@@ -3,58 +3,51 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ENDORPHIN | ГЛАВНОЕ МЕНЮ</title>
+  <title>ENDORPHIN | МЕНЮ</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap');
-    body { 
-      background: radial-gradient(circle at 50% 0%, #0a2540 0%, #03080f 100%);
-      font-family: 'Montserrat', sans-serif; color: #fff; overflow: hidden;
-    }
-    .snowflake { position: absolute; color: rgba(255, 255, 255, 0.6); font-size: 20px; animation: fall linear infinite; pointer-events: none; z-index: 0; filter: drop-shadow(0 0 8px #fff); }
-    @keyframes fall { to { transform: translateY(110vh) rotate(360deg); } }
+    body { background: radial-gradient(circle at 50% 0%, #0a2540 0%, #03080f 100%); font-family: 'Montserrat', sans-serif; color: #fff; overflow: hidden; height: 100vh; display: flex; align-items: center; justify-content: center; }
     .glass-panel { background: rgba(10, 37, 64, 0.6); backdrop-filter: blur(16px); border: 1px solid rgba(127, 227, 255, 0.3); box-shadow: 0 0 40px rgba(31, 143, 214, 0.2); }
     .btn-neon { transition: all 0.3s ease; }
     .btn-neon:hover { transform: scale(1.05); box-shadow: 0 0 40px rgba(34, 211, 238, 0.6); }
   </style>
 </head>
-<body class="h-screen w-screen flex flex-col items-center justify-center relative">
-
-  <div id="snow" class="fixed inset-0 pointer-events-none z-0"></div>
-
-  <div class="relative z-10 flex flex-col items-center">
+<body>
+  <div class="flex flex-col items-center">
     <div class="text-center mb-16">
       <h1 class="text-8xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 via-blue-400 to-indigo-500 mb-2 drop-shadow-[0_0_30px_rgba(59,130,246,0.8)] tracking-tighter">ENDORPHIN</h1>
       <h2 class="text-3xl font-bold text-cyan-100 tracking-[0.3em] uppercase opacity-80">Снежный Баттл</h2>
     </div>
 
     <div class="flex gap-8">
-      <!-- Кнопка для модератора -->
       <a href="mod.html" class="glass-panel btn-neon px-12 py-8 rounded-3xl flex flex-col items-center w-64">
         <span class="text-5xl mb-4">🎮</span>
         <span class="text-2xl font-black text-cyan-300">ПУЛЬТ ВЕДУЩЕГО</span>
-        <span class="text-xs text-cyan-200/50 mt-2 text-center uppercase tracking-widest">Управление игрой</span>
       </a>
-
-      <!-- Кнопка для ТВ -->
       <a href="tv.html" class="glass-panel btn-neon px-12 py-8 rounded-3xl flex flex-col items-center w-64">
         <span class="text-5xl mb-4">📺</span>
         <span class="text-2xl font-black text-blue-400">ЭКРАН ТВ</span>
-        <span class="text-xs text-blue-200/50 mt-2 text-center uppercase tracking-widest">Для проектора</span>
       </a>
     </div>
     
     <p class="mt-12 text-gray-500 text-sm tracking-widest">ВХОД ДЛЯ АДМИНИСТРАТОРА: <a href="admin.html" class="hover:text-cyan-400 underline transition">admin.html</a></p>
   </div>
 
-  <script>
-    const snowBox = document.getElementById('snow');
-    for (let i = 0; i < 60; i++) {
-      const s = document.createElement('div'); s.className = 'snowflake'; s.innerText = '❄';
-      s.style.left = Math.random() * 100 + '%'; s.style.fontSize = (10 + Math.random() * 30) + 'px';
-      s.style.animationDuration = (4 + Math.random() * 8) + 's'; s.style.animationDelay = (-Math.random() * 10) + 's';
-      s.style.opacity = Math.random() * 0.7 + 0.3; snowBox.appendChild(s);
-    }
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+    const firebaseConfig = { apiKey: "AIzaSyCXIR5Tv8lB6ivcGRC3yt1SC66MM6T5b_M", authDomain: "endorphin-battle.firebaseapp.com", databaseURL: "https://endorphin-battle-default-rtdb.europe-west1.firebasedatabase.app", projectId: "endorphin-battle", storageBucket: "endorphin-battle.firebasestorage.app", messagingSenderId: "185259733030", appId: "1:185259733030:web:d72a89a436880973e636e7" };
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    const gameRef = ref(db, 'games/battle_1');
+
+    onValue(gameRef, (snap) => {
+      const data = snap.val();
+      if (data && data.status === 'playing') {
+        document.body.innerHTML = `<div class="glass-panel p-10 rounded-3xl flex flex-col items-center"><div class="text-6xl mb-6">❄️</div><h2 class="text-3xl font-black mb-2 uppercase text-center text-red-500">ИГРА УЖЕ ИДЕТ!</h2><p class="text-cyan-300 font-bold text-center">ДОЖДИТЕСЬ ОКОНЧАНИЯ БОЯ</p></div>`;
+      }
+    }, { onlyOnce: true });
   </script>
 </body>
 </html>
