@@ -5,25 +5,264 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>ENDORPHIN | ТВ ЭКРАН</title>
     
-    <!-- Внешние библиотеки -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/qrcode-generator@1.4.4/qrcode.js"></script>
     
-    <!-- Подключение стилей -->
-    <link rel="stylesheet" href="tv.css">
+    <style>
+        /* ============================================================
+           ГЛОБАЛЬНЫЕ СТИЛИ И ШРИФТЫ
+           ============================================================ */
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap');
+        
+        :root {
+            --bg-gradient: radial-gradient(circle at 50% 0%, #0a2540 0%, #03080f 100%);
+            --glass-bg: rgba(10, 37, 64, 0.6);
+            --glass-border: rgba(127, 227, 255, 0.3);
+            --red-team: #ef4444;
+            --blue-team: #3b82f6;
+            --cyan-glow: #22d3ee;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        html, body { width: 100%; height: 100%; overflow: hidden; }
+        body {
+            background: var(--bg-gradient);
+            font-family: 'Montserrat', sans-serif;
+            color: #fff;
+            user-select: none;
+        }
+
+        /* ============================================================
+           ФОН И СНЕЖИНКИ
+           ============================================================ */
+        .snowflake {
+            position: absolute;
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 20px;
+            animation: fall linear infinite;
+            pointer-events: none;
+            z-index: 0;
+            filter: drop-shadow(0 0 8px #fff);
+            top: -10vh;
+        }
+
+        @keyframes fall {
+            0% { transform: translateY(-10vh) rotate(0deg); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateY(110vh) rotate(360deg); opacity: 0; }
+        }
+
+        /* ============================================================
+           СТЕКЛЯННЫЕ ПАНЕЛИ
+           ============================================================ */
+        .glass-panel {
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 0 40px rgba(31, 143, 214, 0.2), inset 0 0 20px rgba(127, 227, 255, 0.1);
+            border-radius: 1.5rem;
+        }
+
+        /* ============================================================
+           ЭФФЕКТЫ
+           ============================================================ */
+        @keyframes screenShake {
+            0%, 100% { transform: translate(0, 0); }
+            20% { transform: translate(-5px, 2px); }
+            40% { transform: translate(5px, -2px); }
+            60% { transform: translate(-8px, 4px); }
+            80% { transform: translate(8px, -4px); }
+        }
+        .screen-shake { animation: screenShake 0.4s cubic-bezier(.36,.07,.19,.97) both; }
+
+        @keyframes flashAnim {
+            0% { opacity: 1; }
+            100% { opacity: 0; }
+        }
+        .flash-effect {
+            position: fixed;
+            inset: 0;
+            background: #ffffff;
+            z-index: 50;
+            pointer-events: none;
+            animation: flashAnim 0.3s ease-out forwards;
+        }
+
+        /* ============================================================
+           ПОЛЕ БОЯ
+           ============================================================ */
+        #battlefield {
+            position: absolute;
+            left: 0; right: 0; top: 0; bottom: 0;
+            z-index: 10;
+            overflow: hidden;
+        }
+
+        .grid-overlay {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            z-index: 11;
+            background-image: 
+                linear-gradient(rgba(127,227,255,0.1) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(127,227,255,0.1) 1px, transparent 1px);
+            background-size: 40px 40px;
+        }
+
+        /* ============================================================
+           СНАРЯДЫ И ЧАСТИЦЫ
+           ============================================================ */
+        .snowball {
+            position: absolute;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, #fff, #7fe3ff);
+            box-shadow: 0 0 20px #7fe3ff, 0 0 40px rgba(127,227,255,0.8);
+            pointer-events: none;
+            z-index: 30;
+            transform: translate(-50%, -50%);
+        }
+
+        .particle {
+            position: absolute;
+            border-radius: 50%;
+            background: #fff;
+            pointer-events: none;
+            z-index: 25;
+        }
+
+        /* ============================================================
+           ПЕРСОНАЖИ
+           ============================================================ */
+        .player-slot {
+            position: absolute;
+            transform: translate(-50%, -50%);
+            z-index: 20;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+
+        .player-hitbox {
+            width: 80px;
+            height: 120px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-end;
+            border-radius: 20px;
+            position: relative;
+        }
+
+        .player-red {
+            background: rgba(239, 68, 68, 0.15);
+            border: 3px dashed var(--red-team);
+            box-shadow: 0 0 30px rgba(239, 68, 68, 0.4);
+        }
+
+        .player-blue {
+            background: rgba(59, 130, 246, 0.15);
+            border: 3px dashed var(--blue-team);
+            box-shadow: 0 0 30px rgba(59, 130, 246, 0.4);
+        }
+
+        .player-name {
+            background: rgba(0, 0, 0, 0.8);
+            padding: 2px 8px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 700;
+            margin-top: 4px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .player-lives {
+            position: absolute;
+            top: -24px;
+            font-size: 18px;
+        }
+
+        /* ============================================================
+           QR-КОДЫ И МЕГАБРОСОК
+           ============================================================ */
+        .qr-slot {
+            background: #ffffff;
+            padding: 6px;
+            border-radius: 12px;
+            border: 4px solid var(--cyan-glow);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        @keyframes megaZoom {
+            0% { transform: translate(-50%, -50%) scale(0.1) rotate(-15deg); opacity: 0; }
+            50% { transform: translate(-50%, -50%) scale(1.2) rotate(5deg); opacity: 1; }
+            100% { transform: translate(-50%, -50%) scale(1) rotate(0); opacity: 1; }
+        }
+
+        .mega-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            font-size: 120px;
+            font-weight: 900;
+            color: #ffffff;
+            text-shadow: 0 0 80px #fbbf24;
+            z-index: 100;
+            letter-spacing: 5px;
+            text-transform: uppercase;
+            animation: megaZoom 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        /* ============================================================
+           БЕГУЩАЯ СТРОКА
+           ============================================================ */
+        .ticker-wrap {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 60px;
+            background: rgba(0, 0, 0, 0.9);
+            overflow: hidden;
+            border-top: 2px solid var(--cyan-glow);
+            z-index: 100;
+            display: flex;
+            align-items: center;
+        }
+
+        .ticker {
+            display: inline-block;
+            white-space: nowrap;
+            padding-left: 100%;
+            animation: tickerMove 15s linear infinite;
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--cyan-glow);
+            text-transform: uppercase;
+        }
+
+        @keyframes tickerMove {
+            0% { transform: translate3d(0, 0, 0); }
+            100% { transform: translate3d(-100%, 0, 0); }
+        }
+    </style>
 </head>
 <body class="h-screen w-screen flex flex-col items-center justify-center relative overflow-hidden" id="main-body">
 
-    <!-- ==================== ФОН (СНЕЖИНКИ) ==================== -->
     <div id="snow-container" class="fixed inset-0 pointer-events-none z-0"></div>
 
-    <!-- ==================== ОСНОВНОЙ ЭКРАН ==================== -->
     <div id="tv-screen" class="flex-1 w-full h-full relative z-10 pb-16">
         
-        <!-- ==================== ЭКРАН ЛОББИ ==================== -->
-        <div id="lobby-view" class="absolute inset-0 flex flex-col items-center justify-center p-8 transition-opacity duration-500">
+        <!-- ЛОББИ -->
+        <div id="lobby-view" class="absolute inset-0 flex flex-col items-center justify-center p-8">
             <div class="text-center mb-8">
-                <h1 class="text-8xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 via-blue-400 to-indigo-500 mb-2 drop-shadow-[0_0_30px_rgba(59,130,246,0.8)] tracking-tighter">
+                <h1 class="text-8xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 via-blue-400 to-indigo-500 mb-2 tracking-tighter">
                     ENDORPHIN
                 </h1>
                 <h2 class="text-4xl font-bold text-cyan-100 tracking-[0.3em] uppercase opacity-80">
@@ -37,9 +276,9 @@
             <div id="qr-container" class="hidden flex gap-24 mb-8">
                 <div class="glass-panel p-6 rounded-3xl flex flex-col items-center w-80 relative">
                     <div class="absolute -top-6 w-full text-center">
-                        <span class="bg-red-500 text-white font-black px-6 py-2 rounded-full shadow-[0_0_20px_#ef4444]">КРАСНЫЕ</span>
+                        <span class="bg-red-500 text-white font-black px-6 py-2 rounded-full">КРАСНЫЕ</span>
                     </div>
-                    <div class="bg-white p-3 rounded-xl mt-4 shadow-lg" id="qr-red"></div>
+                    <div class="bg-white p-3 rounded-xl mt-4" id="qr-red"></div>
                     <div id="tv-players-red" class="mt-4 space-y-2 w-full text-center text-sm"></div>
                 </div>
                 
@@ -49,56 +288,43 @@
 
                 <div class="glass-panel p-6 rounded-3xl flex flex-col items-center w-80 relative">
                     <div class="absolute -top-6 w-full text-center">
-                        <span class="bg-blue-500 text-white font-black px-6 py-2 rounded-full shadow-[0_0_20px_#3b82f6]">СИНИЕ</span>
+                        <span class="bg-blue-500 text-white font-black px-6 py-2 rounded-full">СИНИЕ</span>
                     </div>
-                    <div class="bg-white p-3 rounded-xl mt-4 shadow-lg" id="qr-blue"></div>
+                    <div class="bg-white p-3 rounded-xl mt-4" id="qr-blue"></div>
                     <div id="tv-players-blue" class="mt-4 space-y-2 w-full text-center text-sm"></div>
                 </div>
             </div>
             
-            <div id="tv-status" class="text-4xl font-black text-white tracking-widest drop-shadow-[0_0_20px_#fff] hidden">
+            <div id="tv-status" class="text-4xl font-black text-white tracking-widest hidden">
                 ОЖИДАНИЕ ИГРОКОВ...
             </div>
         </div>
 
-        <!-- ==================== ЭКРАН БИТВЫ ==================== -->
+        <!-- БИТВА -->
         <div id="battle-view" class="absolute inset-0 hidden z-10 bg-[#0a2540]">
             <div class="grid-overlay"></div>
-            
             <div class="absolute left-0 top-0 bottom-0 w-[20%] bg-gradient-to-r from-red-900/40 to-transparent border-r-4 border-red-500/50"></div>
             <div class="absolute right-0 top-0 bottom-0 w-[20%] bg-gradient-to-l from-blue-900/40 to-transparent border-l-4 border-blue-500/50"></div>
             
             <div id="battlefield" class="absolute left-0 right-0 top-0 bottom-0"></div>
             
-            <div class="absolute top-4 left-4 flex flex-col gap-1 glass-panel p-2 rounded-xl z-30 text-3xl">
-                <div id="heart-red">❤️❤️❤️</div>
-            </div>
+            <div class="absolute top-4 left-4 glass-panel p-2 rounded-xl z-30 text-3xl"><div id="heart-red">❤️❤️❤️</div></div>
+            <div class="absolute bottom-4 right-4 glass-panel p-2 rounded-xl z-30 text-3xl"><div id="heart-blue">❤️❤️❤️</div></div>
             
-            <div class="absolute bottom-4 right-4 flex flex-col gap-1 glass-panel p-2 rounded-xl z-30 text-3xl">
-                <div id="heart-blue">❤️❤️❤️</div>
-            </div>
-            
-            <div class="absolute top-4 left-1/2 -translate-x-1/2 glass-panel px-8 py-3 rounded-full z-30 text-2xl font-black tracking-widest" id="turn-indicator">
-                ХОД: ...
-            </div>
-            
-            <div class="absolute top-20 left-1/2 -translate-x-1/2 text-6xl font-black text-white drop-shadow-[0_0_20px_#fff]" id="tv-timer"></div>
+            <div class="absolute top-4 left-1/2 -translate-x-1/2 glass-panel px-8 py-3 rounded-full z-30 text-2xl font-black" id="turn-indicator">ХОД: ...</div>
+            <div class="absolute top-20 left-1/2 -translate-x-1/2 text-6xl font-black text-white" id="tv-timer"></div>
         </div>
 
-        <!-- ==================== ЭКРАН ПОБЕДЫ ==================== -->
+        <!-- ПОБЕДА -->
         <div id="win-view" class="absolute inset-0 hidden flex-col items-center justify-center bg-black/80 backdrop-blur-2xl z-40">
-            <h1 class="text-9xl font-black text-white mb-12 drop-shadow-[0_0_80px_rgba(255,255,255,0.8)]" id="win-text">
-                ПОБЕДА!
-            </h1>
+            <h1 class="text-9xl font-black text-white mb-12" id="win-text">ПОБЕДА!</h1>
         </div>
     </div>
 
-    <!-- ==================== БЕГУЩАЯ СТРОКА ==================== -->
     <div class="ticker-wrap">
         <div class="ticker" id="ticker-text">ДОБРО ПОЖАЛОВАТЬ НА ВЕЧЕРИНКУ ENDORPHIN!</div>
     </div>
 
-    <!-- Подключение скриптов -->
     <script type="module" src="tv.js"></script>
 </body>
 </html>
