@@ -7,11 +7,14 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap');
-    body { background: #03080f; color: #fff; font-family: 'Montserrat', sans-serif; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 2rem; }
-    .glass { background: rgba(10, 37, 64, 0.8); border: 1px solid rgba(127, 227, 255, 0.3); border-radius: 1.5rem; }
+    body { background: radial-gradient(circle at 50% 0%, #0a2540 0%, #03080f 100%); color: #fff; font-family: 'Montserrat', sans-serif; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 2rem; }
+    .glass { background: rgba(10, 37, 64, 0.8); border: 1px solid rgba(127, 227, 255, 0.3); border-radius: 1.5rem; backdrop-filter: blur(16px); }
+    .mode-btn { transition: all 0.3s ease; }
+    .mode-btn.active { border-color: #22d3ee; background: rgba(34, 211, 238, 0.2); color: #22d3ee; box-shadow: 0 0 20px rgba(34, 211, 238, 0.5); }
   </style>
 </head>
 <body>
+
   <div class="w-full max-w-4xl flex justify-between items-center mb-8">
     <h1 class="text-3xl font-black text-cyan-300 tracking-wider">ПУЛЬТ ВЕДУЩЕГО</h1>
     <a href="index.html" class="px-4 py-2 bg-gray-800 rounded-lg font-bold text-sm hover:bg-gray-700 transition">В МЕНЮ</a>
@@ -21,22 +24,30 @@
     <div class="glass w-full max-w-4xl p-8 mb-8 flex flex-col items-center">
       <h2 class="text-xl font-bold mb-4 text-cyan-100">ВЫБЕРИ РЕЖИМ</h2>
       <div class="flex gap-4">
-        <button onclick="setMode('1v1')" class="mode-btn px-8 py-4 rounded-xl border-2 font-bold text-lg transition-all" id="btn-1v1">1 на 1</button>
-        <button onclick="setMode('2v2')" class="mode-btn px-8 py-4 rounded-xl border-2 font-bold text-lg transition-all" id="btn-2v2">2 на 2</button>
-        <button onclick="setMode('3v3')" class="mode-btn px-8 py-4 rounded-xl border-2 font-bold text-lg transition-all" id="btn-3v3">3 на 3</button>
-        <button onclick="setMode('4v4')" class="mode-btn px-8 py-4 rounded-xl border-2 font-bold text-lg transition-all" id="btn-4v4">4 на 4</button>
+        <button onclick="setMode('1v1')" class="mode-btn px-8 py-4 rounded-xl border-2 font-bold text-lg" id="btn-1v1">1 на 1</button>
+        <button onclick="setMode('2v2')" class="mode-btn px-8 py-4 rounded-xl border-2 font-bold text-lg" id="btn-2v2">2 на 2</button>
+        <button onclick="setMode('3v3')" class="mode-btn px-8 py-4 rounded-xl border-2 font-bold text-lg" id="btn-3v3">3 на 3</button>
+        <button onclick="setMode('4v4')" class="mode-btn px-8 py-4 rounded-xl border-2 font-bold text-lg" id="btn-4v4">4 на 4</button>
       </div>
     </div>
 
     <div class="glass w-full max-w-4xl p-8 mb-8">
       <h2 class="text-xl font-bold mb-4 text-cyan-100 text-center">КОМАНДЫ</h2>
       <div class="grid grid-cols-2 gap-8">
-        <div class="bg-red-900/20 p-6 rounded-xl border border-red-500/30"><h3 class="font-bold text-red-400 mb-4 text-center text-xl">КРАСНЫЕ</h3><ul id="list-red" class="space-y-2 text-sm"></ul></div>
-        <div class="bg-blue-900/20 p-6 rounded-xl border border-blue-500/30"><h3 class="font-bold text-blue-400 mb-4 text-center text-xl">СИНИЕ</h3><ul id="list-blue" class="space-y-2 text-sm"></ul></div>
+        <div class="bg-red-900/20 p-6 rounded-xl border border-red-500/30">
+          <h3 class="font-bold text-red-400 mb-4 text-center text-xl">КРАСНЫЕ</h3>
+          <ul id="list-red" class="space-y-2 text-sm"></ul>
+        </div>
+        <div class="bg-blue-900/20 p-6 rounded-xl border border-blue-500/30">
+          <h3 class="font-bold text-blue-400 mb-4 text-center text-xl">СИНИЕ</h3>
+          <ul id="list-blue" class="space-y-2 text-sm"></ul>
+        </div>
       </div>
     </div>
 
-    <button id="btn-start" disabled class="w-full max-w-4xl py-8 bg-gradient-to-r from-blue-600 to-cyan-500 rounded-2xl text-3xl font-black text-black shadow-[0_0_40px_rgba(6,182,212,0.6)] disabled:opacity-50 disabled:cursor-not-allowed transition-all">НАЧАТЬ БОЙ</button>
+    <button id="btn-start" disabled class="w-full max-w-4xl py-8 bg-gradient-to-r from-blue-600 to-cyan-500 rounded-2xl text-3xl font-black text-black shadow-[0_0_40px_rgba(6,182,212,0.6)] disabled:opacity-50 disabled:cursor-not-allowed transition-all">
+      НАЧАТЬ БОЙ
+    </button>
   </div>
 
   <div id="game-controls" class="hidden w-full max-w-4xl flex-col items-center">
@@ -84,8 +95,8 @@
       }
 
       if (data.mode) {
-        document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('border-cyan-400', 'bg-cyan-900/30', 'text-cyan-300'));
-        document.getElementById(`btn-${data.mode}`)?.classList.add('border-cyan-400', 'bg-cyan-900/30', 'text-cyan-300');
+        document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById(`btn-${data.mode}`)?.classList.add('active');
       }
 
       const renderList = (team, listId) => {
