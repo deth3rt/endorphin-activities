@@ -9,28 +9,40 @@
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap');
     body { background: radial-gradient(circle at 50% 0%, #0a2540 0%, #03080f 100%); font-family: 'Montserrat', sans-serif; overflow: hidden; user-select: none; color: #fff; margin: 0; }
+    
+    /* Снежинки */
     .snowflake { position: absolute; color: rgba(255, 255, 255, 0.6); font-size: 20px; animation: fall linear infinite; pointer-events: none; z-index: 0; filter: drop-shadow(0 0 8px #fff); }
     @keyframes fall { to { transform: translateY(110vh) rotate(360deg); } }
-    .glass-panel { background: rgba(10, 37, 64, 0.6); backdrop-filter: blur(16px); border: 1px solid rgba(127, 227, 255, 0.3); box-shadow: 0 0 40px rgba(31, 143, 214, 0.2); }
+
+    /* Стекло */
+    .glass-panel { background: rgba(10, 37, 64, 0.6); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid rgba(127, 227, 255, 0.3); box-shadow: 0 0 40px rgba(31, 143, 214, 0.2), inset 0 0 20px rgba(127, 227, 255, 0.1); }
+    
+    /* Эффекты боя */
     @keyframes shake { 0%, 100% { transform: translate(0, 0); } 20% { transform: translate(-10px, 5px); } 40% { transform: translate(10px, -5px); } 60% { transform: translate(-5px, 10px); } 80% { transform: translate(5px, -10px); } }
     .screen-shake { animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both; }
     @keyframes flash { 0% { opacity: 1; } 100% { opacity: 0; } }
     .flash-effect { position: fixed; inset: 0; background: #fff; z-index: 50; pointer-events: none; animation: flash 0.3s ease-out forwards; }
+    
     #battlefield { position: absolute; left: 0; right: 0; top: 0; bottom: 0; z-index: 10; overflow: hidden; }
     .grid-overlay { position: absolute; inset: 0; pointer-events: none; z-index: 11; background-image: linear-gradient(rgba(127,227,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(127,227,255,0.1) 1px, transparent 1px); background-size: 40px 40px; }
-    .snowball { position: absolute; width: 24px; height: 24px; border-radius: 50%; background: radial-gradient(circle at 30% 30%, #fff, #7fe3ff); box-shadow: 0 0 20px #7fe3ff; pointer-events: none; z-index: 30; transform: translate(-50%, -50%); }
+    
+    /* Снаряды и взрывы */
+    .snowball { position: absolute; width: 24px; height: 24px; border-radius: 50%; background: radial-gradient(circle at 30% 30%, #fff, #7fe3ff); box-shadow: 0 0 20px #7fe3ff, 0 0 40px rgba(127,227,255,0.8); pointer-events: none; z-index: 30; transform: translate(-50%, -50%); }
     .snow-burst { position: absolute; width: 80px; height: 80px; border-radius: 50%; background: radial-gradient(circle, rgba(255,255,255,1) 0%, rgba(127,227,255,0) 70%); pointer-events: none; z-index: 25; transform: translate(-50%, -50%) scale(0); }
     
+    /* Персонажи */
     .player-slot { position: absolute; transform: translate(-50%, -50%); z-index: 20; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: all 0.3s; }
-    .player-hitbox { width: 70px; height: 110px; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; border-radius: 20px; }
+    .player-hitbox { width: 80px; height: 120px; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; border-radius: 20px; }
     .player-red { background: rgba(239, 68, 68, 0.15); border: 3px dashed #ef4444; box-shadow: 0 0 30px rgba(239, 68, 68, 0.4); }
     .player-blue { background: rgba(59, 130, 246, 0.15); border: 3px dashed #3b82f6; box-shadow: 0 0 30px rgba(59, 130, 246, 0.4); }
     
     .qr-slot { background: #fff; padding: 6px; border-radius: 12px; box-shadow: 0 0 30px rgba(255,255,255,0.8); border: 4px solid #22d3ee; }
     
+    /* Текст МЕГАБРОСОК */
     @keyframes megaZoom { 0% { transform: translate(-50%, -50%) scale(0.1) rotate(-15deg); opacity: 0; } 50% { transform: translate(-50%, -50%) scale(1.2) rotate(5deg); opacity: 1; text-shadow: 0 0 150px #fbbf24; } 100% { transform: translate(-50%, -50%) scale(1) rotate(0); opacity: 1; } }
     .mega-text { position: absolute; top: 50%; left: 50%; font-size: 120px; font-weight: 900; color: #fff; text-shadow: 0 0 80px #fbbf24, 0 0 40px #fff; z-index: 100; pointer-events: none; letter-spacing: 5px; text-transform: uppercase; animation: megaZoom 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
     
+    /* Бегущая строка */
     .ticker-wrap { position: fixed; bottom: 0; left: 0; width: 100%; height: 60px; background: rgba(0, 0, 0, 0.9); overflow: hidden; border-top: 2px solid #06b6d4; z-index: 100; display: flex; align-items: center; }
     .ticker { display: inline-block; white-space: nowrap; padding-left: 100%; animation: ticker 15s linear infinite; font-size: 24px; font-weight: 700; color: #22d3ee; text-transform: uppercase; letter-spacing: 2px; }
     @keyframes ticker { 0% { transform: translate3d(0, 0, 0); } 100% { transform: translate3d(-100%, 0, 0); } }
@@ -141,7 +153,7 @@
         if (data.status === 'lobby') generateQRs();
       }
       
-      // Собираем данные игроков (важно: сохраняем ID!)
+      // Собираем данные игроков
       playersData.red = Object.entries(data.players?.red || {}).map(([id, p]) => ({ id, ...p }));
       playersData.blue = Object.entries(data.players?.blue || {}).map(([id, p]) => ({ id, ...p }));
       
@@ -196,21 +208,20 @@
       const field = document.getElementById('battlefield');
       const maxP = parseInt(data.mode.charAt(0));
       
-      // Перерисовываем только если изменилось количество игроков (чтобы не дергать анимацию)
+      // Перерисовываем, если изменилось количество слотов
       if (field.children.length !== maxP * 2) {
         field.innerHTML = '';
         
         const renderTeam = (players, team) => {
           for (let i = 0; i < maxP; i++) {
-            const p = players[i]; // Игрок по индексу (если есть)
-            
+            const p = players[i];
             const slot = document.createElement('div');
             slot.className = 'player-slot';
+            // Расстановка по Y: от 20% до 80%
             const yPos = 20 + (i * 60 / Math.max(1, maxP)) + 10;
             slot.style.left = team === 'red' ? '15%' : '85%';
             slot.style.top = `${yPos}%`;
             
-            // Если игрок есть и жив
             if (p && p.alive) {
                slot.innerHTML = `
                 <div class="player-hitbox player-${team}" id="player-${team}-${i}">
@@ -219,13 +230,9 @@
                   <div class="text-red-500 text-lg absolute -top-6 drop-shadow-[0_0_10px_#ef4444]">${'❤️'.repeat(p.lives)}</div>
                 </div>
                `;
-            } 
-            // Если игрок есть, но мертв
-            else if (p && !p.alive) {
+            } else if (p && !p.alive) {
                slot.innerHTML = `<div class="text-6xl opacity-30 text-gray-500">💀</div>`;
-            } 
-            // Если игрока нет — показываем QR
-            else {
+            } else {
                const teamUrl = `${baseUrl}play.html?game=${gameId}&team=${team}`;
                const qrDiv = document.createElement('div');
                qrDiv.className = 'qr-slot';
@@ -239,7 +246,7 @@
         renderTeam(playersData.red, 'red');
         renderTeam(playersData.blue, 'blue');
       } else {
-        // Если слоты уже есть, просто обновляем тексты (имена, жизни)
+        // Обновляем жизни и имена
         const updateTeam = (players, team) => {
           for (let i = 0; i < maxP; i++) {
             const p = players[i];
@@ -277,7 +284,11 @@
       let endX = tRect.left - fieldRect.left + tRect.width/2;
       let endY = tRect.top - fieldRect.top + tRect.height/2;
 
-      if (!shot.isHit) { endX += (Math.random() > 0.5 ? 200 : -200); endY += (Math.random() > 0.5 ? 150 : -150); }
+      // Если промах, летит мимо
+      if (!shot.isHit) { 
+        endX += (Math.random() > 0.5 ? 200 : -200); 
+        endY += (Math.random() > 0.5 ? 150 : -150); 
+      }
 
       ball.style.left = startX + 'px'; ball.style.top = startY + 'px';
 
