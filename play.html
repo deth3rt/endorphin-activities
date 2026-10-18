@@ -125,62 +125,35 @@
       const power = parseInt(document.getElementById('power-slider').value);
       const angle = currentAngle;
       
-      const rad = angle * Math.PI / 180;
-      const distance = (Math.pow(power, 2) * Math.sin(2 * rad)) / 10;
-      const targetDistance = 70;
-      const isHit = (distance >= targetDistance - 8 && distance <= targetDistance + 8);
+      // Отправляем силу и угол, без isHit
+      const shotData = { 
+        team, 
+        shooterId: playerId,
+        power, 
+        angle,
+        time: Date.now()
+      };
+      
+      push(ref(db, 'games/battle_1/shots'), shotData);
+      set(ref(db, 'games/battle_1/last_shot'), shotData);
+      set(ref(db, 'games/battle_1/timer'), 15);
 
-      // ВАЖНО: Мы отправляем playerId, а не индекс!
-      onValue(ref(db, `games/battle_1/players/${isRed ? 'blue' : 'red'}`), (enemySnap) => {
-        const enemies = Object.entries(enemySnap.val() || {});
-        const aliveEnemies = enemies.filter(([id, p]) => p.alive);
-        if (aliveEnemies.length === 0) return;
+      // Передача хода
+      onValue(ref(db, 'games/battle_1/players'), (snap) => {
+        const players = snap.val();
+        const myTeamPlayers = Object.entries(players[team] || {}).filter(([id, p]) => p.alive);
+        const myIdx = myTeamPlayers.findIndex(([id]) => id === playerId);
         
-        const targetId = aliveEnemies[0][0]; // Бьем первого живого
-        
-        const shotData = { 
-          team, 
-          shooterId: playerId,        // <--- Передаем ID стрелка
-          targetTeam: isRed ? 'blue' : 'red',
-          targetId: targetId,         // <--- Передаем ID цели
-          isHit, 
-          isMega: (power > 90 && isHit) 
-        };
-        
-        push(ref(db, 'games/battle_1/shots'), shotData);
-        set(ref(db, 'games/battle_1/last_shot'), shotData);
-
-        // СБРОС ТАЙМЕРА (на 15 секунд)
-        set(ref(db, 'games/battle_1/timer'), 15);
-
-        if (isHit) {
-          const newLives = Math.max(0, aliveEnemies[0][1].lives - 1);
-          update(ref(db, `games/battle_1/players/${isRed ? 'blue' : 'red'}/${targetId}`), { lives: newLives, alive: newLives > 0 });
-          
-          onValue(ref(db, `games/battle_1/players/${isRed ? 'blue' : 'red'}`), (finalSnap) => {
-            const allEnemies = Object.values(finalSnap.val() || {});
-            const totalLives = allEnemies.reduce((sum, p) => sum + p.lives, 0);
-            if (totalLives <= 0) update(ref(db, 'games/battle_1'), { status: 'finished', winner: team });
-          }, { onlyOnce: true });
+        let nextPlayer = null;
+        if (myIdx !== -1 && myIdx < myTeamPlayers.length - 1) { nextPlayer = myTeamPlayers[myIdx + 1]; } 
+        else {
+          const enemyTeam = Object.entries(players[isRed ? 'blue' : 'red'] || {}).filter(([id, p]) => p.alive);
+          if (enemyTeam.length > 0) nextPlayer = enemyTeam[0];
         }
 
-        // Передача хода
-        onValue(ref(db, 'games/battle_1/players'), (snap) => {
-          const players = snap.val();
-          const myTeamPlayers = Object.entries(players[team] || {}).filter(([id, p]) => p.alive);
-          const myIdx = myTeamPlayers.findIndex(([id]) => id === playerId);
-          
-          let nextPlayer = null;
-          if (myIdx !== -1 && myIdx < myTeamPlayers.length - 1) { nextPlayer = myTeamPlayers[myIdx + 1]; } 
-          else {
-            const enemyTeam = Object.entries(players[isRed ? 'blue' : 'red'] || {}).filter(([id, p]) => p.alive);
-            if (enemyTeam.length > 0) nextPlayer = enemyTeam[0];
-          }
-
-          if (nextPlayer) {
-            update(ref(db, 'games/battle_1'), { activePlayerId: nextPlayer[0], turn: { team: isRed ? 'blue' : 'red', name: nextPlayer[1].name } });
-          }
-        }, { onlyOnce: true });
+        if (nextPlayer) {
+          update(ref(db, 'games/battle_1'), { activePlayerId: nextPlayer[0], turn: { team: isRed ? 'blue' : 'red', name: nextPlayer[1].name } });
+        }
       }, { onlyOnce: true });
     };
   </script>
