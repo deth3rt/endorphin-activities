@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>ENDORPHIN | ЛЕДЯНОЙ БОЙ</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.skypack.dev/qrcode"></script>
+  <style>
+    body { background: #03080f; color: #eaffff; font-family: system-ui, sans-serif; overflow: hidden; user-select: none; }
+    
+    /* Снежинки */
+    .snowflake { position: absolute; color: rgba(180, 235, 255, 0.6); font-size: 14px; animation: fall linear infinite; pointer-events: none; z-index: 0; }
+    @keyframes fall { to { transform: translateY(100vh) rotate(360deg); } }
+
+    /* UI на телефоне */
+    .phone-mockup { width: 100vw; height: 100vh; background: #03080f; position: fixed; inset: 0; overflow: hidden; touch-action: none; z-index: 9999; }
+    .crosshair { position: absolute; width: 60px; height: 60px; border: 2px dashed #fff; border-radius: 50%; pointer-events: none; transform: translate(-50%, -50%); opacity: 0.7; display: none; }
+    .crosshair::before, .crosshair::after { content: ''; position: absolute; background: #fff; }
+    .crosshair::before { top: 50%; left: 0; width: 100%; height: 2px; transform: translateY(-50%); }
+    .crosshair::after { left: 50%; top: 0; width: 2px; height: 100%; transform: translateX(-50%); }
+    .shoot-btn { position: absolute; bottom: 20px; right: 20px; width: 80px; height: 80px; border-radius: 50%; background: rgba(255,255,255,0.2); border: 2px solid #fff; color: #fff; font-weight: bold; font-size: 20px; backdrop-filter: blur(5px); display: flex; align-items: center; justify-content: center; z-index: 10000; }
+    .shoot-btn:active { background: rgba(255,255,255,0.5); transform: scale(0.95); }
+
+    /* Поле боя на ТВ */
+    .snowball { position: absolute; width: 20px; height: 20px; border-radius: 50%; background: radial-gradient(circle at 30% 30%, #fff, #7fe3ff); box-shadow: 0 0 20px #7fe3ff; pointer-events: none; z-index: 20; transform: translate(-50%, -50%); }
+    
+    .snow-fort { background: linear-gradient(180deg, #ffffff, #a8e6ff); box-shadow: 0 10px 20px rgba(127,227,255,0.3); border-radius: 50%; position: absolute; }
+    .player-dot { position: absolute; width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 30px; transform: translate(-50%, -50%); transition: all 0.1s; z-index: 10; }
+    .player-red { background: #ef4444; box-shadow: 0 0 20px #ef4444; border: 2px solid #fff; }
+    .player-blue { background: #3b82f6; box-shadow: 0 0 20px #3b82f6; border: 2px solid #fff; }
+    
+    .heart { filter: drop-shadow(0 0 10px #ef4444); transition: all 0.3s; }
+    .heart.dead { filter: grayscale(1); opacity: 0.3; transform: scale(0.8); }
+  </style>
+</head>
+<body class="h-screen w-screen flex flex-col items-center justify-center">
+
+  <div id="snow" class="fixed inset-0 pointer-events-none z-0"></div>
+
+  <div class="relative z-10 w-full h-full flex flex-col">
+    
+    <!-- ================= ТВ ЭКРАН ================= -->
+    <div id="tv-screen" class="flex-1 bg-[#e0f2fe] relative overflow-hidden">
+      
+      <!-- ЛОББИ -->
+      <div id="lobby-view" class="absolute inset-0 flex flex-col items-center justify-center p-8 bg-gradient-to-br from-[#0a2540] to-[#03080f] z-30">
+        <h1 class="text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-cyan-300 to-red-400 mb-8 text-center drop-shadow-[0_0_20px_rgba(127,227,255,0.5)]">
+          ENDORPHIN<br><span class="text-3xl">ЛЕДЯНОЙ БОЙ</span>
+        </h1>
+        
+        <div class="flex gap-20 mb-12">
+          <div class="flex flex-col items-center">
+            <h2 class="text-4xl font-bold text-red-500 mb-4 drop-shadow-[0_0_10px_rgba(239,68,68,0.5)]">🔴 КРАСНЫЕ</h2>
+            <div class="bg-white p-4 rounded-2xl shadow-xl"><canvas id="qr-red"></canvas></div>
+            <p class="mt-6 text-2xl font-bold">Игроков: <span id="count-red" class="text-red-500 text-4xl">0</span></p>
+          </div>
+          
+          <div class="flex flex-col items-center">
+            <h2 class="text-4xl font-bold text-blue-500 mb-4 drop-shadow-[0_0_10px_rgba(59,130,246,0.5)]">🔵 СИНИЕ</h2>
+            <div class="bg-white p-4 rounded-2xl shadow-xl"><canvas id="qr-blue"></canvas></div>
+            <p class="mt-6 text-2xl font-bold">Игроков: <span id="count-blue" class="text-blue-500 text-4xl">0</span></p>
+          </div>
+        </div>
+
+        <button id="btn-start" class="opacity-50 cursor-not-allowed px-16 py-6 rounded-full text-4xl font-black bg-gradient-to-r from-blue-500 to-cyan-400 text-black shadow-[0_0_30px_rgba(127,227,255,0.4)] transition hover:scale-105">
+          НАЧАТЬ БОЙ
+        </button>
+        <p class="mt-6 text-gray-400 text-xl">Для старта нужно по 1 игроку с каждой стороны</p>
+      </div>
+
+      <!-- СЦЕНА БИТВЫ -->
+      <div id="battle-view" class="absolute inset-0 hidden z-10 bg-[#e0f2fe]">
+        
+        <!-- Верхняя база (Синие) -->
+        <div class="absolute top-0 w-full h-[25%] bg-[#bae6fd] flex justify-center border-b-4 border-[#7fe3ff]">
+           <div class="snow-fort w-[300px] h-[100px] top-[10px]"></div>
+           <div id="blue-player" class="player-dot player-blue top-[50px]">🧍‍♂️</div>
+           <div class="absolute top-4 left-6 flex gap-2">
+             <div class="text-5xl heart" id="life-blue-1">❤️</div>
+             <div class="text-5xl heart" id="life-blue-2">❤️</div>
+             <div class="text-5xl heart" id="life-blue-3">❤️</div>
+           </div>
+        </div>
+
+        <!-- Поле боя -->
+        <div id="battlefield" class="absolute top-[25%] bottom-[25%] left-0 right-0 overflow-hidden"></div>
+
+        <!-- Нижняя база (Красные) -->
+        <div class="absolute bottom-0 w-full h-[25%] bg-[#fecaca] flex justify-center border-t-4 border-[#f87171]">
+           <div class="snow-fort w-[300px] h-[100px] bottom-[10px]"></div>
+           <div id="red-player" class="player-dot player-red bottom-[50px]">🧍‍♂️</div>
+           <div class="absolute bottom-4 right-6 flex gap-2">
+             <div class="text-5xl heart" id="life-red-1">❤️</div>
+             <div class="text-5xl heart" id="life-red-2">❤️</div>
+             <div class="text-5xl heart" id="life-red-3">❤️</div>
+           </div>
+        </div>
+      </div>
+
+      <!-- ЭКРАН ПОБЕДЫ -->
+      <div id="win-view" class="absolute inset-0 hidden flex-col items-center justify-center bg-black/90 backdrop-blur-md z-40">
+        <h1 class="text-8xl font-black text-white mb-8" id="win-text">ПОБЕДА!</h1>
+        <button onclick="resetGame()" class="px-10 py-4 rounded-full border-2 border-cyan-400 text-cyan-400 font-bold text-2xl hover:bg-cyan-400 hover:text-black transition">Сыграть ещё</button>
+      </div>
+
+    </div>
+
+    <!-- ================= ТЕЛЕФОНЫ ================= -->
+    <div id="phone-view-red" class="phone-mockup hidden flex-col bg-[#03080f]">
+      <div id="join-red" class="flex flex-col items-center justify-center h-full p-6 text-center">
+        <div class="w-24 h-24 bg-red-500/20 rounded-full flex items-center justify-center mb-6 border border-red-500"><span class="text-5xl">🔴</span></div>
+        <h2 class="text-3xl font-bold mb-8 text-red-500">Красные</h2>
+        <input type="text" id="input-name-red" placeholder="Твоё имя" class="w-full bg-black/50 border-2 border-red-500 rounded-xl px-4 py-4 text-center text-2xl text-white mb-6 outline-none focus:border-red-400">
+        <button onclick="joinTeam('red')" class="w-full py-4 bg-red-600 text-white font-bold text-2xl rounded-xl active:scale-95 transition shadow-[0_0_20px_rgba(239,68,68,0.5)]">В БОЙ</button>
+      </div>
+      
+      <div id="play-red" class="hidden w-full h-full absolute inset-0 bg-[#03080f]">
+         <div class="absolute inset-0 bg-[#0a2540]">
+           <div class="absolute top-0 w-full h-1/4 bg-blue-900/30 flex justify-center items-center"><span class="text-6xl opacity-30">🛡️</span></div>
+           <div class="absolute bottom-0 w-full h-1/4 bg-red-900/30 flex justify-center items-center"><span class="text-6xl">🧍‍♂️</span></div>
+         </div>
+         <div id="crosshair-red" class="crosshair"></div>
+         <div class="shoot-btn" onclick="firePhone('red')">БРОСОК</div>
+         <div class="absolute top-6 w-full text-center text-red-500 font-black text-2xl pointer-events-none">ЦЕЛЬСЯ И БРОСАЙ</div>
+         <p class="absolute top-16 w-full text-center text-gray-400 text-sm pointer-events-none">Тапни по полю, чтобы прицелиться</p>
+      </div>
+    </div>
+
+    <div id="phone-view-blue" class="phone-mockup hidden flex-col bg-[#03080f]">
+      <div id="join-blue" class="flex flex-col items-center justify-center h-full p-6 text-center">
+        <div class="w-24 h-24 bg-blue-500/20 rounded-full flex items-center justify-center mb-6 border border-blue-500"><span class="text-5xl">🔵</span></div>
+        <h2 class="text-3xl font-bold mb-8 text-blue-500">Синие</h2>
+        <input type="text" id="input-name-blue" placeholder="Твоё имя" class="w-full bg-black/50 border-2 border-blue-500 rounded-xl px-4 py-4 text-center text-2xl text-white mb-6 outline-none focus:border-blue-400">
+        <button onclick="joinTeam('blue')" class="w-full py-4 bg-blue-600 text-white font-bold text-2xl rounded-xl active:scale-95 transition shadow-[0_0_20px_rgba(59,130,246,0.5)]">В БОЙ</button>
+      </div>
+      
+      <div id="play-blue" class="hidden w-full h-full absolute inset-0 bg-[#03080f]">
+         <div class="absolute inset-0 bg-[#0a2540]">
+           <div class="absolute top-0 w-full h-1/4 bg-blue-900/30 flex justify-center items-center"><span class="text-6xl">🧍‍♂️</span></div>
+           <div class="absolute bottom-0 w-full h-1/4 bg-red-900/30 flex justify-center items-center"><span class="text-6xl opacity-30">🛡️</span></div>
+         </div>
+         <div id="crosshair-blue" class="crosshair"></div>
+         <div class="shoot-btn" onclick="firePhone('blue')">БРОСОК</div>
+         <div class="absolute top-6 w-full text-center text-blue-500 font-black text-2xl pointer-events-none">ЦЕЛЬСЯ И БРОСАЙ</div>
+         <p class="absolute top-16 w-full text-center text-gray-400 text-sm pointer-events-none">Тапни по полю, чтобы прицелиться</p>
+      </div>
+    </div>
+
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getDatabase, ref, set, onValue, update, remove, push, onDisconnect } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+    // ============================================================
+    // ТВОЙ FIREBASE_CONFIG
+    // ============================================================
+    const firebaseConfig = {
+      apiKey: "AIzaSyCXIR5Tv8lB6ivcGRC3yt1SC66MM6T5b_M",
+      authDomain: "endorphin-battle.firebaseapp.com",
+      databaseURL: "https://endorphin-battle-default-rtdb.europe-west1.firebasedatabase.app",
+      projectId: "endorphin-battle",
+      storageBucket: "endorphin-battle.firebasestorage.app",
+      messagingSenderId: "185259733030",
+      appId: "1:185259733030:web:d72a89a436880973e636e7",
+      measurementId: "G-5Z9CNGV5L4"
+    };
+    // ============================================================
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const gameId = urlParams.get('game') || 'battle_1';
+    const team = urlParams.get('team');
+
+    const gameRef = ref(db, `games/${gameId}`);
+    const playerId = 'player_' + Math.random().toString(36).substr(2, 9);
+
+    // Снежинки
+    const snowBox = document.getElementById('snow');
+    for (let i = 0; i < 50; i++) {
+      const s = document.createElement('div');
+      s.className = 'snowflake';
+      s.innerText = '❄';
+      s.style.left = Math.random() * 100 + '%';
+      s.style.fontSize = (10 + Math.random() * 20) + 'px';
+      s.style.animationDuration = (5 + Math.random() * 10) + 's';
+      s.style.animationDelay = (-Math.random() * 10) + 's';
+      snowBox.appendChild(s);
+    }
+
+    // ================= ТВ ЛОГИКА =================
+    if (!team) {
+      document.getElementById('tv-screen').style.display = 'block';
+      const baseUrl = window.location.origin + window.location.pathname;
+      const redUrl = baseUrl + `?game=${gameId}&team=red`;
+      const blueUrl = baseUrl + `?game=${gameId}&team=blue`;
+
+      QRCode.toCanvas(document.getElementById('qr-red'), redUrl, { width: 200, margin: 1 });
+      QRCode.toCanvas(document.getElementById('qr-blue'), blueUrl, { width: 200, margin: 1 });
+
+      set(gameRef, {
+        status: 'lobby',
+        lives: { red: 3, blue: 3 },
+        players: { red: 0, blue: 0 }
+      });
+
+      onValue(gameRef, (snapshot) => {
+        const data = snapshot.val();
+        if (!data) return;
+
+        const redCount = Object.keys(data.players?.red || {}).length;
+        const blueCount = Object.keys(data.players?.blue || {}).length;
+        document.getElementById('count-red').innerText = redCount;
+        document.getElementById('count-blue').innerText = blueCount;
+
+        const btn = document.getElementById('btn-start');
+        if (redCount >= 1 && blueCount >= 1 && data.status === 'lobby') {
+          btn.disabled = false;
+          btn.classList.remove('opacity-50', 'cursor-not-allowed');
+          btn.classList.add('hover:scale-105', 'shadow-[0_0_50px_rgba(127,227,255,0.8)]');
+        } else if (data.status === 'lobby') {
+          btn.disabled = true;
+          btn.classList.add('opacity-50', 'cursor-not-allowed');
+        }
+
+        if (data.status === 'playing') {
+          document.getElementById('lobby-view').classList.add('hidden');
+          document.getElementById('battle-view').classList.remove('hidden');
+        }
+
+        if (data.status === 'finished') {
+          document.getElementById('win-view').classList.remove('hidden');
+          document.getElementById('win-view').classList.add('flex');
+          const winText = document.getElementById('win-text');
+          if (data.winner === 'red') {
+            winText.innerText = '🔴 КРАСНЫЕ ПОБЕДИЛИ!';
+            winText.className = 'text-8xl font-black text-red-500 mb-8 drop-shadow-[0_0_30px_rgba(239,68,68,0.8)]';
+          } else if (data.winner === 'blue') {
+            winText.innerText = '🔵 СИНИЕ ПОБЕДИЛИ!';
+            winText.className = 'text-8xl font-black text-blue-500 mb-8 drop-shadow-[0_0_30px_rgba(59,130,246,0.8)]';
+          } else {
+            winText.innerText = '🤝 НИЧЬЯ!';
+            winText.className = 'text-8xl font-black text-white mb-8';
+          }
+        }
+
+        if (data.lives) {
+          for (let i = 1; i <= 3; i++) {
+            const heartRed = document.getElementById(`life-red-${i}`);
+            const heartBlue = document.getElementById(`life-blue-${i}`);
+            if (heartRed) heartRed.className = `text-5xl heart ${i > data.lives.red ? 'dead' : ''}`;
+            if (heartBlue) heartBlue.className = `text-5xl heart ${i > data.lives.blue ? 'dead' : ''}`;
+          }
+        }
+      });
+
+      document.getElementById('btn-start').onclick = () => {
+        update(gameRef, { status: 'playing' });
+      };
+
+      onValue(ref(db, `games/${gameId}/shots`), (snapshot) => {
+        const shots = snapshot.val();
+        if (!shots) return;
+        
+        Object.keys(shots).forEach(key => {
+          const shot = shots[key];
+          if (shot.animated) return;
+          
+          animateShot(shot.team, shot.targetX, shot.targetY);
+          update(ref(db, `games/${gameId}/shots/${key}`), { animated: true });
+          setTimeout(() => remove(ref(db, `games/${gameId}/shots/${key}`)), 2000);
+        });
+      });
+
+      function animateShot(team, targetX, targetY) {
+        const battlefield = document.getElementById('battlefield');
+        const ball = document.createElement('div');
+        ball.className = 'snowball';
+        battlefield.appendChild(ball);
+
+        const startX = window.innerWidth / 2;
+        const startY = team === 'red' ? battlefield.offsetHeight : 0;
+        const endY = team === 'red' ? 0 : battlefield.offsetHeight;
+        const endX = (targetX / 100) * battlefield.offsetWidth;
+
+        ball.style.left = startX + 'px';
+        ball.style.top = startY + 'px';
+
+        ball.animate([
+          { left: startX + 'px', top: startY + 'px' },
+          { left: endX + 'px', top: endY + 'px' }
+        ], { duration: 600, easing: 'ease-in', fill: 'forwards' }).onfinish = () => {
+          const isHit = team === 'red' ? (targetY < 30) : (targetY > 70);
+          
+          if (isHit) {
+            const currentLives = { ...data.lives };
+            if (team === 'red') currentLives.blue = Math.max(0, currentLives.blue - 1);
+            else currentLives.red = Math.max(0, currentLives.red - 1);
+
+            let winner = null;
+            if (currentLives.red <= 0) winner = 'blue';
+            if (currentLives.blue <= 0) winner = 'red';
+
+            update(gameRef, {
+              lives: currentLives,
+              ...(winner ? { status: 'finished', winner } : {})
+            });
+          }
+          ball.remove();
+        };
+      }
+    }
+
+    // ================= ТЕЛЕФОН ЛОГИКА =================
+    if (team) {
+      const phoneView = document.getElementById(`phone-view-${team}`);
+      phoneView.classList.remove('hidden');
+      phoneView.classList.add('flex');
+
+      const playerRef = ref(db, `games/${gameId}/players/${team}/${playerId}`);
+      onDisconnect(playerRef).remove();
+
+      window.joinTeam = () => {
+        const name = document.getElementById(`input-name-${team}`).value.trim() || 'Игрок';
+        set(playerRef, { name });
+        document.getElementById(`join-${team}`).classList.add('hidden');
+        document.getElementById(`play-${team}`).classList.remove('hidden');
+        document.getElementById(`crosshair-${team}`).style.display = 'block';
+      };
+
+      onValue(gameRef, (snapshot) => {
+        const data = snapshot.val();
+        if (!data) return;
+        
+        if (data.status === 'playing') {
+          document.getElementById(`play-${team}`).classList.remove('hidden');
+          document.getElementById(`crosshair-${team}`).style.display = 'block';
+        } else if (data.status === 'finished') {
+          document.getElementById(`crosshair-${team}`).style.display = 'none';
+          document.querySelector(`#play-${team} .shoot-btn`).style.display = 'none';
+        }
+      });
+
+      let targetX = 50, targetY = 50;
+      const playArea = document.getElementById(`play-${team}`);
+      
+      const handleMove = (e) => {
+        if (e.touches) e.preventDefault();
+        const rect = playArea.getBoundingClientRect();
+        const clientX = e.clientX || e.touches[0].clientX;
+        const clientY = e.clientY || e.touches[0].clientY;
+        const x = clientX - rect.left;
+        const y = clientY - rect.top;
+
+        targetX = (x / rect.width) * 100;
+        targetY = (y / rect.height) * 100;
+
+        const crosshair = document.getElementById(`crosshair-${team}`);
+        crosshair.style.left = `${x}px`;
+        crosshair.style.top = `${y}px`;
+      };
+
+      playArea.addEventListener('touchmove', handleMove, { passive: false });
+      playArea.addEventListener('touchstart', handleMove, { passive: false });
+      playArea.addEventListener('mousemove', handleMove);
+
+      window.firePhone = () => {
+        const shotsRef = ref(db, `games/${gameId}/shots`);
+        push(shotsRef, { team, targetX, targetY, time: Date.now() });
+      };
+    }
+
+    window.resetGame = () => {
+      set(gameRef, {
+        status: 'lobby',
+        lives: { red: 3, blue: 3 },
+        players: { red: 0, blue: 0 }
+      });
+      window.location.reload();
+    };
+
+  </script>
+</body>
+</html>
