@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ENDORPHIN | МОДЕРАТОР</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/qrcode-generator@1.4.4/qrcode.js"></script>
+  <style>
+    body { background: #03080f; color: #fff; font-family: system-ui, sans-serif; }
+    .glass { background: rgba(10, 37, 64, 0.8); border: 1px solid rgba(127, 227, 255, 0.3); }
+  </style>
+</head>
+<body class="min-h-screen p-6 flex flex-col items-center">
+
+  <div class="w-full max-w-4xl flex justify-between items-center mb-8">
+    <h1 class="text-3xl font-black text-cyan-300">ПУЛЬТ ВЕДУЩЕГО</h1>
+    <button onclick="resetAll()" class="px-4 py-2 bg-red-600 rounded-lg font-bold text-sm">СБРОСИТЬ ИГРУ</button>
+  </div>
+
+  <div class="glass w-full max-w-4xl p-8 rounded-3xl mb-8 flex flex-col items-center">
+    <h2 class="text-xl font-bold mb-4">1. ВЫБЕРИ РЕЖИМ</h2>
+    <div class="flex gap-4">
+      <button onclick="setMode('1v1')" class="mode-btn px-6 py-3 rounded-xl border-2 font-bold" id="btn-1v1">1 на 1</button>
+      <button onclick="setMode('2v2')" class="mode-btn px-6 py-3 rounded-xl border-2 font-bold" id="btn-2v2">2 на 2</button>
+      <button onclick="setMode('3v3')" class="mode-btn px-6 py-3 rounded-xl border-2 font-bold" id="btn-3v3">3 на 3</button>
+      <button onclick="setMode('4v4')" class="mode-btn px-6 py-3 rounded-xl border-2 font-bold" id="btn-4v4">4 на 4</button>
+    </div>
+  </div>
+
+  <div class="glass w-full max-w-4xl p-8 rounded-3xl mb-8">
+    <h2 class="text-xl font-bold mb-4 text-center">2. QR КОДЫ ДЛЯ ИГРОКОВ</h2>
+    <div class="flex justify-around">
+      <div class="text-center">
+        <h3 class="text-red-400 font-bold mb-2">КРАСНЫЕ</h3>
+        <div class="bg-white p-2 rounded" id="qr-red"></div>
+      </div>
+      <div class="text-center">
+        <h3 class="text-blue-400 font-bold mb-2">СИНИЕ</h3>
+        <div class="bg-white p-2 rounded" id="qr-blue"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="glass w-full max-w-4xl p-8 rounded-3xl">
+    <h2 class="text-xl font-bold mb-4">3. ПОДКЛЮЧЕННЫЕ ИГРОКИ</h2>
+    <div class="grid grid-cols-2 gap-4">
+      <div class="bg-red-900/20 p-4 rounded-xl border border-red-500/30">
+        <h3 class="font-bold text-red-400 mb-2">Красные</h3>
+        <ul id="list-red" class="space-y-2 text-sm"></ul>
+      </div>
+      <div class="bg-blue-900/20 p-4 rounded-xl border border-blue-500/30">
+        <h3 class="font-bold text-blue-400 mb-2">Синие</h3>
+        <ul id="list-blue" class="space-y-2 text-sm"></ul>
+      </div>
+    </div>
+
+    <button id="btn-start" disabled class="w-full mt-8 py-6 bg-cyan-600 rounded-xl text-2xl font-black disabled:opacity-50 disabled:cursor-not-allowed text-black">
+      НАЧАТЬ БОЙ
+    </button>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getDatabase, ref, set, onValue, update, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+    const firebaseConfig = { apiKey: "AIzaSyCXIR5Tv8lB6ivcGRC3yt1SC66MM6T5b_M", authDomain: "endorphin-battle.firebaseapp.com", databaseURL: "https://endorphin-battle-default-rtdb.europe-west1.firebasedatabase.app", projectId: "endorphin-battle", storageBucket: "endorphin-battle.firebasestorage.app", messagingSenderId: "185259733030", appId: "1:185259733030:web:d72a89a436880973e636e7" };
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    const gameId = 'battle_1';
+    const gameRef = ref(db, `games/${gameId}`);
+    const currentUrl = window.location.href.split('?')[0];
+
+    function drawQR(text, containerId) {
+      const qr = qrcode(0, 'M'); qr.addData(text); qr.make();
+      document.getElementById(containerId).innerHTML = qr.createImgTag(5, 8);
+    }
+    drawQR(currentUrl + `play.html?game=${gameId}&team=red`, 'qr-red');
+    drawQR(currentUrl + `play.html?game=${gameId}&team=blue`, 'qr-blue');
+
+    let currentData = null;
+    
+    set(gameRef, { 
+      status: 'lobby', mode: '1v1', 
+      lives: { red: 3, blue: 3 }, 
+      players: { red: {}, blue: {} },
+      turn: { team: 'red', name: '...' }
+    }).then(() => { setMode('1v1'); });
+
+    window.setMode = (mode) => {
+      update(gameRef, { mode });
+      document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('border-cyan-400', 'bg-cyan-900/30'));
+      document.getElementById(`btn-${mode}`).classList.add('border-cyan-400', 'bg-cyan-900/30');
+    };
+
+    onValue(gameRef, (snapshot) => {
+      const data = snapshot.val();
+      if (!data) return;
+      currentData = data;
+
+      // Обновляем списки
+      const renderList = (team, listId) => {
+        const players = Object.entries(data.players[team] || {});
+        document.getElementById(listId).innerHTML = players.map(([id, p]) => `
+          <li class="flex justify-between items-center bg-black/30 p-2 rounded border border-white/10">
+            <span>👤 ${p.name}</span>
+            <button onclick="kickPlayer('${team}', '${id}')" class="text-red-400 hover:text-red-300 font-bold px-2">✖</button>
+          </li>
+        `).join('');
+      };
+      renderList('red', 'list-red');
+      renderList('blue', 'list-blue');
+
+      // Проверка готовности
+      const maxP = parseInt(data.mode.charAt(0)); // Берем цифру из "1v1", "2v2" и т.д.
+      const redCount = Object.keys(data.players.red || {}).length;
+      const blueCount = Object.keys(data.players.blue || {}).length;
+
+      const btn = document.getElementById('btn-start');
+      if (redCount >= maxP && blueCount >= maxP && data.status === 'lobby') {
+        btn.disabled = false;
+      } else {
+        btn.disabled = true;
+      }
+    });
+
+    window.kickPlayer = (team, id) => {
+      if(confirm('Удалить игрока?')) remove(ref(db, `games/${gameId}/players/${team}/${id}`));
+    };
+
+    document.getElementById('btn-start').onclick = () => {
+      // Определяем, кто ходит первым (например, красные)
+      // В реальности ведущий решает, но для простоты пусть ходят красные
+      const firstTeam = 'red';
+      const firstPlayer = Object.values(currentData.players[firstTeam])[0].name;
+      
+      update(gameRef, { 
+        status: 'playing',
+        turn: { team: firstTeam, name: firstPlayer },
+        activePlayerId: Object.keys(currentData.players[firstTeam])[0]
+      });
+    };
+
+    window.resetAll = () => {
+      if(confirm('Сбросить всю игру?')) set(gameRef, { status: 'lobby', mode: '1v1', lives: { red: 3, blue: 3 }, players: { red: {}, blue: {} } });
+    };
+  </script>
+</body>
+</html>
