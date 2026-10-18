@@ -9,11 +9,15 @@
     @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap');
     body { background: radial-gradient(circle at 50% 0%, #0a2540 0%, #03080f 100%); color: #fff; font-family: 'Montserrat', sans-serif; overflow: hidden; user-select: none; touch-action: none; }
     .glass-panel { background: rgba(10, 37, 64, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(127, 227, 255, 0.2); }
+    
+    /* Вертикальный джойстик */
     .slider-container { position: relative; width: 60px; height: 260px; background: rgba(255,255,255,0.05); border-radius: 30px; border: 2px solid rgba(255,255,255,0.1); margin: 0 auto; overflow: hidden; display: flex; align-items: center; }
     .slider-thumb { width: 50px; height: 50px; border-radius: 50%; background: linear-gradient(135deg, #fff, #a8e6ff); position: absolute; left: 3px; top: 50%; transform: translateY(-50%); box-shadow: 0 0 20px rgba(255,255,255,0.6); }
+    
     input[type=range] { -webkit-appearance: none; width: 100%; background: transparent; }
     input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; height: 36px; width: 36px; border-radius: 50%; background: #fff; box-shadow: 0 0 20px #fff; cursor: pointer; margin-top: -14px; }
     input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 8px; cursor: pointer; background: linear-gradient(90deg, #ef4444, #fbbf24, #22c55e); border-radius: 4px; }
+
     .shoot-btn { width: 180px; height: 180px; border-radius: 50%; font-size: 2.5rem; font-weight: 900; transition: all 0.2s; display: flex; align-items: center; justify-content: center; }
     .shoot-btn:disabled { filter: grayscale(1); opacity: 0.3; transform: scale(0.9); }
     .disabled-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 100; display: flex; align-items: center; justify-content: center; flex-direction: column; backdrop-filter: blur(5px); }
@@ -110,7 +114,7 @@
       y = Math.max(25, Math.min(rect.height - 25, y));
       const percentage = 1 - (y / rect.height);
       thumb.style.top = `${y}px`;
-      currentAngle = 10 + (percentage * 70); // От 10 до 80 градусов
+      currentAngle = 10 + (percentage * 70);
     };
     container.addEventListener('touchmove', handleMove, { passive: false });
     container.addEventListener('touchstart', handleMove, { passive: false });
@@ -123,29 +127,18 @@
       if (!isMyTurn) return;
       
       const power = parseInt(document.getElementById('power-slider').value);
-      const angle = currentAngle; // Получаем угол из переменной джойстика
+      const angle = currentAngle;
       
-      // ТОЧНАЯ МАТЕМАТИКА
-      // Дальность полета = (V^2 * sin(2a)) / g
-      // У нас упрощенная формула: power переводим в "силу" (дальность).
-      // Если угол 45 градусов, то дальность = power * 10 (например).
+      // ФИЗИКА ПОПАДАНИЯ
       const rad = angle * Math.PI / 180;
       const distance = (Math.pow(power, 2) * Math.sin(2 * rad)) / 10;
-
-      // Физический хитбокс: Красные на 15% слева, Синие на 85%.
-      // Это расстояние между ними (по X) = 70% ширины экрана.
-      // Переводим в условные единицы.
-      const targetDistance = 70; // В процентах экрана (от 15% до 85%)
-      
-      // Проверяем, попадает ли снаряд в диапазон (плюс-минус погрешность)
+      const targetDistance = 70; // Расстояние между командами в % (15% до 85%)
       const isHit = (distance >= targetDistance - 8 && distance <= targetDistance + 8);
 
-      // Отправляем в базу
       const shotsRef = ref(db, 'games/battle_1/shots');
       push(shotsRef, { team, power, angle, distance, isHit, time: Date.now() });
 
       if (isHit) {
-        // Ищем случайного живого врага
         onValue(ref(db, `games/battle_1/players/${isRed ? 'blue' : 'red'}`), (snap) => {
           const enemies = Object.entries(snap.val() || {});
           const aliveEnemies = enemies.filter(([id, p]) => p.alive);
@@ -154,15 +147,15 @@
           const targetId = aliveEnemies[0][0];
           const enemyTeam = isRed ? 'blue' : 'red';
           
-          // Снимаем жизнь
           const newLives = Math.max(0, aliveEnemies[0][1].lives - 1);
           update(ref(db, `games/battle_1/players/${enemyTeam}/${targetId}`), { lives: newLives, alive: newLives > 0 });
           
-          // Проверка на смерть команды
-          const teamLives = aliveEnemies.reduce((sum, [id, p]) => sum + (id === targetId ? newLives : p.lives), 0);
-          if (teamLives <= 0) {
-            update(ref(db, 'games/battle_1'), { status: 'finished', winner: team });
-          }
+          // Проверка на победу
+          onValue(ref(db, `games/battle_1/players/${enemyTeam}`), (teamSnap) => {
+            const allEnemies = Object.values(teamSnap.val() || {});
+            const totalLives = allEnemies.reduce((sum, p) => sum + p.lives, 0);
+            if (totalLives <= 0) update(ref(db, 'games/battle_1'), { status: 'finished', winner: team });
+          }, { onlyOnce: true });
         }, { onlyOnce: true });
       }
 
