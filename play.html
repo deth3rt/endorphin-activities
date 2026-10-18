@@ -48,7 +48,7 @@
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getDatabase, ref, set, push, onDisconnect, onValue, update, get } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+    import { getDatabase, ref, set, push, onDisconnect, onValue, update } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
     const firebaseConfig = { apiKey: "AIzaSyCXIR5Tv8lB6ivcGRC3yt1SC66MM6T5b_M", authDomain: "endorphin-battle.firebaseapp.com", databaseURL: "https://endorphin-battle-default-rtdb.europe-west1.firebasedatabase.app", projectId: "endorphin-battle", storageBucket: "endorphin-battle.firebasestorage.app", messagingSenderId: "185259733030", appId: "1:185259733030:web:d72a89a436880973e636e7" };
     const app = initializeApp(firebaseConfig);
@@ -130,7 +130,6 @@
       const targetDistance = 70;
       const isHit = (distance >= targetDistance - 8 && distance <= targetDistance + 8);
 
-      // ВАЖНО: Отправляем индекс стрелка и цели
       onValue(ref(db, `games/battle_1/players/${team}`), (mySnap) => {
         const myPlayers = Object.entries(mySnap.val() || {});
         const myIndex = myPlayers.findIndex(([id]) => id === playerId);
@@ -140,33 +139,25 @@
           const aliveEnemies = enemies.filter(([id, p]) => p.alive);
           if (aliveEnemies.length === 0) return;
           
-          const targetIndex = 0; // Всегда бьем первого живого
+          const targetIndex = 0;
           
-          // Отправляем в формате, который ждет ТВ
-          push(ref(db, 'games/battle_1/shots'), { 
+          const shotData = { 
             team, 
             shooterIndex: myIndex,
             targetTeam: isRed ? 'blue' : 'red',
             targetIndex: targetIndex,
-            isHit, isMega: (power > 90 && isHit) 
-          });
+            isHit, 
+            isMega: (power > 90 && isHit) 
+          };
           
-          // Дублируем в last_shot для мгновенной реакции ТВ
-          set(ref(db, 'games/battle_1/last_shot'), { 
-            team, 
-            shooterIndex: myIndex,
-            targetTeam: isRed ? 'blue' : 'red',
-            targetIndex: targetIndex,
-            isHit, isMega: (power > 90 && isHit) 
-          });
+          push(ref(db, 'games/battle_1/shots'), shotData);
+          set(ref(db, 'games/battle_1/last_shot'), shotData);
 
-          // Урон
           if (isHit) {
             const targetId = aliveEnemies[targetIndex][0];
             const newLives = Math.max(0, aliveEnemies[targetIndex][1].lives - 1);
             update(ref(db, `games/battle_1/players/${isRed ? 'blue' : 'red'}/${targetId}`), { lives: newLives, alive: newLives > 0 });
             
-            // Проверка победы
             onValue(ref(db, `games/battle_1/players/${isRed ? 'blue' : 'red'}`), (finalSnap) => {
               const allEnemies = Object.values(finalSnap.val() || {});
               const totalLives = allEnemies.reduce((sum, p) => sum + p.lives, 0);
@@ -174,7 +165,6 @@
             }, { onlyOnce: true });
           }
 
-          // Передача хода
           onValue(ref(db, 'games/battle_1/players'), (snap) => {
             const players = snap.val();
             const myTeamPlayers = Object.entries(players[team] || {}).filter(([id, p]) => p.alive);
