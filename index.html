@@ -11,7 +11,6 @@
     .glass-panel { background: rgba(10, 37, 64, 0.6); backdrop-filter: blur(16px); border: 1px solid rgba(127, 227, 255, 0.3); box-shadow: 0 0 40px rgba(31, 143, 214, 0.2); }
     .btn-neon { transition: all 0.3s ease; }
     .btn-neon:hover { transform: scale(1.05); box-shadow: 0 0 40px rgba(34, 211, 238, 0.6); }
-    .btn-red { background: linear-gradient(135deg, #ef4444, #7f1d1d); }
   </style>
 </head>
 <body>
@@ -45,14 +44,12 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
-    
     const firebaseConfig = { apiKey: "AIzaSyCXIR5Tv8lB6ivcGRC3yt1SC66MM6T5b_M", authDomain: "endorphin-battle.firebaseapp.com", databaseURL: "https://endorphin-battle-default-rtdb.europe-west1.firebasedatabase.app", projectId: "endorphin-battle", storageBucket: "endorphin-battle.firebasestorage.app", messagingSenderId: "185259733030", appId: "1:185259733030:web:d72a89a436880973e636e7" };
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
     const gameRef = ref(db, 'games/battle_1');
 
     let isBlocked = false;
-
     onValue(gameRef, (snap) => {
       const data = snap.val();
       if (data && data.status === 'playing' && !isBlocked) {
@@ -69,17 +66,8 @@
     });
 
     window.forceReset = () => {
-      if (confirm('Сбросить игру принудительно? Все игроки отключатся.')) {
-        set(gameRef, { 
-          status: 'lobby', 
-          mode: '1v1', 
-          lives: { red: 3, blue: 3 }, 
-          players: { red: {}, blue: {} },
-          turn: { team: 'red', name: '...' },
-          activePlayerId: null,
-          timer: null
-        });
-        alert('Игра сброшена');
+      if (confirm('Сбросить игру?')) {
+        set(gameRef, { status: 'lobby', mode: '1v1', lives: { red: 3, blue: 3 }, players: { red: {}, blue: {} }, turn: { team: 'red', name: '...' }, activePlayerId: null, timer: null });
       }
     };
   </script>
