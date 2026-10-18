@@ -1,13 +1,10 @@
 // ============================================================
-// ENDORPHIN | ТВ ЭКРАН | ЛОГИКА (ПОЛНАЯ ВЕРСИЯ)
+// ENDORPHIN | ТВ ЭКРАН | ЛОГИКА (ИСПРАВЛЕННАЯ)
 // ============================================================
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-// ============================================================
-// КОНФИГУРАЦИЯ
-// ============================================================
 const firebaseConfig = { 
     apiKey: "AIzaSyCXIR5Tv8lB6ivcGRC3yt1SC66MM6T5b_M", 
     authDomain: "endorphin-battle.firebaseapp.com", 
@@ -40,9 +37,10 @@ class Player {
     createDOM() {
         const slot = document.createElement('div');
         slot.className = 'player-slot';
+        // Позиция по X
         slot.style.left = this.team === 'red' ? '15%' : '85%';
-        
-        const yPos = 20 + (this.index * 60 / Math.max(1, 4)) + 10;
+        // Позиция по Y (чтобы не перекрывались)
+        const yPos = 20 + (this.index * 20) + 10;
         slot.style.top = `${yPos}%`;
 
         if (this.alive) {
@@ -56,7 +54,6 @@ class Player {
         } else {
             slot.innerHTML = `<div class="text-6xl opacity-30 text-gray-500">💀</div>`;
         }
-
         this.element = slot;
         return slot;
     }
@@ -73,29 +70,24 @@ class Player {
 }
 
 // ============================================================
-// КЛАСС: СИСТЕМА ЧАСТИЦ (ВЗРЫВЫ)
+// КЛАСС: СИСТЕМА ЧАСТИЦ
 // ============================================================
 class ParticleSystem {
     constructor(container) {
         this.container = container;
-        this.particles = [];
     }
-
     explode(x, y, count = 15) {
         for (let i = 0; i < count; i++) {
             const p = document.createElement('div');
             p.className = 'particle';
-            
             const size = Math.random() * 12 + 4;
             p.style.width = `${size}px`;
             p.style.height = `${size}px`;
             p.style.left = `${x}px`;
             p.style.top = `${y}px`;
             p.style.background = `rgba(255, 255, 255, ${Math.random() * 0.5 + 0.5})`;
-            
             this.container.appendChild(p);
-            this.particles.push(p);
-
+            
             const angle = Math.random() * Math.PI * 2;
             const distance = Math.random() * 150 + 50;
             const destX = x + Math.cos(angle) * distance;
@@ -104,59 +96,43 @@ class ParticleSystem {
             p.animate([
                 { transform: 'translate(-50%, -50%) scale(1)', opacity: 1 },
                 { transform: `translate(${destX - x}px, ${destY - y}px) scale(0)`, opacity: 0 }
-            ], { 
-                duration: 600 + Math.random() * 400, 
-                easing: 'cubic-bezier(0.25, 0.1, 0.25, 1)', 
-                fill: 'forwards' 
-            }).onfinish = () => {
-                p.remove();
-                this.particles = this.particles.filter(item => item !== p);
-            };
+            ], { duration: 600, fill: 'forwards' }).onfinish = () => p.remove();
         }
     }
 }
 
 // ============================================================
-// КЛАСС: СНЕЖОК (ФИЗИКА ПОЛЕТА)
+// КЛАСС: СНЕЖОК
 // ============================================================
 class Snowball {
     constructor(container, startX, startY, endX, endY, onHit) {
         this.container = container;
-        this.x = startX;
-        this.y = startY;
-        this.startX = startX;
-        this.startY = startY;
-        this.endX = endX;
-        this.endY = endY;
+        this.startX = startX; this.startY = startY;
+        this.endX = endX; this.endY = endY;
         this.onHit = onHit;
-        this.element = null;
         this.progress = 0;
-        this.speed = 0.02;
-        this.animationId = null;
+        this.element = null;
     }
 
-    createElement() {
+    start() {
         const ball = document.createElement('div');
         ball.className = 'snowball';
-        ball.style.left = `${this.x}px`;
-        ball.style.top = `${this.y}px`;
+        ball.style.left = `${this.startX}px`;
+        ball.style.top = `${this.startY}px`;
         this.container.appendChild(ball);
         this.element = ball;
+        this.animate();
     }
 
     animate() {
-        this.progress += this.speed;
-        
+        this.progress += 0.02;
         if (this.progress >= 1) {
-            this.progress = 1;
             this.element.style.left = `${this.endX}px`;
             this.element.style.top = `${this.endY}px`;
-            
             setTimeout(() => {
                 if (this.onHit) this.onHit();
                 this.element.remove();
             }, 100);
-            
             return;
         }
 
@@ -167,29 +143,18 @@ class Snowball {
         this.element.style.left = `${currentX}px`;
         this.element.style.top = `${currentY}px`;
 
-        if (Math.random() > 0.5) {
+        // Шлейф
+        if (Math.random() > 0.7) {
             const trail = document.createElement('div');
             trail.className = 'particle';
-            trail.style.width = '8px';
-            trail.style.height = '8px';
-            trail.style.left = `${currentX}px`;
-            trail.style.top = `${currentY}px`;
-            trail.style.background = 'rgba(255, 255, 255, 0.5)';
+            trail.style.width = '6px'; trail.style.height = '6px';
+            trail.style.left = `${currentX}px`; trail.style.top = `${currentY}px`;
+            trail.style.background = 'rgba(255,255,255,0.4)';
             this.container.appendChild(trail);
             setTimeout(() => trail.remove(), 300);
         }
 
-        this.animationId = requestAnimationFrame(() => this.animate());
-    }
-
-    start() {
-        this.createElement();
-        this.animate();
-    }
-
-    destroy() {
-        if (this.animationId) cancelAnimationFrame(this.animationId);
-        if (this.element) this.element.remove();
+        requestAnimationFrame(() => this.animate());
     }
 }
 
@@ -208,77 +173,52 @@ function getBaseUrl() {
 }
 currentBaseUrl = getBaseUrl();
 
-// ============================================================
-// ГЕНЕРАЦИЯ QR-КОДОВ
-// ============================================================
 function generateQRs() {
     document.getElementById('qr-container').classList.remove('hidden');
     document.getElementById('tv-status').classList.remove('hidden');
-    
     const redUrl = `${currentBaseUrl}play.html?game=${gameId}&team=red`;
     const blueUrl = `${currentBaseUrl}play.html?game=${gameId}&team=blue`;
-    
     document.getElementById('qr-red').innerHTML = '';
     document.getElementById('qr-blue').innerHTML = '';
     
-    const qrRed = qrcode(0, 'M'); 
-    qrRed.addData(redUrl); 
-    qrRed.make();
+    const qrRed = qrcode(0, 'M'); qrRed.addData(redUrl); qrRed.make();
     document.getElementById('qr-red').innerHTML = qrRed.createImgTag(4, 8);
     
-    const qrBlue = qrcode(0, 'M'); 
-    qrBlue.addData(blueUrl); 
-    qrBlue.make();
+    const qrBlue = qrcode(0, 'M'); qrBlue.addData(blueUrl); qrBlue.make();
     document.getElementById('qr-blue').innerHTML = qrBlue.createImgTag(4, 8);
 }
 
-// ============================================================
-// ОТРИСОВКА ПОЛЯ
-// ============================================================
 function renderBattlefield(data) {
     const field = document.getElementById('battlefield');
-    if (!particleSystem) {
-        particleSystem = new ParticleSystem(field);
-    }
+    if (!particleSystem) particleSystem = new ParticleSystem(field);
     
-    if (field.children.length !== data.mode.charAt(0) * 2) {
+    const maxP = data.mode ? parseInt(data.mode.charAt(0)) : 1;
+    
+    // Пересоздаем DOM только если изменилось количество игроков
+    if (field.children.length !== maxP * 2) {
         field.innerHTML = '';
-        
-        for (let i = 0; i < playersData.red.length; i++) {
-            const p = new Player(playersData.red[i].id, playersData.red[i], 'red', i);
-            field.appendChild(p.createDOM());
-            playersData.red[i] = p;
-        }
-
-        for (let i = 0; i < playersData.blue.length; i++) {
-            const p = new Player(playersData.blue[i].id, playersData.blue[i], 'blue', i);
-            field.appendChild(p.createDOM());
-            playersData.blue[i] = p;
-        }
+        playersData.red.forEach((p, i) => {
+            if (i < maxP) field.appendChild(p.createDOM());
+        });
+        playersData.blue.forEach((p, i) => {
+            if (i < maxP) field.appendChild(p.createDOM());
+        });
     } else {
-        playersData.red.forEach(p => p.updateDOM && p.updateDOM());
-        playersData.blue.forEach(p => p.updateDOM && p.updateDOM());
+        playersData.red.forEach(p => p.updateDOM());
+        playersData.blue.forEach(p => p.updateDOM());
     }
 
-    const totalRedLives = playersData.red.reduce((sum, p) => sum + (p.lives || 0), 0);
-    const totalBlueLives = playersData.blue.reduce((sum, p) => sum + (p.lives || 0), 0);
-    
-    document.getElementById('heart-red').innerText = '❤️'.repeat(totalRedLives) || '💀';
-    document.getElementById('heart-blue').innerText = '❤️'.repeat(totalBlueLives) || '💀';
+    document.getElementById('heart-red').innerText = '❤️'.repeat(playersData.red.reduce((a, b) => a + (b.lives || 0), 0)) || '💀';
+    document.getElementById('heart-blue').innerText = '❤️'.repeat(playersData.blue.reduce((a, b) => a + (b.lives || 0), 0)) || '💀';
 }
 
-// ============================================================
-// АНИМАЦИЯ ВЫСТРЕЛА
-// ============================================================
 function handleShot(shot) {
     const field = document.getElementById('battlefield');
-    if (!field) return;
-
     const shooterEl = document.getElementById(`player-${shot.team}-${shot.shooterIndex}`);
     const targetEl = document.getElementById(`player-${shot.targetTeam}-${shot.targetIndex}`);
     
     if (!shooterEl || !targetEl) {
-        console.warn('Не найдены элементы для выстрела');
+        console.warn('Не найдены элементы для выстрела', shot);
         return;
     }
 
@@ -288,7 +228,6 @@ function handleShot(shot) {
 
     const startX = sRect.left - fieldRect.left + sRect.width / 2;
     const startY = sRect.top - fieldRect.top + sRect.height / 2;
-    
     let endX = tRect.left - fieldRect.left + tRect.width / 2;
     let endY = tRect.top - fieldRect.top + tRect.height / 2;
 
@@ -299,40 +238,22 @@ function handleShot(shot) {
 
     const ball = new Snowball(field, startX, startY, endX, endY, () => {
         if (shot.isHit) {
-            if (particleSystem) particleSystem.explode(endX, endY, 20);
-            
+            particleSystem.explode(endX, endY, 15);
             document.getElementById('main-body').classList.add('screen-shake');
-            setTimeout(() => document.getElementById('main-body').classList.remove('screen-shake'), 500);
-
-            const flash = document.createElement('div');
-            flash.className = 'flash-effect';
-            document.body.appendChild(flash);
-            setTimeout(() => flash.remove(), 300);
-
+            setTimeout(() => document.getElementById('main-body').classList.remove('screen-shake'), 400);
             if (shot.isMega) {
                 const megaDiv = document.createElement('div');
-                megaDiv.className = 'mega-text';
-                megaDiv.innerText = 'МЕГАБРОСОК!';
+                megaDiv.className = 'mega-text'; megaDiv.innerText = 'МЕГАБРОСОК!';
                 document.body.appendChild(megaDiv);
-                setTimeout(() => megaDiv.remove(), 2500);
+                setTimeout(() => megaDiv.remove(), 2000);
             }
         }
     });
-    
     ball.start();
 }
 
 // ============================================================
-// ОБНОВЛЕНИЕ БЕГУЩЕЙ СТРОКИ
-// ============================================================
-onValue(ref(db, `games/${gameId}/ticker`), (snap) => {
-    if (snap.val()) {
-        document.getElementById('ticker-text').innerText = snap.val();
-    }
-});
-
-// ============================================================
-// СЛУШАТЕЛЬ СОСТОЯНИЯ ИГРЫ
+// СЛУШАТЕЛИ
 // ============================================================
 onValue(gameRef, (snapshot) => {
     const data = snapshot.val();
@@ -345,6 +266,7 @@ onValue(gameRef, (snapshot) => {
         if (data.status === 'lobby') generateQRs();
     }
     
+    // Обновляем данные игроков
     const redPlayers = Object.entries(data.players?.red || {}).map(([id, p], idx) => ({ ...p, id, index: idx }));
     const bluePlayers = Object.entries(data.players?.blue || {}).map(([id, p], idx) => ({ ...p, id, index: idx }));
 
@@ -352,53 +274,29 @@ onValue(gameRef, (snapshot) => {
         playersData.red = redPlayers.map(p => new Player(p.id, p, 'red', p.index));
         playersData.blue = bluePlayers.map(p => new Player(p.id, p, 'blue', p.index));
     } else {
-        playersData.red.forEach((p, i) => {
-            if (redPlayers[i]) {
-                p.lives = redPlayers[i].lives;
-                p.alive = redPlayers[i].alive;
-            }
-        });
-        playersData.blue.forEach((p, i) => {
-            if (bluePlayers[i]) {
-                p.lives = bluePlayers[i].lives;
-                p.alive = bluePlayers[i].alive;
-            }
-        });
+        playersData.red.forEach((p, i) => { if (redPlayers[i]) { p.lives = redPlayers[i].lives; p.alive = redPlayers[i].alive; } });
+        playersData.blue.forEach((p, i) => { if (bluePlayers[i]) { p.lives = bluePlayers[i].lives; p.alive = bluePlayers[i].alive; } });
     }
 
-    document.getElementById('tv-players-red').innerHTML = playersData.red.map(p => 
-        `<div class="text-red-300 font-bold bg-red-900/40 py-1 rounded border border-red-500/50">👤 ${p.name}</div>`
-    ).join('');
-    
-    document.getElementById('tv-players-blue').innerHTML = playersData.blue.map(p => 
-        `<div class="text-blue-300 font-bold bg-blue-900/40 py-1 rounded border border-blue-500/50">👤 ${p.name}</div>`
-    ).join('');
+    document.getElementById('tv-players-red').innerHTML = playersData.red.map(p => `<div class="text-red-300 font-bold bg-red-900/40 py-1 rounded border border-red-500/50">👤 ${p.name}</div>`).join('');
+    document.getElementById('tv-players-blue').innerHTML = playersData.blue.map(p => `<div class="text-blue-300 font-bold bg-blue-900/40 py-1 rounded border border-blue-500/50">👤 ${p.name}</div>`).join('');
 
     if (data.status === 'lobby') {
         document.getElementById('lobby-view').classList.remove('hidden');
         document.getElementById('battle-view').classList.add('hidden');
         document.getElementById('win-view').classList.add('hidden');
         document.getElementById('win-view').classList.remove('flex');
-        
         if (data.mode) {
             document.getElementById('qr-container').classList.remove('hidden');
             const maxP = parseInt(data.mode.charAt(0));
-            if (playersData.red.length >= maxP && playersData.blue.length >= maxP) {
-                document.getElementById('tv-status').innerText = "ВСЕ ГОТОВЫ! ЖДЕМ СТАРТА...";
-                document.getElementById('tv-status').classList.add('text-green-400');
-            } else {
-                document.getElementById('tv-status').innerText = "ОЖИДАНИЕ ИГРОКОВ...";
-                document.getElementById('tv-status').classList.remove('text-green-400');
-            }
+            document.getElementById('tv-status').innerText = (playersData.red.length >= maxP && playersData.blue.length >= maxP) ? "ВСЕ ГОТОВЫ!" : "ОЖИДАНИЕ...";
         }
     }
 
     if (data.status === 'playing') {
         document.getElementById('lobby-view').classList.add('hidden');
         document.getElementById('battle-view').classList.remove('hidden');
-        
         renderBattlefield(data);
-        
         if (data.turn && data.turn.name) {
             document.getElementById('turn-indicator').innerText = `ХОД: ${data.turn.name.toUpperCase()}`;
             document.getElementById('turn-indicator').style.color = data.turn.team === 'red' ? '#ef4444' : '#3b82f6';
@@ -407,56 +305,35 @@ onValue(gameRef, (snapshot) => {
 
     if (data.status === 'finished') {
         const winView = document.getElementById('win-view');
-        winView.classList.remove('hidden');
-        winView.classList.add('flex');
+        winView.classList.remove('hidden'); winView.classList.add('flex');
         const winText = document.getElementById('win-text');
-        if (data.winner === 'red') { 
-            winText.innerText = 'КРАСНЫЕ ПОБЕДИЛИ!'; 
-            winText.className = 'text-9xl font-black text-red-500 mb-12'; 
-        } else if (data.winner === 'blue') { 
-            winText.innerText = 'СИНИЕ ПОБЕДИЛИ!'; 
-            winText.className = 'text-9xl font-black text-blue-500 mb-12'; 
-        }
+        if (data.winner === 'red') { winText.innerText = 'КРАСНЫЕ ПОБЕДИЛИ!'; winText.className = 'text-9xl font-black text-red-500 mb-12'; }
+        else if (data.winner === 'blue') { winText.innerText = 'СИНИЕ ПОБЕДИЛИ!'; winText.className = 'text-9xl font-black text-blue-500 mb-12'; }
     }
 });
 
-// ============================================================
-// СЛУШАТЕЛЬ ТАЙМЕРА
-// ============================================================
 onValue(ref(db, `games/${gameId}/timer`), (snap) => {
     const val = snap.val();
-    if (val !== null && val !== undefined) {
-        document.getElementById('tv-timer').innerText = val;
-    } else {
-        document.getElementById('tv-timer').innerText = '';
-    }
+    document.getElementById('tv-timer').innerText = (val !== null && val !== undefined) ? val : '';
 });
 
-// ============================================================
-// СЛУШАТЕЛЬ ВЫСТРЕЛОВ
-// ============================================================
 onValue(ref(db, `games/${gameId}/last_shot`), (snap) => {
     const shot = snap.val();
-    if (!shot) return;
-    
-    if (shot.animated) return;
+    if (!shot || shot.animated) return;
     shot.animated = true;
-
     handleShot(shot);
 });
 
-// ============================================================
-// ГЕНЕРАЦИЯ СНЕЖИНОК
-// ============================================================
+onValue(ref(db, `games/${gameId}/ticker`), (snap) => {
+    if (snap.val()) document.getElementById('ticker-text').innerText = snap.val();
+});
+
+// Снежинки
 const snowContainer = document.getElementById('snow-container');
 for (let i = 0; i < 60; i++) {
-    const s = document.createElement('div'); 
-    s.className = 'snowflake'; 
-    s.innerText = '❄';
-    s.style.left = Math.random() * 100 + '%'; 
-    s.style.fontSize = (10 + Math.random() * 20) + 'px'; 
-    s.style.animationDuration = (4 + Math.random() * 8) + 's'; 
-    s.style.animationDelay = (-Math.random() * 10) + 's'; 
+    const s = document.createElement('div'); s.className = 'snowflake'; s.innerText = '❄';
+    s.style.left = Math.random() * 100 + '%'; s.style.fontSize = (10 + Math.random() * 20) + 'px';
+    s.style.animationDuration = (4 + Math.random() * 8) + 's'; s.style.animationDelay = (-Math.random() * 10) + 's';
     s.style.opacity = Math.random() * 0.7 + 0.3;
     snowContainer.appendChild(s);
 }
