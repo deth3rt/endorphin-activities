@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>ENDORPHIN | ПУЛЬТ</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap');
+
+    body { 
+      background: radial-gradient(circle at 50% 0%, #0a2540 0%, #03080f 100%);
+      color: #fff; font-family: 'Montserrat', sans-serif; 
+      overflow: hidden; user-select: none; touch-action: none; 
+    }
+
+    /* Стекло */
+    .glass-panel {
+      background: rgba(10, 37, 64, 0.7);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(127, 227, 255, 0.2);
+      box-shadow: inset 0 0 20px rgba(127, 227, 255, 0.1);
+    }
+
+    /* Джойстик */
+    .joystick-base { 
+      width: 160px; height: 160px; border-radius: 50%; 
+      background: rgba(0,0,0,0.5); border: 3px solid rgba(255,255,255,0.2); 
+      position: relative; margin: 0 auto; box-shadow: inset 0 0 30px rgba(0,0,0,0.8); 
+    }
+    .joystick-stick { 
+      width: 70px; height: 70px; border-radius: 50%; 
+      background: linear-gradient(135deg, #fff, #a8e6ff); 
+      position: absolute; top: 45px; left: 45px; 
+      box-shadow: 0 0 25px rgba(255,255,255,0.6); 
+      pointer-events: none; transition: transform 0.1s; 
+    }
+
+    /* Ползунок */
+    input[type=range] { -webkit-appearance: none; width: 100%; background: transparent; }
+    input[type=range]::-webkit-slider-thumb { 
+      -webkit-appearance: none; height: 36px; width: 36px; border-radius: 50%; 
+      background: #fff; box-shadow: 0 0 20px #fff; cursor: pointer; margin-top: -14px; 
+    }
+    input[type=range]::-webkit-slider-runnable-track { 
+      width: 100%; height: 8px; cursor: pointer; 
+      background: linear-gradient(90deg, #ef4444, #fbbf24, #22c55e); 
+      border-radius: 4px; 
+    }
+
+    /* Анимация пульсации кнопки */
+    @keyframes pulseBtn { 0% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.4); } 70% { box-shadow: 0 0 0 20px rgba(255, 255, 255, 0); } 100% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0); } }
+    .pulse-btn { animation: pulseBtn 2s infinite; }
+  </style>
+</head>
+<body class="h-screen w-screen flex flex-col relative">
+
+  <!-- ЭКРАН ВВОДА ИМЕНИ -->
+  <div id="join-step" class="flex flex-col items-center justify-center h-full p-6 text-center z-10">
+    <div class="glass-panel p-10 rounded-3xl w-full max-w-sm flex flex-col items-center relative overflow-hidden">
+      <div class="absolute -top-20 -right-20 w-40 h-40 bg-cyan-500 rounded-full blur-[80px] opacity-50"></div>
+      <div class="absolute -bottom-20 -left-20 w-40 h-40 bg-blue-500 rounded-full blur-[80px] opacity-50"></div>
+
+      <div class="w-28 h-28 rounded-full flex items-center justify-center mb-8 border-4 z-10" id="team-icon-join"><span class="text-6xl" id="team-emoji-join">🔴</span></div>
+      <h2 class="text-4xl font-black mb-10 z-10 tracking-widest uppercase" id="team-name-join">Красные</h2>
+      
+      <input type="text" id="input-name" placeholder="ТВОЁ ИМЯ" class="w-full bg-black/50 border-2 rounded-2xl px-5 py-5 text-center text-2xl font-bold text-white mb-8 outline-none transition z-10 placeholder-white/30" id="input-style">
+      
+      <button id="join-btn" class="w-full py-5 text-white font-black text-2xl tracking-widest uppercase rounded-2xl active:scale-95 transition-all z-10 pulse-btn">В БОЙ</button>
+    </div>
+  </div>
+  
+  <!-- ЭКРАН ДЖОЙСТИКА -->
+  <div id="play-step" class="hidden w-full h-full flex flex-col items-center justify-center relative z-10">
+    
+    <div class="w-full flex justify-between px-6 pt-10 absolute top-0">
+      <div class="text-white/50 font-bold uppercase tracking-widest text-sm">Твоя цель: Попади в противника!</div>
+    </div>
+
+    <!-- Зона джойстика -->
+    <div class="text-center mb-12 relative">
+      <p class="text-cyan-300/80 mb-4 font-bold tracking-[0.2em] text-sm">УГОЛ (ДЖОЙСТИК)</p>
+      <div id="joystick-zone" class="joystick-base">
+        <div id="joystick-stick" class="joystick-stick"></div>
+      </div>
+    </div>
+
+    <!-- Ползунок силы -->
+    <div class="w-4/5 max-w-sm mb-16 glass-panel p-6 rounded-2xl">
+      <div class="flex justify-between text-sm font-bold text-white/70 mb-4 tracking-wider">
+        <span>СИЛА БРОСКА</span>
+        <span id="power-display" class="text-white text-lg">50%</span>
+      </div>
+      <input type="range" id="power-slider" min="10" max="100" value="50">
+    </div>
+
+    <!-- Кнопка ОГОНЬ -->
+    <button id="shoot-btn" class="w-56 h-56 rounded-full text-white font-black text-5xl tracking-widest active:scale-90 transition-all duration-150 relative bg-red-600 border-8 border-red-400/30">
+      <span class="relative z-10">ОГОНЬ</span>
+    </button>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getDatabase, ref, set, push, onDisconnect, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCXIR5Tv8lB6ivcGRC3yt1SC66MM6T5b_M",
+      authDomain: "endorphin-battle.firebaseapp.com",
+      databaseURL: "https://endorphin-battle-default-rtdb.europe-west1.firebasedatabase.app",
+      projectId: "endorphin-battle",
+      storageBucket: "endorphin-battle.firebasestorage.app",
+      messagingSenderId: "185259733030",
+      appId: "1:185259733030:web:d72a89a436880973e636e7"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const gameId = urlParams.get('game') || 'battle_1';
+    const team = urlParams.get('team') || 'red';
+    const playerId = 'player_' + Math.random().toString(36).substr(2, 9);
+    const isRed = team === 'red';
+    
+    // Стилизация под команду
+    const mainColor = isRed ? '#ef4444' : '#3b82f6';
+    const secColor = isRed ? '#7f1d1d' : '#1e3a8a';
+    
+    document.getElementById('team-icon-join').style.borderColor = mainColor;
+    document.getElementById('team-icon-join').style.boxShadow = `0 0 30px ${mainColor}`;
+    document.getElementById('team-emoji-join').innerText = isRed ? '🔴' : '🔵';
+    document.getElementById('team-name-join').innerText = isRed ? 'Красные' : 'Синие';
+    document.getElementById('team-name-join').style.color = mainColor;
+    
+    const input = document.getElementById('input-name');
+    input.style.borderColor = mainColor;
+    
+    const joinBtn = document.getElementById('join-btn');
+    joinBtn.style.background = `linear-gradient(90deg, ${mainColor}, ${secColor})`;
+    joinBtn.style.boxShadow = `0 10px 30px ${mainColor}80`;
+
+    const shootBtn = document.getElementById('shoot-btn');
+    shootBtn.style.background = `linear-gradient(135deg, ${mainColor}, ${secColor})`;
+    shootBtn.style.borderColor = `${mainColor}80`;
+    shootBtn.style.boxShadow = `0 20px 50px ${mainColor}80`;
+
+    const playerRef = ref(db, `games/${gameId}/players/${team}/${playerId}`);
+    onDisconnect(playerRef).remove();
+
+    document.getElementById('join-btn').onclick = () => {
+      const name = document.getElementById('input-name').value.trim() || 'Игрок';
+      set(playerRef, { name });
+      document.getElementById('join-step').classList.add('hidden');
+      document.getElementById('play-step').classList.remove('hidden');
+      document.getElementById('play-step').classList.add('flex');
+    };
+
+    onValue(ref(db, `games/${gameId}/status`), (snap) => {
+      if (snap.val() === 'finished') {
+        document.getElementById('play-step').classList.add('hidden');
+        document.getElementById('play-step').classList.remove('flex');
+      }
+    });
+
+    // ЛОГИКА ДЖОЙСТИКА
+    const joystickZone = document.getElementById('joystick-zone');
+    const stick = document.getElementById('joystick-stick');
+    let currentAngle = 45; 
+    
+    const handleJoystickMove = (e) => {
+      if (e.touches) e.preventDefault();
+      const rect = joystickZone.getBoundingClientRect();
+      const clientX = e.clientX || e.touches[0].clientX;
+      const clientY = e.clientY || e.touches[0].clientY;
+      const centerX = rect.left + rect.width / 2;
+      const centerY = rect.top + rect.height / 2;
+      
+      let deltaX = clientX - centerX;
+      let deltaY = clientY - centerY;
+      
+      const maxRadius = 45;
+      const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+      if (distance > maxRadius) {
+        deltaX = (deltaX / distance) * maxRadius;
+        deltaY = (deltaY / distance) * maxRadius;
+      }
+      
+      stick.style.transform = `translate(${deltaX}px, ${deltaY}px)`;
+      
+      if (deltaY < 0) { 
+        const rad = Math.atan2(-deltaY, deltaX);
+        const deg = (rad * 180) / Math.PI;
+        currentAngle = Math.max(10, Math.min(80, deg));
+      }
+    };
+
+    const resetJoystick = () => { stick.style.transform = `translate(0px, 0px)`; };
+
+    joystickZone.addEventListener('touchmove', handleJoystickMove, { passive: false });
+    joystickZone.addEventListener('touchstart', handleJoystickMove, { passive: false });
+    joystickZone.addEventListener('touchend', resetJoystick);
+    joystickZone.addEventListener('mousemove', handleJoystickMove);
+    joystickZone.addEventListener('mouseleave', resetJoystick);
+
+    // СИЛА
+    const powerSlider = document.getElementById('power-slider');
+    const powerDisplay = document.getElementById('power-display');
+    powerSlider.addEventListener('input', () => { 
+      powerDisplay.innerText = powerSlider.value + '%'; 
+      if (powerSlider.value > 90) powerDisplay.style.color = '#fbbf24';
+      else powerDisplay.style.color = '#fff';
+    });
+
+    // ВЫСТРЕЛ
+    let canShoot = true;
+    shootBtn.onclick = () => {
+      if (!canShoot) return;
+      canShoot = false;
+      
+      shootBtn.style.opacity = '0.5';
+      shootBtn.style.transform = 'scale(0.9)';
+      
+      const power = parseInt(powerSlider.value);
+      const shotsRef = ref(db, `games/${gameId}/shots`);
+      push(shotsRef, { team: team, power: power, angle: currentAngle, time: Date.now() });
+
+      if (navigator.vibrate) navigator.vibrate([50, 30, 50]);
+
+      setTimeout(() => {
+        canShoot = true;
+        shootBtn.style.opacity = '1';
+        shootBtn.style.transform = 'scale(1)';
+      }, 2500);
+    };
+  </script>
+</body>
+</html>
