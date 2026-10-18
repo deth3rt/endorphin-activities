@@ -27,7 +27,7 @@
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
     window.updateTicker = () => { set(ref(db, 'games/battle_1/ticker'), document.getElementById('ticker-input').value); alert('Текст отправлен на ТВ!'); };
-    window.clearGame = () => { if(confirm('Сбросить ВСЮ игру? Игроки отключатся.')) { set(ref(db, 'games/battle_1'), { status: 'lobby', mode: '1v1', lives: { red: 3, blue: 3 }, players: { red: {}, blue: {} } }); alert('Игра сброшена'); } };
+    window.clearGame = () => { if(confirm('Сбросить ВСЮ игру?')) { set(ref(db, 'games/battle_1'), { status: 'lobby', mode: '1v1', lives: { red: 3, blue: 3 }, players: { red: {}, blue: {} } }); alert('Игра сброшена'); } };
   </script>
 </body>
 </html>
