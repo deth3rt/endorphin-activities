@@ -9,29 +9,17 @@
     @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap');
     body { background: radial-gradient(circle at 50% 0%, #0a2540 0%, #03080f 100%); color: #fff; font-family: 'Montserrat', sans-serif; overflow: hidden; user-select: none; touch-action: none; }
     
-    .glass-panel { background: rgba(10, 37, 64, 0.7); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(127, 227, 255, 0.2); box-shadow: inset 0 0 20px rgba(127, 227, 255, 0.1); }
+    .glass-panel { background: rgba(10, 37, 64, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(127, 227, 255, 0.2); box-shadow: inset 0 0 20px rgba(127, 227, 255, 0.1); }
 
-    /* Стили для режимов */
     .mode-btn { transition: all 0.3s; border: 2px solid transparent; }
-    .mode-btn:hover { transform: translateY(-3px); }
     .mode-btn.active-red { border-color: #ef4444; box-shadow: 0 0 20px #ef4444; background: rgba(239, 68, 68, 0.2); }
     .mode-btn.active-blue { border-color: #3b82f6; box-shadow: 0 0 20px #3b82f6; background: rgba(59, 130, 246, 0.2); }
 
-    /* Направляющая стрелка (полукруг) */
-    .aim-arc-container { position: relative; width: 280px; height: 280px; margin: 0 auto; }
+    .aim-arc-container { position: relative; width: 260px; height: 260px; margin: 0 auto; }
     .aim-arc-bg { position: absolute; inset: 0; border-radius: 50%; border: 4px dashed rgba(255,255,255,0.1); }
-    .aim-arrow { 
-      position: absolute; top: 50%; left: 50%; width: 4px; height: 120px; 
-      background: linear-gradient(to top, transparent, #fff); 
-      transform-origin: bottom center; transform: translate(-50%, -100%) rotate(0deg); 
-      transition: transform 0.1s; 
-    }
-    .aim-arrow::before { 
-      content: ''; position: absolute; top: -10px; left: -8px; 
-      border-left: 10px solid transparent; border-right: 10px solid transparent; border-bottom: 20px solid #fff; 
-    }
+    .aim-arrow { position: absolute; top: 50%; left: 50%; width: 4px; height: 110px; background: linear-gradient(to top, transparent, #fff); transform-origin: bottom center; transition: transform 0.1s; }
+    .aim-arrow::before { content: ''; position: absolute; top: -10px; left: -8px; border-left: 10px solid transparent; border-right: 10px solid transparent; border-bottom: 20px solid #fff; }
     
-    /* Ползунок */
     input[type=range] { -webkit-appearance: none; width: 100%; background: transparent; }
     input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; height: 36px; width: 36px; border-radius: 50%; background: #fff; box-shadow: 0 0 20px #fff; cursor: pointer; margin-top: -14px; }
     input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 8px; cursor: pointer; background: linear-gradient(90deg, #ef4444, #fbbf24, #22c55e); border-radius: 4px; }
@@ -44,8 +32,6 @@
 
   <!-- ЭКРАН 1: ВХОД -->
   <div id="login-screen" class="flex flex-col items-center justify-center h-full p-6 text-center z-10">
-    
-    <!-- Выбор режима -->
     <div class="glass-panel p-8 rounded-3xl w-full max-w-sm mb-6 flex flex-col items-center">
       <h2 class="text-2xl font-black mb-6 tracking-widest uppercase" id="title-color">Выбери режим</h2>
       <div class="flex gap-4 w-full">
@@ -54,7 +40,6 @@
       </div>
     </div>
 
-    <!-- Ввод имени -->
     <div class="glass-panel p-8 rounded-3xl w-full max-w-sm flex flex-col items-center relative overflow-hidden">
       <div class="absolute -top-20 -right-20 w-40 h-40 bg-cyan-500 rounded-full blur-[80px] opacity-50"></div>
       <div class="w-20 h-20 rounded-full flex items-center justify-center mb-4 border-4 z-10" id="team-icon"><span class="text-4xl" id="team-emoji">🔴</span></div>
@@ -67,8 +52,8 @@
   <div id="wait-screen" class="hidden flex-col items-center justify-center h-full z-10">
     <div class="glass-panel p-10 rounded-3xl flex flex-col items-center">
       <div class="text-6xl mb-6 animate-spin-slow">❄️</div>
-      <h2 class="text-3xl font-black mb-2 uppercase tracking-widest">ОЖИДАНИЕ</h2>
-      <p class="text-cyan-300 font-bold">СОПЕРНИКА...</p>
+      <h2 class="text-3xl font-black mb-2 uppercase tracking-widest text-center">ОЖИДАНИЕ</h2>
+      <p class="text-cyan-300 font-bold text-center" id="wait-text">ПОДКЛЮЧЕНИЕ...</p>
     </div>
   </div>
 
@@ -79,7 +64,6 @@
       <p class="text-cyan-300/80 mb-2 font-bold tracking-[0.2em] text-sm">НАПРАВЛЕНИЕ БРОСКА</p>
       <div class="aim-arc-container" id="aim-container">
         <div class="aim-arc-bg"></div>
-        <!-- Стрелка поворачивается скриптом -->
         <div class="aim-arrow" id="aim-arrow"></div>
       </div>
     </div>
@@ -99,7 +83,7 @@
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getDatabase, ref, set, push, onDisconnect, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+    import { getDatabase, ref, set, push, onDisconnect, onValue, get } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyCXIR5Tv8lB6ivcGRC3yt1SC66MM6T5b_M",
@@ -123,7 +107,6 @@
     const mainColor = isRed ? '#ef4444' : '#3b82f6';
     const secColor = isRed ? '#7f1d1d' : '#1e3a8a';
 
-    // Настройка стилей
     document.getElementById('team-icon').style.borderColor = mainColor;
     document.getElementById('team-emoji').innerText = isRed ? '🔴' : '🔵';
     document.getElementById('input-name').style.borderColor = mainColor;
@@ -131,26 +114,36 @@
     document.getElementById('shoot-btn').style.background = `linear-gradient(135deg, ${mainColor}, ${secColor})`;
     
     let selectedMode = '1v1';
-    
     window.setMode = (mode) => {
       selectedMode = mode;
       document.getElementById('mode-1v1').className = `mode-btn flex-1 py-4 rounded-xl text-xl font-bold bg-white/5 ${mode === '1v1' ? (isRed ? 'active-red' : 'active-blue') : ''}`;
       document.getElementById('mode-2v2').className = `mode-btn flex-1 py-4 rounded-xl text-xl font-bold bg-white/5 ${mode === '2v2' ? (isRed ? 'active-red' : 'active-blue') : ''}`;
     };
-    setMode('1v1'); // По умолчанию
+    setMode('1v1');
 
     const playerRef = ref(db, `games/${gameId}/players/${team}/${playerId}`);
     onDisconnect(playerRef).remove();
 
-    window.joinGame = () => {
+    window.joinGame = async () => {
       const name = document.getElementById('input-name').value.trim() || 'Игрок';
+      
+      // Проверка, не переполнена ли команда
+      const snapshot = await get(ref(db, `games/${gameId}/players/${team}`));
+      const currentPlayers = snapshot.exists() ? Object.keys(snapshot.val()).length : 0;
+      const maxAllowed = selectedMode === '2v2' ? 2 : 1;
+      
+      if (currentPlayers >= maxAllowed) {
+        alert('Команда уже заполнена!');
+        return;
+      }
+
       set(playerRef, { name, mode: selectedMode });
+      
       document.getElementById('login-screen').classList.add('hidden');
       document.getElementById('wait-screen').classList.remove('hidden');
       document.getElementById('wait-screen').classList.add('flex');
     };
 
-    // Следим за статусом игры
     onValue(ref(db, `games/${gameId}/status`), (snap) => {
       const status = snap.val();
       if (status === 'playing') {
@@ -159,7 +152,6 @@
         document.getElementById('game-screen').classList.remove('hidden');
         document.getElementById('game-screen').classList.add('flex');
         
-        // Направляем стрелку на врага
         initArrow();
       } else if (status === 'finished') {
         document.getElementById('game-screen').classList.add('hidden');
@@ -167,18 +159,16 @@
       }
     });
 
-    // ЛОГИКА СТРЕЛКИ
+    // Логика стрелки (Горизонтальная игра!)
     let currentAngle = 45;
     const arrow = document.getElementById('aim-arrow');
     const aimContainer = document.getElementById('aim-container');
 
     function initArrow() {
-      // Если мы красные (снизу), стрелка смотрит ВВЕРХ (0 градусов).
-      // Если мы синие (сверху), стрелка смотрит ВНИЗ (180 градусов).
-      const baseRotation = isRed ? 0 : 180;
+      // В ГОРИЗОНТАЛЬНОЙ ИГРЕ: Красные слева (целятся вправо, 90 град). Синие справа (влево, -90).
+      const baseRotation = isRed ? 90 : -90;
       arrow.style.transform = `translate(-50%, -100%) rotate(${baseRotation}deg)`;
       
-      // Обработка касаний для выбора угла
       const handleMove = (e) => {
         if (e.touches) e.preventDefault();
         const rect = aimContainer.getBoundingClientRect();
@@ -188,23 +178,23 @@
         const centerX = rect.left + rect.width / 2;
         const centerY = rect.top + rect.height / 2;
         
-        // Вычисляем угол (от -90 до +90 градусов относительно вертикали)
         let rad = Math.atan2(clientY - centerY, clientX - centerX);
         let deg = (rad * 180) / Math.PI;
         
-        // Если красные (снизу), то вверх это -90. Нам нужен угол от 10 до 80 относительно вертикали.
         let finalAngle = 0;
         if (isRed) {
-          finalAngle = deg + 90; // Смещаем так, чтобы -90 стало 0
-          finalAngle = Math.max(-40, Math.min(40, finalAngle)); // Ограничиваем +/- 40 градусов
+          // Для красных 90 - это вправо. Отклоняем вверх/вниз.
+          finalAngle = deg;
+          finalAngle = Math.max(50, Math.min(130, finalAngle)); // +/- 40 градусов
           arrow.style.transform = `translate(-50%, -100%) rotate(${finalAngle}deg)`;
-          currentAngle = 45 + (finalAngle * 0.7); // Переводим в силу (примерно)
         } else {
-          finalAngle = deg - 90; // Для синих разворачиваем
-          finalAngle = Math.max(-40, Math.min(40, finalAngle));
-          arrow.style.transform = `translate(-50%, -100%) rotate(${180 + finalAngle}deg)`;
-          currentAngle = 45 - (finalAngle * 0.7);
+          // Для синих -90 - это влево.
+          finalAngle = deg;
+          if (finalAngle > 0) finalAngle -= 180; // Чтобы смотрело влево
+          finalAngle = Math.max(-130, Math.min(-50, finalAngle));
+          arrow.style.transform = `translate(-50%, -100%) rotate(${finalAngle}deg)`;
         }
+        currentAngle = finalAngle;
       };
 
       aimContainer.addEventListener('touchmove', handleMove, { passive: false });
@@ -212,7 +202,6 @@
       aimContainer.addEventListener('mousemove', (e) => { if (e.buttons === 1) handleMove(e); });
     }
 
-    // СИЛА И ВЫСТРЕЛ
     const powerSlider = document.getElementById('power-slider');
     const powerDisplay = document.getElementById('power-display');
     powerSlider.addEventListener('input', () => { 
@@ -226,7 +215,6 @@
     shootBtn.onclick = () => {
       if (!canShoot) return;
       canShoot = false;
-      
       shootBtn.style.opacity = '0.5';
       shootBtn.style.transform = 'scale(0.9)';
       
