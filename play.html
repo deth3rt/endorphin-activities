@@ -153,6 +153,9 @@
           push(ref(db, 'games/battle_1/shots'), shotData);
           set(ref(db, 'games/battle_1/last_shot'), shotData);
 
+          // СБРОС ТАЙМЕРА (на 15 секунд)
+          set(ref(db, 'games/battle_1/timer'), 15);
+
           if (isHit) {
             const targetId = aliveEnemies[targetIndex][0];
             const newLives = Math.max(0, aliveEnemies[targetIndex][1].lives - 1);
