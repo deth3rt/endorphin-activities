@@ -5,44 +5,29 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ENDORPHIN | АДМИН</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <style> body { background: #03080f; color: #fff; font-family: system-ui, sans-serif; } .glass { background: rgba(10, 37, 64, 0.8); border: 1px solid rgba(127, 227, 255, 0.3); } </style>
 </head>
-<body class="bg-black text-white p-8 font-sans">
-  <div class="max-w-md mx-auto glass p-8 rounded-2xl border border-cyan-500/30">
-    <h1 class="text-2xl font-black mb-6 text-cyan-400">АДМИН-ПАНЕЛЬ</h1>
-    
-    <div class="space-y-4">
+<body class="min-h-screen p-8 flex items-center justify-center">
+  <div class="glass max-w-md w-full p-8 rounded-2xl">
+    <h1 class="text-2xl font-black mb-6 text-cyan-400 text-center">АДМИН-ПАНЕЛЬ</h1>
+    <div class="space-y-6">
       <div>
         <label class="block text-sm font-bold mb-2">Текст бегущей строки:</label>
         <textarea id="ticker-input" class="w-full h-24 bg-gray-900 border border-gray-700 rounded-lg p-3 text-white" placeholder="Введите текст рекламы..."></textarea>
       </div>
-      <button onclick="updateTicker()" class="w-full py-3 bg-cyan-600 rounded-lg font-bold">ОТПРАВИТЬ НА ЭКРАН</button>
-      
-      <button onclick="clearGame()" class="w-full py-3 bg-red-600 rounded-lg font-bold mt-8">ПОЛНЫЙ СБРОС ИГРЫ</button>
+      <button onclick="updateTicker()" class="w-full py-3 bg-cyan-600 rounded-lg font-bold hover:bg-cyan-500 transition">ОТПРАВИТЬ НА ЭКРАН</button>
+      <hr class="border-gray-700">
+      <button onclick="clearGame()" class="w-full py-3 bg-red-600 rounded-lg font-bold hover:bg-red-500 transition">ПОЛНЫЙ СБРОС ИГРЫ</button>
     </div>
   </div>
-
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
-    
     const firebaseConfig = { apiKey: "AIzaSyCXIR5Tv8lB6ivcGRC3yt1SC66MM6T5b_M", authDomain: "endorphin-battle.firebaseapp.com", databaseURL: "https://endorphin-battle-default-rtdb.europe-west1.firebasedatabase.app", projectId: "endorphin-battle", storageBucket: "endorphin-battle.firebasestorage.app", messagingSenderId: "185259733030", appId: "1:185259733030:web:d72a89a436880973e636e7" };
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
-    
-    window.updateTicker = () => {
-      const text = document.getElementById('ticker-input').value;
-      set(ref(db, 'games/battle_1/ticker'), text);
-      alert('Текст отправлен на ТВ!');
-    };
-
-    window.clearGame = () => {
-      if(confirm('Сбросить ВСЮ игру? Игроки отключатся.')) {
-        set(ref(db, 'games/battle_1'), {
-          status: 'lobby', mode: '1v1', lives: { red: 3, blue: 3 }, players: { red: {}, blue: {} }
-        });
-        alert('Игра сброшена');
-      }
-    };
+    window.updateTicker = () => { set(ref(db, 'games/battle_1/ticker'), document.getElementById('ticker-input').value); alert('Текст отправлен на ТВ!'); };
+    window.clearGame = () => { if(confirm('Сбросить ВСЮ игру? Игроки отключатся.')) { set(ref(db, 'games/battle_1'), { status: 'lobby', mode: '1v1', lives: { red: 3, blue: 3 }, players: { red: {}, blue: {} } }); alert('Игра сброшена'); } };
   </script>
 </body>
 </html>
