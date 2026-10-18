@@ -13,11 +13,12 @@
     @keyframes fall { to { transform: translateY(100vh) rotate(360deg); } }
 
     .phone-mockup { width: 100vw; height: 100vh; background: #03080f; position: fixed; inset: 0; overflow: hidden; touch-action: none; z-index: 9999; }
-    .crosshair { position: absolute; width: 60px; height: 60px; border: 2px dashed #fff; border-radius: 50%; pointer-events: none; transform: translate(-50%, -50%); opacity: 0.7; display: none; }
+    .crosshair { position: absolute; width: 60px; height: 60px; border: 2px dashed #fff; border-radius: 50%; pointer-events: none; transform: translate(-50%, -50%); opacity: 0.7; display: none; z-index: 10; }
     .crosshair::before, .crosshair::after { content: ''; position: absolute; background: #fff; }
     .crosshair::before { top: 50%; left: 0; width: 100%; height: 2px; transform: translateY(-50%); }
     .crosshair::after { left: 50%; top: 0; width: 2px; height: 100%; transform: translateX(-50%); }
-    .shoot-btn { position: absolute; bottom: 20px; right: 20px; width: 80px; height: 80px; border-radius: 50%; background: rgba(255,255,255,0.2); border: 2px solid #fff; color: #fff; font-weight: bold; font-size: 20px; backdrop-filter: blur(5px); display: flex; align-items: center; justify-content: center; z-index: 10000; }
+    
+    .shoot-btn { position: absolute; bottom: 20px; right: 20px; width: 80px; height: 80px; border-radius: 50%; background: rgba(255,255,255,0.2); border: 2px solid #fff; color: #fff; font-weight: bold; font-size: 20px; backdrop-filter: blur(5px); display: flex; align-items: center; justify-content: center; z-index: 10000; cursor: pointer; }
     .shoot-btn:active { background: rgba(255,255,255,0.5); transform: scale(0.95); }
 
     .snowball { position: absolute; width: 20px; height: 20px; border-radius: 50%; background: radial-gradient(circle at 30% 30%, #fff, #7fe3ff); box-shadow: 0 0 20px #7fe3ff; pointer-events: none; z-index: 20; transform: translate(-50%, -50%); }
@@ -41,7 +42,6 @@
     <!-- ================= ТВ ЭКРАН ================= -->
     <div id="tv-screen" class="flex-1 bg-[#e0f2fe] relative overflow-hidden">
       
-      <!-- ЛОББИ -->
       <div id="lobby-view" class="absolute inset-0 flex flex-col items-center justify-center p-8 bg-gradient-to-br from-[#0a2540] to-[#03080f] z-30">
         <h1 class="text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-cyan-300 to-red-400 mb-8 text-center drop-shadow-[0_0_20px_rgba(127,227,255,0.5)]">
           ENDORPHIN<br><span class="text-3xl">ЛЕДЯНОЙ БОЙ</span>
@@ -67,7 +67,6 @@
         <p class="mt-6 text-gray-400 text-xl">Для старта нужно по 1 игроку с каждой стороны</p>
       </div>
 
-      <!-- СЦЕНА БИТВЫ -->
       <div id="battle-view" class="absolute inset-0 hidden z-10 bg-[#e0f2fe]">
         <div class="absolute top-0 w-full h-[25%] bg-[#bae6fd] flex justify-center border-b-4 border-[#7fe3ff]">
            <div class="snow-fort w-[300px] h-[100px] top-[10px]"></div>
@@ -92,7 +91,6 @@
         </div>
       </div>
 
-      <!-- ЭКРАН ПОБЕДЫ -->
       <div id="win-view" class="absolute inset-0 hidden flex-col items-center justify-center bg-black/90 backdrop-blur-md z-40">
         <h1 class="text-8xl font-black text-white mb-8" id="win-text">ПОБЕДА!</h1>
         <button onclick="resetGame()" class="px-10 py-4 rounded-full border-2 border-cyan-400 text-cyan-400 font-bold text-2xl hover:bg-cyan-400 hover:text-black transition">Сыграть ещё</button>
@@ -141,12 +139,15 @@
 
   </div>
 
+  <!-- ОСНОВНОЙ СКРИПТ -->
   <script type="module">
-    // Ловим ошибки и выводим на экран
+    // Вывод ошибок на экран
     window.addEventListener('error', function(e) {
       const banner = document.getElementById('error-banner');
-      banner.innerText = 'ОШИБКА: ' + e.message;
-      banner.classList.remove('hidden');
+      if (banner) {
+        banner.innerText = 'ОШИБКА: ' + e.message;
+        banner.classList.remove('hidden');
+      }
     });
 
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
@@ -172,6 +173,8 @@
       document.getElementById('error-banner').classList.remove('hidden');
     }
 
+    // Обрезаем путь до корня проекта, чтобы ссылка не вела в репозиторий
+    const currentUrl = window.location.href.split('?')[0];
     const urlParams = new URLSearchParams(window.location.search);
     const gameId = urlParams.get('game') || 'battle_1';
     const team = urlParams.get('team');
@@ -179,26 +182,26 @@
 
     // Снежинки
     const snowBox = document.getElementById('snow');
-    for (let i = 0; i < 50; i++) {
-      const s = document.createElement('div');
-      s.className = 'snowflake';
-      s.innerText = '❄';
-      s.style.left = Math.random() * 100 + '%';
-      s.style.fontSize = (10 + Math.random() * 20) + 'px';
-      s.style.animationDuration = (5 + Math.random() * 10) + 's';
-      s.style.animationDelay = (-Math.random() * 10) + 's';
-      snowBox.appendChild(s);
+    if (snowBox) {
+      for (let i = 0; i < 50; i++) {
+        const s = document.createElement('div');
+        s.className = 'snowflake';
+        s.innerText = '❄';
+        s.style.left = Math.random() * 100 + '%';
+        s.style.fontSize = (10 + Math.random() * 20) + 'px';
+        s.style.animationDuration = (5 + Math.random() * 10) + 's';
+        s.style.animationDelay = (-Math.random() * 10) + 's';
+        snowBox.appendChild(s);
+      }
     }
 
     // ================= ТВ ЛОГИКА =================
     if (!team) {
       document.getElementById('tv-screen').style.display = 'block';
       
-      const baseUrl = window.location.origin + window.location.pathname;
-      const redUrl = baseUrl + `?game=${gameId}&team=red`;
-      const blueUrl = baseUrl + `?game=${gameId}&team=blue`;
+      const redUrl = currentUrl + `?game=${gameId}&team=red`;
+      const blueUrl = currentUrl + `?game=${gameId}&team=blue`;
 
-      // Генерируем QR (работает, так как библиотека в <head>)
       new QRCode(document.getElementById("qr-red"), { text: redUrl, width: 200, height: 200, colorDark: "#000000", colorLight: "#ffffff" });
       new QRCode(document.getElementById("qr-blue"), { text: blueUrl, width: 200, height: 200, colorDark: "#000000", colorLight: "#ffffff" });
 
@@ -323,22 +326,27 @@
       }
     }
 
-    // ================= ТЕЛЕФОН ЛОГИКА =================
+    // ================= ТЕЛЕФОН ЛОГИКА (ГЛОБАЛЬНЫЕ ФУНКЦИИ) =================
+    let targetX = 50, targetY = 50, playArea;
+    
     if (team) {
       const phoneView = document.getElementById(`phone-view-${team}`);
-      phoneView.classList.remove('hidden');
-      phoneView.classList.add('flex');
+      if (phoneView) {
+        phoneView.classList.remove('hidden');
+        phoneView.classList.add('flex');
+      }
 
       if (db) {
         const playerRef = ref(db, `games/${gameId}/players/${team}/${playerId}`);
         onDisconnect(playerRef).remove();
 
-        window.joinTeam = () => {
-          const name = document.getElementById(`input-name-${team}`).value.trim() || 'Игрок';
+        // Делаем функции глобальными (через window), чтобы их видел onclick в HTML
+        window.joinTeam = (t) => {
+          const name = document.getElementById(`input-name-${t}`).value.trim() || 'Игрок';
           set(playerRef, { name });
-          document.getElementById(`join-${team}`).classList.add('hidden');
-          document.getElementById(`play-${team}`).classList.remove('hidden');
-          document.getElementById(`crosshair-${team}`).style.display = 'block';
+          document.getElementById(`join-${t}`).classList.add('hidden');
+          document.getElementById(`play-${t}`).classList.remove('hidden');
+          document.getElementById(`crosshair-${t}`).style.display = 'block';
         };
 
         onValue(gameRef, (snapshot) => {
@@ -350,36 +358,42 @@
             document.getElementById(`crosshair-${team}`).style.display = 'block';
           } else if (data.status === 'finished') {
             document.getElementById(`crosshair-${team}`).style.display = 'none';
-            document.querySelector(`#play-${team} .shoot-btn`).style.display = 'none';
+            const btn = document.querySelector(`#play-${team} .shoot-btn`);
+            if (btn) btn.style.display = 'none';
           }
         });
 
-        let targetX = 50, targetY = 50;
-        const playArea = document.getElementById(`play-${team}`);
+        playArea = document.getElementById(`play-${team}`);
         
-        const handleMove = (e) => {
-          if (e.touches) e.preventDefault();
-          const rect = playArea.getBoundingClientRect();
-          const clientX = e.clientX || e.touches[0].clientX;
-          const clientY = e.clientY || e.touches[0].clientY;
-          const x = clientX - rect.left;
-          const y = clientY - rect.top;
+        if (playArea) {
+          const handleMove = (e) => {
+            if (e.touches) e.preventDefault();
+            const rect = playArea.getBoundingClientRect();
+            const clientX = e.clientX || e.touches[0].clientX;
+            const clientY = e.clientY || e.touches[0].clientY;
+            const x = clientX - rect.left;
+            const y = clientY - rect.top;
 
-          targetX = (x / rect.width) * 100;
-          targetY = (y / rect.height) * 100;
+            targetX = (x / rect.width) * 100;
+            targetY = (y / rect.height) * 100;
 
-          const crosshair = document.getElementById(`crosshair-${team}`);
-          crosshair.style.left = `${x}px`;
-          crosshair.style.top = `${y}px`;
-        };
+            const crosshair = document.getElementById(`crosshair-${team}`);
+            if (crosshair) {
+              crosshair.style.left = `${x}px`;
+              crosshair.style.top = `${y}px`;
+            }
+          };
 
-        playArea.addEventListener('touchmove', handleMove, { passive: false });
-        playArea.addEventListener('touchstart', handleMove, { passive: false });
-        playArea.addEventListener('mousemove', handleMove);
+          playArea.addEventListener('touchmove', handleMove, { passive: false });
+          playArea.addEventListener('touchstart', handleMove, { passive: false });
+          playArea.addEventListener('mousemove', handleMove);
+        }
 
-        window.firePhone = () => {
+        // Глобальная функция выстрела
+        window.firePhone = (t) => {
+          if (!db) return;
           const shotsRef = ref(db, `games/${gameId}/shots`);
-          push(shotsRef, { team, targetX, targetY, time: Date.now() });
+          push(shotsRef, { team: t, targetX, targetY, time: Date.now() });
         };
       }
     }
