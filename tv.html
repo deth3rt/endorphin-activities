@@ -21,13 +21,12 @@
     .snowball { position: absolute; width: 24px; height: 24px; border-radius: 50%; background: radial-gradient(circle at 30% 30%, #fff, #7fe3ff); box-shadow: 0 0 20px #7fe3ff; pointer-events: none; z-index: 30; transform: translate(-50%, -50%); }
     .snow-burst { position: absolute; width: 80px; height: 80px; border-radius: 50%; background: radial-gradient(circle, rgba(255,255,255,1) 0%, rgba(127,227,255,0) 70%); pointer-events: none; z-index: 25; transform: translate(-50%, -50%) scale(0); }
     
-    /* Персонажи и слоты для QR */
     .player-slot { position: absolute; transform: translate(-50%, -50%); z-index: 20; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: all 0.3s; }
     .player-hitbox { width: 70px; height: 110px; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; border-radius: 20px; }
     .player-red { background: rgba(239, 68, 68, 0.15); border: 3px dashed #ef4444; box-shadow: 0 0 30px rgba(239, 68, 68, 0.4); }
     .player-blue { background: rgba(59, 130, 246, 0.15); border: 3px dashed #3b82f6; box-shadow: 0 0 30px rgba(59, 130, 246, 0.4); }
     
-    .qr-slot { background: #fff; padding: 8px; border-radius: 12px; box-shadow: 0 0 30px rgba(255,255,255,0.5); border: 4px solid #22d3ee; }
+    .qr-slot { background: #fff; padding: 6px; border-radius: 12px; box-shadow: 0 0 30px rgba(255,255,255,0.8); border: 4px solid #22d3ee; }
     
     @keyframes megaZoom { 0% { transform: translate(-50%, -50%) scale(0.1) rotate(-15deg); opacity: 0; } 50% { transform: translate(-50%, -50%) scale(1.2) rotate(5deg); opacity: 1; text-shadow: 0 0 150px #fbbf24; } 100% { transform: translate(-50%, -50%) scale(1) rotate(0); opacity: 1; } }
     .mega-text { position: absolute; top: 50%; left: 50%; font-size: 120px; font-weight: 900; color: #fff; text-shadow: 0 0 80px #fbbf24, 0 0 40px #fff; z-index: 100; pointer-events: none; letter-spacing: 5px; text-transform: uppercase; animation: megaZoom 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
@@ -51,7 +50,7 @@
         <div id="tv-mode" class="mt-4 inline-block bg-cyan-900/50 px-8 py-2 rounded-full border border-cyan-500/50 text-2xl font-black text-cyan-300">РЕЖИМ: ОЖИДАНИЕ</div>
       </div>
 
-      <!-- Блок с QR (появляется, когда выбран режим) -->
+      <!-- Блок с QR -->
       <div id="qr-container" class="hidden flex gap-24 mb-8">
         <div class="glass-panel p-6 rounded-3xl flex flex-col items-center w-80 relative">
           <div class="absolute -top-6 w-full text-center"><span class="bg-red-500 text-white font-black px-6 py-2 rounded-full">КРАСНЫЕ</span></div>
@@ -75,7 +74,6 @@
       <div class="absolute left-0 top-0 bottom-0 w-[20%] bg-gradient-to-r from-red-900/40 to-transparent border-r-4 border-red-500/50"></div>
       <div class="absolute right-0 top-0 bottom-0 w-[20%] bg-gradient-to-l from-blue-900/40 to-transparent border-l-4 border-blue-500/50"></div>
       
-      <!-- Контейнер для персонажей и QR -->
       <div id="battlefield" class="absolute left-0 right-0 top-0 bottom-0"></div>
       
       <div class="absolute top-4 left-4 flex flex-col gap-1 glass-panel p-2 rounded-xl z-30 text-3xl"><div id="heart-red">❤️❤️❤️</div></div>
@@ -104,12 +102,13 @@
     const gameId = 'battle_1';
     const gameRef = ref(db, `games/${gameId}`);
 
+    let currentData = null;
     let playersData = { red: [], blue: [] };
     let currentMode = null;
+    
     const url = new URL(window.location.href);
     const baseUrl = url.origin + url.pathname.substring(0, url.pathname.lastIndexOf('/') + 1);
     
-    // Генерация QR
     function generateQRs() {
       document.getElementById('qr-container').classList.remove('hidden');
       document.getElementById('tv-status').classList.remove('hidden');
@@ -134,15 +133,17 @@
     onValue(gameRef, (snapshot) => {
       const data = snapshot.val();
       if (!data) return;
+      currentData = data;
 
       if (data.mode !== currentMode) {
         currentMode = data.mode;
-        document.getElementById('tv-mode').innerText = `РЕЖИМ: ${data.mode.toUpperCase()}`;
+        document.getElementById('tv-mode').innerText = `РЕЖИМ: ${data.mode?.toUpperCase() || 'ОЖИДАНИЕ'}`;
         if (data.status === 'lobby') generateQRs();
       }
       
-      playersData.red = Object.values(data.players?.red || {});
-      playersData.blue = Object.values(data.players?.blue || {});
+      // Собираем данные игроков (важно: сохраняем ID!)
+      playersData.red = Object.entries(data.players?.red || {}).map(([id, p]) => ({ id, ...p }));
+      playersData.blue = Object.entries(data.players?.blue || {}).map(([id, p]) => ({ id, ...p }));
       
       document.getElementById('tv-players-red').innerHTML = playersData.red.map(p => `<div class="text-red-300 font-bold bg-red-900/40 py-1 rounded border border-red-500/50">👤 ${p.name}</div>`).join('');
       document.getElementById('tv-players-blue').innerHTML = playersData.blue.map(p => `<div class="text-blue-300 font-bold bg-blue-900/40 py-1 rounded border border-blue-500/50">👤 ${p.name}</div>`).join('');
@@ -170,7 +171,6 @@
         document.getElementById('lobby-view').classList.add('hidden');
         document.getElementById('battle-view').classList.remove('hidden');
         
-        // Рисуем поле и QR для вылетевших
         renderBattlefield(data);
         
         if (data.turn && data.turn.name) {
@@ -194,53 +194,70 @@
 
     function renderBattlefield(data) {
       const field = document.getElementById('battlefield');
-      field.innerHTML = ''; // Очищаем всё, чтобы отрисовать заново (для QR и имен)
+      const maxP = parseInt(data.mode.charAt(0));
       
-      const renderTeam = (players, team) => {
-        const maxP = parseInt(data.mode.charAt(0));
-        // Отрисовываем всех, кто должен быть по режиму
-        for (let i = 0; i < maxP; i++) {
-          const p = players[i]; // Игрок по индексу
-          
-          const slot = document.createElement('div');
-          slot.className = 'player-slot';
-          const yPos = 20 + (i * 60 / Math.max(1, maxP)) + 10;
-          slot.style.left = team === 'red' ? '15%' : '85%';
-          slot.style.top = `${yPos}%`;
-          
-          if (p && p.alive) {
-             // Игрок есть и жив
-             slot.innerHTML = `
-              <div class="player-hitbox player-${team}">
-                <div class="text-4xl">🧍‍♂️</div>
-                <div class="bg-black/80 px-2 py-1 rounded text-xs font-bold text-white mt-1 whitespace-nowrap shadow-lg border border-white/20">${p.name}</div>
-                <div class="text-red-500 text-lg absolute -top-6 drop-shadow-[0_0_10px_#ef4444]">${'❤️'.repeat(p.lives)}</div>
-              </div>
-             `;
-          } else if (p && !p.alive) {
-             // Игрок есть, но мертв
-             slot.innerHTML = `<div class="text-6xl opacity-30 text-gray-500">💀</div>`;
-          } else {
-             // Игрока нет — показываем QR-код для подключения
-             const teamUrl = `${baseUrl}play.html?game=${gameId}&team=${team}`;
-             const qrDiv = document.createElement('div');
-             qrDiv.className = 'qr-slot';
-             const qr = qrcode(0, 'M'); qr.addData(teamUrl); qr.make();
-             qrDiv.innerHTML = qr.createImgTag(3, 5) + `<p class="text-black text-[10px] font-bold text-center mt-1">Сканируй</p>`;
-             slot.appendChild(qrDiv);
+      // Перерисовываем только если изменилось количество игроков (чтобы не дергать анимацию)
+      if (field.children.length !== maxP * 2) {
+        field.innerHTML = '';
+        
+        const renderTeam = (players, team) => {
+          for (let i = 0; i < maxP; i++) {
+            const p = players[i]; // Игрок по индексу (если есть)
+            
+            const slot = document.createElement('div');
+            slot.className = 'player-slot';
+            const yPos = 20 + (i * 60 / Math.max(1, maxP)) + 10;
+            slot.style.left = team === 'red' ? '15%' : '85%';
+            slot.style.top = `${yPos}%`;
+            
+            // Если игрок есть и жив
+            if (p && p.alive) {
+               slot.innerHTML = `
+                <div class="player-hitbox player-${team}" id="player-${team}-${i}">
+                  <div class="text-4xl">🧍‍♂️</div>
+                  <div class="bg-black/80 px-2 py-1 rounded text-xs font-bold text-white mt-1 whitespace-nowrap shadow-lg border border-white/20">${p.name}</div>
+                  <div class="text-red-500 text-lg absolute -top-6 drop-shadow-[0_0_10px_#ef4444]">${'❤️'.repeat(p.lives)}</div>
+                </div>
+               `;
+            } 
+            // Если игрок есть, но мертв
+            else if (p && !p.alive) {
+               slot.innerHTML = `<div class="text-6xl opacity-30 text-gray-500">💀</div>`;
+            } 
+            // Если игрока нет — показываем QR
+            else {
+               const teamUrl = `${baseUrl}play.html?game=${gameId}&team=${team}`;
+               const qrDiv = document.createElement('div');
+               qrDiv.className = 'qr-slot';
+               const qr = qrcode(0, 'M'); qr.addData(teamUrl); qr.make();
+               qrDiv.innerHTML = qr.createImgTag(3, 5);
+               slot.appendChild(qrDiv);
+            }
+            field.appendChild(slot);
           }
-          field.appendChild(slot);
-        }
-      };
-      
-      renderTeam(playersData.red, 'red');
-      renderTeam(playersData.blue, 'blue');
+        };
+        renderTeam(playersData.red, 'red');
+        renderTeam(playersData.blue, 'blue');
+      } else {
+        // Если слоты уже есть, просто обновляем тексты (имена, жизни)
+        const updateTeam = (players, team) => {
+          for (let i = 0; i < maxP; i++) {
+            const p = players[i];
+            const el = document.getElementById(`player-${team}-${i}`);
+            if (el && p && p.alive) {
+              el.querySelector('.text-xs').innerText = p.name;
+              el.querySelector('.text-red-500').innerText = '❤️'.repeat(p.lives);
+            }
+          }
+        };
+        updateTeam(playersData.red, 'red');
+        updateTeam(playersData.blue, 'blue');
+      }
 
-      document.getElementById('heart-red').innerText = '❤️'.repeat(playersData.red.reduce((a, b) => a + b.lives, 0)) || '💀';
-      document.getElementById('heart-blue').innerText = '❤️'.repeat(playersData.blue.reduce((a, b) => a + b.lives, 0)) || '💀';
+      document.getElementById('heart-red').innerText = '❤️'.repeat(playersData.red.reduce((a, b) => a + (b.lives || 0), 0)) || '💀';
+      document.getElementById('heart-blue').innerText = '❤️'.repeat(playersData.blue.reduce((a, b) => a + (b.lives || 0), 0)) || '💀';
     }
 
-    // Анимация выстрела (без изменений)
     onValue(ref(db, `games/${gameId}/last_shot`), (snap) => {
       const shot = snap.val();
       if (!shot) return;
