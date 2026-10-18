@@ -12,33 +12,45 @@
         * { box-sizing: border-box; margin: 0; padding: 0; }
         html, body { width: 100%; height: 100%; overflow: hidden; }
         body { background: var(--bg-gradient); font-family: 'Montserrat', sans-serif; color: #fff; user-select: none; }
+        
         .snowflake { position: absolute; color: rgba(255, 255, 255, 0.6); font-size: 20px; animation: fall linear infinite; pointer-events: none; z-index: 0; filter: drop-shadow(0 0 8px #fff); top: -10vh; }
         @keyframes fall { 0% { transform: translateY(-10vh) rotate(0deg); opacity: 0; } 10% { opacity: 1; } 90% { opacity: 1; } 100% { transform: translateY(110vh) rotate(360deg); opacity: 0; } }
-        .glass-panel { background: var(--glass-bg); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid var(--glass-border); box-shadow: 0 0 40px rgba(31, 143, 214, 0.2), inset 0 0 20px rgba(127, 227, 255, 0.1); border-radius: 1.5rem; }
+        
+        .glass-panel { background: var(--glass-bg); backdrop-filter: blur(16px); border: 1px solid var(--glass-border); box-shadow: 0 0 40px rgba(31, 143, 214, 0.2); border-radius: 1.5rem; }
+        
         @keyframes screenShake { 0%, 100% { transform: translate(0, 0); } 20% { transform: translate(-5px, 2px); } 40% { transform: translate(5px, -2px); } 60% { transform: translate(-8px, 4px); } 80% { transform: translate(8px, -4px); } }
         .screen-shake { animation: screenShake 0.4s cubic-bezier(.36,.07,.19,.97) both; }
+
         @keyframes flashAnim { 0% { opacity: 1; } 100% { opacity: 0; } }
         .flash-effect { position: fixed; inset: 0; background: #ffffff; z-index: 50; pointer-events: none; animation: flashAnim 0.3s ease-out forwards; }
+
         #battlefield { position: absolute; left: 0; right: 0; top: 0; bottom: 0; z-index: 10; overflow: hidden; }
         .grid-overlay { position: absolute; inset: 0; pointer-events: none; z-index: 11; background-image: linear-gradient(rgba(127,227,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(127,227,255,0.1) 1px, transparent 1px); background-size: 40px 40px; }
-        .snowball { position: absolute; width: 24px; height: 24px; border-radius: 50%; background: radial-gradient(circle at 30% 30%, #fff, #7fe3ff); box-shadow: 0 0 20px #7fe3ff, 0 0 40px rgba(127,227,255,0.8); pointer-events: none; z-index: 30; transform: translate(-50%, -50%); }
+
+        .snowball { position: absolute; width: 24px; height: 24px; border-radius: 50%; background: radial-gradient(circle at 30% 30%, #fff, #7fe3ff); box-shadow: 0 0 20px #7fe3ff; pointer-events: none; z-index: 30; transform: translate(-50%, -50%); }
         .particle { position: absolute; border-radius: 50%; background: #fff; pointer-events: none; z-index: 25; }
+
         .player-slot { position: absolute; transform: translate(-50%, -50%); z-index: 20; display: flex; flex-direction: column; align-items: center; transition: all 0.3s ease; }
         .player-hitbox { width: 80px; height: 120px; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; border-radius: 20px; position: relative; }
         .player-red { background: rgba(239, 68, 68, 0.15); border: 3px dashed var(--red-team); box-shadow: 0 0 30px rgba(239, 68, 68, 0.4); }
         .player-blue { background: rgba(59, 130, 246, 0.15); border: 3px dashed var(--blue-team); box-shadow: 0 0 30px rgba(59, 130, 246, 0.4); }
         .player-name { background: rgba(0, 0, 0, 0.8); padding: 2px 8px; border-radius: 6px; font-size: 12px; font-weight: 700; margin-top: 4px; border: 1px solid rgba(255, 255, 255, 0.2); }
         .player-lives { position: absolute; top: -24px; font-size: 18px; }
+
         .qr-slot { background: #ffffff; padding: 6px; border-radius: 12px; border: 4px solid var(--cyan-glow); display: flex; flex-direction: column; align-items: center; }
+
         @keyframes megaZoom { 0% { transform: translate(-50%, -50%) scale(0.1); opacity: 0; } 50% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; } 100% { transform: translate(-50%, -50%) scale(1); opacity: 1; } }
         .mega-text { position: absolute; top: 50%; left: 50%; font-size: 120px; font-weight: 900; color: #ffffff; text-shadow: 0 0 80px #fbbf24; z-index: 100; letter-spacing: 5px; text-transform: uppercase; animation: megaZoom 0.8s forwards; }
+
         .ticker-wrap { position: fixed; bottom: 0; left: 0; width: 100%; height: 60px; background: rgba(0, 0, 0, 0.9); overflow: hidden; border-top: 2px solid var(--cyan-glow); z-index: 100; display: flex; align-items: center; }
         .ticker { display: inline-block; white-space: nowrap; padding-left: 100%; animation: tickerMove 15s linear infinite; font-size: 24px; font-weight: 700; color: var(--cyan-glow); text-transform: uppercase; }
         @keyframes tickerMove { 0% { transform: translate3d(0, 0, 0); } 100% { transform: translate3d(-100%, 0, 0); } }
     </style>
 </head>
 <body class="h-screen w-screen flex flex-col items-center justify-center relative overflow-hidden" id="main-body">
+
     <div id="snow-container" class="fixed inset-0 pointer-events-none z-0"></div>
+
     <div id="tv-screen" class="flex-1 w-full h-full relative z-10 pb-16">
         <div id="lobby-view" class="absolute inset-0 flex flex-col items-center justify-center p-8">
             <div class="text-center mb-8">
@@ -77,11 +89,12 @@
             <h1 class="text-9xl font-black text-white mb-12" id="win-text">ПОБЕДА!</h1>
         </div>
     </div>
+
     <div class="ticker-wrap"><div class="ticker" id="ticker-text">ДОБРО ПОЖАЛОВАТЬ НА ВЕЧЕРИНКУ ENDORPHIN!</div></div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+        import { getDatabase, ref, onValue, update } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
         const firebaseConfig = { apiKey: "AIzaSyCXIR5Tv8lB6ivcGRC3yt1SC66MM6T5b_M", authDomain: "endorphin-battle.firebaseapp.com", databaseURL: "https://endorphin-battle-default-rtdb.europe-west1.firebasedatabase.app", projectId: "endorphin-battle", storageBucket: "endorphin-battle.firebasestorage.app", messagingSenderId: "185259733030", appId: "1:185259733030:web:d72a89a436880973e636e7" };
         const app = initializeApp(firebaseConfig);
@@ -93,7 +106,6 @@
         let currentData = null;
         let playersData = { red: [], blue: [] };
         let currentMode = null;
-        let particleSystem = null;
 
         function getBaseUrl() {
             const url = new URL(window.location.href);
@@ -111,6 +123,62 @@
             document.getElementById('qr-red').innerHTML = qrRed.createImgTag(4, 8);
             const qrBlue = qrcode(0, 'M'); qrBlue.addData(blueUrl); qrBlue.make();
             document.getElementById('qr-blue').innerHTML = qrBlue.createImgTag(4, 8);
+        }
+
+        function renderBattlefield(data) {
+            const field = document.getElementById('battlefield');
+            const maxP = parseInt(data.mode.charAt(0));
+            
+            if (field.children.length !== maxP * 2) {
+                field.innerHTML = '';
+                const renderTeam = (players, team) => {
+                    for (let i = 0; i < maxP; i++) {
+                        const p = players[i];
+                        const slot = document.createElement('div');
+                        slot.className = 'player-slot';
+                        // Используем сохраненные координаты или дефолтные
+                        const posX = p && p.posX !== undefined ? p.posX : (team === 'red' ? 15 : 85);
+                        const posY = p && p.posY !== undefined ? p.posY : (20 + i * 60 / Math.max(1, maxP) + 10);
+                        
+                        slot.style.left = `${posX}%`;
+                        slot.style.top = `${posY}%`;
+                        
+                        if (p && p.alive) {
+                            slot.innerHTML = `<div class="player-hitbox player-${team}" id="player-${team}-${p.id}"><div class="text-4xl">🧍‍♂️</div><div class="player-name">${p.name}</div><div class="player-lives">${'❤️'.repeat(p.lives)}</div></div>`;
+                        } else if (p && !p.alive) {
+                            slot.innerHTML = `<div class="text-6xl opacity-30 text-gray-500">💀</div>`;
+                        } else {
+                            const teamUrl = `${currentBaseUrl}play.html?game=${gameId}&team=${team}`;
+                            const qrDiv = document.createElement('div');
+                            qrDiv.className = 'qr-slot';
+                            const qr = qrcode(0, 'M'); qr.addData(teamUrl); qr.make();
+                            qrDiv.innerHTML = qr.createImgTag(3, 5);
+                            slot.appendChild(qrDiv);
+                        }
+                        field.appendChild(slot);
+                    }
+                };
+                renderTeam(playersData.red, 'red');
+                renderTeam(playersData.blue, 'blue');
+            } else {
+                const updateTeam = (players, team) => {
+                    for (let i = 0; i < maxP; i++) {
+                        const p = players[i];
+                        if (!p) continue;
+                        const el = document.getElementById(`player-${team}-${p.id}`);
+                        if (el) {
+                            const nameEl = el.querySelector('.player-name');
+                            const livesEl = el.querySelector('.player-lives');
+                            if (nameEl) nameEl.innerText = p.name;
+                            if (livesEl) livesEl.innerText = '❤️'.repeat(p.lives);
+                        }
+                    }
+                };
+                updateTeam(playersData.red, 'red');
+                updateTeam(playersData.blue, 'blue');
+            }
+            document.getElementById('heart-red').innerText = '❤️'.repeat(playersData.red.reduce((a, b) => a + (b.lives || 0), 0)) || '💀';
+            document.getElementById('heart-blue').innerText = '❤️'.repeat(playersData.blue.reduce((a, b) => a + (b.lives || 0), 0)) || '💀';
         }
 
         onValue(ref(db, `games/${gameId}/ticker`), (snap) => { if (snap.val()) document.getElementById('ticker-text').innerText = snap.val(); });
@@ -175,109 +243,144 @@
             document.getElementById('tv-timer').innerText = (val !== null && val !== undefined) ? val : '';
         });
 
-        function renderBattlefield(data) {
+        // ============================================================
+        // ФИЗИКА ПОЛЕТА СНЕЖКА
+        // ============================================================
+        function simulateShot(shot) {
             const field = document.getElementById('battlefield');
-            const maxP = parseInt(data.mode.charAt(0));
+            const fieldRect = field.getBoundingClientRect();
             
-            if (field.children.length !== maxP * 2) {
-                field.innerHTML = '';
-                const renderTeam = (players, team) => {
-                    for (let i = 0; i < maxP; i++) {
-                        const p = players[i];
-                        const slot = document.createElement('div');
-                        slot.className = 'player-slot';
-                        const yPos = 20 + (i * 60 / Math.max(1, maxP)) + 10;
-                        slot.style.left = team === 'red' ? '15%' : '85%';
-                        slot.style.top = `${yPos}%`;
-                        
-                        if (p && p.alive) {
-                            slot.innerHTML = `<div class="player-hitbox player-${team}" id="player-${team}-${p.id}"><div class="text-4xl">🧍‍♂️</div><div class="player-name">${p.name}</div><div class="player-lives">${'❤️'.repeat(p.lives)}</div></div>`;
-                        } else if (p && !p.alive) {
-                            slot.innerHTML = `<div class="text-6xl opacity-30 text-gray-500">💀</div>`;
-                        } else {
-                            const teamUrl = `${currentBaseUrl}play.html?game=${gameId}&team=${team}`;
-                            const qrDiv = document.createElement('div');
-                            qrDiv.className = 'qr-slot';
-                            const qr = qrcode(0, 'M'); qr.addData(teamUrl); qr.make();
-                            qrDiv.innerHTML = qr.createImgTag(3, 5);
-                            slot.appendChild(qrDiv);
-                        }
-                        field.appendChild(slot);
-                    }
-                };
-                renderTeam(playersData.red, 'red');
-                renderTeam(playersData.blue, 'blue');
-            } else {
-                const updateTeam = (players, team) => {
-                    for (let i = 0; i < maxP; i++) {
-                        const p = players[i];
-                        if (!p) continue;
-                        const el = document.getElementById(`player-${team}-${p.id}`);
-                        if (el) {
-                            const nameEl = el.querySelector('.player-name');
-                            const livesEl = el.querySelector('.player-lives');
-                            if (nameEl) nameEl.innerText = p.name;
-                            if (livesEl) livesEl.innerText = '❤️'.repeat(p.lives);
-                        }
-                    }
-                };
-                updateTeam(playersData.red, 'red');
-                updateTeam(playersData.blue, 'blue');
-            }
-            document.getElementById('heart-red').innerText = '❤️'.repeat(playersData.red.reduce((a, b) => a + (b.lives || 0), 0)) || '💀';
-            document.getElementById('heart-blue').innerText = '❤️'.repeat(playersData.blue.reduce((a, b) => a + (b.lives || 0), 0)) || '💀';
-        }
-
-        // АНИМАЦИЯ ВЫСТРЕЛА (поиск по ID!)
-        onValue(ref(db, `games/${gameId}/last_shot`), (snap) => {
-            const shot = snap.val();
-            if (!shot) return;
-            
-            const field = document.getElementById('battlefield');
-            const ball = document.createElement('div'); ball.className = 'snowball'; field.appendChild(ball);
-
-            // Ищем элементы по ID игрока
+            // Находим стрелка и цель
             const shooterEl = document.getElementById(`player-${shot.team}-${shot.shooterId}`);
             const targetEl = document.getElementById(`player-${shot.targetTeam}-${shot.targetId}`);
             
-            if (!shooterEl || !targetEl) {
-                console.warn('Не найдены элементы для выстрела', shot);
-                ball.remove();
-                return;
-            }
+            if (!shooterEl || !targetEl) return;
 
-            const fieldRect = field.getBoundingClientRect();
             const sRect = shooterEl.getBoundingClientRect();
             const tRect = targetEl.getBoundingClientRect();
 
+            // Координаты в пикселях относительно поля
             const startX = sRect.left - fieldRect.left + sRect.width/2;
             const startY = sRect.top - fieldRect.top + sRect.height/2;
-            let endX = tRect.left - fieldRect.left + tRect.width/2;
-            let endY = tRect.top - fieldRect.top + tRect.height/2;
+            const targetX = tRect.left - fieldRect.left + tRect.width/2;
+            const targetY = tRect.top - fieldRect.top + tRect.height/2;
 
-            if (!shot.isHit) { 
-                endX += (Math.random() > 0.5 ? 200 : -200); 
-                endY += (Math.random() > 0.5 ? 150 : -150); 
+            // Параметры полета
+            const power = shot.power || 50;
+            const angle = shot.angle || 45;
+            const rad = angle * Math.PI / 180;
+            
+            // Скорость и гравитация
+            const speed = power * 0.15;
+            const vx = speed * Math.cos(rad) * (shot.team === 'red' ? 1 : -1);
+            const vy = -speed * Math.sin(rad);
+            const gravity = 0.5;
+
+            // Создаем снежок
+            const ball = document.createElement('div');
+            ball.className = 'snowball';
+            ball.style.left = startX + 'px';
+            ball.style.top = startY + 'px';
+            field.appendChild(ball);
+
+            // Физическая симуляция
+            let t = 0;
+            let currentX = startX;
+            let currentY = startY;
+            let velX = vx;
+            let velY = vy;
+            let isHit = false;
+
+            // Hitbox цели
+            const hitboxMinX = targetX - 40;
+            const hitboxMaxX = targetX + 40;
+            const hitboxMinY = targetY - 60;
+            const hitboxMaxY = targetY + 60;
+
+            function animate() {
+                t += 0.05;
+                
+                // Физика
+                currentX += velX;
+                currentY += velY;
+                velY += gravity;
+
+                ball.style.left = currentX + 'px';
+                ball.style.top = currentY + 'px';
+
+                // Проверка попадания в цель
+                if (currentX >= hitboxMinX && currentX <= hitboxMaxX &&
+                    currentY >= hitboxMinY && currentY <= hitboxMaxY) {
+                    isHit = true;
+                    ball.remove();
+                    handleHit(shot, targetX, targetY);
+                    return;
+                }
+
+                // Проверка вылета за экран
+                if (currentX < -100 || currentX > fieldRect.width + 100 || currentY > fieldRect.height + 100) {
+                    ball.remove();
+                    handleMiss(shot);
+                    return;
+                }
+
+                requestAnimationFrame(animate);
             }
 
-            ball.style.left = startX + 'px'; ball.style.top = startY + 'px';
+            requestAnimationFrame(animate);
+        }
 
-            ball.animate([
-                { left: startX + 'px', top: startY + 'px', transform: 'translate(-50%, -50%) scale(1)' },
-                { left: (startX + endX) / 2 + 'px', top: startY - 100 + 'px', transform: 'translate(-50%, -50%) scale(1.5)' },
-                { left: endX + 'px', top: endY + 'px', transform: 'translate(-50%, -50%) scale(1)' }
-            ], { duration: 800, easing: 'cubic-bezier(0.25, 0.1, 0.25, 1)', fill: 'forwards' }).onfinish = () => {
-                if (shot.isHit) {
-                    const burst = document.createElement('div'); burst.className = 'snowball'; burst.style.width = '80px'; burst.style.height = '80px'; burst.style.opacity = '0.5';
-                    burst.style.left = endX + 'px'; burst.style.top = endY + 'px';
-                    field.appendChild(burst); 
-                    burst.animate([{ transform: 'translate(-50%, -50%) scale(1)', opacity: 0.8 }, { transform: 'translate(-50%, -50%) scale(3)', opacity: 0 }], { duration: 400, fill: 'forwards' });
-                    setTimeout(() => burst.remove(), 400);
-                    document.getElementById('main-body').classList.add('screen-shake'); setTimeout(() => document.getElementById('main-body').classList.remove('screen-shake'), 400);
-                    if (shot.isMega) { const megaDiv = document.createElement('div'); megaDiv.className = 'mega-text'; megaDiv.innerText = 'МЕГАБРОСОК!'; document.body.appendChild(megaDiv); setTimeout(() => megaDiv.remove(), 2000); }
-                }
-                ball.remove();
-            };
+        function handleHit(shot, hitX, hitY) {
+            // Взрыв
+            const burst = document.createElement('div');
+            burst.className = 'snowball';
+            burst.style.width = '80px';
+            burst.style.height = '80px';
+            burst.style.opacity = '0.5';
+            burst.style.left = hitX + 'px';
+            burst.style.top = hitY + 'px';
+            document.getElementById('battlefield').appendChild(burst);
+            burst.animate([
+                { transform: 'translate(-50%, -50%) scale(1)', opacity: 0.8 },
+                { transform: 'translate(-50%, -50%) scale(3)', opacity: 0 }
+            ], { duration: 400, fill: 'forwards' });
+            setTimeout(() => burst.remove(), 400);
+
+            // Тряска
+            document.getElementById('main-body').classList.add('screen-shake');
+            setTimeout(() => document.getElementById('main-body').classList.remove('screen-shake'), 400);
+
+            // Мегабросок
+            if (shot.power > 90) {
+                const megaDiv = document.createElement('div');
+                megaDiv.className = 'mega-text';
+                megaDiv.innerText = 'МЕГАБРОСОК!';
+                document.body.appendChild(megaDiv);
+                setTimeout(() => megaDiv.remove(), 2000);
+            }
+
+            // Урон
+            const enemyTeam = shot.team === 'red' ? 'blue' : 'red';
+            onValue(ref(db, `games/${gameId}/players/${enemyTeam}/${shot.targetId}`), (snap) => {
+                const enemy = snap.val();
+                if (!enemy) return;
+                const newLives = Math.max(0, (enemy.lives || 3) - 1);
+                update(ref(db, `games/${gameId}/players/${enemyTeam}/${shot.targetId}`), {
+                    lives: newLives,
+                    alive: newLives > 0
+                });
+            }, { onlyOnce: true });
+        }
+
+        function handleMiss(shot) {
+            console.log('Промах!');
+        }
+
+        onValue(ref(db, `games/${gameId}/last_shot`), (snap) => {
+            const shot = snap.val();
+            if (!shot || shot.animated) return;
+            shot.animated = true;
+            simulateShot(shot);
         });
 
         const snowContainer = document.getElementById('snow-container');
