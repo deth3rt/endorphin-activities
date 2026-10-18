@@ -99,7 +99,6 @@
     const db = getDatabase(app);
     const gameId = 'battle_1';
     const gameRef = ref(db, `games/${gameId}`);
-    const currentUrl = window.location.href.split('?')[0];
 
     let playersData = { red: [], blue: [] };
     let currentMode = null;
@@ -114,16 +113,21 @@
       qrContainer.classList.remove('hidden');
       document.getElementById('tv-status').classList.remove('hidden');
       
-      const urlRed = currentUrl + `play.html?game=${gameId}&team=red`;
-      const urlBlue = currentUrl + `play.html?game=${gameId}&team=blue`;
+      // ЖЕЛЕЗОБЕТОННАЯ СБОРКА ССЫЛКИ:
+      // Берем текущий URL, отрезаем всё после последнего слэша, и добавляем play.html с параметрами.
+      const url = new URL(window.location.href);
+      const baseUrl = url.origin + url.pathname.substring(0, url.pathname.lastIndexOf('/') + 1);
+      
+      const redUrl = `${baseUrl}play.html?game=${gameId}&team=red`;
+      const blueUrl = `${baseUrl}play.html?game=${gameId}&team=blue`;
       
       document.getElementById('qr-red').innerHTML = '';
       document.getElementById('qr-blue').innerHTML = '';
       
-      const qrRed = qrcode(0, 'M'); qrRed.addData(urlRed); qrRed.make();
+      const qrRed = qrcode(0, 'M'); qrRed.addData(redUrl); qrRed.make();
       document.getElementById('qr-red').innerHTML = qrRed.createImgTag(4, 8);
       
-      const qrBlue = qrcode(0, 'M'); qrBlue.addData(urlBlue); qrBlue.make();
+      const qrBlue = qrcode(0, 'M'); qrBlue.addData(blueUrl); qrBlue.make();
       document.getElementById('qr-blue').innerHTML = qrBlue.createImgTag(4, 8);
     }
 
@@ -140,7 +144,6 @@
       playersData.red = Object.values(data.players?.red || {});
       playersData.blue = Object.values(data.players?.blue || {});
       
-      // Вывод имен
       document.getElementById('tv-players-red').innerHTML = playersData.red.map(p => `<div class="text-red-300 font-bold bg-red-900/40 py-1 rounded border border-red-500/50">👤 ${p.name}</div>`).join('');
       document.getElementById('tv-players-blue').innerHTML = playersData.blue.map(p => `<div class="text-blue-300 font-bold bg-blue-900/40 py-1 rounded border border-blue-500/50">👤 ${p.name}</div>`).join('');
 
@@ -198,7 +201,6 @@
             el.className = `player-hitbox player-${team}`;
             el.id = `player-${team}-${i}`;
             
-            // Рандомная расстановка по вертикали для каждого
             const yPos = 20 + (i * 60 / Math.max(1, players.length)) + 10;
             el.style.left = team === 'red' ? '15%' : '85%';
             el.style.top = `${yPos}%`;
@@ -218,7 +220,6 @@
       document.getElementById('heart-blue').innerText = '❤️'.repeat(playersData.blue.reduce((a, b) => a + b.lives, 0)) || '💀';
     }
 
-    // Анимация выстрела
     onValue(ref(db, `games/${gameId}/last_shot`), (snap) => {
       const shot = snap.val();
       if (!shot) return;
