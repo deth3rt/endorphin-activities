@@ -130,44 +130,68 @@
       const targetDistance = 70;
       const isHit = (distance >= targetDistance - 8 && distance <= targetDistance + 8);
 
-      const shotsRef = ref(db, 'games/battle_1/shots');
-      push(shotsRef, { team, power, angle, distance, isHit, time: Date.now() });
-
-      if (isHit) {
-        onValue(ref(db, `games/battle_1/players/${isRed ? 'blue' : 'red'}`), (snap) => {
-          const enemies = Object.entries(snap.val() || {});
+      // ВАЖНО: Отправляем индекс стрелка и цели
+      onValue(ref(db, `games/battle_1/players/${team}`), (mySnap) => {
+        const myPlayers = Object.entries(mySnap.val() || {});
+        const myIndex = myPlayers.findIndex(([id]) => id === playerId);
+        
+        onValue(ref(db, `games/battle_1/players/${isRed ? 'blue' : 'red'}`), (enemySnap) => {
+          const enemies = Object.entries(enemySnap.val() || {});
           const aliveEnemies = enemies.filter(([id, p]) => p.alive);
           if (aliveEnemies.length === 0) return;
           
-          const targetId = aliveEnemies[0][0];
-          const enemyTeam = isRed ? 'blue' : 'red';
+          const targetIndex = 0; // Всегда бьем первого живого
           
-          const newLives = Math.max(0, aliveEnemies[0][1].lives - 1);
-          update(ref(db, `games/battle_1/players/${enemyTeam}/${targetId}`), { lives: newLives, alive: newLives > 0 });
+          // Отправляем в формате, который ждет ТВ
+          push(ref(db, 'games/battle_1/shots'), { 
+            team, 
+            shooterIndex: myIndex,
+            targetTeam: isRed ? 'blue' : 'red',
+            targetIndex: targetIndex,
+            isHit, isMega: (power > 90 && isHit) 
+          });
           
-          onValue(ref(db, `games/battle_1/players/${enemyTeam}`), (teamSnap) => {
-            const allEnemies = Object.values(teamSnap.val() || {});
-            const totalLives = allEnemies.reduce((sum, p) => sum + p.lives, 0);
-            if (totalLives <= 0) update(ref(db, 'games/battle_1'), { status: 'finished', winner: team });
+          // Дублируем в last_shot для мгновенной реакции ТВ
+          set(ref(db, 'games/battle_1/last_shot'), { 
+            team, 
+            shooterIndex: myIndex,
+            targetTeam: isRed ? 'blue' : 'red',
+            targetIndex: targetIndex,
+            isHit, isMega: (power > 90 && isHit) 
+          });
+
+          // Урон
+          if (isHit) {
+            const targetId = aliveEnemies[targetIndex][0];
+            const newLives = Math.max(0, aliveEnemies[targetIndex][1].lives - 1);
+            update(ref(db, `games/battle_1/players/${isRed ? 'blue' : 'red'}/${targetId}`), { lives: newLives, alive: newLives > 0 });
+            
+            // Проверка победы
+            onValue(ref(db, `games/battle_1/players/${isRed ? 'blue' : 'red'}`), (finalSnap) => {
+              const allEnemies = Object.values(finalSnap.val() || {});
+              const totalLives = allEnemies.reduce((sum, p) => sum + p.lives, 0);
+              if (totalLives <= 0) update(ref(db, 'games/battle_1'), { status: 'finished', winner: team });
+            }, { onlyOnce: true });
+          }
+
+          // Передача хода
+          onValue(ref(db, 'games/battle_1/players'), (snap) => {
+            const players = snap.val();
+            const myTeamPlayers = Object.entries(players[team] || {}).filter(([id, p]) => p.alive);
+            const myIdx = myTeamPlayers.findIndex(([id]) => id === playerId);
+            
+            let nextPlayer = null;
+            if (myIdx !== -1 && myIdx < myTeamPlayers.length - 1) { nextPlayer = myTeamPlayers[myIdx + 1]; } 
+            else {
+              const enemyTeam = Object.entries(players[isRed ? 'blue' : 'red'] || {}).filter(([id, p]) => p.alive);
+              if (enemyTeam.length > 0) nextPlayer = enemyTeam[0];
+            }
+
+            if (nextPlayer) {
+              update(ref(db, 'games/battle_1'), { activePlayerId: nextPlayer[0], turn: { team: isRed ? 'blue' : 'red', name: nextPlayer[1].name } });
+            }
           }, { onlyOnce: true });
         }, { onlyOnce: true });
-      }
-
-      onValue(ref(db, 'games/battle_1/players'), (snap) => {
-        const players = snap.val();
-        const myTeamPlayers = Object.entries(players[team] || {}).filter(([id, p]) => p.alive);
-        const myIndex = myTeamPlayers.findIndex(([id]) => id === playerId);
-        
-        let nextPlayer = null;
-        if (myIndex !== -1 && myIndex < myTeamPlayers.length - 1) { nextPlayer = myTeamPlayers[myIndex + 1]; } 
-        else {
-          const enemyTeam = Object.entries(players[isRed ? 'blue' : 'red'] || {}).filter(([id, p]) => p.alive);
-          if (enemyTeam.length > 0) nextPlayer = enemyTeam[0];
-        }
-
-        if (nextPlayer) {
-          update(ref(db, 'games/battle_1'), { activePlayerId: nextPlayer[0], turn: { team: isRed ? 'blue' : 'red', name: nextPlayer[1].name } });
-        }
       }, { onlyOnce: true });
     };
   </script>
