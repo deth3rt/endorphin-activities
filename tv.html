@@ -10,10 +10,9 @@
   <script src="https://unpkg.com/qrcode-generator@1.4.4/qrcode.js"></script>
   
   <style>
-    /* ==================== ОБЩИЕ СТИЛИ И ШРИФТЫ ==================== */
+    /* ==================== ГЛОБАЛЬНЫЕ СТИЛИ ==================== */
     @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap');
     
-    /* ==================== ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ ==================== */
     :root {
       --bg-dark: #03080f;
       --bg-gradient: radial-gradient(circle at 50% 0%, #0a2540 0%, #03080f 100%);
@@ -24,8 +23,13 @@
       --cyan-glow: #22d3ee;
     }
 
-    /* ==================== СБРОС И БАЗОВЫЕ СТИЛИ ==================== */
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+    /* ==================== СБРОС ==================== */
+    * { 
+      box-sizing: border-box; 
+      margin: 0; 
+      padding: 0; 
+    }
+    
     body {
       background: var(--bg-gradient);
       font-family: 'Montserrat', sans-serif;
@@ -37,7 +41,7 @@
       position: relative;
     }
 
-    /* ==================== АНИМАЦИИ ФОНА (СНЕЖИНКИ) ==================== */
+    /* ==================== СНЕЖИНКИ ==================== */
     .snowflake {
       position: absolute;
       color: rgba(255, 255, 255, 0.6);
@@ -48,14 +52,25 @@
       filter: drop-shadow(0 0 8px #fff);
       top: -10vh;
     }
+    
     @keyframes fall {
-      0% { transform: translateY(-10vh) rotate(0deg); opacity: 0; }
-      10% { opacity: 1; }
-      90% { opacity: 1; }
-      100% { transform: translateY(110vh) rotate(360deg); opacity: 0; }
+      0% { 
+        transform: translateY(-10vh) rotate(0deg); 
+        opacity: 0; 
+      }
+      10% { 
+        opacity: 1; 
+      }
+      90% { 
+        opacity: 1; 
+      }
+      100% { 
+        transform: translateY(110vh) rotate(360deg); 
+        opacity: 0; 
+      }
     }
 
-    /* ==================== СТЕКЛЯННЫЕ ПАНЕЛИ (GLASSMORPHISM) ==================== */
+    /* ==================== СТЕКЛО ==================== */
     .glass-panel {
       background: var(--glass-bg);
       backdrop-filter: blur(16px);
@@ -65,8 +80,7 @@
       border-radius: 1.5rem;
     }
 
-    /* ==================== ЭФФЕКТЫ БОЯ ==================== */
-    /* Тряска экрана */
+    /* ==================== ЭФФЕКТЫ ==================== */
     @keyframes screenShake {
       0%, 100% { transform: translate(0, 0); }
       10% { transform: translate(-5px, 2px); }
@@ -79,13 +93,16 @@
       80% { transform: translate(2px, -5px); }
       90% { transform: translate(-1px, 1px); }
     }
-    .screen-shake { animation: screenShake 0.5s cubic-bezier(.36,.07,.19,.97) both; }
+    
+    .screen-shake { 
+      animation: screenShake 0.5s cubic-bezier(.36,.07,.19,.97) both; 
+    }
 
-    /* Вспышка */
     @keyframes flashAnim {
       0% { opacity: 1; }
       100% { opacity: 0; }
     }
+    
     .flash-effect {
       position: fixed;
       inset: 0;
@@ -95,13 +112,17 @@
       animation: flashAnim 0.3s ease-out forwards;
     }
 
-    /* ==================== ПОЛЕ БОЯ ==================== */
+    /* ==================== ПОЛЕ ==================== */
     #battlefield {
       position: absolute;
-      left: 0; right: 0; top: 0; bottom: 0;
+      left: 0; 
+      right: 0; 
+      top: 0; 
+      bottom: 0;
       z-index: 10;
       overflow: hidden;
     }
+    
     .grid-overlay {
       position: absolute;
       inset: 0;
@@ -113,7 +134,7 @@
       background-size: 40px 40px;
     }
 
-    /* ==================== СНАРЯДЫ И ВЗРЫВЫ ==================== */
+    /* ==================== СНАРЯДЫ ==================== */
     .snowball {
       position: absolute;
       width: 24px;
@@ -125,6 +146,7 @@
       z-index: 30;
       transform: translate(-50%, -50%);
     }
+    
     .snow-burst {
       position: absolute;
       width: 80px;
@@ -135,6 +157,7 @@
       z-index: 25;
       transform: translate(-50%, -50%) scale(0);
     }
+
     .snow-trail {
       position: absolute;
       width: 12px;
@@ -147,7 +170,7 @@
       transform: translate(-50%, -50%);
     }
 
-    /* ==================== ПЕРСОНАЖИ И СЛОТЫ ==================== */
+    /* ==================== ПЕРСОНАЖИ ==================== */
     .player-slot {
       position: absolute;
       transform: translate(-50%, -50%);
@@ -158,6 +181,7 @@
       justify-content: center;
       transition: all 0.3s ease;
     }
+    
     .player-hitbox {
       width: 80px;
       height: 120px;
@@ -168,16 +192,19 @@
       border-radius: 20px;
       position: relative;
     }
+    
     .player-red {
       background: rgba(239, 68, 68, 0.15);
       border: 3px dashed var(--red-team);
       box-shadow: 0 0 30px rgba(239, 68, 68, 0.4);
     }
+    
     .player-blue {
       background: rgba(59, 130, 246, 0.15);
       border: 3px dashed var(--blue-team);
       box-shadow: 0 0 30px rgba(59, 130, 246, 0.4);
     }
+    
     .player-name {
       background: rgba(0, 0, 0, 0.8);
       padding: 2px 8px;
@@ -188,6 +215,7 @@
       border: 1px solid rgba(255, 255, 255, 0.2);
       margin-top: 4px;
     }
+    
     .player-lives {
       position: absolute;
       top: -24px;
@@ -195,7 +223,7 @@
       filter: drop-shadow(0 0 10px var(--red-team));
     }
 
-    /* ==================== QR-КОДЫ ==================== */
+    /* ==================== QR ==================== */
     .qr-slot {
       background: #ffffff;
       padding: 6px;
@@ -206,9 +234,11 @@
       flex-direction: column;
       align-items: center;
     }
+    
     .qr-slot img {
       display: block;
     }
+    
     .qr-label {
       font-size: 10px;
       font-weight: 800;
@@ -217,12 +247,23 @@
       text-transform: uppercase;
     }
 
-    /* ==================== ТЕКСТ МЕГАБРОСОК ==================== */
+    /* ==================== МЕГАБРОСОК ==================== */
     @keyframes megaZoom {
-      0% { transform: translate(-50%, -50%) scale(0.1) rotate(-15deg); opacity: 0; }
-      50% { transform: translate(-50%, -50%) scale(1.2) rotate(5deg); opacity: 1; text-shadow: 0 0 150px #fbbf24, 0 0 80px #fbbf24; }
-      100% { transform: translate(-50%, -50%) scale(1) rotate(0); opacity: 1; }
+      0% { 
+        transform: translate(-50%, -50%) scale(0.1) rotate(-15deg); 
+        opacity: 0; 
+      }
+      50% { 
+        transform: translate(-50%, -50%) scale(1.2) rotate(5deg); 
+        opacity: 1; 
+        text-shadow: 0 0 150px #fbbf24, 0 0 80px #fbbf24; 
+      }
+      100% { 
+        transform: translate(-50%, -50%) scale(1) rotate(0); 
+        opacity: 1; 
+      }
     }
+    
     .mega-text {
       position: absolute;
       top: 50%;
@@ -252,6 +293,7 @@
       display: flex;
       align-items: center;
     }
+    
     .ticker {
       display: inline-block;
       white-space: nowrap;
@@ -263,12 +305,13 @@
       text-transform: uppercase;
       letter-spacing: 2px;
     }
+    
     @keyframes tickerMove {
       0% { transform: translate3d(0, 0, 0); }
       100% { transform: translate3d(-100%, 0, 0); }
     }
 
-    /* ==================== СПЕЦИАЛЬНЫЕ КЛАССЫ ==================== */
+    /* ==================== СПЕЦКЛАССЫ ==================== */
     .hidden { display: none !important; }
     .flex { display: flex !important; }
     .team-red { color: var(--red-team); }
@@ -277,16 +320,15 @@
 </head>
 <body class="h-screen w-screen flex flex-col items-center justify-center relative overflow-hidden" id="main-body">
 
-  <!-- ==================== ФОН (СНЕЖИНКИ) ==================== -->
+  <!-- ==================== ФОН ==================== -->
   <div id="snow-container" class="fixed inset-0 pointer-events-none z-0"></div>
 
-  <!-- ==================== ОСНОВНОЙ ЭКРАН ==================== -->
+  <!-- ==================== ЭКРАН ==================== -->
   <div id="tv-screen" class="flex-1 w-full h-full relative z-10 pb-16">
     
-    <!-- ==================== ЭКРАН ЛОББИ ==================== -->
+    <!-- ==================== ЛОББИ ==================== -->
     <div id="lobby-view" class="absolute inset-0 flex flex-col items-center justify-center p-8 transition-opacity duration-500">
       
-      <!-- Заголовок -->
       <div class="text-center mb-8">
         <h1 class="text-8xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 via-blue-400 to-indigo-500 mb-2 drop-shadow-[0_0_30px_rgba(59,130,246,0.8)] tracking-tighter">
           ENDORPHIN
@@ -299,9 +341,7 @@
         </div>
       </div>
 
-      <!-- Контейнер с QR -->
       <div id="qr-container" class="hidden flex gap-24 mb-8">
-        <!-- Красные -->
         <div class="glass-panel p-6 rounded-3xl flex flex-col items-center w-80 relative">
           <div class="absolute -top-6 w-full text-center">
             <span class="bg-red-500 text-white font-black px-6 py-2 rounded-full shadow-[0_0_20px_#ef4444]">КРАСНЫЕ</span>
@@ -310,12 +350,10 @@
           <div id="tv-players-red" class="mt-4 space-y-2 w-full text-center text-sm"></div>
         </div>
         
-        <!-- VS -->
         <div class="flex flex-col items-center justify-center">
           <div class="text-6xl font-black text-white/30 italic">VS</div>
         </div>
 
-        <!-- Синие -->
         <div class="glass-panel p-6 rounded-3xl flex flex-col items-center w-80 relative">
           <div class="absolute -top-6 w-full text-center">
             <span class="bg-blue-500 text-white font-black px-6 py-2 rounded-full shadow-[0_0_20px_#3b82f6]">СИНИЕ</span>
@@ -325,45 +363,35 @@
         </div>
       </div>
       
-      <!-- Статус -->
       <div id="tv-status" class="text-4xl font-black text-white tracking-widest drop-shadow-[0_0_20px_#fff] hidden">
         ОЖИДАНИЕ ИГРОКОВ...
       </div>
     </div>
 
-    <!-- ==================== ЭКРАН БИТВЫ ==================== -->
+    <!-- ==================== БИТВА ==================== -->
     <div id="battle-view" class="absolute inset-0 hidden z-10 bg-[#0a2540]">
-      
-      <!-- Сетка -->
       <div class="grid-overlay"></div>
-      
-      <!-- Зоны команд -->
       <div class="absolute left-0 top-0 bottom-0 w-[20%] bg-gradient-to-r from-red-900/40 to-transparent border-r-4 border-red-500/50"></div>
       <div class="absolute right-0 top-0 bottom-0 w-[20%] bg-gradient-to-l from-blue-900/40 to-transparent border-l-4 border-blue-500/50"></div>
       
-      <!-- Поле боя (снаряды и персонажи) -->
       <div id="battlefield" class="absolute left-0 right-0 top-0 bottom-0"></div>
       
-      <!-- Счётчик жизней красных -->
       <div class="absolute top-4 left-4 flex flex-col gap-1 glass-panel p-2 rounded-xl z-30 text-3xl">
         <div id="heart-red">❤️❤️❤️</div>
       </div>
       
-      <!-- Счётчик жизней синих -->
       <div class="absolute bottom-4 right-4 flex flex-col gap-1 glass-panel p-2 rounded-xl z-30 text-3xl">
         <div id="heart-blue">❤️❤️❤️</div>
       </div>
       
-      <!-- Индикатор хода -->
       <div class="absolute top-4 left-1/2 -translate-x-1/2 glass-panel px-8 py-3 rounded-full z-30 text-2xl font-black tracking-widest" id="turn-indicator">
         ХОД: ...
       </div>
       
-      <!-- Таймер -->
       <div class="absolute top-20 left-1/2 -translate-x-1/2 text-6xl font-black text-white drop-shadow-[0_0_20px_#fff]" id="tv-timer"></div>
     </div>
 
-    <!-- ==================== ЭКРАН ПОБЕДЫ ==================== -->
+    <!-- ==================== ПОБЕДА ==================== -->
     <div id="win-view" class="absolute inset-0 hidden flex-col items-center justify-center bg-black/80 backdrop-blur-2xl z-40">
       <h1 class="text-9xl font-black text-white mb-12 drop-shadow-[0_0_80px_rgba(255,255,255,0.8)]" id="win-text">
         ПОБЕДА!
@@ -376,13 +404,13 @@
     <div class="ticker" id="ticker-text">ДОБРО ПОЖАЛОВАТЬ НА ВЕЧЕРИНКУ ENDORPHIN!</div>
   </div>
 
-  <!-- ==================== ОСНОВНОЙ СКРИПТ (FIREBASE & ЛОГИКА) ==================== -->
+  <!-- ==================== СКРИПТ ==================== -->
   <script type="module">
-    // ==================== ИМПОРТЫ FIREBASE ====================
+    // ==================== ИМПОРТЫ ====================
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-    // ==================== КОНФИГУРАЦИЯ FIREBASE ====================
+    // ==================== КОНФИГ ====================
     const firebaseConfig = { 
       apiKey: "AIzaSyCXIR5Tv8lB6ivcGRC3yt1SC66MM6T5b_M", 
       authDomain: "endorphin-battle.firebaseapp.com", 
@@ -398,20 +426,19 @@
     const gameId = 'battle_1';
     const gameRef = ref(db, `games/${gameId}`);
 
-    // ==================== ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ ====================
+    // ==================== ПЕРЕМЕННЫЕ ====================
     let currentData = null;
     let playersData = { red: [], blue: [] };
     let currentMode = null;
     let currentBaseUrl = '';
     
-    // ==================== УТИЛИТЫ ====================
     function getBaseUrl() {
       const url = new URL(window.location.href);
       return url.origin + url.pathname.substring(0, url.pathname.lastIndexOf('/') + 1);
     }
     currentBaseUrl = getBaseUrl();
 
-    // ==================== ГЕНЕРАЦИЯ QR-КОДОВ ====================
+    // ==================== QR ====================
     function generateQRs() {
       document.getElementById('qr-container').classList.remove('hidden');
       document.getElementById('tv-status').classList.remove('hidden');
@@ -433,31 +460,28 @@
       document.getElementById('qr-blue').innerHTML = qrBlue.createImgTag(4, 8);
     }
 
-    // ==================== ОБНОВЛЕНИЕ БЕГУЩЕЙ СТРОКИ ====================
+    // ==================== TICKER ====================
     onValue(ref(db, `games/${gameId}/ticker`), (snap) => {
       if (snap.val()) {
         document.getElementById('ticker-text').innerText = snap.val();
       }
     });
 
-    // ==================== СЛУШАТЕЛЬ ОСНОВНОГО СОСТОЯНИЯ ИГРЫ ====================
+    // ==================== MAIN ====================
     onValue(gameRef, (snapshot) => {
       const data = snapshot.val();
       if (!data) return;
       currentData = data;
 
-      // Смена режима
       if (data.mode !== currentMode) {
         currentMode = data.mode;
         document.getElementById('tv-mode').innerText = `РЕЖИМ: ${data.mode?.toUpperCase() || 'ОЖИДАНИЕ'}`;
         if (data.status === 'lobby') generateQRs();
       }
       
-      // Сбор данных игроков
       playersData.red = Object.entries(data.players?.red || {}).map(([id, p]) => ({ id, ...p }));
       playersData.blue = Object.entries(data.players?.blue || {}).map(([id, p]) => ({ id, ...p }));
       
-      // Обновление лобби
       document.getElementById('tv-players-red').innerHTML = playersData.red.map(p => 
         `<div class="text-red-300 font-bold bg-red-900/40 py-1 rounded border border-red-500/50">👤 ${p.name}</div>`
       ).join('');
@@ -466,7 +490,6 @@
         `<div class="text-blue-300 font-bold bg-blue-900/40 py-1 rounded border border-blue-500/50">👤 ${p.name}</div>`
       ).join('');
 
-      // Обработка статуса
       if (data.status === 'lobby') {
          document.getElementById('lobby-view').classList.remove('hidden');
          document.getElementById('battle-view').classList.add('hidden');
@@ -513,7 +536,7 @@
       }
     });
 
-    // ==================== СЛУШАТЕЛЬ ТАЙМЕРА ====================
+    // ==================== TIMER ====================
     onValue(ref(db, `games/${gameId}/timer`), (snap) => {
       const val = snap.val();
       if (val !== null && val !== undefined) {
@@ -523,12 +546,11 @@
       }
     });
 
-    // ==================== ФУНКЦИЯ ОТРИСОВКИ ПОЛЯ ====================
+    // ==================== RENDER ====================
     function renderBattlefield(data) {
       const field = document.getElementById('battlefield');
       const maxP = parseInt(data.mode.charAt(0));
       
-      // Очистка при смене количества игроков
       if (field.children.length !== maxP * 2) {
         field.innerHTML = '';
         
@@ -538,13 +560,11 @@
             const slot = document.createElement('div');
             slot.className = 'player-slot';
             
-            // Расстановка по Y (сверху вниз)
             const yPos = 20 + (i * 60 / Math.max(1, maxP)) + 10;
             slot.style.left = team === 'red' ? '15%' : '85%';
             slot.style.top = `${yPos}%`;
             
             if (p && p.alive) {
-               // Живой игрок
                slot.innerHTML = `
                 <div class="player-hitbox player-${team}" id="player-${team}-${i}">
                   <div class="text-4xl">🧍‍♂️</div>
@@ -553,10 +573,8 @@
                 </div>
                `;
             } else if (p && !p.alive) {
-               // Мертвый игрок
                slot.innerHTML = `<div class="text-6xl opacity-30 text-gray-500">💀</div>`;
             } else {
-               // Нет игрока (показываем QR)
                const teamUrl = `${currentBaseUrl}play.html?game=${gameId}&team=${team}`;
                const qrDiv = document.createElement('div');
                qrDiv.className = 'qr-slot';
@@ -572,7 +590,6 @@
         renderTeam(playersData.red, 'red');
         renderTeam(playersData.blue, 'blue');
       } else {
-        // Обновление жизней и имен
         const updateTeam = (players, team) => {
           for (let i = 0; i < maxP; i++) {
             const p = players[i];
@@ -587,12 +604,11 @@
         updateTeam(playersData.blue, 'blue');
       }
 
-      // Глобальные сердца
       document.getElementById('heart-red').innerText = '❤️'.repeat(playersData.red.reduce((a, b) => a + (b.lives || 0), 0)) || '💀';
       document.getElementById('heart-blue').innerText = '❤️'.repeat(playersData.blue.reduce((a, b) => a + (b.lives || 0), 0)) || '💀';
     }
 
-    // ==================== АНИМАЦИЯ ВЫСТРЕЛА ====================
+    // ==================== SHOT ANIMATION ====================
     onValue(ref(db, `games/${gameId}/last_shot`), (snap) => {
       const shot = snap.val();
       if (!shot) return;
@@ -616,7 +632,6 @@
       let endX = tRect.left - fieldRect.left + tRect.width/2;
       let endY = tRect.top - fieldRect.top + tRect.height/2;
 
-      // Если промах, летит в сторону
       if (!shot.isHit) { 
         endX += (Math.random() > 0.5 ? 200 : -200); 
         endY += (Math.random() > 0.5 ? 150 : -150); 
@@ -625,7 +640,6 @@
       ball.style.left = startX + 'px'; 
       ball.style.top = startY + 'px';
 
-      // Анимация полета
       ball.animate([
         { left: startX + 'px', top: startY + 'px', transform: 'translate(-50%, -50%) scale(1)' },
         { left: (startX + endX) / 2 + 'px', top: startY - 100 + 'px', transform: 'translate(-50%, -50%) scale(1.5)' },
@@ -658,7 +672,7 @@
       };
     });
 
-    // ==================== ГЕНЕРАЦИЯ СНЕЖИНОК ====================
+    // ==================== СНЕЖИНКИ ====================
     const snowContainer = document.getElementById('snow-container');
     for (let i = 0; i < 60; i++) {
       const s = document.createElement('div'); 
