@@ -5,26 +5,27 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
   <title>ENDORPHIN | ЛЕДЯНОЙ БОЙ</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <!-- Библиотека для QR с улучшенной совместимостью -->
+  <script src="https://unpkg.com/qrcode-generator@1.4.4/qrcode.js"></script>
   <style>
     body { background: #03080f; color: #eaffff; font-family: system-ui, sans-serif; overflow: hidden; user-select: none; }
     
+    /* Снежинки */
     .snowflake { position: absolute; color: rgba(180, 235, 255, 0.6); font-size: 14px; animation: fall linear infinite; pointer-events: none; z-index: 0; }
     @keyframes fall { to { transform: translateY(100vh) rotate(360deg); } }
 
-    .phone-mockup { width: 100vw; height: 100vh; background: #03080f; position: fixed; inset: 0; overflow: hidden; touch-action: none; z-index: 9999; }
-    .crosshair { position: absolute; width: 60px; height: 60px; border: 2px dashed #fff; border-radius: 50%; pointer-events: none; transform: translate(-50%, -50%); opacity: 0.7; display: none; z-index: 10; }
-    .crosshair::before, .crosshair::after { content: ''; position: absolute; background: #fff; }
-    .crosshair::before { top: 50%; left: 0; width: 100%; height: 2px; transform: translateY(-50%); }
-    .crosshair::after { left: 50%; top: 0; width: 2px; height: 100%; transform: translateX(-50%); }
+    /* Мобильный интерфейс */
+    .phone-mockup { width: 100vw; height: 100vh; background: #03080f; position: fixed; inset: 0; overflow: hidden; touch-action: none; z-index: 9999; display: none; }
     
-    .shoot-btn { position: absolute; bottom: 20px; right: 20px; width: 80px; height: 80px; border-radius: 50%; background: rgba(255,255,255,0.2); border: 2px solid #fff; color: #fff; font-weight: bold; font-size: 20px; backdrop-filter: blur(5px); display: flex; align-items: center; justify-content: center; z-index: 10000; cursor: pointer; }
-    .shoot-btn:active { background: rgba(255,255,255,0.5); transform: scale(0.95); }
+    /* Ползунки */
+    input[type=range] { -webkit-appearance: none; width: 100%; background: transparent; }
+    input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; height: 30px; width: 30px; border-radius: 50%; background: #fff; box-shadow: 0 0 15px #fff; cursor: pointer; margin-top: -12px; }
+    input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 8px; cursor: pointer; background: #1f8fd6; border-radius: 4px; }
 
-    .snowball { position: absolute; width: 20px; height: 20px; border-radius: 50%; background: radial-gradient(circle at 30% 30%, #fff, #7fe3ff); box-shadow: 0 0 20px #7fe3ff; pointer-events: none; z-index: 20; transform: translate(-50%, -50%); }
-    
+    /* Поле боя на ТВ */
+    .snowball { position: absolute; width: 24px; height: 24px; border-radius: 50%; background: radial-gradient(circle at 30% 30%, #fff, #7fe3ff); box-shadow: 0 0 25px #7fe3ff; pointer-events: none; z-index: 20; transform: translate(-50%, -50%); }
     .snow-fort { background: linear-gradient(180deg, #ffffff, #a8e6ff); box-shadow: 0 10px 20px rgba(127,227,255,0.3); border-radius: 50%; position: absolute; }
-    .player-dot { position: absolute; width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 30px; transform: translate(-50%, -50%); transition: all 0.1s; z-index: 10; }
+    .player-dot { position: absolute; width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 35px; transform: translate(-50%, -50%); transition: all 0.1s; z-index: 10; }
     .player-red { background: #ef4444; box-shadow: 0 0 20px #ef4444; border: 2px solid #fff; }
     .player-blue { background: #3b82f6; box-shadow: 0 0 20px #3b82f6; border: 2px solid #fff; }
     
@@ -37,110 +38,125 @@
   <div id="error-banner" class="hidden fixed top-0 left-0 right-0 bg-red-600 text-white text-center py-2 z-[99999] font-bold text-lg"></div>
   <div id="snow" class="fixed inset-0 pointer-events-none z-0"></div>
 
-  <div class="relative z-10 w-full h-full flex flex-col">
+  <!-- ТВ ЭКРАН -->
+  <div id="tv-screen" class="flex-1 w-full h-full bg-[#e0f2fe] relative overflow-hidden hidden">
     
-    <!-- ================= ТВ ЭКРАН ================= -->
-    <div id="tv-screen" class="flex-1 bg-[#e0f2fe] relative overflow-hidden">
+    <!-- ЛОББИ -->
+    <div id="lobby-view" class="absolute inset-0 flex flex-col items-center justify-center p-8 bg-gradient-to-br from-[#0a2540] to-[#03080f] z-30">
+      <h1 class="text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-cyan-300 to-red-400 mb-8 text-center drop-shadow-[0_0_20px_rgba(127,227,255,0.5)]">
+        ENDORPHIN<br><span class="text-3xl">ЛЕДЯНОЙ БОЙ</span>
+      </h1>
       
-      <div id="lobby-view" class="absolute inset-0 flex flex-col items-center justify-center p-8 bg-gradient-to-br from-[#0a2540] to-[#03080f] z-30">
-        <h1 class="text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-cyan-300 to-red-400 mb-8 text-center drop-shadow-[0_0_20px_rgba(127,227,255,0.5)]">
-          ENDORPHIN<br><span class="text-3xl">ЛЕДЯНОЙ БОЙ</span>
-        </h1>
+      <div class="flex gap-20 mb-12">
+        <div class="flex flex-col items-center">
+          <h2 class="text-4xl font-bold text-red-500 mb-4 drop-shadow-[0_0_10px_rgba(239,68,68,0.5)]">🔴 КРАСНЫЕ</h2>
+          <div class="bg-white p-4 rounded-xl shadow-xl overflow-hidden" id="qr-red"></div>
+          <p class="mt-6 text-2xl font-bold">Игроков: <span id="count-red" class="text-red-500 text-4xl">0</span></p>
+        </div>
         
-        <div class="flex gap-20 mb-12">
-          <div class="flex flex-col items-center">
-            <h2 class="text-4xl font-bold text-red-500 mb-4 drop-shadow-[0_0_10px_rgba(239,68,68,0.5)]">🔴 КРАСНЫЕ</h2>
-            <div class="bg-white p-2 rounded-xl shadow-xl overflow-hidden"><div id="qr-red"></div></div>
-            <p class="mt-6 text-2xl font-bold">Игроков: <span id="count-red" class="text-red-500 text-4xl">0</span></p>
-          </div>
-          
-          <div class="flex flex-col items-center">
-            <h2 class="text-4xl font-bold text-blue-500 mb-4 drop-shadow-[0_0_10px_rgba(59,130,246,0.5)]">🔵 СИНИЕ</h2>
-            <div class="bg-white p-2 rounded-xl shadow-xl overflow-hidden"><div id="qr-blue"></div></div>
-            <p class="mt-6 text-2xl font-bold">Игроков: <span id="count-blue" class="text-blue-500 text-4xl">0</span></p>
-          </div>
-        </div>
-
-        <button id="btn-start" class="opacity-50 cursor-not-allowed px-16 py-6 rounded-full text-4xl font-black bg-gradient-to-r from-blue-500 to-cyan-400 text-black shadow-[0_0_30px_rgba(127,227,255,0.4)] transition hover:scale-105">
-          НАЧАТЬ БОЙ
-        </button>
-        <p class="mt-6 text-gray-400 text-xl">Для старта нужно по 1 игроку с каждой стороны</p>
-      </div>
-
-      <div id="battle-view" class="absolute inset-0 hidden z-10 bg-[#e0f2fe]">
-        <div class="absolute top-0 w-full h-[25%] bg-[#bae6fd] flex justify-center border-b-4 border-[#7fe3ff]">
-           <div class="snow-fort w-[300px] h-[100px] top-[10px]"></div>
-           <div id="blue-player" class="player-dot player-blue top-[50px]">🧍‍♂️</div>
-           <div class="absolute top-4 left-6 flex gap-2">
-             <div class="text-5xl heart" id="life-blue-1">❤️</div>
-             <div class="text-5xl heart" id="life-blue-2">❤️</div>
-             <div class="text-5xl heart" id="life-blue-3">❤️</div>
-           </div>
-        </div>
-
-        <div id="battlefield" class="absolute top-[25%] bottom-[25%] left-0 right-0 overflow-hidden"></div>
-
-        <div class="absolute bottom-0 w-full h-[25%] bg-[#fecaca] flex justify-center border-t-4 border-[#f87171]">
-           <div class="snow-fort w-[300px] h-[100px] bottom-[10px]"></div>
-           <div id="red-player" class="player-dot player-red bottom-[50px]">🧍‍♂️</div>
-           <div class="absolute bottom-4 right-6 flex gap-2">
-             <div class="text-5xl heart" id="life-red-1">❤️</div>
-             <div class="text-5xl heart" id="life-red-2">❤️</div>
-             <div class="text-5xl heart" id="life-red-3">❤️</div>
-           </div>
+        <div class="flex flex-col items-center">
+          <h2 class="text-4xl font-bold text-blue-500 mb-4 drop-shadow-[0_0_10px_rgba(59,130,246,0.5)]">🔵 СИНИЕ</h2>
+          <div class="bg-white p-4 rounded-xl shadow-xl overflow-hidden" id="qr-blue"></div>
+          <p class="mt-6 text-2xl font-bold">Игроков: <span id="count-blue" class="text-blue-500 text-4xl">0</span></p>
         </div>
       </div>
 
-      <div id="win-view" class="absolute inset-0 hidden flex-col items-center justify-center bg-black/90 backdrop-blur-md z-40">
-        <h1 class="text-8xl font-black text-white mb-8" id="win-text">ПОБЕДА!</h1>
-        <button onclick="resetGame()" class="px-10 py-4 rounded-full border-2 border-cyan-400 text-cyan-400 font-bold text-2xl hover:bg-cyan-400 hover:text-black transition">Сыграть ещё</button>
-      </div>
-
+      <button id="btn-start" class="opacity-50 cursor-not-allowed px-16 py-6 rounded-full text-4xl font-black bg-gradient-to-r from-blue-500 to-cyan-400 text-black shadow-[0_0_30px_rgba(127,227,255,0.4)] transition hover:scale-105">
+        НАЧАТЬ БОЙ
+      </button>
+      <p class="mt-6 text-gray-400 text-xl">Для старта нужно по 1 игроку с каждой стороны</p>
     </div>
 
-    <!-- ================= ТЕЛЕФОНЫ ================= -->
-    <div id="phone-view-red" class="phone-mockup hidden flex-col bg-[#03080f]">
-      <div id="join-red" class="flex flex-col items-center justify-center h-full p-6 text-center">
-        <div class="w-24 h-24 bg-red-500/20 rounded-full flex items-center justify-center mb-6 border border-red-500"><span class="text-5xl">🔴</span></div>
-        <h2 class="text-3xl font-bold mb-8 text-red-500">Красные</h2>
-        <input type="text" id="input-name-red" placeholder="Твоё имя" class="w-full bg-black/50 border-2 border-red-500 rounded-xl px-4 py-4 text-center text-2xl text-white mb-6 outline-none focus:border-red-400">
-        <button onclick="joinTeam('red')" class="w-full py-4 bg-red-600 text-white font-bold text-2xl rounded-xl active:scale-95 transition shadow-[0_0_20px_rgba(239,68,68,0.5)]">В БОЙ</button>
-      </div>
-      
-      <div id="play-red" class="hidden w-full h-full absolute inset-0 bg-[#03080f]">
-         <div class="absolute inset-0 bg-[#0a2540]">
-           <div class="absolute top-0 w-full h-1/4 bg-blue-900/30 flex justify-center items-center"><span class="text-6xl opacity-30">🛡️</span></div>
-           <div class="absolute bottom-0 w-full h-1/4 bg-red-900/30 flex justify-center items-center"><span class="text-6xl">🧍‍♂️</span></div>
+    <!-- СЦЕНА БИТВЫ -->
+    <div id="battle-view" class="absolute inset-0 hidden z-10 bg-[#e0f2fe]">
+      <!-- Верхняя база -->
+      <div class="absolute top-0 w-full h-[25%] bg-[#bae6fd] flex justify-center border-b-4 border-[#7fe3ff]">
+         <div class="snow-fort w-[300px] h-[100px] top-[10px]"></div>
+         <div id="blue-player" class="player-dot player-blue top-[50px]">🧍‍♂️</div>
+         <div class="absolute top-4 left-6 flex gap-2">
+           <div class="text-5xl heart" id="life-blue-1">❤️</div>
+           <div class="text-5xl heart" id="life-blue-2">❤️</div>
+           <div class="text-5xl heart" id="life-blue-3">❤️</div>
          </div>
-         <div id="crosshair-red" class="crosshair"></div>
-         <div class="shoot-btn" onclick="firePhone('red')">БРОСОК</div>
-         <div class="absolute top-6 w-full text-center text-red-500 font-black text-2xl pointer-events-none">ЦЕЛЬСЯ И БРОСАЙ</div>
+      </div>
+
+      <!-- Поле боя -->
+      <div id="battlefield" class="absolute top-[25%] bottom-[25%] left-0 right-0 overflow-hidden"></div>
+
+      <!-- Нижняя база -->
+      <div class="absolute bottom-0 w-full h-[25%] bg-[#fecaca] flex justify-center border-t-4 border-[#f87171]">
+         <div class="snow-fort w-[300px] h-[100px] bottom-[10px]"></div>
+         <div id="red-player" class="player-dot player-red bottom-[50px]">🧍‍♂️</div>
+         <div class="absolute bottom-4 right-6 flex gap-2">
+           <div class="text-5xl heart" id="life-red-1">❤️</div>
+           <div class="text-5xl heart" id="life-red-2">❤️</div>
+           <div class="text-5xl heart" id="life-red-3">❤️</div>
+         </div>
       </div>
     </div>
 
-    <div id="phone-view-blue" class="phone-mockup hidden flex-col bg-[#03080f]">
-      <div id="join-blue" class="flex flex-col items-center justify-center h-full p-6 text-center">
-        <div class="w-24 h-24 bg-blue-500/20 rounded-full flex items-center justify-center mb-6 border border-blue-500"><span class="text-5xl">🔵</span></div>
-        <h2 class="text-3xl font-bold mb-8 text-blue-500">Синие</h2>
-        <input type="text" id="input-name-blue" placeholder="Твоё имя" class="w-full bg-black/50 border-2 border-blue-500 rounded-xl px-4 py-4 text-center text-2xl text-white mb-6 outline-none focus:border-blue-400">
-        <button onclick="joinTeam('blue')" class="w-full py-4 bg-blue-600 text-white font-bold text-2xl rounded-xl active:scale-95 transition shadow-[0_0_20px_rgba(59,130,246,0.5)]">В БОЙ</button>
-      </div>
-      
-      <div id="play-blue" class="hidden w-full h-full absolute inset-0 bg-[#03080f]">
-         <div class="absolute inset-0 bg-[#0a2540]">
-           <div class="absolute top-0 w-full h-1/4 bg-blue-900/30 flex justify-center items-center"><span class="text-6xl">🧍‍♂️</span></div>
-           <div class="absolute bottom-0 w-full h-1/4 bg-red-900/30 flex justify-center items-center"><span class="text-6xl opacity-30">🛡️</span></div>
-         </div>
-         <div id="crosshair-blue" class="crosshair"></div>
-         <div class="shoot-btn" onclick="firePhone('blue')">БРОСОК</div>
-         <div class="absolute top-6 w-full text-center text-blue-500 font-black text-2xl pointer-events-none">ЦЕЛЬСЯ И БРОСАЙ</div>
-      </div>
+    <!-- ЭКРАН ПОБЕДЫ -->
+    <div id="win-view" class="absolute inset-0 hidden flex-col items-center justify-center bg-black/90 backdrop-blur-md z-40">
+      <h1 class="text-8xl font-black text-white mb-8" id="win-text">ПОБЕДА!</h1>
+      <button onclick="resetGame()" class="px-10 py-4 rounded-full border-2 border-cyan-400 text-cyan-400 font-bold text-2xl hover:bg-cyan-400 hover:text-black transition">Сыграть ещё</button>
     </div>
 
   </div>
 
-  <!-- ОСНОВНОЙ СКРИПТ -->
+  <!-- МОБИЛЬНЫЙ ИНТЕРФЕЙС (ТЕЛЕФОНЫ) -->
+  <div id="phone-screen" class="phone-mockup flex-col bg-[#03080f]">
+    <!-- Ввод имени -->
+    <div id="join-step" class="flex flex-col items-center justify-center h-full p-6 text-center">
+      <div class="w-24 h-24 rounded-full flex items-center justify-center mb-6 border-2" id="team-icon-join"><span class="text-5xl" id="team-emoji-join">🔴</span></div>
+      <h2 class="text-3xl font-bold mb-8" id="team-name-join">Красные</h2>
+      <input type="text" id="input-name" placeholder="Твоё имя" class="w-full bg-black/50 border-2 rounded-xl px-4 py-4 text-center text-2xl text-white mb-6 outline-none transition" id="input-style">
+      <button id="join-btn" class="w-full py-4 text-white font-bold text-2xl rounded-xl active:scale-95 transition shadow-lg">В БОЙ</button>
+    </div>
+    
+    <!-- Экран прицеливания и силы -->
+    <div id="play-step" class="hidden w-full h-full flex flex-col relative">
+      <!-- Мини-поле для наглядности -->
+      <div class="absolute inset-0 bg-[#0a2540] pointer-events-none">
+        <div class="absolute top-0 w-full h-1/4 bg-blue-900/30 flex justify-center items-center"><span class="text-6xl opacity-30">🛡️</span></div>
+        <div class="absolute bottom-0 w-full h-1/4 bg-red-900/30 flex justify-center items-center"><span class="text-6xl">🧍‍♂️</span></div>
+      </div>
+      
+      <!-- Панель управления -->
+      <div class="absolute bottom-0 w-full p-6 bg-black/80 backdrop-blur-md rounded-t-3xl border-t border-gray-700">
+        
+        <!-- Угол -->
+        <div class="mb-6">
+          <div class="flex justify-between text-sm text-gray-300 mb-2"><span>УГОЛ ТРАЕКТОРИИ</span><span id="angle-display">45°</span></div>
+          <input type="range" id="angle-slider" min="10" max="80" value="45" oninput="updateAngle()">
+        </div>
+
+        <!-- Сила -->
+        <div class="mb-6">
+          <div class="flex justify-between text-sm text-gray-300 mb-2"><span>СИЛА БРОСКА</span><span id="power-display">50</span></div>
+          <!-- Полоса с зоной попадания -->
+          <div class="w-full h-4 bg-gray-800 rounded-full relative overflow-hidden mb-2">
+            <div class="absolute h-full w-[10%] bg-red-500/50 left-0"></div>
+            <div class="absolute h-full w-[20%] bg-green-500/50 left-[50%]"></div>
+            <div class="absolute h-full w-[30%] bg-red-500/50 right-0"></div>
+            <div id="power-bar" class="absolute h-full w-[2px] bg-white shadow-[0_0_10px_#fff]" style="left: 50%"></div>
+          </div>
+        </div>
+
+        <!-- Кнопка -->
+        <button id="action-btn" class="w-full py-5 text-white font-black text-2xl rounded-2xl active:scale-95 transition shadow-[0_10px_30px_rgba(0,0,0,0.5)] bg-blue-600">
+          ЗАМЕР СИЛЫ
+        </button>
+      </div>
+    </div>
+  </div>
+
   <script type="module">
+    // Глобальные переменные для доступа из HTML
+    window.joinTeam = null;
+    window.updateAngle = null;
+    window.firePhone = null;
+    window.resetGame = null;
+
     // Вывод ошибок на экран
     window.addEventListener('error', function(e) {
       const banner = document.getElementById('error-banner');
@@ -160,8 +176,7 @@
       projectId: "endorphin-battle",
       storageBucket: "endorphin-battle.firebasestorage.app",
       messagingSenderId: "185259733030",
-      appId: "1:185259733030:web:d72a89a436880973e636e7",
-      measurementId: "G-5Z9CNGV5L4"
+      appId: "1:185259733030:web:d72a89a436880973e636e7"
     };
 
     let app, db, gameRef;
@@ -173,17 +188,17 @@
       document.getElementById('error-banner').classList.remove('hidden');
     }
 
-    // Обрезаем путь до корня проекта, чтобы ссылка не вела в репозиторий
+    // Парсим URL параметры
     const currentUrl = window.location.href.split('?')[0];
     const urlParams = new URLSearchParams(window.location.search);
     const gameId = urlParams.get('game') || 'battle_1';
-    const team = urlParams.get('team');
+    const team = urlParams.get('team'); // 'red', 'blue' или null
     const playerId = 'player_' + Math.random().toString(36).substr(2, 9);
 
     // Снежинки
     const snowBox = document.getElementById('snow');
     if (snowBox) {
-      for (let i = 0; i < 50; i++) {
+      for (let i = 0; i < 40; i++) {
         const s = document.createElement('div');
         s.className = 'snowflake';
         s.innerText = '❄';
@@ -195,15 +210,22 @@
       }
     }
 
-    // ================= ТВ ЛОГИКА =================
+    // ================= ТВ ЛОГИКА (ЕСЛИ НЕТ ТИМА) =================
     if (!team) {
-      document.getElementById('tv-screen').style.display = 'block';
+      document.getElementById('tv-screen').classList.remove('hidden');
       
-      const redUrl = currentUrl + `?game=${gameId}&team=red`;
-      const blueUrl = currentUrl + `?game=${gameId}&team=blue`;
+      // Функция генерации QR без внешних библиотек (рисует через Canvas)
+      function drawQR(text, containerId) {
+        const qr = qrcode(0, 'M');
+        qr.addData(text);
+        qr.make();
+        document.getElementById(containerId).innerHTML = qr.createImgTag(6, 8);
+      }
 
-      new QRCode(document.getElementById("qr-red"), { text: redUrl, width: 200, height: 200, colorDark: "#000000", colorLight: "#ffffff" });
-      new QRCode(document.getElementById("qr-blue"), { text: blueUrl, width: 200, height: 200, colorDark: "#000000", colorLight: "#ffffff" });
+      setTimeout(() => {
+        drawQR(currentUrl + `?game=${gameId}&team=red`, 'qr-red');
+        drawQR(currentUrl + `?game=${gameId}&team=blue`, 'qr-blue');
+      }, 100);
 
       if (db) {
         gameRef = ref(db, `games/${gameId}`);
@@ -267,6 +289,7 @@
           update(gameRef, { status: 'playing' });
         };
 
+        // Слушаем выстрелы
         onValue(ref(db, `games/${gameId}/shots`), (snapshot) => {
           const shots = snapshot.val();
           if (!shots) return;
@@ -275,14 +298,14 @@
             const shot = shots[key];
             if (shot.animated) return;
             
-            animateShot(shot.team, shot.targetX, shot.targetY);
+            animateShot(shot.team, shot.power, shot.angle);
             update(ref(db, `games/${gameId}/shots/${key}`), { animated: true });
             setTimeout(() => remove(ref(db, `games/${gameId}/shots/${key}`)), 2000);
           });
         });
       }
 
-      function animateShot(team, targetX, targetY) {
+      function animateShot(team, power, angle) {
         const battlefield = document.getElementById('battlefield');
         const ball = document.createElement('div');
         ball.className = 'snowball';
@@ -291,17 +314,18 @@
         const startX = window.innerWidth / 2;
         const startY = team === 'red' ? battlefield.offsetHeight : 0;
         const endY = team === 'red' ? 0 : battlefield.offsetHeight;
-        const endX = (targetX / 100) * battlefield.offsetWidth;
+        
+        // Расчет попадания: если сила от 50 до 70 - попал, иначе мимо (пролетел по Х)
+        const isHit = power >= 50 && power <= 70;
+        const targetX = isHit ? (window.innerWidth / 2) : (Math.random() > 0.5 ? window.innerWidth + 100 : -100);
 
         ball.style.left = startX + 'px';
         ball.style.top = startY + 'px';
 
         ball.animate([
           { left: startX + 'px', top: startY + 'px' },
-          { left: endX + 'px', top: endY + 'px' }
+          { left: targetX + 'px', top: endY + 'px' }
         ], { duration: 600, easing: 'ease-in', fill: 'forwards' }).onfinish = () => {
-          const isHit = team === 'red' ? (targetY < 30) : (targetY > 70);
-          
           if (isHit && db) {
             onValue(gameRef, (snap) => {
               const data = snap.val();
@@ -326,78 +350,98 @@
       }
     }
 
-    // ================= ТЕЛЕФОН ЛОГИКА (ГЛОБАЛЬНЫЕ ФУНКЦИИ) =================
-    let targetX = 50, targetY = 50, playArea;
-    
+    // ================= ТЕЛЕФОН ЛОГИКА (ЕСЛИ ЕСТЬ ТИМА) =================
     if (team) {
-      const phoneView = document.getElementById(`phone-view-${team}`);
-      if (phoneView) {
-        phoneView.classList.remove('hidden');
-        phoneView.classList.add('flex');
-      }
+      document.getElementById('phone-screen').classList.remove('hidden');
+      document.getElementById('phone-screen').classList.add('flex');
+      document.getElementById('phone-screen').style.display = 'flex';
+
+      // Настраиваем цвета под команду
+      const isRed = team === 'red';
+      document.getElementById('team-icon-join').style.borderColor = isRed ? '#ef4444' : '#3b82f6';
+      document.getElementById('team-emoji-join').innerText = isRed ? '🔴' : '🔵';
+      document.getElementById('team-name-join').innerText = isRed ? 'Красные' : 'Синие';
+      document.getElementById('team-name-join').style.color = isRed ? '#ef4444' : '#3b82f6';
+      
+      const input = document.getElementById('input-name');
+      input.style.borderColor = isRed ? '#ef4444' : '#3b82f6';
+      
+      const joinBtn = document.getElementById('join-btn');
+      joinBtn.style.backgroundColor = isRed ? '#dc2626' : '#2563eb';
+
+      const actionBtn = document.getElementById('action-btn');
+      actionBtn.style.backgroundColor = isRed ? '#dc2626' : '#2563eb';
 
       if (db) {
         const playerRef = ref(db, `games/${gameId}/players/${team}/${playerId}`);
         onDisconnect(playerRef).remove();
 
-        // Делаем функции глобальными (через window), чтобы их видел onclick в HTML
-        window.joinTeam = (t) => {
-          const name = document.getElementById(`input-name-${t}`).value.trim() || 'Игрок';
+        // Глобальная функция входа
+        window.joinTeam = () => {
+          const name = input.value.trim() || 'Игрок';
           set(playerRef, { name });
-          document.getElementById(`join-${t}`).classList.add('hidden');
-          document.getElementById(`play-${t}`).classList.remove('hidden');
-          document.getElementById(`crosshair-${t}`).style.display = 'block';
+          document.getElementById('join-step').classList.add('hidden');
+          document.getElementById('play-step').classList.remove('hidden');
         };
 
         onValue(gameRef, (snapshot) => {
           const data = snapshot.val();
-          if (!data) return;
-          
-          if (data.status === 'playing') {
-            document.getElementById(`play-${team}`).classList.remove('hidden');
-            document.getElementById(`crosshair-${team}`).style.display = 'block';
-          } else if (data.status === 'finished') {
-            document.getElementById(`crosshair-${team}`).style.display = 'none';
-            const btn = document.querySelector(`#play-${team} .shoot-btn`);
-            if (btn) btn.style.display = 'none';
+          if (data.status === 'finished') {
+            document.getElementById('play-step').classList.add('hidden');
           }
         });
 
-        playArea = document.getElementById(`play-${team}`);
-        
-        if (playArea) {
-          const handleMove = (e) => {
-            if (e.touches) e.preventDefault();
-            const rect = playArea.getBoundingClientRect();
-            const clientX = e.clientX || e.touches[0].clientX;
-            const clientY = e.clientY || e.touches[0].clientY;
-            const x = clientX - rect.left;
-            const y = clientY - rect.top;
+        // Ползунок угла
+        const angleSlider = document.getElementById('angle-slider');
+        window.updateAngle = () => {
+          document.getElementById('angle-display').innerText = angleSlider.value + '°';
+        };
 
-            targetX = (x / rect.width) * 100;
-            targetY = (y / rect.height) * 100;
+        // Механика "Гольфа" (остановка бегущего ползунка)
+        let isAiming = false;
+        let currentPower = 50;
+        let powerDirection = 1;
+        let powerInterval = null;
 
-            const crosshair = document.getElementById(`crosshair-${team}`);
-            if (crosshair) {
-              crosshair.style.left = `${x}px`;
-              crosshair.style.top = `${y}px`;
-            }
-          };
+        actionBtn.onclick = () => {
+          if (!isAiming) {
+            // Старт замера
+            isAiming = true;
+            actionBtn.innerText = 'БРОСОК!';
+            powerInterval = setInterval(() => {
+              currentPower += powerDirection * 2;
+              if (currentPower >= 100) powerDirection = -1;
+              if (currentPower <= 0) powerDirection = 1;
+              document.getElementById('power-bar').style.left = currentPower + '%';
+              document.getElementById('power-display').innerText = Math.round(currentPower);
+            }, 20);
+          } else {
+            // Бросок
+            isAiming = false;
+            clearInterval(powerInterval);
+            actionBtn.innerText = 'ЖДЕМ...';
+            actionBtn.disabled = true;
 
-          playArea.addEventListener('touchmove', handleMove, { passive: false });
-          playArea.addEventListener('touchstart', handleMove, { passive: false });
-          playArea.addEventListener('mousemove', handleMove);
-        }
+            // Отправляем в Firebase
+            const shotsRef = ref(db, `games/${gameId}/shots`);
+            push(shotsRef, { 
+              team: team, 
+              power: currentPower, 
+              angle: parseInt(angleSlider.value), 
+              time: Date.now() 
+            });
 
-        // Глобальная функция выстрела
-        window.firePhone = (t) => {
-          if (!db) return;
-          const shotsRef = ref(db, `games/${gameId}/shots`);
-          push(shotsRef, { team: t, targetX, targetY, time: Date.now() });
+            // Разблокируем кнопку через 1 секунду
+            setTimeout(() => {
+              actionBtn.innerText = 'ЗАМЕР СИЛЫ';
+              actionBtn.disabled = false;
+            }, 1000);
+          }
         };
       }
     }
 
+    // Глобальная функция сброса
     window.resetGame = () => {
       if (db) {
         set(gameRef, {
