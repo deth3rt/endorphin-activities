@@ -9,60 +9,41 @@
     @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap');
     body { background: radial-gradient(circle at 50% 0%, #0a2540 0%, #03080f 100%); color: #fff; font-family: 'Montserrat', sans-serif; overflow: hidden; user-select: none; touch-action: none; }
     .glass-panel { background: rgba(10, 37, 64, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(127, 227, 255, 0.2); }
-    
-    /* Вертикальный джойстик */
     .slider-container { position: relative; width: 60px; height: 260px; background: rgba(255,255,255,0.05); border-radius: 30px; border: 2px solid rgba(255,255,255,0.1); margin: 0 auto; overflow: hidden; display: flex; align-items: center; }
-    .slider-track { position: absolute; top: 0; bottom: 0; left: 0; right: 0; }
     .slider-thumb { width: 50px; height: 50px; border-radius: 50%; background: linear-gradient(135deg, #fff, #a8e6ff); position: absolute; left: 3px; top: 50%; transform: translateY(-50%); box-shadow: 0 0 20px rgba(255,255,255,0.6); }
-    
     input[type=range] { -webkit-appearance: none; width: 100%; background: transparent; }
     input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; height: 36px; width: 36px; border-radius: 50%; background: #fff; box-shadow: 0 0 20px #fff; cursor: pointer; margin-top: -14px; }
     input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 8px; cursor: pointer; background: linear-gradient(90deg, #ef4444, #fbbf24, #22c55e); border-radius: 4px; }
-
-    /* Кнопка ОГОНЬ */
     .shoot-btn { width: 180px; height: 180px; border-radius: 50%; font-size: 2.5rem; font-weight: 900; transition: all 0.2s; display: flex; align-items: center; justify-content: center; }
-    .shoot-btn:active { transform: scale(0.9); }
     .shoot-btn:disabled { filter: grayscale(1); opacity: 0.3; transform: scale(0.9); }
-
     .disabled-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 100; display: flex; align-items: center; justify-content: center; flex-direction: column; backdrop-filter: blur(5px); }
   </style>
 </head>
 <body class="h-screen w-screen flex flex-col relative" id="main-body">
 
-  <!-- ЭКРАН ВХОДА -->
   <div id="join-screen" class="flex flex-col items-center justify-center h-full p-6 text-center z-10">
     <div class="glass-panel p-8 rounded-3xl w-full max-w-sm flex flex-col items-center">
-      <div class="w-20 h-20 rounded-full flex items-center justify-center mb-4 border-4" id="team-icon"><span class="text-4xl" id="team-emoji">🔴</span></div>
       <input type="text" id="input-name" placeholder="ТВОЁ ИМЯ" class="w-full bg-black/50 border-2 rounded-xl px-4 py-4 text-center text-xl font-bold mb-6 outline-none">
-      <button id="join-btn" class="w-full py-4 text-white font-black text-xl rounded-xl">ПОДКЛЮЧИТЬСЯ</button>
+      <button id="join-btn" class="w-full py-4 text-white font-black text-xl rounded-xl bg-red-600">ПОДКЛЮЧИТЬСЯ</button>
     </div>
   </div>
   
-  <!-- ЭКРАН ИГРЫ -->
   <div id="game-screen" class="hidden w-full h-full flex flex-col items-center justify-center relative z-10">
-    
     <div class="text-center mb-8">
-      <p class="text-cyan-300/80 mb-2 font-bold tracking-[0.2em] text-sm">УГОЛ БРОСКА</p>
-      <!-- Вертикальный джойстик -->
+      <p class="text-cyan-300/80 mb-2 font-bold tracking-[0.2em] text-sm">УГОЛ</p>
       <div class="slider-container" id="angle-slider-container">
-        <div class="slider-track" id="angle-track">
-          <div class="slider-thumb" id="angle-thumb"></div>
-        </div>
+        <div class="slider-thumb" id="angle-thumb"></div>
       </div>
     </div>
-
     <div class="w-4/5 max-w-sm mb-8 glass-panel p-6 rounded-2xl">
       <div class="flex justify-between text-sm font-bold text-white/70 mb-4"><span>СИЛА</span><span id="power-display">50%</span></div>
       <input type="range" id="power-slider" min="10" max="100" value="50">
     </div>
-
-    <button id="shoot-btn" class="shoot-btn border-8 border-white/20">ОГОНЬ</button>
+    <button id="shoot-btn" class="shoot-btn border-8 border-white/20 bg-red-600">ОГОНЬ</button>
   </div>
 
-  <!-- Оверлей "Не твой ход" -->
   <div id="wait-overlay" class="disabled-overlay hidden">
     <h1 class="text-4xl font-black text-white mb-4">ХОД СОПЕРНИКА</h1>
-    <p class="text-xl text-gray-400">ЖДИ СВОЕГО ЧАСА...</p>
   </div>
 
   <script type="module">
@@ -74,44 +55,17 @@
     const db = getDatabase(app);
 
     const urlParams = new URLSearchParams(window.location.search);
-    const gameId = urlParams.get('game') || 'battle_1';
     const team = urlParams.get('team') || 'red';
     const isRed = team === 'red';
-    
-    let playerId = localStorage.getItem('endorphin_playerId');
-    if (!playerId) {
-      playerId = 'p_' + Math.random().toString(36).substr(2, 9);
-      localStorage.setItem('endorphin_playerId', playerId);
-    }
+    let playerId = localStorage.getItem('endorphin_playerId') || 'p_' + Math.random().toString(36).substr(2, 9);
+    localStorage.setItem('endorphin_playerId', playerId);
 
-    const mainColor = isRed ? '#ef4444' : '#3b82f6';
-    document.getElementById('team-icon').style.borderColor = mainColor;
-    document.getElementById('team-emoji').innerText = isRed ? '🔴' : '🔵';
-    document.getElementById('input-name').style.borderColor = mainColor;
-    document.getElementById('join-btn').style.background = mainColor;
-    document.getElementById('shoot-btn').style.background = `linear-gradient(135deg, ${mainColor}, #000)`;
-
-    const playerRef = ref(db, `games/${gameId}/players/${team}/${playerId}`);
+    const playerRef = ref(db, `games/battle_1/players/${team}/${playerId}`);
     onDisconnect(playerRef).remove();
 
     window.joinGame = async () => {
       const name = document.getElementById('input-name').value.trim() || 'Игрок';
-      const snapshot = await get(ref(db, `games/${gameId}`));
-      const data = snapshot.val();
-      
-      if (data && data.status !== 'lobby') return alert('Игра уже идет!');
-      
-      const maxP = data ? parseInt(data.mode.charAt(0)) : 1;
-      const currentCount = Object.keys(data?.players?.[team] || {}).length;
-      
-      if (!data?.players?.[team]?.[playerId] && currentCount >= maxP) {
-        return alert('Команда заполнена!');
-      }
-
-      // ВАЖНО: Сохраняем жизни при переподключении!
-      const currentLives = data?.players?.[team]?.[playerId]?.lives || 3;
-      set(playerRef, { name, lives: currentLives, alive: true });
-      
+      set(playerRef, { name, lives: 3, alive: true });
       document.getElementById('join-screen').classList.add('hidden');
       document.getElementById('game-screen').classList.remove('hidden');
       document.getElementById('game-screen').classList.add('flex');
@@ -120,7 +74,7 @@
 
     let isMyTurn = false;
 
-    onValue(ref(db, `games/${gameId}`), (snapshot) => {
+    onValue(ref(db, 'games/battle_1'), (snapshot) => {
       const data = snapshot.val();
       if (!data) return;
 
@@ -130,7 +84,6 @@
         document.getElementById('game-screen').classList.add('flex');
         
         isMyTurn = (data.activePlayerId === playerId);
-        
         const btn = document.getElementById('shoot-btn');
         const overlay = document.getElementById('wait-overlay');
         
@@ -142,39 +95,26 @@
           overlay.classList.remove('hidden');
         }
       }
-      
-      if (data.status === 'finished') {
-        document.getElementById('game-screen').classList.add('hidden');
-      }
     });
 
-    // === ЛОГИКА ДЖОЙСТИКА ===
+    let currentAngle = 45;
     const container = document.getElementById('angle-slider-container');
     const thumb = document.getElementById('angle-thumb');
-    let currentAngle = 45;
-
-    const updateThumb = (clientY) => {
-      const rect = container.getBoundingClientRect();
-      let y = clientY - rect.top;
-      y = Math.max(25, Math.min(rect.height - 25, y));
-      
-      const percentage = 1 - (y / rect.height);
-      thumb.style.top = `${y}px`;
-      currentAngle = 10 + (percentage * 70);
-    };
-
+    
     const handleMove = (e) => {
       if (!isMyTurn) return;
       if (e.touches) e.preventDefault();
       const clientY = e.clientY || e.touches[0].clientY;
-      updateThumb(clientY);
+      const rect = container.getBoundingClientRect();
+      let y = clientY - rect.top;
+      y = Math.max(25, Math.min(rect.height - 25, y));
+      const percentage = 1 - (y / rect.height);
+      thumb.style.top = `${y}px`;
+      currentAngle = 10 + (percentage * 70); // От 10 до 80 градусов
     };
-
     container.addEventListener('touchmove', handleMove, { passive: false });
     container.addEventListener('touchstart', handleMove, { passive: false });
-    container.addEventListener('mousemove', (e) => { if (e.buttons === 1) handleMove(e); });
 
-    // === ВЫСТРЕЛ ===
     document.getElementById('power-slider').addEventListener('input', (e) => {
       document.getElementById('power-display').innerText = e.target.value + '%';
     });
@@ -183,55 +123,66 @@
       if (!isMyTurn) return;
       
       const power = parseInt(document.getElementById('power-slider').value);
+      const angle = currentAngle; // Получаем угол из переменной джойстика
       
-      onValue(ref(db, `games/${gameId}/players/${isRed ? 'blue' : 'red'}`), (snap) => {
-        const enemies = Object.entries(snap.val() || {});
-        const aliveEnemies = enemies.filter(([id, p]) => p.alive);
-        if (aliveEnemies.length === 0) return;
-        
-        const targetIndex = Math.floor(Math.random() * aliveEnemies.length);
-        const targetId = aliveEnemies[targetIndex][0];
-        const isHit = power >= 30; 
-        
-        onValue(ref(db, `games/${gameId}/players/${team}`), (mySnap) => {
-          const myPlayers = Object.entries(mySnap.val() || {}).filter(([id, p]) => p.alive);
-          
-          const shotData = { 
-            team, 
-            shooterIndex: myPlayers.findIndex(([id]) => id === playerId),
-            targetTeam: isRed ? 'blue' : 'red', 
-            targetIndex: aliveEnemies.findIndex(([id]) => id === targetId),
-            isHit: isHit, 
-            isMega: (power > 90 && isHit) 
-          };
-          
-          push(ref(db, `games/${gameId}/shots`), shotData);
-          set(ref(db, `games/${gameId}/last_shot`), shotData);
-          
-          if (isHit) {
-            const dmg = (power > 90) ? 2 : 1;
-            const newLives = Math.max(0, aliveEnemies[targetIndex][1].lives - dmg);
-            const isDead = newLives <= 0;
-            update(ref(db, `games/${gameId}/players/${isRed ? 'blue' : 'red'}/${targetId}`), { lives: newLives, alive: !isDead });
-          }
-          
-          // Передача хода
-          let nextPlayer = null;
-          const myIndex = myPlayers.findIndex(([id]) => id === playerId);
-          
-          if (myIndex !== -1 && myIndex < myPlayers.length - 1) { 
-            nextPlayer = myPlayers[myIndex + 1]; 
-          } else {
-            const enemyTeam = Object.entries(data.players[isRed ? 'blue' : 'red'] || {}).filter(([id, p]) => p.alive);
-            if (enemyTeam.length > 0) nextPlayer = enemyTeam[0];
-          }
+      // ТОЧНАЯ МАТЕМАТИКА
+      // Дальность полета = (V^2 * sin(2a)) / g
+      // У нас упрощенная формула: power переводим в "силу" (дальность).
+      // Если угол 45 градусов, то дальность = power * 10 (например).
+      const rad = angle * Math.PI / 180;
+      const distance = (Math.pow(power, 2) * Math.sin(2 * rad)) / 10;
 
-          if (nextPlayer) {
-            update(ref(db, `games/${gameId}`), { activePlayerId: nextPlayer[0], turn: { team: isRed ? 'blue' : 'red', name: nextPlayer[1].name } });
-          } else {
-            update(ref(db, `games/${gameId}`), { status: 'finished', winner: team });
+      // Физический хитбокс: Красные на 15% слева, Синие на 85%.
+      // Это расстояние между ними (по X) = 70% ширины экрана.
+      // Переводим в условные единицы.
+      const targetDistance = 70; // В процентах экрана (от 15% до 85%)
+      
+      // Проверяем, попадает ли снаряд в диапазон (плюс-минус погрешность)
+      const isHit = (distance >= targetDistance - 8 && distance <= targetDistance + 8);
+
+      // Отправляем в базу
+      const shotsRef = ref(db, 'games/battle_1/shots');
+      push(shotsRef, { team, power, angle, distance, isHit, time: Date.now() });
+
+      if (isHit) {
+        // Ищем случайного живого врага
+        onValue(ref(db, `games/battle_1/players/${isRed ? 'blue' : 'red'}`), (snap) => {
+          const enemies = Object.entries(snap.val() || {});
+          const aliveEnemies = enemies.filter(([id, p]) => p.alive);
+          if (aliveEnemies.length === 0) return;
+          
+          const targetId = aliveEnemies[0][0];
+          const enemyTeam = isRed ? 'blue' : 'red';
+          
+          // Снимаем жизнь
+          const newLives = Math.max(0, aliveEnemies[0][1].lives - 1);
+          update(ref(db, `games/battle_1/players/${enemyTeam}/${targetId}`), { lives: newLives, alive: newLives > 0 });
+          
+          // Проверка на смерть команды
+          const teamLives = aliveEnemies.reduce((sum, [id, p]) => sum + (id === targetId ? newLives : p.lives), 0);
+          if (teamLives <= 0) {
+            update(ref(db, 'games/battle_1'), { status: 'finished', winner: team });
           }
         }, { onlyOnce: true });
+      }
+
+      // Передача хода
+      onValue(ref(db, 'games/battle_1/players'), (snap) => {
+        const players = snap.val();
+        const myTeamPlayers = Object.entries(players[team] || {}).filter(([id, p]) => p.alive);
+        const myIndex = myTeamPlayers.findIndex(([id]) => id === playerId);
+        
+        let nextPlayer = null;
+        if (myIndex !== -1 && myIndex < myTeamPlayers.length - 1) {
+          nextPlayer = myTeamPlayers[myIndex + 1];
+        } else {
+          const enemyTeam = Object.entries(players[isRed ? 'blue' : 'red'] || {}).filter(([id, p]) => p.alive);
+          if (enemyTeam.length > 0) nextPlayer = enemyTeam[0];
+        }
+
+        if (nextPlayer) {
+          update(ref(db, 'games/battle_1'), { activePlayerId: nextPlayer[0], turn: { team: isRed ? 'blue' : 'red', name: nextPlayer[1].name } });
+        }
       }, { onlyOnce: true });
     };
   </script>
