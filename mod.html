@@ -12,7 +12,6 @@
   </style>
 </head>
 <body>
-
   <div class="w-full max-w-4xl flex justify-between items-center mb-8">
     <h1 class="text-3xl font-black text-cyan-300 tracking-wider">ПУЛЬТ ВЕДУЩЕГО</h1>
     <a href="index.html" class="px-4 py-2 bg-gray-800 rounded-lg font-bold text-sm hover:bg-gray-700 transition">В МЕНЮ</a>
@@ -20,7 +19,7 @@
 
   <div id="lobby-controls" class="w-full flex flex-col items-center">
     <div class="glass w-full max-w-4xl p-8 mb-8 flex flex-col items-center">
-      <h2 class="text-xl font-bold mb-4 text-cyan-100">1. ВЫБЕРИ РЕЖИМ</h2>
+      <h2 class="text-xl font-bold mb-4 text-cyan-100">ВЫБЕРИ РЕЖИМ</h2>
       <div class="flex gap-4">
         <button onclick="setMode('1v1')" class="mode-btn px-8 py-4 rounded-xl border-2 font-bold text-lg transition-all" id="btn-1v1">1 на 1</button>
         <button onclick="setMode('2v2')" class="mode-btn px-8 py-4 rounded-xl border-2 font-bold text-lg transition-all" id="btn-2v2">2 на 2</button>
@@ -30,22 +29,14 @@
     </div>
 
     <div class="glass w-full max-w-4xl p-8 mb-8">
-      <h2 class="text-xl font-bold mb-4 text-cyan-100 text-center">2. КОМАНДЫ</h2>
+      <h2 class="text-xl font-bold mb-4 text-cyan-100 text-center">КОМАНДЫ</h2>
       <div class="grid grid-cols-2 gap-8">
-        <div class="bg-red-900/20 p-6 rounded-xl border border-red-500/30">
-          <h3 class="font-bold text-red-400 mb-4 text-center text-xl">КРАСНЫЕ</h3>
-          <ul id="list-red" class="space-y-2 text-sm"></ul>
-        </div>
-        <div class="bg-blue-900/20 p-6 rounded-xl border border-blue-500/30">
-          <h3 class="font-bold text-blue-400 mb-4 text-center text-xl">СИНИЕ</h3>
-          <ul id="list-blue" class="space-y-2 text-sm"></ul>
-        </div>
+        <div class="bg-red-900/20 p-6 rounded-xl border border-red-500/30"><h3 class="font-bold text-red-400 mb-4 text-center text-xl">КРАСНЫЕ</h3><ul id="list-red" class="space-y-2 text-sm"></ul></div>
+        <div class="bg-blue-900/20 p-6 rounded-xl border border-blue-500/30"><h3 class="font-bold text-blue-400 mb-4 text-center text-xl">СИНИЕ</h3><ul id="list-blue" class="space-y-2 text-sm"></ul></div>
       </div>
     </div>
 
-    <button id="btn-start" disabled class="w-full max-w-4xl py-8 bg-gradient-to-r from-blue-600 to-cyan-500 rounded-2xl text-3xl font-black text-black shadow-[0_0_40px_rgba(6,182,212,0.6)] disabled:opacity-50 disabled:cursor-not-allowed transition-all">
-      НАЧАТЬ БОЙ
-    </button>
+    <button id="btn-start" disabled class="w-full max-w-4xl py-8 bg-gradient-to-r from-blue-600 to-cyan-500 rounded-2xl text-3xl font-black text-black shadow-[0_0_40px_rgba(6,182,212,0.6)] disabled:opacity-50 disabled:cursor-not-allowed transition-all">НАЧАТЬ БОЙ</button>
   </div>
 
   <div id="game-controls" class="hidden w-full max-w-4xl flex-col items-center">
@@ -57,17 +48,12 @@
         <div class="bg-blue-900/20 p-6 rounded-xl border border-blue-500/30 text-blue-400 font-bold text-2xl" id="mod-hp-blue">СИНИЕ: 3</div>
       </div>
     </div>
-    
-    <div class="flex gap-4 w-full">
-      <button onclick="endGame()" class="flex-1 py-6 bg-red-600 rounded-xl font-black text-xl hover:bg-red-500 transition">ЗАКОНЧИТЬ БОЙ</button>
-      <button onclick="resetGame()" class="flex-1 py-6 bg-gray-800 rounded-xl font-black text-xl hover:bg-gray-700 transition">В ГЛАВНОЕ МЕНЮ</button>
-    </div>
+    <button onclick="endGame()" class="w-full py-6 bg-red-600 rounded-xl font-black text-xl hover:bg-red-500 transition">ЗАКОНЧИТЬ БОЙ</button>
   </div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getDatabase, ref, set, onValue, update, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
-
     const firebaseConfig = { apiKey: "AIzaSyCXIR5Tv8lB6ivcGRC3yt1SC66MM6T5b_M", authDomain: "endorphin-battle.firebaseapp.com", databaseURL: "https://endorphin-battle-default-rtdb.europe-west1.firebasedatabase.app", projectId: "endorphin-battle", storageBucket: "endorphin-battle.firebasestorage.app", messagingSenderId: "185259733030", appId: "1:185259733030:web:d72a89a436880973e636e7" };
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
@@ -78,38 +64,30 @@
 
     set(gameRef, { status: 'lobby', mode: null, lives: { red: 3, blue: 3 }, players: { red: {}, blue: {} } }).then(() => { setMode('1v1'); });
 
-    window.setMode = (mode) => {
-      if(currentData?.status === 'playing') return;
-      update(gameRef, { mode });
-    };
+    window.setMode = (mode) => { if(currentData?.status === 'playing') return; update(gameRef, { mode }); };
 
     onValue(gameRef, (snapshot) => {
       const data = snapshot.val();
       if (!data) return;
       currentData = data;
 
-      // Управление экранами
       if (data.status === 'playing') {
         document.getElementById('lobby-controls').classList.add('hidden');
         document.getElementById('game-controls').classList.remove('hidden');
         document.getElementById('game-controls').classList.add('flex');
-        
         if (data.turn) document.getElementById('mod-turn-info').innerText = `ХОД: ${data.turn.name.toUpperCase()}`;
         document.getElementById('mod-hp-red').innerText = `КРАСНЫЕ: ${data.lives.red}`;
         document.getElementById('mod-hp-blue').innerText = `СИНИЕ: ${data.lives.blue}`;
       } else {
         document.getElementById('lobby-controls').classList.remove('hidden');
         document.getElementById('game-controls').classList.add('hidden');
-        document.getElementById('game-controls').classList.remove('flex');
       }
 
-      // Подсветка режима
       if (data.mode) {
         document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('border-cyan-400', 'bg-cyan-900/30', 'text-cyan-300'));
         document.getElementById(`btn-${data.mode}`)?.classList.add('border-cyan-400', 'bg-cyan-900/30', 'text-cyan-300');
       }
 
-      // Списки игроков
       const renderList = (team, listId) => {
         const players = Object.entries(data.players[team] || {});
         document.getElementById(listId).innerHTML = players.map(([id, p]) => `
@@ -119,30 +97,22 @@
           </li>
         `).join('');
       };
-      renderList('red', 'list-red');
-      renderList('blue', 'list-blue');
+      renderList('red', 'list-red'); renderList('blue', 'list-blue');
 
       const maxP = parseInt(data.mode?.charAt(0) || 1);
       const redCount = Object.keys(data.players.red || {}).length;
       const blueCount = Object.keys(data.players.blue || {}).length;
 
       const btn = document.getElementById('btn-start');
-      if (redCount >= maxP && blueCount >= maxP && data.status === 'lobby') {
-        btn.disabled = false;
-        btn.innerText = 'НАЧАТЬ БОЙ';
-      } else if (data.status === 'lobby') {
-        btn.disabled = true;
-        btn.innerText = `ОЖИДАНИЕ (${redCount}/${maxP} vs ${blueCount}/${maxP})`;
-      }
+      if (redCount >= maxP && blueCount >= maxP && data.status === 'lobby') { btn.disabled = false; btn.innerText = 'НАЧАТЬ БОЙ'; } 
+      else if (data.status === 'lobby') { btn.disabled = true; btn.innerText = `ОЖИДАНИЕ (${redCount}/${maxP} vs ${blueCount}/${maxP})`; }
     });
 
-    window.kickPlayer = (team, id) => {
-      if(confirm('Кикнуть игрока?')) remove(ref(db, `games/battle_1/players/${team}/${id}`));
-    };
+    window.kickPlayer = (team, id) => { if(confirm('Кикнуть игрока?')) remove(ref(db, `games/battle_1/players/${team}/${id}`)); };
+    window.endGame = () => { update(gameRef, { status: 'finished', winner: 'none' }); };
 
     document.getElementById('btn-start').onclick = () => {
       if (!currentData) return;
-      
       const firstTeam = 'red';
       const firstPlayerEntry = Object.entries(currentData.players[firstTeam] || {})[0];
       if (!firstPlayerEntry) return alert('Нет игроков!');
@@ -151,47 +121,28 @@
         status: 'playing', 
         turn: { team: firstTeam, name: firstPlayerEntry[1].name }, 
         activePlayerId: firstPlayerEntry[0],
-        timer: 3
+        timer: 3 
       });
       
-      // Запуск 3-2-1 и затем хода
       let countdown = 3;
       if (timerInterval) clearInterval(timerInterval);
-      
       timerInterval = setInterval(() => {
         countdown--;
         update(gameRef, { timer: countdown });
-        if (countdown <= 0) {
-          clearInterval(timerInterval);
-          startPlayerTimer();
-        }
+        if (countdown <= 0) { clearInterval(timerInterval); startPlayerTimer(); }
       }, 1000);
     };
 
-    // Запуск 15-секундного таймера
     function startPlayerTimer() {
       let time = 15;
       update(gameRef, { timer: time });
-      
       if (timerInterval) clearInterval(timerInterval);
       timerInterval = setInterval(() => {
         time--;
         update(gameRef, { timer: time });
-        
-        if (time <= 0) {
-          clearInterval(timerInterval);
-          // Таймаут — пропуск хода (логика пропуска пишется в play.html при выстреле)
-          // Но чтобы не зависало, мы просто меняем ход. Для простоты засчитываем как промах.
-          const data = currentData;
-          if (data) {
-             // Передаем ход следующему (упрощенно)
-          }
-        }
+        if (time <= 0) { clearInterval(timerInterval); }
       }, 1000);
     }
-
-    window.endGame = () => { update(gameRef, { status: 'finished', winner: 'none' }); };
-    window.resetGame = () => { set(gameRef, { status: 'lobby', mode: currentData.mode, lives: { red: 3, blue: 3 }, players: { red: {}, blue: {} } }); window.location.reload(); };
   </script>
 </body>
 </html>
