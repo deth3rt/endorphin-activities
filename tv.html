@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>ENDORPHIN | ТВ</title>
+  <title>ENDORPHIN | ТВ ЭКРАН</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/qrcode-generator@1.4.4/qrcode.js"></script>
   <style>
@@ -21,17 +21,14 @@
     .snowball { position: absolute; width: 24px; height: 24px; border-radius: 50%; background: radial-gradient(circle at 30% 30%, #fff, #7fe3ff); box-shadow: 0 0 20px #7fe3ff; pointer-events: none; z-index: 30; transform: translate(-50%, -50%); }
     .snow-burst { position: absolute; width: 80px; height: 80px; border-radius: 50%; background: radial-gradient(circle, rgba(255,255,255,1) 0%, rgba(127,227,255,0) 70%); pointer-events: none; z-index: 25; transform: translate(-50%, -50%) scale(0); }
     
-    /* Персонажи с именами */
     .player-hitbox { position: absolute; width: 70px; height: 110px; transform: translate(-50%, -50%); z-index: 20; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; border-radius: 20px; transition: all 0.3s; }
     .player-red { background: rgba(239, 68, 68, 0.15); border: 3px dashed #ef4444; box-shadow: 0 0 30px rgba(239, 68, 68, 0.4); }
     .player-blue { background: rgba(59, 130, 246, 0.15); border: 3px dashed #3b82f6; box-shadow: 0 0 30px rgba(59, 130, 246, 0.4); }
     .player-hitbox.dead { opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
     
-    /* МЕГАБРОСОК */
     @keyframes megaZoom { 0% { transform: translate(-50%, -50%) scale(0.1) rotate(-15deg); opacity: 0; } 50% { transform: translate(-50%, -50%) scale(1.2) rotate(5deg); opacity: 1; text-shadow: 0 0 150px #fbbf24; } 100% { transform: translate(-50%, -50%) scale(1) rotate(0); opacity: 1; } }
     .mega-text { position: absolute; top: 50%; left: 50%; font-size: 120px; font-weight: 900; color: #fff; text-shadow: 0 0 80px #fbbf24, 0 0 40px #fff; z-index: 100; pointer-events: none; letter-spacing: 5px; text-transform: uppercase; animation: megaZoom 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
     
-    /* Бегущая строка */
     .ticker-wrap { position: fixed; bottom: 0; left: 0; width: 100%; height: 60px; background: rgba(0, 0, 0, 0.9); overflow: hidden; border-top: 2px solid #06b6d4; z-index: 100; display: flex; align-items: center; }
     .ticker { display: inline-block; white-space: nowrap; padding-left: 100%; animation: ticker 15s linear infinite; font-size: 24px; font-weight: 700; color: #22d3ee; text-transform: uppercase; letter-spacing: 2px; }
     @keyframes ticker { 0% { transform: translate3d(0, 0, 0); } 100% { transform: translate3d(-100%, 0, 0); } }
@@ -43,25 +40,31 @@
 
   <div id="tv-screen" class="flex-1 w-full h-full relative z-10 pb-16">
     
-    <!-- ЛОББИ -->
+    <!-- ЛОББИ / ОЖИДАНИЕ -->
     <div id="lobby-view" class="absolute inset-0 flex flex-col items-center justify-center p-8 transition-opacity duration-500">
-      <div class="text-center mb-12">
+      <div class="text-center mb-8">
         <h1 class="text-8xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 via-blue-400 to-indigo-500 mb-2 drop-shadow-[0_0_30px_rgba(59,130,246,0.8)] tracking-tighter">ENDORPHIN</h1>
-        <h2 class="text-4xl font-bold text-cyan-100 tracking-[0.3em] uppercase opacity-80" id="tv-mode-text">Снежный Баттл</h2>
+        <h2 class="text-4xl font-bold text-cyan-100 tracking-[0.3em] uppercase opacity-80">Снежный Баттл</h2>
+        <div id="tv-mode" class="mt-4 inline-block bg-cyan-900/50 px-8 py-2 rounded-full border border-cyan-500/50 text-2xl font-black text-cyan-300">РЕЖИМ: ОЖИДАНИЕ</div>
       </div>
-      
-      <div class="flex gap-24 mb-12">
-        <div class="glass-panel p-8 rounded-3xl flex flex-col items-center w-80 relative">
+
+      <!-- Блок с QR (появляется, когда выбран режим) -->
+      <div id="qr-container" class="hidden flex gap-24 mb-8">
+        <div class="glass-panel p-6 rounded-3xl flex flex-col items-center w-80 relative">
           <div class="absolute -top-6 w-full text-center"><span class="bg-red-500 text-white font-black px-6 py-2 rounded-full">КРАСНЫЕ</span></div>
-          <div id="players-red" class="mt-6 space-y-2 w-full text-center text-sm"></div>
+          <div class="bg-white p-3 rounded-xl mt-4" id="qr-red"></div>
+          <div id="tv-players-red" class="mt-4 space-y-2 w-full text-center text-sm"></div>
         </div>
         <div class="flex flex-col items-center justify-center"><div class="text-6xl font-black text-white/30 italic">VS</div></div>
-        <div class="glass-panel p-8 rounded-3xl flex flex-col items-center w-80 relative">
+        <div class="glass-panel p-6 rounded-3xl flex flex-col items-center w-80 relative">
           <div class="absolute -top-6 w-full text-center"><span class="bg-blue-500 text-white font-black px-6 py-2 rounded-full">СИНИЕ</span></div>
-          <div id="players-blue" class="mt-6 space-y-2 w-full text-center text-sm"></div>
+          <div class="bg-white p-3 rounded-xl mt-4" id="qr-blue"></div>
+          <div id="tv-players-blue" class="mt-4 space-y-2 w-full text-center text-sm"></div>
         </div>
       </div>
-      <p class="mt-4 text-cyan-200/50 text-lg font-semibold tracking-wider" id="lobby-status">ОЖИДАНИЕ МОДЕРАТОРА...</p>
+      
+      <!-- Статус (Ожидание / Отсчет) -->
+      <div id="tv-status" class="text-4xl font-black text-white tracking-widest drop-shadow-[0_0_20px_#fff] hidden">ОЖИДАНИЕ ИГРОКОВ...</div>
     </div>
 
     <!-- СЦЕНА БИТВЫ -->
@@ -69,20 +72,12 @@
       <div class="grid-overlay"></div>
       <div class="absolute left-0 top-0 bottom-0 w-[20%] bg-gradient-to-r from-red-900/40 to-transparent border-r-4 border-red-500/50"></div>
       <div class="absolute right-0 top-0 bottom-0 w-[20%] bg-gradient-to-l from-blue-900/40 to-transparent border-l-4 border-blue-500/50"></div>
-
       <div id="battlefield" class="absolute left-0 right-0 top-0 bottom-0"></div>
-
-      <div class="absolute top-4 left-4 flex flex-col gap-1 glass-panel p-2 rounded-xl z-30 text-3xl">
-        <div id="heart-red">❤️❤️❤️</div>
-      </div>
-      <div class="absolute bottom-4 right-4 flex flex-col gap-1 glass-panel p-2 rounded-xl z-30 text-3xl">
-        <div id="heart-blue">❤️❤️❤️</div>
-      </div>
       
-      <!-- Индикатор хода -->
-      <div class="absolute top-4 left-1/2 -translate-x-1/2 glass-panel px-8 py-3 rounded-full z-30 text-2xl font-black tracking-widest" id="turn-indicator">
-        ХОД: ...
-      </div>
+      <div class="absolute top-4 left-4 flex flex-col gap-1 glass-panel p-2 rounded-xl z-30 text-3xl"><div id="heart-red">❤️❤️❤️</div></div>
+      <div class="absolute bottom-4 right-4 flex flex-col gap-1 glass-panel p-2 rounded-xl z-30 text-3xl"><div id="heart-blue">❤️❤️❤️</div></div>
+      
+      <div class="absolute top-4 left-1/2 -translate-x-1/2 glass-panel px-8 py-3 rounded-full z-30 text-2xl font-black tracking-widest" id="turn-indicator">ХОД: ...</div>
       <div class="absolute top-20 left-1/2 -translate-x-1/2 text-6xl font-black text-white drop-shadow-[0_0_20px_#fff]" id="tv-timer"></div>
     </div>
 
@@ -93,58 +88,89 @@
   </div>
 
   <div class="ticker-wrap">
-    <div class="ticker" id="ticker-text">ДОБРО ПОЖАЛОВАТЬ НА ВЕЧЕРИНКУ ENDORPHIN! СЛЕДИ ЗА СРАЖЕНИЕМ НА ЭКРАНЕ. НЕ ЗАБУДЬ ПОДПИСАТЬСЯ НА НАШИ СОЦСЕТИ!</div>
+    <div class="ticker" id="ticker-text">ДОБРО ПОЖАЛОВАТЬ НА ВЕЧЕРИНКУ ENDORPHIN! СЛЕДИ ЗА СРАЖЕНИЕМ НА ЭКРАНЕ.</div>
   </div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
-
     const firebaseConfig = { apiKey: "AIzaSyCXIR5Tv8lB6ivcGRC3yt1SC66MM6T5b_M", authDomain: "endorphin-battle.firebaseapp.com", databaseURL: "https://endorphin-battle-default-rtdb.europe-west1.firebasedatabase.app", projectId: "endorphin-battle", storageBucket: "endorphin-battle.firebasestorage.app", messagingSenderId: "185259733030", appId: "1:185259733030:web:d72a89a436880973e636e7" };
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
     const gameId = 'battle_1';
     const gameRef = ref(db, `games/${gameId}`);
+    const currentUrl = window.location.href.split('?')[0];
 
     let playersData = { red: [], blue: [] };
+    let currentMode = null;
 
-    // Слушаем текст бегущей строки
     onValue(ref(db, `games/${gameId}/ticker`), (snap) => {
       if(snap.val()) document.getElementById('ticker-text').innerText = snap.val();
     });
+
+    // Генерация QR
+    function generateQRs(teamParam) {
+      const qrContainer = document.getElementById('qr-container');
+      qrContainer.classList.remove('hidden');
+      document.getElementById('tv-status').classList.remove('hidden');
+      
+      const urlRed = currentUrl + `play.html?game=${gameId}&team=red`;
+      const urlBlue = currentUrl + `play.html?game=${gameId}&team=blue`;
+      
+      document.getElementById('qr-red').innerHTML = '';
+      document.getElementById('qr-blue').innerHTML = '';
+      
+      const qrRed = qrcode(0, 'M'); qrRed.addData(urlRed); qrRed.make();
+      document.getElementById('qr-red').innerHTML = qrRed.createImgTag(4, 8);
+      
+      const qrBlue = qrcode(0, 'M'); qrBlue.addData(urlBlue); qrBlue.make();
+      document.getElementById('qr-blue').innerHTML = qrBlue.createImgTag(4, 8);
+    }
 
     onValue(gameRef, (snapshot) => {
       const data = snapshot.val();
       if (!data) return;
 
-      document.getElementById('tv-mode-text').innerText = `Снежный Баттл (${data.mode || '1v1'})`;
+      if (data.mode !== currentMode) {
+        currentMode = data.mode;
+        document.getElementById('tv-mode').innerText = `РЕЖИМ: ${data.mode.toUpperCase()}`;
+        if (data.status === 'lobby') generateQRs();
+      }
       
       playersData.red = Object.values(data.players?.red || {});
       playersData.blue = Object.values(data.players?.blue || {});
       
-      document.getElementById('players-red').innerHTML = playersData.red.map(p => `<div class="text-red-300 font-bold bg-red-900/40 py-2 rounded-xl border border-red-500/50">👤 ${p.name}</div>`).join('');
-      document.getElementById('players-blue').innerHTML = playersData.blue.map(p => `<div class="text-blue-300 font-bold bg-blue-900/40 py-2 rounded-xl border border-blue-500/50">👤 ${p.name}</div>`).join('');
+      // Вывод имен
+      document.getElementById('tv-players-red').innerHTML = playersData.red.map(p => `<div class="text-red-300 font-bold bg-red-900/40 py-1 rounded border border-red-500/50">👤 ${p.name}</div>`).join('');
+      document.getElementById('tv-players-blue').innerHTML = playersData.blue.map(p => `<div class="text-blue-300 font-bold bg-blue-900/40 py-1 rounded border border-blue-500/50">👤 ${p.name}</div>`).join('');
 
       if (data.status === 'lobby') {
          document.getElementById('lobby-view').classList.remove('hidden');
          document.getElementById('battle-view').classList.add('hidden');
          document.getElementById('win-view').classList.add('hidden');
          document.getElementById('win-view').classList.remove('flex');
+         
+         if (data.mode) {
+           document.getElementById('qr-container').classList.remove('hidden');
+           const maxP = parseInt(data.mode.charAt(0));
+           if (playersData.red.length >= maxP && playersData.blue.length >= maxP) {
+             document.getElementById('tv-status').innerText = "ВСЕ ГОТОВЫ! ЖДЕМ СТАРТА...";
+             document.getElementById('tv-status').classList.add('text-green-400');
+           } else {
+             document.getElementById('tv-status').innerText = "ОЖИДАНИЕ ИГРОКОВ...";
+             document.getElementById('tv-status').classList.remove('text-green-400');
+           }
+         }
       }
 
       if (data.status === 'playing') {
         document.getElementById('lobby-view').classList.add('hidden');
         document.getElementById('battle-view').classList.remove('hidden');
-        
-        // Отрисовка поля
         renderBattlefield(data);
         
-        // Обновляем ход
         if (data.turn && data.turn.name) {
           document.getElementById('turn-indicator').innerText = `ХОД: ${data.turn.name.toUpperCase()}`;
           document.getElementById('turn-indicator').style.color = data.turn.team === 'red' ? '#ef4444' : '#3b82f6';
-        } else {
-          document.getElementById('turn-indicator').innerText = `ХОД: ...`;
         }
       }
 
@@ -154,33 +180,27 @@
         const winText = document.getElementById('win-text');
         if (data.winner === 'red') { winText.innerText = 'КРАСНЫЕ ПОБЕДИЛИ!'; winText.className = 'text-9xl font-black text-red-500 mb-12 drop-shadow-[0_0_60px_#ef4444]'; }
         else if (data.winner === 'blue') { winText.innerText = 'СИНИЕ ПОБЕДИЛИ!'; winText.className = 'text-9xl font-black text-blue-500 mb-12 drop-shadow-[0_0_60px_#3b82f6]'; }
-        else { winText.innerText = 'НИЧЬЯ!'; winText.className = 'text-9xl font-black text-white mb-12'; }
       }
     });
 
-    // Таймер (визуальный)
     onValue(ref(db, `games/${gameId}/timer`), (snap) => {
       if(snap.val() !== null) document.getElementById('tv-timer').innerText = snap.val();
     });
 
     function renderBattlefield(data) {
       const field = document.getElementById('battlefield');
-      // Очищаем только если поменялся режим (чтобы не дергать анимации)
       if (field.children.length !== (playersData.red.length + playersData.blue.length)) {
         field.innerHTML = '';
-        
         const renderTeam = (players, team) => {
           players.forEach((p, i) => {
-            if (!p.alive) return; // Мертвых не рисуем
-            
+            if (!p.alive) return;
             const el = document.createElement('div');
             el.className = `player-hitbox player-${team}`;
             el.id = `player-${team}-${i}`;
             
-            // Расстановка по Y (сверху вниз)
+            // Рандомная расстановка по вертикали для каждого
             const yPos = 20 + (i * 60 / Math.max(1, players.length)) + 10;
-            if (team === 'red') el.style.left = `15%`;
-            else el.style.left = `85%`;
+            el.style.left = team === 'red' ? '15%' : '85%';
             el.style.top = `${yPos}%`;
 
             el.innerHTML = `
@@ -194,26 +214,19 @@
         renderTeam(playersData.red, 'red');
         renderTeam(playersData.blue, 'blue');
       }
-      
-      // Обновляем сердечки в статах
       document.getElementById('heart-red').innerText = '❤️'.repeat(playersData.red.reduce((a, b) => a + b.lives, 0)) || '💀';
       document.getElementById('heart-blue').innerText = '❤️'.repeat(playersData.blue.reduce((a, b) => a + b.lives, 0)) || '💀';
     }
 
-    // АНИМАЦИЯ ВЫСТРЕЛА
+    // Анимация выстрела
     onValue(ref(db, `games/${gameId}/last_shot`), (snap) => {
       const shot = snap.val();
       if (!shot) return;
-      
       const field = document.getElementById('battlefield');
-      const ball = document.createElement('div');
-      ball.className = 'snowball';
-      field.appendChild(ball);
+      const ball = document.createElement('div'); ball.className = 'snowball'; field.appendChild(ball);
 
-      // Берем реальные координаты стрелка и цели
       const shooterEl = document.getElementById(`player-${shot.team}-${shot.shooterIndex}`);
       const targetEl = document.getElementById(`player-${shot.targetTeam}-${shot.targetIndex}`);
-      
       if (!shooterEl || !targetEl) return;
 
       const fieldRect = field.getBoundingClientRect();
@@ -225,51 +238,31 @@
       let endX = tRect.left - fieldRect.left + tRect.width/2;
       let endY = tRect.top - fieldRect.top + tRect.height/2;
 
-      // Если промах, смещаем цель
-      if (!shot.isHit) {
-        endX += (Math.random() > 0.5 ? 200 : -200);
-        endY += (Math.random() > 0.5 ? 150 : -150);
-      }
+      if (!shot.isHit) { endX += (Math.random() > 0.5 ? 200 : -200); endY += (Math.random() > 0.5 ? 150 : -150); }
 
-      ball.style.left = startX + 'px';
-      ball.style.top = startY + 'px';
+      ball.style.left = startX + 'px'; ball.style.top = startY + 'px';
 
       ball.animate([
         { left: startX + 'px', top: startY + 'px', transform: 'translate(-50%, -50%) scale(1)' },
-        { left: (startX + endX) / 2 + 'px', top: startY - 100 + 'px', transform: 'translate(-50%, -50%) scale(1.5)' }, // Дуга
+        { left: (startX + endX) / 2 + 'px', top: startY - 100 + 'px', transform: 'translate(-50%, -50%) scale(1.5)' },
         { left: endX + 'px', top: endY + 'px', transform: 'translate(-50%, -50%) scale(1)' }
       ], { duration: 800, easing: 'cubic-bezier(0.25, 0.1, 0.25, 1)', fill: 'forwards' }).onfinish = () => {
-        
         if (shot.isHit) {
-          // Взрыв
-          const burst = document.createElement('div');
-          burst.className = 'snow-burst';
-          burst.style.left = endX + 'px'; burst.style.top = endY + 'px';
-          field.appendChild(burst);
-          burst.animate([{ transform: 'translate(-50%, -50%) scale(0)', opacity: 1 }, { transform: 'translate(-50%, -50%) scale(3)', opacity: 0 }], { duration: 400, fill: 'forwards' });
+          const burst = document.createElement('div'); burst.className = 'snow-burst'; burst.style.left = endX + 'px'; burst.style.top = endY + 'px';
+          field.appendChild(burst); burst.animate([{ transform: 'translate(-50%, -50%) scale(0)', opacity: 1 }, { transform: 'translate(-50%, -50%) scale(3)', opacity: 0 }], { duration: 400, fill: 'forwards' });
           setTimeout(() => burst.remove(), 400);
-
-          document.getElementById('main-body').classList.add('screen-shake');
-          setTimeout(() => document.getElementById('main-body').classList.remove('screen-shake'), 400);
-
-          if (shot.isMega) {
-            const megaDiv = document.createElement('div');
-            megaDiv.className = 'mega-text'; megaDiv.innerText = 'МЕГАБРОСОК!';
-            document.body.appendChild(megaDiv);
-            setTimeout(() => megaDiv.remove(), 2500);
-          }
+          document.getElementById('main-body').classList.add('screen-shake'); setTimeout(() => document.getElementById('main-body').classList.remove('screen-shake'), 400);
+          if (shot.isMega) { const megaDiv = document.createElement('div'); megaDiv.className = 'mega-text'; megaDiv.innerText = 'МЕГАБРОСОК!'; document.body.appendChild(megaDiv); setTimeout(() => megaDiv.remove(), 2500); }
         }
         ball.remove();
       };
     });
 
-    // Снежинки
     const snowBox = document.getElementById('snow');
     for (let i = 0; i < 50; i++) {
       const s = document.createElement('div'); s.className = 'snowflake'; s.innerText = '❄';
-      s.style.left = Math.random() * 100 + '%'; s.style.fontSize = (10 + Math.random() * 20) + 'px';
-      s.style.animationDuration = (4 + Math.random() * 8) + 's'; s.style.animationDelay = (-Math.random() * 10) + 's';
-      s.style.opacity = Math.random() * 0.7 + 0.3; snowBox.appendChild(s);
+      s.style.left = Math.random() * 100 + '%'; s.style.fontSize = (10 + Math.random() * 20) + 'px'; s.style.animationDuration = (4 + Math.random() * 8) + 's'; s.style.animationDelay = (-Math.random() * 10) + 's'; s.style.opacity = Math.random() * 0.7 + 0.3;
+      snowBox.appendChild(s);
     }
   </script>
 </body>
