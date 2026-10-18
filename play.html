@@ -8,118 +8,76 @@
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap');
     body { background: radial-gradient(circle at 50% 0%, #0a2540 0%, #03080f 100%); color: #fff; font-family: 'Montserrat', sans-serif; overflow: hidden; user-select: none; touch-action: none; }
-    
-    .glass-panel { background: rgba(10, 37, 64, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(127, 227, 255, 0.2); box-shadow: inset 0 0 20px rgba(127, 227, 255, 0.1); }
-
-    .mode-btn { transition: all 0.3s; border: 2px solid transparent; }
-    .mode-btn.active-red { border-color: #ef4444; box-shadow: 0 0 20px #ef4444; background: rgba(239, 68, 68, 0.2); }
-    .mode-btn.active-blue { border-color: #3b82f6; box-shadow: 0 0 20px #3b82f6; background: rgba(59, 130, 246, 0.2); }
-
+    .glass-panel { background: rgba(10, 37, 64, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(127, 227, 255, 0.2); }
     .aim-arc-container { position: relative; width: 260px; height: 260px; margin: 0 auto; }
     .aim-arc-bg { position: absolute; inset: 0; border-radius: 50%; border: 4px dashed rgba(255,255,255,0.1); }
     .aim-arrow { position: absolute; top: 50%; left: 50%; width: 4px; height: 110px; background: linear-gradient(to top, transparent, #fff); transform-origin: bottom center; transition: transform 0.1s; }
     .aim-arrow::before { content: ''; position: absolute; top: -10px; left: -8px; border-left: 10px solid transparent; border-right: 10px solid transparent; border-bottom: 20px solid #fff; }
-    
     input[type=range] { -webkit-appearance: none; width: 100%; background: transparent; }
     input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; height: 36px; width: 36px; border-radius: 50%; background: #fff; box-shadow: 0 0 20px #fff; cursor: pointer; margin-top: -14px; }
     input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 8px; cursor: pointer; background: linear-gradient(90deg, #ef4444, #fbbf24, #22c55e); border-radius: 4px; }
-
-    @keyframes pulseBtn { 0% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.4); } 70% { box-shadow: 0 0 0 20px rgba(255, 255, 255, 0); } 100% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0); } }
-    .pulse-btn { animation: pulseBtn 2s infinite; }
+    .disabled-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 100; display: flex; align-items: center; justify-content: center; flex-direction: column; backdrop-filter: blur(5px); }
   </style>
 </head>
-<body class="h-screen w-screen flex flex-col relative">
+<body class="h-screen w-screen flex flex-col relative" id="main-body">
 
-  <!-- ЭКРАН 1: ВХОД -->
-  <div id="login-screen" class="flex flex-col items-center justify-center h-full p-6 text-center z-10">
-    <div class="glass-panel p-8 rounded-3xl w-full max-w-sm mb-6 flex flex-col items-center">
-      <h2 class="text-2xl font-black mb-6 tracking-widest uppercase" id="title-color">Выбери режим</h2>
-      <div class="flex gap-4 w-full">
-        <button onclick="setMode('1v1')" class="mode-btn flex-1 py-4 rounded-xl text-xl font-bold bg-white/5" id="mode-1v1">1 на 1</button>
-        <button onclick="setMode('2v2')" class="mode-btn flex-1 py-4 rounded-xl text-xl font-bold bg-white/5" id="mode-2v2">2 на 2</button>
-      </div>
-    </div>
-
-    <div class="glass-panel p-8 rounded-3xl w-full max-w-sm flex flex-col items-center relative overflow-hidden">
-      <div class="absolute -top-20 -right-20 w-40 h-40 bg-cyan-500 rounded-full blur-[80px] opacity-50"></div>
-      <div class="w-20 h-20 rounded-full flex items-center justify-center mb-4 border-4 z-10" id="team-icon"><span class="text-4xl" id="team-emoji">🔴</span></div>
-      <input type="text" id="input-name" placeholder="ТВОЁ ИМЯ" class="w-full bg-black/50 border-2 rounded-xl px-4 py-4 text-center text-xl font-bold text-white mb-6 outline-none transition z-10 placeholder-white/30">
-      <button onclick="joinGame()" class="w-full py-4 text-white font-black text-xl tracking-widest uppercase rounded-xl active:scale-95 transition-all z-10 pulse-btn" id="join-btn">В БОЙ</button>
+  <!-- Ожидание подключения -->
+  <div id="join-screen" class="flex flex-col items-center justify-center h-full p-6 text-center z-10">
+    <div class="glass-panel p-8 rounded-3xl w-full max-w-sm flex flex-col items-center">
+      <div class="w-20 h-20 rounded-full flex items-center justify-center mb-4 border-4" id="team-icon"><span class="text-4xl" id="team-emoji">🔴</span></div>
+      <input type="text" id="input-name" placeholder="ТВОЁ ИМЯ" class="w-full bg-black/50 border-2 rounded-xl px-4 py-4 text-center text-xl font-bold mb-6 outline-none">
+      <button id="join-btn" class="w-full py-4 text-white font-black text-xl rounded-xl">ПОДКЛЮЧИТЬСЯ</button>
     </div>
   </div>
   
-  <!-- ЭКРАН 2: ОЖИДАНИЕ -->
-  <div id="wait-screen" class="hidden flex-col items-center justify-center h-full z-10">
-    <div class="glass-panel p-10 rounded-3xl flex flex-col items-center">
-      <div class="text-6xl mb-6 animate-spin-slow">❄️</div>
-      <h2 class="text-3xl font-black mb-2 uppercase tracking-widest text-center">ОЖИДАНИЕ</h2>
-      <p class="text-cyan-300 font-bold text-center" id="wait-text">ПОДКЛЮЧЕНИЕ...</p>
-    </div>
-  </div>
-
-  <!-- ЭКРАН 3: ИГРА (Стрелка) -->
+  <!-- Экран игры -->
   <div id="game-screen" class="hidden w-full h-full flex flex-col items-center justify-center relative z-10">
-    
     <div class="text-center mb-10">
-      <p class="text-cyan-300/80 mb-2 font-bold tracking-[0.2em] text-sm">НАПРАВЛЕНИЕ БРОСКА</p>
+      <p class="text-cyan-300/80 mb-2 font-bold tracking-[0.2em] text-sm">УГОЛ</p>
       <div class="aim-arc-container" id="aim-container">
         <div class="aim-arc-bg"></div>
         <div class="aim-arrow" id="aim-arrow"></div>
       </div>
     </div>
-
     <div class="w-4/5 max-w-sm mb-12 glass-panel p-6 rounded-2xl">
-      <div class="flex justify-between text-sm font-bold text-white/70 mb-4 tracking-wider">
-        <span>СИЛА БРОСКА</span>
-        <span id="power-display" class="text-white text-lg">50%</span>
-      </div>
+      <div class="flex justify-between text-sm font-bold text-white/70 mb-4"><span>СИЛА</span><span id="power-display">50%</span></div>
       <input type="range" id="power-slider" min="10" max="100" value="50">
     </div>
+    <button id="shoot-btn" class="w-48 h-48 rounded-full text-white font-black text-4xl tracking-widest disabled:opacity-50 transition-all border-8 border-white/20">ОГОНЬ</button>
+  </div>
 
-    <button id="shoot-btn" class="w-48 h-48 rounded-full text-white font-black text-4xl tracking-widest active:scale-90 transition-all duration-150 relative bg-red-600 border-8 border-red-400/30">
-      ОГОНЬ
-    </button>
+  <!-- Оверлей "Не твой ход" -->
+  <div id="wait-overlay" class="disabled-overlay hidden">
+    <h1 class="text-4xl font-black text-white mb-4">ХОД СОПЕРНИКА</h1>
+    <p class="text-xl text-gray-400">ЖДИ СВОЕГО ЧАСА...</p>
   </div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getDatabase, ref, set, push, onDisconnect, onValue, get } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+    import { getDatabase, ref, set, push, onDisconnect, onValue, update, get } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyCXIR5Tv8lB6ivcGRC3yt1SC66MM6T5b_M",
-      authDomain: "endorphin-battle.firebaseapp.com",
-      databaseURL: "https://endorphin-battle-default-rtdb.europe-west1.firebasedatabase.app",
-      projectId: "endorphin-battle",
-      storageBucket: "endorphin-battle.firebasestorage.app",
-      messagingSenderId: "185259733030",
-      appId: "1:185259733030:web:d72a89a436880973e636e7"
-    };
-
+    const firebaseConfig = { apiKey: "AIzaSyCXIR5Tv8lB6ivcGRC3yt1SC66MM6T5b_M", authDomain: "endorphin-battle.firebaseapp.com", databaseURL: "https://endorphin-battle-default-rtdb.europe-west1.firebasedatabase.app", projectId: "endorphin-battle", storageBucket: "endorphin-battle.firebasestorage.app", messagingSenderId: "185259733030", appId: "1:185259733030:web:d72a89a436880973e636e7" };
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
 
     const urlParams = new URLSearchParams(window.location.search);
     const gameId = urlParams.get('game') || 'battle_1';
     const team = urlParams.get('team') || 'red';
-    const playerId = 'player_' + Math.random().toString(36).substr(2, 9);
     const isRed = team === 'red';
     
-    const mainColor = isRed ? '#ef4444' : '#3b82f6';
-    const secColor = isRed ? '#7f1d1d' : '#1e3a8a';
+    // Восстановление ID из сессии (защита от перезагрузки)
+    let playerId = localStorage.getItem('endorphin_playerId');
+    if (!playerId) {
+      playerId = 'p_' + Math.random().toString(36).substr(2, 9);
+      localStorage.setItem('endorphin_playerId', playerId);
+    }
 
+    const mainColor = isRed ? '#ef4444' : '#3b82f6';
     document.getElementById('team-icon').style.borderColor = mainColor;
     document.getElementById('team-emoji').innerText = isRed ? '🔴' : '🔵';
     document.getElementById('input-name').style.borderColor = mainColor;
-    document.getElementById('join-btn').style.background = `linear-gradient(90deg, ${mainColor}, ${secColor})`;
-    document.getElementById('shoot-btn').style.background = `linear-gradient(135deg, ${mainColor}, ${secColor})`;
-    
-    let selectedMode = '1v1';
-    window.setMode = (mode) => {
-      selectedMode = mode;
-      document.getElementById('mode-1v1').className = `mode-btn flex-1 py-4 rounded-xl text-xl font-bold bg-white/5 ${mode === '1v1' ? (isRed ? 'active-red' : 'active-blue') : ''}`;
-      document.getElementById('mode-2v2').className = `mode-btn flex-1 py-4 rounded-xl text-xl font-bold bg-white/5 ${mode === '2v2' ? (isRed ? 'active-red' : 'active-blue') : ''}`;
-    };
-    setMode('1v1');
+    document.getElementById('join-btn').style.background = mainColor;
+    document.getElementById('shoot-btn').style.background = `linear-gradient(135deg, ${mainColor}, #000)`;
 
     const playerRef = ref(db, `games/${gameId}/players/${team}/${playerId}`);
     onDisconnect(playerRef).remove();
@@ -127,108 +85,162 @@
     window.joinGame = async () => {
       const name = document.getElementById('input-name').value.trim() || 'Игрок';
       
-      // Проверка, не переполнена ли команда
-      const snapshot = await get(ref(db, `games/${gameId}/players/${team}`));
-      const currentPlayers = snapshot.exists() ? Object.keys(snapshot.val()).length : 0;
-      const maxAllowed = selectedMode === '2v2' ? 2 : 1;
+      // Проверка лимита
+      const snapshot = await get(ref(db, `games/${gameId}`));
+      const data = snapshot.val();
+      if (data && data.status !== 'lobby') return alert('Игра уже идет!');
       
-      if (currentPlayers >= maxAllowed) {
-        alert('Команда уже заполнена!');
-        return;
+      const maxP = data ? parseInt(data.mode.charAt(0)) : 1;
+      const currentCount = Object.keys(data?.players?.[team] || {}).length;
+      
+      // Если мы не перезаходим, а новый игрок
+      if (!data?.players?.[team]?.[playerId] && currentCount >= maxP) {
+        return alert('Команда заполнена!');
       }
 
-      set(playerRef, { name, mode: selectedMode });
-      
-      document.getElementById('login-screen').classList.add('hidden');
-      document.getElementById('wait-screen').classList.remove('hidden');
-      document.getElementById('wait-screen').classList.add('flex');
+      set(playerRef, { name, lives: 3, alive: true });
+      document.getElementById('join-screen').classList.add('hidden');
+      document.getElementById('game-screen').classList.remove('hidden');
+      document.getElementById('game-screen').classList.add('flex');
     };
+    document.getElementById('join-btn').onclick = window.joinGame;
 
-    onValue(ref(db, `games/${gameId}/status`), (snap) => {
-      const status = snap.val();
-      if (status === 'playing') {
-        document.getElementById('wait-screen').classList.add('hidden');
-        document.getElementById('wait-screen').classList.remove('flex');
+    let isMyTurn = false;
+    let currentAngle = 45;
+
+    onValue(ref(db, `games/${gameId}`), (snapshot) => {
+      const data = snapshot.val();
+      if (!data) return;
+
+      if (data.status === 'playing') {
+        document.getElementById('join-screen').classList.add('hidden');
         document.getElementById('game-screen').classList.remove('hidden');
         document.getElementById('game-screen').classList.add('flex');
         
-        initArrow();
-      } else if (status === 'finished') {
+        // Проверяем, чей ход
+        isMyTurn = (data.activePlayerId === playerId);
+        
+        const btn = document.getElementById('shoot-btn');
+        const overlay = document.getElementById('wait-overlay');
+        
+        if (isMyTurn) {
+          btn.disabled = false;
+          overlay.classList.add('hidden');
+        } else {
+          btn.disabled = true;
+          overlay.classList.remove('hidden');
+        }
+      }
+      
+      if (data.status === 'finished') {
         document.getElementById('game-screen').classList.add('hidden');
-        document.getElementById('game-screen').classList.remove('flex');
       }
     });
 
-    // Логика стрелки (Горизонтальная игра!)
-    let currentAngle = 45;
+    // Направление
     const arrow = document.getElementById('aim-arrow');
     const aimContainer = document.getElementById('aim-container');
-
-    function initArrow() {
-      // В ГОРИЗОНТАЛЬНОЙ ИГРЕ: Красные слева (целятся вправо, 90 град). Синие справа (влево, -90).
-      const baseRotation = isRed ? 90 : -90;
-      arrow.style.transform = `translate(-50%, -100%) rotate(${baseRotation}deg)`;
+    
+    const baseRotation = isRed ? 90 : -90;
+    arrow.style.transform = `translate(-50%, -100%) rotate(${baseRotation}deg)`;
+    
+    const handleMove = (e) => {
+      if (!isMyTurn) return;
+      if (e.touches) e.preventDefault();
+      const rect = aimContainer.getBoundingClientRect();
+      const clientX = e.clientX || e.touches[0].clientX;
+      const clientY = e.clientY || e.touches[0].clientY;
+      const centerX = rect.left + rect.width / 2;
+      const centerY = rect.top + rect.height / 2;
+      let rad = Math.atan2(clientY - centerY, clientX - centerX);
+      let deg = (rad * 180) / Math.PI;
       
-      const handleMove = (e) => {
-        if (e.touches) e.preventDefault();
-        const rect = aimContainer.getBoundingClientRect();
-        const clientX = e.clientX || e.touches[0].clientX;
-        const clientY = e.clientY || e.touches[0].clientY;
-        
-        const centerX = rect.left + rect.width / 2;
-        const centerY = rect.top + rect.height / 2;
-        
-        let rad = Math.atan2(clientY - centerY, clientX - centerX);
-        let deg = (rad * 180) / Math.PI;
-        
-        let finalAngle = 0;
-        if (isRed) {
-          // Для красных 90 - это вправо. Отклоняем вверх/вниз.
-          finalAngle = deg;
-          finalAngle = Math.max(50, Math.min(130, finalAngle)); // +/- 40 градусов
-          arrow.style.transform = `translate(-50%, -100%) rotate(${finalAngle}deg)`;
-        } else {
-          // Для синих -90 - это влево.
-          finalAngle = deg;
-          if (finalAngle > 0) finalAngle -= 180; // Чтобы смотрело влево
-          finalAngle = Math.max(-130, Math.min(-50, finalAngle));
-          arrow.style.transform = `translate(-50%, -100%) rotate(${finalAngle}deg)`;
-        }
-        currentAngle = finalAngle;
-      };
+      let finalAngle = deg;
+      if (isRed) {
+        finalAngle = Math.max(50, Math.min(130, finalAngle));
+      } else {
+        if (finalAngle > 0) finalAngle -= 180;
+        finalAngle = Math.max(-130, Math.min(-50, finalAngle));
+      }
+      arrow.style.transform = `translate(-50%, -100%) rotate(${finalAngle}deg)`;
+      currentAngle = finalAngle;
+    };
+    aimContainer.addEventListener('touchmove', handleMove, { passive: false });
+    aimContainer.addEventListener('touchstart', handleMove, { passive: false });
+    aimContainer.addEventListener('mousemove', (e) => { if (e.buttons === 1) handleMove(e); });
 
-      aimContainer.addEventListener('touchmove', handleMove, { passive: false });
-      aimContainer.addEventListener('touchstart', handleMove, { passive: false });
-      aimContainer.addEventListener('mousemove', (e) => { if (e.buttons === 1) handleMove(e); });
-    }
-
-    const powerSlider = document.getElementById('power-slider');
-    const powerDisplay = document.getElementById('power-display');
-    powerSlider.addEventListener('input', () => { 
-      powerDisplay.innerText = powerSlider.value + '%'; 
-      if (powerSlider.value > 90) powerDisplay.style.color = '#fbbf24';
-      else powerDisplay.style.color = '#fff';
+    // Сила и выстрел
+    document.getElementById('power-slider').addEventListener('input', (e) => {
+      document.getElementById('power-display').innerText = e.target.value + '%';
     });
 
-    const shootBtn = document.getElementById('shoot-btn');
-    let canShoot = true;
-    shootBtn.onclick = () => {
-      if (!canShoot) return;
-      canShoot = false;
-      shootBtn.style.opacity = '0.5';
-      shootBtn.style.transform = 'scale(0.9)';
+    document.getElementById('shoot-btn').onclick = () => {
+      if (!isMyTurn) return;
       
-      const power = parseInt(powerSlider.value);
-      const shotsRef = ref(db, `games/${gameId}/shots`);
-      push(shotsRef, { team: team, power: power, angle: currentAngle, time: Date.now() });
+      const power = parseInt(document.getElementById('power-slider').value);
+      
+      // Находим цель (рандомного живого врага)
+      onValue(ref(db, `games/${gameId}/players/${isRed ? 'blue' : 'red'}`), (snap) => {
+        const enemies = Object.entries(snap.val() || {});
+        const aliveEnemies = enemies.filter(([id, p]) => p.alive);
+        if (aliveEnemies.length === 0) return;
+        
+        const targetIndex = Math.floor(Math.random() * aliveEnemies.length);
+        const targetId = aliveEnemies[targetIndex][0];
+        
+        // Логика попадания (шанс зависит от силы)
+        const isHit = power >= 30; 
+        
+        // Отправляем выстрел
+        const shotData = {
+          team, 
+          shooterIndex: Object.keys(data.players[team] || {}).indexOf(playerId),
+          targetTeam: isRed ? 'blue' : 'red',
+          targetIndex: targetIndex,
+          isHit: isHit,
+          isMega: (power > 90 && isHit)
+        };
+        
+        push(ref(db, `games/${gameId}/shots`), shotData);
+        set(ref(db, `games/${gameId}/last_shot`), shotData);
+        
+        // Урон
+        if (isHit) {
+          const dmg = (power > 90) ? 2 : 1;
+          const newLives = Math.max(0, aliveEnemies[targetIndex][1].lives - dmg);
+          const isDead = newLives <= 0;
+          
+          update(ref(db, `games/${gameId}/players/${isRed ? 'blue' : 'red'}/${targetId}`), {
+            lives: newLives,
+            alive: !isDead
+          });
+        }
+        
+        // Передача хода
+        // Ищем следующего живого игрока в команде (включая себя)
+        const myTeamPlayers = Object.entries(data.players[team] || {}).filter(([id, p]) => p.alive);
+        const myIndex = myTeamPlayers.findIndex(([id]) => id === playerId);
+        let nextPlayer = null;
+        
+        if (myIndex !== -1 && myIndex < myTeamPlayers.length - 1) {
+          // Есть следующий в моей команде
+          nextPlayer = myTeamPlayers[myIndex + 1];
+        } else {
+          // Переход к другой команде
+          const enemyTeamKey = isRed ? 'blue' : 'red';
+          const enemyTeam = Object.entries(data.players[enemyTeamKey] || {}).filter(([id, p]) => p.alive);
+          if (enemyTeam.length > 0) nextPlayer = enemyTeam[0];
+        }
 
-      if (navigator.vibrate) navigator.vibrate([50, 30, 50]);
-
-      setTimeout(() => {
-        canShoot = true;
-        shootBtn.style.opacity = '1';
-        shootBtn.style.transform = 'scale(1)';
-      }, 2500);
+        if (nextPlayer) {
+          update(gameRef, { 
+            activePlayerId: nextPlayer[0], 
+            turn: { team: isRed ? 'blue' : 'red', name: nextPlayer[1].name }
+          });
+        } else {
+          update(gameRef, { status: 'finished', winner: team });
+        }
+      }, { onlyOnce: true });
     };
   </script>
 </body>
