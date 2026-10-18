@@ -21,10 +21,13 @@
     .snowball { position: absolute; width: 24px; height: 24px; border-radius: 50%; background: radial-gradient(circle at 30% 30%, #fff, #7fe3ff); box-shadow: 0 0 20px #7fe3ff; pointer-events: none; z-index: 30; transform: translate(-50%, -50%); }
     .snow-burst { position: absolute; width: 80px; height: 80px; border-radius: 50%; background: radial-gradient(circle, rgba(255,255,255,1) 0%, rgba(127,227,255,0) 70%); pointer-events: none; z-index: 25; transform: translate(-50%, -50%) scale(0); }
     
-    .player-hitbox { position: absolute; width: 70px; height: 110px; transform: translate(-50%, -50%); z-index: 20; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; border-radius: 20px; transition: all 0.3s; }
+    /* Персонажи и слоты для QR */
+    .player-slot { position: absolute; transform: translate(-50%, -50%); z-index: 20; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: all 0.3s; }
+    .player-hitbox { width: 70px; height: 110px; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; border-radius: 20px; }
     .player-red { background: rgba(239, 68, 68, 0.15); border: 3px dashed #ef4444; box-shadow: 0 0 30px rgba(239, 68, 68, 0.4); }
     .player-blue { background: rgba(59, 130, 246, 0.15); border: 3px dashed #3b82f6; box-shadow: 0 0 30px rgba(59, 130, 246, 0.4); }
-    .player-hitbox.dead { opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
+    
+    .qr-slot { background: #fff; padding: 8px; border-radius: 12px; box-shadow: 0 0 30px rgba(255,255,255,0.5); border: 4px solid #22d3ee; }
     
     @keyframes megaZoom { 0% { transform: translate(-50%, -50%) scale(0.1) rotate(-15deg); opacity: 0; } 50% { transform: translate(-50%, -50%) scale(1.2) rotate(5deg); opacity: 1; text-shadow: 0 0 150px #fbbf24; } 100% { transform: translate(-50%, -50%) scale(1) rotate(0); opacity: 1; } }
     .mega-text { position: absolute; top: 50%; left: 50%; font-size: 120px; font-weight: 900; color: #fff; text-shadow: 0 0 80px #fbbf24, 0 0 40px #fff; z-index: 100; pointer-events: none; letter-spacing: 5px; text-transform: uppercase; animation: megaZoom 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
@@ -40,7 +43,7 @@
 
   <div id="tv-screen" class="flex-1 w-full h-full relative z-10 pb-16">
     
-    <!-- ЛОББИ / ОЖИДАНИЕ -->
+    <!-- ЛОББИ -->
     <div id="lobby-view" class="absolute inset-0 flex flex-col items-center justify-center p-8 transition-opacity duration-500">
       <div class="text-center mb-8">
         <h1 class="text-8xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 via-blue-400 to-indigo-500 mb-2 drop-shadow-[0_0_30px_rgba(59,130,246,0.8)] tracking-tighter">ENDORPHIN</h1>
@@ -63,7 +66,6 @@
         </div>
       </div>
       
-      <!-- Статус (Ожидание / Отсчет) -->
       <div id="tv-status" class="text-4xl font-black text-white tracking-widest drop-shadow-[0_0_20px_#fff] hidden">ОЖИДАНИЕ ИГРОКОВ...</div>
     </div>
 
@@ -72,6 +74,8 @@
       <div class="grid-overlay"></div>
       <div class="absolute left-0 top-0 bottom-0 w-[20%] bg-gradient-to-r from-red-900/40 to-transparent border-r-4 border-red-500/50"></div>
       <div class="absolute right-0 top-0 bottom-0 w-[20%] bg-gradient-to-l from-blue-900/40 to-transparent border-l-4 border-blue-500/50"></div>
+      
+      <!-- Контейнер для персонажей и QR -->
       <div id="battlefield" class="absolute left-0 right-0 top-0 bottom-0"></div>
       
       <div class="absolute top-4 left-4 flex flex-col gap-1 glass-panel p-2 rounded-xl z-30 text-3xl"><div id="heart-red">❤️❤️❤️</div></div>
@@ -88,7 +92,7 @@
   </div>
 
   <div class="ticker-wrap">
-    <div class="ticker" id="ticker-text">ДОБРО ПОЖАЛОВАТЬ НА ВЕЧЕРИНКУ ENDORPHIN! СЛЕДИ ЗА СРАЖЕНИЕМ НА ЭКРАНЕ.</div>
+    <div class="ticker" id="ticker-text">ДОБРО ПОЖАЛОВАТЬ НА ВЕЧЕРИНКУ ENDORPHIN!</div>
   </div>
 
   <script type="module">
@@ -102,21 +106,13 @@
 
     let playersData = { red: [], blue: [] };
     let currentMode = null;
-
-    onValue(ref(db, `games/${gameId}/ticker`), (snap) => {
-      if(snap.val()) document.getElementById('ticker-text').innerText = snap.val();
-    });
-
+    const url = new URL(window.location.href);
+    const baseUrl = url.origin + url.pathname.substring(0, url.pathname.lastIndexOf('/') + 1);
+    
     // Генерация QR
-    function generateQRs(teamParam) {
-      const qrContainer = document.getElementById('qr-container');
-      qrContainer.classList.remove('hidden');
+    function generateQRs() {
+      document.getElementById('qr-container').classList.remove('hidden');
       document.getElementById('tv-status').classList.remove('hidden');
-      
-      // ЖЕЛЕЗОБЕТОННАЯ СБОРКА ССЫЛКИ:
-      // Берем текущий URL, отрезаем всё после последнего слэша, и добавляем play.html с параметрами.
-      const url = new URL(window.location.href);
-      const baseUrl = url.origin + url.pathname.substring(0, url.pathname.lastIndexOf('/') + 1);
       
       const redUrl = `${baseUrl}play.html?game=${gameId}&team=red`;
       const blueUrl = `${baseUrl}play.html?game=${gameId}&team=blue`;
@@ -130,6 +126,10 @@
       const qrBlue = qrcode(0, 'M'); qrBlue.addData(blueUrl); qrBlue.make();
       document.getElementById('qr-blue').innerHTML = qrBlue.createImgTag(4, 8);
     }
+
+    onValue(ref(db, `games/${gameId}/ticker`), (snap) => {
+      if(snap.val()) document.getElementById('ticker-text').innerText = snap.val();
+    });
 
     onValue(gameRef, (snapshot) => {
       const data = snapshot.val();
@@ -169,6 +169,8 @@
       if (data.status === 'playing') {
         document.getElementById('lobby-view').classList.add('hidden');
         document.getElementById('battle-view').classList.remove('hidden');
+        
+        // Рисуем поле и QR для вылетевших
         renderBattlefield(data);
         
         if (data.turn && data.turn.name) {
@@ -192,34 +194,53 @@
 
     function renderBattlefield(data) {
       const field = document.getElementById('battlefield');
-      if (field.children.length !== (playersData.red.length + playersData.blue.length)) {
-        field.innerHTML = '';
-        const renderTeam = (players, team) => {
-          players.forEach((p, i) => {
-            if (!p.alive) return;
-            const el = document.createElement('div');
-            el.className = `player-hitbox player-${team}`;
-            el.id = `player-${team}-${i}`;
-            
-            const yPos = 20 + (i * 60 / Math.max(1, players.length)) + 10;
-            el.style.left = team === 'red' ? '15%' : '85%';
-            el.style.top = `${yPos}%`;
+      field.innerHTML = ''; // Очищаем всё, чтобы отрисовать заново (для QR и имен)
+      
+      const renderTeam = (players, team) => {
+        const maxP = parseInt(data.mode.charAt(0));
+        // Отрисовываем всех, кто должен быть по режиму
+        for (let i = 0; i < maxP; i++) {
+          const p = players[i]; // Игрок по индексу
+          
+          const slot = document.createElement('div');
+          slot.className = 'player-slot';
+          const yPos = 20 + (i * 60 / Math.max(1, maxP)) + 10;
+          slot.style.left = team === 'red' ? '15%' : '85%';
+          slot.style.top = `${yPos}%`;
+          
+          if (p && p.alive) {
+             // Игрок есть и жив
+             slot.innerHTML = `
+              <div class="player-hitbox player-${team}">
+                <div class="text-4xl">🧍‍♂️</div>
+                <div class="bg-black/80 px-2 py-1 rounded text-xs font-bold text-white mt-1 whitespace-nowrap shadow-lg border border-white/20">${p.name}</div>
+                <div class="text-red-500 text-lg absolute -top-6 drop-shadow-[0_0_10px_#ef4444]">${'❤️'.repeat(p.lives)}</div>
+              </div>
+             `;
+          } else if (p && !p.alive) {
+             // Игрок есть, но мертв
+             slot.innerHTML = `<div class="text-6xl opacity-30 text-gray-500">💀</div>`;
+          } else {
+             // Игрока нет — показываем QR-код для подключения
+             const teamUrl = `${baseUrl}play.html?game=${gameId}&team=${team}`;
+             const qrDiv = document.createElement('div');
+             qrDiv.className = 'qr-slot';
+             const qr = qrcode(0, 'M'); qr.addData(teamUrl); qr.make();
+             qrDiv.innerHTML = qr.createImgTag(3, 5) + `<p class="text-black text-[10px] font-bold text-center mt-1">Сканируй</p>`;
+             slot.appendChild(qrDiv);
+          }
+          field.appendChild(slot);
+        }
+      };
+      
+      renderTeam(playersData.red, 'red');
+      renderTeam(playersData.blue, 'blue');
 
-            el.innerHTML = `
-              <div class="text-4xl">🧍‍♂️</div>
-              <div class="bg-black/80 px-2 py-1 rounded text-xs font-bold text-white mt-1 whitespace-nowrap shadow-lg border border-white/20">${p.name}</div>
-              <div class="text-red-500 text-lg absolute -top-6 drop-shadow-[0_0_10px_#ef4444]">${'❤️'.repeat(p.lives)}</div>
-            `;
-            field.appendChild(el);
-          });
-        };
-        renderTeam(playersData.red, 'red');
-        renderTeam(playersData.blue, 'blue');
-      }
       document.getElementById('heart-red').innerText = '❤️'.repeat(playersData.red.reduce((a, b) => a + b.lives, 0)) || '💀';
       document.getElementById('heart-blue').innerText = '❤️'.repeat(playersData.blue.reduce((a, b) => a + b.lives, 0)) || '💀';
     }
 
+    // Анимация выстрела (без изменений)
     onValue(ref(db, `games/${gameId}/last_shot`), (snap) => {
       const shot = snap.val();
       if (!shot) return;
