@@ -65,7 +65,6 @@
     const team = urlParams.get('team') || 'red';
     const isRed = team === 'red';
     
-    // Восстановление ID из сессии (защита от перезагрузки)
     let playerId = localStorage.getItem('endorphin_playerId');
     if (!playerId) {
       playerId = 'p_' + Math.random().toString(36).substr(2, 9);
@@ -84,16 +83,14 @@
 
     window.joinGame = async () => {
       const name = document.getElementById('input-name').value.trim() || 'Игрок';
-      
-      // Проверка лимита
       const snapshot = await get(ref(db, `games/${gameId}`));
       const data = snapshot.val();
+      
       if (data && data.status !== 'lobby') return alert('Игра уже идет!');
       
       const maxP = data ? parseInt(data.mode.charAt(0)) : 1;
       const currentCount = Object.keys(data?.players?.[team] || {}).length;
       
-      // Если мы не перезаходим, а новый игрок
       if (!data?.players?.[team]?.[playerId] && currentCount >= maxP) {
         return alert('Команда заполнена!');
       }
@@ -117,7 +114,6 @@
         document.getElementById('game-screen').classList.remove('hidden');
         document.getElementById('game-screen').classList.add('flex');
         
-        // Проверяем, чей ход
         isMyTurn = (data.activePlayerId === playerId);
         
         const btn = document.getElementById('shoot-btn');
@@ -156,12 +152,9 @@
       let deg = (rad * 180) / Math.PI;
       
       let finalAngle = deg;
-      if (isRed) {
-        finalAngle = Math.max(50, Math.min(130, finalAngle));
-      } else {
-        if (finalAngle > 0) finalAngle -= 180;
-        finalAngle = Math.max(-130, Math.min(-50, finalAngle));
-      }
+      if (isRed) { finalAngle = Math.max(50, Math.min(130, finalAngle)); } 
+      else { if (finalAngle > 0) finalAngle -= 180; finalAngle = Math.max(-130, Math.min(-50, finalAngle)); }
+      
       arrow.style.transform = `translate(-50%, -100%) rotate(${finalAngle}deg)`;
       currentAngle = finalAngle;
     };
@@ -176,10 +169,8 @@
 
     document.getElementById('shoot-btn').onclick = () => {
       if (!isMyTurn) return;
-      
       const power = parseInt(document.getElementById('power-slider').value);
       
-      // Находим цель (рандомного живого врага)
       onValue(ref(db, `games/${gameId}/players/${isRed ? 'blue' : 'red'}`), (snap) => {
         const enemies = Object.entries(snap.val() || {});
         const aliveEnemies = enemies.filter(([id, p]) => p.alive);
@@ -187,56 +178,33 @@
         
         const targetIndex = Math.floor(Math.random() * aliveEnemies.length);
         const targetId = aliveEnemies[targetIndex][0];
-        
-        // Логика попадания (шанс зависит от силы)
         const isHit = power >= 30; 
         
-        // Отправляем выстрел
-        const shotData = {
-          team, 
-          shooterIndex: Object.keys(data.players[team] || {}).indexOf(playerId),
-          targetTeam: isRed ? 'blue' : 'red',
-          targetIndex: targetIndex,
-          isHit: isHit,
-          isMega: (power > 90 && isHit)
-        };
+        const shotData = { team, shooterIndex: Object.keys(data.players[team] || {}).indexOf(playerId), targetTeam: isRed ? 'blue' : 'red', targetIndex: targetIndex, isHit: isHit, isMega: (power > 90 && isHit) };
         
         push(ref(db, `games/${gameId}/shots`), shotData);
         set(ref(db, `games/${gameId}/last_shot`), shotData);
         
-        // Урон
         if (isHit) {
           const dmg = (power > 90) ? 2 : 1;
           const newLives = Math.max(0, aliveEnemies[targetIndex][1].lives - dmg);
           const isDead = newLives <= 0;
-          
-          update(ref(db, `games/${gameId}/players/${isRed ? 'blue' : 'red'}/${targetId}`), {
-            lives: newLives,
-            alive: !isDead
-          });
+          update(ref(db, `games/${gameId}/players/${isRed ? 'blue' : 'red'}/${targetId}`), { lives: newLives, alive: !isDead });
         }
         
         // Передача хода
-        // Ищем следующего живого игрока в команде (включая себя)
         const myTeamPlayers = Object.entries(data.players[team] || {}).filter(([id, p]) => p.alive);
         const myIndex = myTeamPlayers.findIndex(([id]) => id === playerId);
         let nextPlayer = null;
         
-        if (myIndex !== -1 && myIndex < myTeamPlayers.length - 1) {
-          // Есть следующий в моей команде
-          nextPlayer = myTeamPlayers[myIndex + 1];
-        } else {
-          // Переход к другой команде
-          const enemyTeamKey = isRed ? 'blue' : 'red';
-          const enemyTeam = Object.entries(data.players[enemyTeamKey] || {}).filter(([id, p]) => p.alive);
+        if (myIndex !== -1 && myIndex < myTeamPlayers.length - 1) { nextPlayer = myTeamPlayers[myIndex + 1]; } 
+        else {
+          const enemyTeam = Object.entries(data.players[isRed ? 'blue' : 'red'] || {}).filter(([id, p]) => p.alive);
           if (enemyTeam.length > 0) nextPlayer = enemyTeam[0];
         }
 
         if (nextPlayer) {
-          update(gameRef, { 
-            activePlayerId: nextPlayer[0], 
-            turn: { team: isRed ? 'blue' : 'red', name: nextPlayer[1].name }
-          });
+          update(gameRef, { activePlayerId: nextPlayer[0], turn: { team: isRed ? 'blue' : 'red', name: nextPlayer[1].name } });
         } else {
           update(gameRef, { status: 'finished', winner: team });
         }
