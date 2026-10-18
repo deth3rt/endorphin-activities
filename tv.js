@@ -42,7 +42,6 @@ class Player {
         slot.className = 'player-slot';
         slot.style.left = this.team === 'red' ? '15%' : '85%';
         
-        // Позиция по Y в зависимости от индекса
         const yPos = 20 + (this.index * 60 / Math.max(1, 4)) + 10;
         slot.style.top = `${yPos}%`;
 
@@ -97,7 +96,6 @@ class ParticleSystem {
             this.container.appendChild(p);
             this.particles.push(p);
 
-            // Случайная траектория
             const angle = Math.random() * Math.PI * 2;
             const distance = Math.random() * 150 + 50;
             const destX = x + Math.cos(angle) * distance;
@@ -133,7 +131,7 @@ class Snowball {
         this.onHit = onHit;
         this.element = null;
         this.progress = 0;
-        this.speed = 0.02; // Скорость анимации
+        this.speed = 0.02;
         this.animationId = null;
     }
 
@@ -162,16 +160,13 @@ class Snowball {
             return;
         }
 
-        // Параболическая траектория (дуга)
         const currentX = this.startX + (this.endX - this.startX) * this.progress;
-        // Высота дуги (синусоида для плавности)
         const arcHeight = -150 * Math.sin(this.progress * Math.PI);
         const currentY = this.startY + (this.endY - this.startY) * this.progress + arcHeight;
 
         this.element.style.left = `${currentX}px`;
         this.element.style.top = `${currentY}px`;
 
-        // Шлейф (маленькие снежинки)
         if (Math.random() > 0.5) {
             const trail = document.createElement('div');
             trail.className = 'particle';
@@ -199,14 +194,13 @@ class Snowball {
 }
 
 // ============================================================
-// ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ И ИНИЦИАЛИЗАЦИЯ
+// ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ
 // ============================================================
 let currentData = null;
 let playersData = { red: [], blue: [] };
 let currentMode = null;
 let currentBaseUrl = '';
 let particleSystem = null;
-let activeSnowball = null;
 
 function getBaseUrl() {
     const url = new URL(window.location.href);
@@ -247,30 +241,25 @@ function renderBattlefield(data) {
         particleSystem = new ParticleSystem(field);
     }
     
-    // Проверка на изменение состава
     if (field.children.length !== data.mode.charAt(0) * 2) {
         field.innerHTML = '';
         
-        // Отрисовка красных
         for (let i = 0; i < playersData.red.length; i++) {
             const p = new Player(playersData.red[i].id, playersData.red[i], 'red', i);
             field.appendChild(p.createDOM());
-            playersData.red[i] = p; // Сохраняем экземпляр
+            playersData.red[i] = p;
         }
 
-        // Отрисовка синих
         for (let i = 0; i < playersData.blue.length; i++) {
             const p = new Player(playersData.blue[i].id, playersData.blue[i], 'blue', i);
             field.appendChild(p.createDOM());
             playersData.blue[i] = p;
         }
     } else {
-        // Обновление существующих
         playersData.red.forEach(p => p.updateDOM && p.updateDOM());
         playersData.blue.forEach(p => p.updateDOM && p.updateDOM());
     }
 
-    // Обновление глобальных сердечек
     const totalRedLives = playersData.red.reduce((sum, p) => sum + (p.lives || 0), 0);
     const totalBlueLives = playersData.blue.reduce((sum, p) => sum + (p.lives || 0), 0);
     
@@ -285,7 +274,6 @@ function handleShot(shot) {
     const field = document.getElementById('battlefield');
     if (!field) return;
 
-    // Получаем координаты стрелка
     const shooterEl = document.getElementById(`player-${shot.team}-${shot.shooterIndex}`);
     const targetEl = document.getElementById(`player-${shot.targetTeam}-${shot.targetIndex}`);
     
@@ -298,36 +286,29 @@ function handleShot(shot) {
     const sRect = shooterEl.getBoundingClientRect();
     const tRect = targetEl.getBoundingClientRect();
 
-    // Стартовые и конечные координаты
     const startX = sRect.left - fieldRect.left + sRect.width / 2;
     const startY = sRect.top - fieldRect.top + sRect.height / 2;
     
     let endX = tRect.left - fieldRect.left + tRect.width / 2;
     let endY = tRect.top - fieldRect.top + tRect.height / 2;
 
-    // Если промах, уводим цель в сторону
     if (!shot.isHit) {
         endX += (Math.random() > 0.5 ? 300 : -300);
         endY += (Math.random() > 0.5 ? 200 : -200);
     }
 
-    // Создаем снежок и запускаем
     const ball = new Snowball(field, startX, startY, endX, endY, () => {
         if (shot.isHit) {
-            // Взрыв частиц
             if (particleSystem) particleSystem.explode(endX, endY, 20);
             
-            // Тряска экрана
             document.getElementById('main-body').classList.add('screen-shake');
             setTimeout(() => document.getElementById('main-body').classList.remove('screen-shake'), 500);
 
-            // Вспышка
             const flash = document.createElement('div');
             flash.className = 'flash-effect';
             document.body.appendChild(flash);
             setTimeout(() => flash.remove(), 300);
 
-            // Мегабросок
             if (shot.isMega) {
                 const megaDiv = document.createElement('div');
                 megaDiv.className = 'mega-text';
@@ -364,16 +345,13 @@ onValue(gameRef, (snapshot) => {
         if (data.status === 'lobby') generateQRs();
     }
     
-    // Подготовка данных для классов
     const redPlayers = Object.entries(data.players?.red || {}).map(([id, p], idx) => ({ ...p, id, index: idx }));
     const bluePlayers = Object.entries(data.players?.blue || {}).map(([id, p], idx) => ({ ...p, id, index: idx }));
 
-    // Преобразуем в экземпляры классов (только при изменении списка)
     if (redPlayers.length !== playersData.red.length || bluePlayers.length !== playersData.blue.length) {
         playersData.red = redPlayers.map(p => new Player(p.id, p, 'red', p.index));
         playersData.blue = bluePlayers.map(p => new Player(p.id, p, 'blue', p.index));
     } else {
-        // Обновляем жизни
         playersData.red.forEach((p, i) => {
             if (redPlayers[i]) {
                 p.lives = redPlayers[i].lives;
@@ -388,7 +366,6 @@ onValue(gameRef, (snapshot) => {
         });
     }
 
-    // Обновление лобби
     document.getElementById('tv-players-red').innerHTML = playersData.red.map(p => 
         `<div class="text-red-300 font-bold bg-red-900/40 py-1 rounded border border-red-500/50">👤 ${p.name}</div>`
     ).join('');
@@ -397,7 +374,6 @@ onValue(gameRef, (snapshot) => {
         `<div class="text-blue-300 font-bold bg-blue-900/40 py-1 rounded border border-blue-500/50">👤 ${p.name}</div>`
     ).join('');
 
-    // Переключение экранов
     if (data.status === 'lobby') {
         document.getElementById('lobby-view').classList.remove('hidden');
         document.getElementById('battle-view').classList.add('hidden');
@@ -463,7 +439,6 @@ onValue(ref(db, `games/${gameId}/last_shot`), (snap) => {
     const shot = snap.val();
     if (!shot) return;
     
-    // Защита от дублей
     if (shot.animated) return;
     shot.animated = true;
 
