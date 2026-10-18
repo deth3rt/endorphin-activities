@@ -9,10 +9,8 @@
     @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap');
     body { background: radial-gradient(circle at 50% 0%, #0a2540 0%, #03080f 100%); color: #fff; font-family: 'Montserrat', sans-serif; overflow: hidden; user-select: none; touch-action: none; }
     .glass-panel { background: rgba(10, 37, 64, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(127, 227, 255, 0.2); }
-    .aim-arc-container { position: relative; width: 260px; height: 260px; margin: 0 auto; }
-    .aim-arc-bg { position: absolute; inset: 0; border-radius: 50%; border: 4px dashed rgba(255,255,255,0.1); }
     
-    /* НОВЫЙ ДЖОЙСТИК (Вертикальный ползунок) */
+    /* Вертикальный джойстик */
     .slider-container { position: relative; width: 60px; height: 260px; background: rgba(255,255,255,0.05); border-radius: 30px; border: 2px solid rgba(255,255,255,0.1); margin: 0 auto; overflow: hidden; display: flex; align-items: center; }
     .slider-track { position: absolute; top: 0; bottom: 0; left: 0; right: 0; }
     .slider-thumb { width: 50px; height: 50px; border-radius: 50%; background: linear-gradient(135deg, #fff, #a8e6ff); position: absolute; left: 3px; top: 50%; transform: translateY(-50%); box-shadow: 0 0 20px rgba(255,255,255,0.6); }
@@ -106,12 +104,14 @@
       const maxP = data ? parseInt(data.mode.charAt(0)) : 1;
       const currentCount = Object.keys(data?.players?.[team] || {}).length;
       
-      // Если мы уже заходили ранее, нас пустят. Если новый — проверяем лимит.
       if (!data?.players?.[team]?.[playerId] && currentCount >= maxP) {
         return alert('Команда заполнена!');
       }
 
-      set(playerRef, { name, lives: 3, alive: true });
+      // ВАЖНО: Сохраняем жизни при переподключении!
+      const currentLives = data?.players?.[team]?.[playerId]?.lives || 3;
+      set(playerRef, { name, lives: currentLives, alive: true });
+      
       document.getElementById('join-screen').classList.add('hidden');
       document.getElementById('game-screen').classList.remove('hidden');
       document.getElementById('game-screen').classList.add('flex');
@@ -148,7 +148,7 @@
       }
     });
 
-    // === ЛОГИКА ВЕРТИКАЛЬНОГО ДЖОЙСТИКА ===
+    // === ЛОГИКА ДЖОЙСТИКА ===
     const container = document.getElementById('angle-slider-container');
     const thumb = document.getElementById('angle-thumb');
     let currentAngle = 45;
@@ -156,13 +156,10 @@
     const updateThumb = (clientY) => {
       const rect = container.getBoundingClientRect();
       let y = clientY - rect.top;
-      // Ограничиваем в пределах контейнера
       y = Math.max(25, Math.min(rect.height - 25, y));
       
-      const percentage = 1 - (y / rect.height); // 1 вверху, 0 внизу
+      const percentage = 1 - (y / rect.height);
       thumb.style.top = `${y}px`;
-      
-      // Угол от 10 (низ) до 80 (верх)
       currentAngle = 10 + (percentage * 70);
     };
 
@@ -177,7 +174,7 @@
     container.addEventListener('touchstart', handleMove, { passive: false });
     container.addEventListener('mousemove', (e) => { if (e.buttons === 1) handleMove(e); });
 
-    // === СИЛА И ВЫСТРЕЛ ===
+    // === ВЫСТРЕЛ ===
     document.getElementById('power-slider').addEventListener('input', (e) => {
       document.getElementById('power-display').innerText = e.target.value + '%';
     });
@@ -196,7 +193,6 @@
         const targetId = aliveEnemies[targetIndex][0];
         const isHit = power >= 30; 
         
-        // Получаем актуальный массив игроков моей команды для передачи хода
         onValue(ref(db, `games/${gameId}/players/${team}`), (mySnap) => {
           const myPlayers = Object.entries(mySnap.val() || {}).filter(([id, p]) => p.alive);
           
