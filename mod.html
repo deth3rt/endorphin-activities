@@ -11,6 +11,9 @@
     .glass { background: rgba(10, 37, 64, 0.8); border: 1px solid rgba(127, 227, 255, 0.3); border-radius: 1.5rem; backdrop-filter: blur(16px); }
     .mode-btn { transition: all 0.3s ease; }
     .mode-btn.active { border-color: #22d3ee; background: rgba(34, 211, 238, 0.2); color: #22d3ee; box-shadow: 0 0 20px rgba(34, 211, 238, 0.5); }
+    .team-btn { transition: all 0.3s ease; }
+    .team-btn.active-red { border-color: #ef4444; background: rgba(239, 68, 68, 0.2); color: #ef4444; box-shadow: 0 0 20px rgba(239, 68, 68, 0.5); }
+    .team-btn.active-blue { border-color: #3b82f6; background: rgba(59, 130, 246, 0.2); color: #3b82f6; box-shadow: 0 0 20px rgba(59, 130, 246, 0.5); }
   </style>
 </head>
 <body>
@@ -44,6 +47,15 @@
       </div>
     </div>
 
+    <!-- ВЫБОР ПЕРВОЙ КОМАНДЫ -->
+    <div class="glass w-full max-w-4xl p-8 mb-8">
+      <h2 class="text-xl font-bold mb-4 text-cyan-100 text-center">КАКАЯ КОМАНДА НАЧИНАЕТ?</h2>
+      <div class="flex justify-center gap-6">
+        <button onclick="setFirstTeam('red')" class="team-btn px-12 py-4 rounded-xl border-2 font-bold text-xl" id="btn-first-red">КРАСНЫЕ</button>
+        <button onclick="setFirstTeam('blue')" class="team-btn px-12 py-4 rounded-xl border-2 font-bold text-xl" id="btn-first-blue">СИНИЕ</button>
+      </div>
+    </div>
+
     <button id="btn-start" disabled class="w-full max-w-4xl py-8 bg-gradient-to-r from-blue-600 to-cyan-500 rounded-2xl text-3xl font-black text-black shadow-[0_0_40px_rgba(6,182,212,0.6)] disabled:opacity-50 disabled:cursor-not-allowed transition-all">
       НАЧАТЬ БОЙ
     </button>
@@ -71,15 +83,31 @@
 
     let currentData = null;
     let timerInterval = null;
+    let firstTeam = 'red'; // По умолчанию красные
 
-    set(gameRef, { status: 'lobby', mode: null, lives: { red: 3, blue: 3 }, players: { red: {}, blue: {} } }).then(() => { setMode('1v1'); });
+    set(gameRef, { status: 'lobby', mode: null, lives: { red: 3, blue: 3 }, players: { red: {}, blue: {} }, firstTeam: 'red' }).then(() => { setMode('1v1'); });
 
     window.setMode = (mode) => { if(currentData?.status === 'playing') return; update(gameRef, { mode }); };
+
+    // Выбор первой команды
+    window.setFirstTeam = (team) => {
+      firstTeam = team;
+      update(gameRef, { firstTeam: team });
+      
+      document.getElementById('btn-first-red').classList.toggle('active-red', team === 'red');
+      document.getElementById('btn-first-blue').classList.toggle('active-blue', team === 'blue');
+    };
 
     onValue(gameRef, (snapshot) => {
       const data = snapshot.val();
       if (!data) return;
       currentData = data;
+
+      if (data.firstTeam) {
+        firstTeam = data.firstTeam;
+        document.getElementById('btn-first-red').classList.toggle('active-red', firstTeam === 'red');
+        document.getElementById('btn-first-blue').classList.toggle('active-blue', firstTeam === 'blue');
+      }
 
       if (data.status === 'playing') {
         document.getElementById('lobby-controls').classList.add('hidden');
@@ -121,12 +149,38 @@
     window.kickPlayer = (team, id) => { if(confirm('Кикнуть игрока?')) remove(ref(db, `games/battle_1/players/${team}/${id}`)); };
     window.endGame = () => { update(gameRef, { status: 'finished', winner: 'none' }); };
 
+    // ============================================================
+    // СТАРТ ИГРЫ (с генерацией координат)
+    // ============================================================
     document.getElementById('btn-start').onclick = () => {
       if (!currentData) return;
-      const firstTeam = 'red';
-      const firstPlayerEntry = Object.entries(currentData.players[firstTeam] || {})[0];
-      if (!firstPlayerEntry) return alert('Нет игроков!');
       
+      // Генерируем координаты для каждого игрока на его базе
+      const playersRed = currentData.players.red || {};
+      const playersBlue = currentData.players.blue || {};
+      
+      // Красные (слева): X от 5% до 20%, Y от 20% до 80%
+      const redKeys = Object.keys(playersRed);
+      redKeys.forEach((id, index) => {
+        const posX = 5 + Math.random() * 15; // 5-20%
+        const posY = 20 + (index * 60 / Math.max(1, redKeys.length)) + Math.random() * 10; // Распределяем по Y
+        update(ref(db, `games/battle_1/players/red/${id}`), { posX, posY });
+      });
+
+      // Синие (справа): X от 80% до 95%, Y от 20% до 80%
+      const blueKeys = Object.keys(playersBlue);
+      blueKeys.forEach((id, index) => {
+        const posX = 80 + Math.random() * 15; // 80-95%
+        const posY = 20 + (index * 60 / Math.max(1, blueKeys.length)) + Math.random() * 10;
+        update(ref(db, `games/battle_1/players/blue/${id}`), { posX, posY });
+      });
+
+      // Определяем первого игрока
+      const firstTeamPlayers = firstTeam === 'red' ? playersRed : playersBlue;
+      const firstPlayerEntry = Object.entries(firstTeamPlayers)[0];
+      if (!firstPlayerEntry) return alert('Нет игроков в выбранной команде!');
+
+      // Обновляем статус игры
       update(gameRef, { 
         status: 'playing', 
         turn: { team: firstTeam, name: firstPlayerEntry[1].name }, 
@@ -134,25 +188,18 @@
         timer: 3 
       });
       
+      // Обратный отсчёт
       let countdown = 3;
       if (timerInterval) clearInterval(timerInterval);
       timerInterval = setInterval(() => {
         countdown--;
         update(gameRef, { timer: countdown });
-        if (countdown <= 0) { clearInterval(timerInterval); startPlayerTimer(); }
+        if (countdown <= 0) { 
+          clearInterval(timerInterval); 
+          update(gameRef, { timer: null }); // Убираем цифру
+        }
       }, 1000);
     };
-
-    function startPlayerTimer() {
-      let time = 15;
-      update(gameRef, { timer: time });
-      if (timerInterval) clearInterval(timerInterval);
-      timerInterval = setInterval(() => {
-        time--;
-        update(gameRef, { timer: time });
-        if (time <= 0) { clearInterval(timerInterval); }
-      }, 1000);
-    }
   </script>
 </body>
 </html>
