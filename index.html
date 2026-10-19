@@ -2,12 +2,12 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#03080f">
+    <meta name="description" content="ENDORPHIN — Снежный Баттл. Мультиплеерная игра для вечеринок.">
     <title>ENDORPHIN | ГЛАВНОЕ МЕНЮ</title>
     
-    <!-- Внешние библиотеки -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/lucide@latest"></script>
     
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap');
@@ -19,8 +19,18 @@
             --ice-glow: rgba(34, 211, 238, 0.4);
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        html, body { width: 100%; height: 100%; overflow: hidden; }
+        * { 
+            box-sizing: border-box; 
+            margin: 0; 
+            padding: 0; 
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        html, body { 
+            width: 100%; 
+            min-height: 100%; 
+            overflow-x: hidden;
+        }
         
         body {
             background: var(--bg-gradient);
@@ -30,13 +40,15 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            min-height: 100dvh;
+            padding: 1rem;
         }
 
         /* ============================================================
-           CANVAS ДЛЯ СНЕГА И ЛЬДА
+           CANVAS
            ============================================================ */
         #snow-canvas {
-            position: absolute;
+            position: fixed;
             top: 0; left: 0;
             width: 100%; height: 100%;
             z-index: 1;
@@ -53,14 +65,16 @@
             flex-direction: column;
             align-items: center;
             text-align: center;
-            padding: 2rem;
+            padding: 1rem;
+            width: 100%;
+            max-width: 900px;
         }
 
         /* ============================================================
-           ЗАГОЛОВОК С ЛЕДЯНЫМ СВЕЧЕНИЕМ
+           ЗАГОЛОВОК
            ============================================================ */
         .title {
-            font-size: 6rem;
+            font-size: clamp(3rem, 12vw, 6rem);
             font-weight: 900;
             line-height: 1;
             background: linear-gradient(180deg, #ffffff 0%, #a8e6ff 50%, #22d3ee 100%);
@@ -71,73 +85,75 @@
                 0 0 30px rgba(34, 211, 238, 0.4),
                 0 0 60px rgba(34, 211, 238, 0.2);
             letter-spacing: -2px;
-            margin-bottom: 1rem;
+            margin-bottom: 0.5rem;
             position: relative;
             animation: titleFloat 4s ease-in-out infinite;
         }
 
         @keyframes titleFloat {
             0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-10px); }
+            50% { transform: translateY(-8px); }
         }
 
         .subtitle {
-            font-size: 1.5rem;
+            font-size: clamp(0.9rem, 2.5vw, 1.4rem);
             font-weight: 700;
             letter-spacing: 0.3em;
             text-transform: uppercase;
             color: rgba(168, 230, 255, 0.7);
-            margin-bottom: 4rem;
+            margin-bottom: clamp(2rem, 6vh, 3.5rem);
         }
 
         /* ============================================================
-           КАРТОЧКИ АКТИВНОСТЕЙ
+           КАРТОЧКИ
            ============================================================ */
         .cards-grid {
             display: flex;
-            gap: 2rem;
+            gap: 1.5rem;
             flex-wrap: wrap;
             justify-content: center;
-            margin-bottom: 3rem;
+            margin-bottom: 2rem;
+            width: 100%;
         }
 
         .card-btn {
             position: relative;
-            width: 280px;
-            padding: 2.5rem 2rem;
+            width: 260px;
+            padding: 2rem 1.5rem;
             background: rgba(10, 37, 64, 0.6);
             backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
             border: 2px solid rgba(127, 227, 255, 0.3);
-            border-radius: 2rem;
+            border-radius: 1.5rem;
             text-align: center;
             cursor: pointer;
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275),
+                        border-color 0.3s,
+                        box-shadow 0.3s;
             overflow: hidden;
             text-decoration: none;
             color: #fff;
             display: block;
+            outline: none;
         }
 
         .card-btn::before {
             content: '';
             position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: conic-gradient(from 0deg, transparent, rgba(34, 211, 238, 0.1), transparent 30%);
+            top: -50%; left: -50%;
+            width: 200%; height: 200%;
+            background: conic-gradient(from 0deg, transparent, rgba(34, 211, 238, 0.12), transparent 30%);
             animation: rotate 8s linear infinite;
             pointer-events: none;
             opacity: 0;
             transition: opacity 0.4s;
         }
 
-        @keyframes rotate {
-            to { transform: rotate(360deg); }
-        }
+        @keyframes rotate { to { transform: rotate(360deg); } }
 
-        .card-btn:hover {
-            transform: translateY(-10px) scale(1.03);
+        .card-btn:hover,
+        .card-btn:focus-visible {
+            transform: translateY(-8px) scale(1.03);
             border-color: rgba(34, 211, 238, 0.8);
             box-shadow: 
                 0 20px 40px rgba(34, 211, 238, 0.2),
@@ -145,189 +161,283 @@
                 inset 0 0 30px rgba(34, 211, 238, 0.1);
         }
 
-        .card-btn:hover::before {
-            opacity: 1;
+        .card-btn:hover::before,
+        .card-btn:focus-visible::before { opacity: 1; }
+
+        .card-btn:active {
+            transform: translateY(-2px) scale(0.98);
+        }
+
+        .card-btn:focus-visible {
+            outline: 2px solid #22d3ee;
+            outline-offset: 4px;
         }
 
         .card-icon {
-            font-size: 4rem;
-            margin-bottom: 1.5rem;
+            font-size: 3.5rem;
+            margin-bottom: 1rem;
             display: block;
             filter: drop-shadow(0 0 20px rgba(34, 211, 238, 0.6));
             transition: transform 0.4s;
+            line-height: 1;
         }
 
-        .card-btn:hover .card-icon {
-            transform: scale(1.2) rotate(5deg);
+        .card-btn:hover .card-icon,
+        .card-btn:focus-visible .card-icon {
+            transform: scale(1.15) rotate(5deg);
         }
 
         .card-title {
-            font-size: 1.3rem;
+            font-size: 1.15rem;
             font-weight: 900;
             letter-spacing: 0.1em;
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.4rem;
             position: relative;
             z-index: 2;
         }
 
         .card-desc {
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             color: rgba(168, 230, 255, 0.6);
             position: relative;
             z-index: 2;
         }
 
         /* ============================================================
-           АДМИН-ССЫЛКА
+           НИЖНЯЯ ПАНЕЛЬ
            ============================================================ */
-        .admin-link {
-            font-size: 0.75rem;
-            color: rgba(168, 230, 255, 0.3);
+        .footer-links {
+            display: flex;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+            margin-top: 1rem;
+        }
+
+        .footer-link {
+            font-size: 0.7rem;
+            color: rgba(168, 230, 255, 0.4);
             letter-spacing: 0.2em;
             text-transform: uppercase;
             transition: color 0.3s;
             text-decoration: none;
+            padding: 0.5rem 0.8rem;
+            border-radius: 8px;
         }
 
-        .admin-link:hover {
-            color: rgba(34, 211, 238, 0.8);
+        .footer-link:hover,
+        .footer-link:focus-visible {
+            color: rgba(34, 211, 238, 0.9);
+            background: rgba(34, 211, 238, 0.08);
+            outline: none;
         }
 
         /* ============================================================
-           ЛЕДЯНЫЕ КРИСТАЛЛЫ (ДЕКОРАЦИЯ)
+           ИНДИКАТОР СТАТУСА
            ============================================================ */
-        .crystal {
-            position: absolute;
-            background: linear-gradient(135deg, rgba(255,255,255,0.8), rgba(34,211,238,0.3));
-            border-radius: 2px;
-            transform: rotate(45deg);
-            pointer-events: none;
-            z-index: 2;
-            animation: crystalFloat 6s ease-in-out infinite;
+        .status-indicator {
+            position: fixed;
+            bottom: 12px;
+            right: 12px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.65rem;
+            color: rgba(168, 230, 255, 0.5);
+            letter-spacing: 0.15em;
+            z-index: 20;
+            padding: 6px 12px;
+            background: rgba(0,0,0,0.4);
+            border-radius: 999px;
+            border: 1px solid rgba(127, 227, 255, 0.15);
         }
 
-        @keyframes crystalFloat {
-            0%, 100% { transform: rotate(45deg) translateY(0); opacity: 0.6; }
-            50% { transform: rotate(45deg) translateY(-20px); opacity: 1; }
+        .status-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #22d3ee;
+            box-shadow: 0 0 8px #22d3ee;
+            animation: pulseDot 2s ease-in-out infinite;
+        }
+
+        .status-dot.error {
+            background: #ef4444;
+            box-shadow: 0 0 8px #ef4444;
+            animation: none;
+        }
+
+        @keyframes pulseDot {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
         }
 
         /* ============================================================
            АДАПТАЦИЯ
            ============================================================ */
-        @media (max-width: 768px) {
-            .title { font-size: 3.5rem; }
-            .subtitle { font-size: 1rem; margin-bottom: 2rem; }
-            .card-btn { width: 100%; max-width: 320px; }
-            .cards-grid { gap: 1rem; }
+        @media (max-width: 640px) {
+            .cards-grid { 
+                gap: 1rem;
+                flex-direction: column;
+                align-items: center;
+            }
+            .card-btn { 
+                width: 100%; 
+                max-width: 340px;
+                padding: 1.5rem 1.2rem;
+            }
+            .card-icon { font-size: 2.5rem; margin-bottom: 0.6rem; }
+            .card-title { font-size: 1rem; }
+            .card-desc { font-size: 0.75rem; }
+        }
+
+        /* ============================================================
+           REDUCED MOTION
+           ============================================================ */
+        @media (prefers-reduced-motion: reduce) {
+            *,
+            *::before,
+            *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
         }
     </style>
 </head>
 <body>
 
-    <!-- Canvas для снега -->
     <canvas id="snow-canvas"></canvas>
 
-    <!-- Главное меню -->
     <div class="menu-container">
         
         <h1 class="title">ENDORPHIN</h1>
         <p class="subtitle">Снежный Баттл</p>
 
         <div class="cards-grid">
-            <!-- Пульт ведущего -->
-            <a href="mod.html" class="card-btn">
+            <a href="mod.html" class="card-btn" aria-label="Открыть пульт ведущего">
                 <span class="card-icon">🎮</span>
                 <div class="card-title" style="color: #22d3ee;">ПУЛЬТ ВЕДУЩЕГО</div>
                 <div class="card-desc">Управление игрой</div>
             </a>
 
-            <!-- Экран ТВ -->
-            <a href="tv.html" class="card-btn">
+            <a href="tv.html" class="card-btn" aria-label="Открыть экран для проектора">
                 <span class="card-icon">📺</span>
                 <div class="card-title" style="color: #3b82f6;">ЭКРАН ТВ</div>
                 <div class="card-desc">Для проектора</div>
             </a>
         </div>
 
-        <a href="admin.html" class="admin-link">ВХОД ДЛЯ АДМИНИСТРАТОРА</a>
+        <div class="footer-links">
+            <a href="play.html?team=red" class="footer-link">🔴 Играть за красных</a>
+            <a href="play.html?team=blue" class="footer-link">🔵 Играть за синих</a>
+            <a href="admin.html" class="footer-link">⚙️ Админ-панель</a>
+        </div>
 
+    </div>
+
+    <div class="status-indicator" id="status-indicator">
+        <div class="status-dot" id="status-dot"></div>
+        <span id="status-text">ONLINE</span>
     </div>
 
     <script>
         // ============================================================
-        // CANVAS: СНЕГОПАД И ЛЕДЯНЫЕ ЧАСТИЦЫ
+        // CANVAS: СНЕГОПАД
         // ============================================================
         const canvas = document.getElementById('snow-canvas');
         const ctx = canvas.getContext('2d');
         let width, height;
+        let snowflakes = [];
+        let crystals = [];
+        let animationId = null;
+        let lastFrameTime = 0;
+        const FRAME_INTERVAL = 1000 / 60; // 60 FPS max
+
+        const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+        function initParticles() {
+            snowflakes = [];
+            crystals = [];
+            
+            const flakeCount = prefersReducedMotion ? 0 : Math.min(80, Math.floor((width * height) / 20000));
+            const crystalCount = prefersReducedMotion ? 0 : Math.min(15, Math.floor((width * height) / 80000));
+
+            for (let i = 0; i < flakeCount; i++) {
+                snowflakes.push({
+                    x: Math.random() * width,
+                    y: Math.random() * height,
+                    radius: Math.random() * 2.5 + 0.8,
+                    speedY: Math.random() * 0.8 + 0.3,
+                    speedX: Math.random() * 0.4 - 0.2,
+                    opacity: Math.random() * 0.5 + 0.3,
+                    wobble: Math.random() * Math.PI * 2,
+                    wobbleSpeed: Math.random() * 0.02 + 0.01
+                });
+            }
+
+            for (let i = 0; i < crystalCount; i++) {
+                crystals.push({
+                    x: Math.random() * width,
+                    y: Math.random() * height,
+                    size: Math.random() * 12 + 5,
+                    speedY: Math.random() * 0.3 + 0.1,
+                    opacity: Math.random() * 0.25 + 0.1,
+                    rotation: Math.random() * Math.PI,
+                    rotationSpeed: (Math.random() - 0.5) * 0.01
+                });
+            }
+        }
 
         function resize() {
             width = canvas.width = window.innerWidth;
             height = canvas.height = window.innerHeight;
-        }
-        window.addEventListener('resize', resize);
-        resize();
-
-        // Массив снежинок
-        const snowflakes = [];
-        const snowflakeCount = 80;
-
-        for (let i = 0; i < snowflakeCount; i++) {
-            snowflakes.push({
-                x: Math.random() * width,
-                y: Math.random() * height,
-                radius: Math.random() * 3 + 1,
-                speedY: Math.random() * 1 + 0.5,
-                speedX: Math.random() * 0.5 - 0.25,
-                opacity: Math.random() * 0.5 + 0.3,
-                wobble: Math.random() * Math.PI * 2
-            });
+            initParticles();
         }
 
-        // Массив ледяных кристаллов (декоративных)
-        const crystals = [];
-        for (let i = 0; i < 15; i++) {
-            crystals.push({
-                x: Math.random() * width,
-                y: Math.random() * height,
-                size: Math.random() * 15 + 5,
-                speedY: Math.random() * 0.3 + 0.1,
-                opacity: Math.random() * 0.3 + 0.1,
-                rotation: Math.random() * Math.PI
-            });
-        }
+        let resizeTimeout;
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeTimeout);
+            resizeTimeout = setTimeout(resize, 150);
+        });
 
-        function drawSnow() {
+        function drawFrame(timestamp) {
+            animationId = requestAnimationFrame(drawFrame);
+
+            // Throttling до 60 FPS
+            if (timestamp - lastFrameTime < FRAME_INTERVAL) return;
+            lastFrameTime = timestamp;
+
             ctx.clearRect(0, 0, width, height);
 
-            // Рисуем снежинки
-            snowflakes.forEach(flake => {
-                // Обновление позиции
+            // Снежинки
+            for (const flake of snowflakes) {
                 flake.y += flake.speedY;
                 flake.x += flake.speedX + Math.sin(flake.wobble) * 0.3;
-                flake.wobble += 0.01;
+                flake.wobble += flake.wobbleSpeed;
 
-                // Респавн
-                if (flake.y > height) {
-                    flake.y = -10;
+                if (flake.y > height + 5) {
+                    flake.y = -5;
                     flake.x = Math.random() * width;
                 }
-                if (flake.x > width) flake.x = 0;
-                if (flake.x < 0) flake.x = width;
+                if (flake.x > width + 5) flake.x = -5;
+                if (flake.x < -5) flake.x = width + 5;
 
-                // Рисование
                 ctx.beginPath();
                 ctx.arc(flake.x, flake.y, flake.radius, 0, Math.PI * 2);
                 ctx.fillStyle = `rgba(255, 255, 255, ${flake.opacity})`;
                 ctx.shadowColor = '#22d3ee';
-                ctx.shadowBlur = 8;
+                ctx.shadowBlur = 6;
                 ctx.fill();
-                ctx.shadowBlur = 0;
-            });
+            }
+            ctx.shadowBlur = 0;
 
-            // Рисуем ледяные кристаллы
-            crystals.forEach(crystal => {
+            // Кристаллы
+            for (const crystal of crystals) {
                 crystal.y += crystal.speedY;
+                crystal.rotation += crystal.rotationSpeed;
+
                 if (crystal.y > height + 20) {
                     crystal.y = -20;
                     crystal.x = Math.random() * width;
@@ -338,7 +448,7 @@
                 ctx.rotate(crystal.rotation);
                 ctx.fillStyle = `rgba(34, 211, 238, ${crystal.opacity})`;
                 ctx.shadowColor = '#22d3ee';
-                ctx.shadowBlur = 15;
+                ctx.shadowBlur = 12;
                 ctx.beginPath();
                 ctx.moveTo(0, -crystal.size);
                 ctx.lineTo(crystal.size / 2, 0);
@@ -347,17 +457,79 @@
                 ctx.closePath();
                 ctx.fill();
                 ctx.restore();
-            });
-
-            requestAnimationFrame(drawSnow);
+            }
+            ctx.shadowBlur = 0;
         }
 
-        drawSnow();
+        // ============================================================
+        // PAUSE/RESUME ПРИ СКРЫТИИ ВКЛАДКИ
+        // ============================================================
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) {
+                if (animationId) {
+                    cancelAnimationFrame(animationId);
+                    animationId = null;
+                }
+            } else {
+                if (!animationId && !prefersReducedMotion) {
+                    lastFrameTime = 0;
+                    animationId = requestAnimationFrame(drawFrame);
+                }
+            }
+        });
 
         // ============================================================
-        // ИНИЦИАЛИЗАЦИЯ ИКОНОК LUCIDE
+        // СТАРТ
         // ============================================================
-        lucide.createIcons();
+        resize();
+        if (!prefersReducedMotion) {
+            animationId = requestAnimationFrame(drawFrame);
+        } else {
+            // Для reduced motion — рисуем один кадр
+            ctx.clearRect(0, 0, width, height);
+        }
+
+        // ============================================================
+        // ПРОВЕРКА ДОСТУПНОСТИ FIREBASE
+        // ============================================================
+        async function checkFirebaseStatus() {
+            const dot = document.getElementById('status-dot');
+            const text = document.getElementById('status-text');
+            
+            try {
+                const controller = new AbortController();
+                const timeout = setTimeout(() => controller.abort(), 5000);
+                
+                const res = await fetch(
+                    'https://endorphin-battle-default-rtdb.europe-west1.firebasedatabase.app/games/battle_1/status.json',
+                    { signal: controller.signal }
+                );
+                clearTimeout(timeout);
+                
+                if (res.ok) {
+                    const status = await res.json();
+                    text.innerText = status ? `ONLINE · ${String(status).toUpperCase()}` : 'ONLINE';
+                    dot.classList.remove('error');
+                } else {
+                    throw new Error('Not OK');
+                }
+            } catch (e) {
+                dot.classList.add('error');
+                text.innerText = 'OFFLINE';
+            }
+        }
+        checkFirebaseStatus();
+        setInterval(checkFirebaseStatus, 30000);
+
+        // ============================================================
+        // ПРЕДЗАГРУЗКА ССЫЛОК (ускоряет переходы)
+        // ============================================================
+        ['mod.html', 'tv.html', 'play.html', 'admin.html'].forEach(href => {
+            const link = document.createElement('link');
+            link.rel = 'prefetch';
+            link.href = href;
+            document.head.appendChild(link);
+        });
     </script>
 
 </body>
