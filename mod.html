@@ -590,6 +590,10 @@
       <button onclick="newGame()" class="start-btn w-full py-6 rounded-2xl text-2xl">
         🔄 НОВАЯ ИГРА
       </button>
+      <p class="text-[0.7rem] text-white/40 text-center mt-3 max-w-md">
+        Игроки, которые хотят играть снова, должны отсканировать QR-код заново.
+        Комната ожидания не очищается — кто был в ней, останется.
+      </p>
     </div>
 
   </div>
@@ -634,7 +638,8 @@
     let lastUIHash = '';
 
     // ============================================================
-    // АУДИО    // ============================================================
+    // АУДИО
+    // ============================================================
     let audioCtx = null;
     function getAudioCtx() {
       if (!audioCtx) {
@@ -761,15 +766,21 @@
         firstTeam = existing.firstTeam || 'red';
 
         if (existing.status === 'finished') {
+          // ВАЖНО: после завершённой игры — НЕ возвращаем всех в комнату.
+          // Просто очищаем players, комнату оставляем как есть.
+          // Кто хочет играть — сканирует QR заново (play.html с hasJoined = false).
           firstTeam = existing.firstTeam || 'red';
-          await moveAllPlayersToRoom(existing);
+          await clearPlayersKeepRoom(existing);
         } else if (existing.status === 'playing') {
           const ok = await showModal({
             icon: '⚠️', title: 'Игра уже идёт',
             text: 'Сбросить текущую игру и вернуться в лобби?',
             confirmText: 'СБРОСИТЬ', danger: true
           });
-          if (ok) await moveAllPlayersToRoom(existing);
+          if (ok) {
+            // Сброс посреди игры — вернуть всех в комнату (они ещё на телефонах)
+            await moveAllPlayersToRoom(existing);
+          }
         } else {
           if (existing.screen !== 'attract') await update(gameRef, { screen: 'attract' });
           if (!existing.room) await update(gameRef, { room: { red: {}, blue: {} } });
@@ -779,6 +790,20 @@
       }
     }
 
+    // Очищает players, комнату НЕ трогает
+    async function clearPlayersKeepRoom(data) {
+      if (countdownInterval) { clearInterval(countdownInterval); countdownInterval = null; }
+      await update(gameRef, {
+        screen: 'attract', status: 'lobby',
+        players: { red: {}, blue: {} },
+        activePlayerId: null, timer: null, preloadDone: false,
+        winner: null, last_shot: null, shots: null,
+        turn: { team: firstTeam, name: '...' }
+      });
+      try { await remove(ref(db, 'games/battle_1/aim')); } catch {}
+    }
+
+    // Возвращает ВСЕХ игроков из players в room (используется при "В ЛОББИ" во время игры)
     async function moveAllPlayersToRoom(data) {
       if (countdownInterval) { clearInterval(countdownInterval); countdownInterval = null; }
 
@@ -1178,16 +1203,29 @@
       });
       if (!ok) return;
       try {
+        // Здесь намеренно возвращаем всех в комнату — они ещё на телефонах
         await moveAllPlayersToRoom(currentData);
         playSuccess();
       } catch (e) { showToast(e.message, 'error'); }
     };
 
+    // НОВАЯ ИГРА после finished — НЕ возвращает в комнату
     window.newGame = async () => {
       if (currentData?.status !== 'finished') return;
       playClick();
+
+      const ok = await showModal({
+        icon: '🔄', title: 'Новая игра?',
+        text: 'Игроки из прошлой игры НЕ вернутся в комнату автоматически. Кто хочет играть — должен отсканировать QR заново.',
+        confirmText: 'НАЧАТЬ', danger: false
+      });
+      if (!ok) return;
+
       try {
-        await moveAllPlayersToRoom(currentData);
+        // Очищаем только players, room не трогаем
+        await clearPlayersKeepRoom(currentData);
+        playSuccess();
+        showToast('Готово к новой игре. Покажите QR-код.', 'success');
       } catch (e) { showToast(e.message, 'error'); }
     };
 
