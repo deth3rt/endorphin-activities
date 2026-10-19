@@ -5,23 +5,30 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <meta name="theme-color" content="#03080f">
   <title>ENDORPHIN | ПУЛЬТ</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap');
 
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&family=JetBrains+Mono:wght@700;900&display=swap" rel="stylesheet">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <style>
     :root {
-      --red-team: #ef4444;
-      --blue-team: #3b82f6;
-      --cyan-glow: #22d3ee;
+      --red-team: #ff3b5c;
+      --blue-team: #3d8bff;
+      --ice: #7fe3ff;
+      --ice-bright: #22d3ee;
+      --amber: #fbbf24;
       --safe-top: env(safe-area-inset-top, 0px);
       --safe-bottom: env(safe-area-inset-bottom, 0px);
       --team-color: #22d3ee;
     }
 
-    * { -webkit-tap-highlight-color: transparent; }
+    * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
 
     body {
-      background: radial-gradient(circle at 50% 0%, #0a2540 0%, #03080f 100%);
+      margin: 0;
+      background: radial-gradient(circle at 50% 0%, #0a2540 0%, #03080f 70%);
       color: #fff;
       font-family: 'Montserrat', sans-serif;
       overflow: hidden;
@@ -29,23 +36,35 @@
       touch-action: none;
       overscroll-behavior: none;
       height: 100dvh;
+      position: relative;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.03;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      mix-blend-mode: overlay;
     }
 
     body.team-red { --team-color: var(--red-team); }
     body.team-blue { --team-color: var(--blue-team); }
 
+    .mono { font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums; }
+
     .glass-panel {
-      background: rgba(10, 37, 64, 0.75);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      border: 1px solid rgba(127, 227, 255, 0.25);
-      box-shadow: 0 0 40px rgba(31, 143, 214, 0.2), inset 0 0 20px rgba(127, 227, 255, 0.05);
+      background: rgba(10, 37, 64, 0.85);
+      border: 1px solid rgba(127, 227, 255, 0.28);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.06), 0 0 40px rgba(31, 143, 214, 0.15);
     }
 
-    @keyframes slideUp { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+    @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
     @keyframes pulseGlow {
       0%, 100% { box-shadow: 0 0 20px rgba(34, 211, 238, 0.3); }
-      50% { box-shadow: 0 0 50px rgba(34, 211, 238, 0.8); }
+      50% { box-shadow: 0 0 50px rgba(34, 211, 238, 0.7); }
     }
     @keyframes winPop {
       0% { transform: scale(0.3); opacity: 0; }
@@ -67,13 +86,10 @@
       50% { transform: scale(1.08); }
     }
     @keyframes superPulse {
-      0%, 100% { transform: scale(1); box-shadow: 0 0 20px #fbbf24; }
-      50% { transform: scale(1.05); box-shadow: 0 0 50px #fbbf24, 0 0 80px #f59e0b; }
+      0%, 100% { box-shadow: 0 0 20px rgba(251,191,36,0.4); }
+      50% { box-shadow: 0 0 40px rgba(251,191,36,0.9); }
     }
-    @keyframes roomPulse {
-      0%, 100% { opacity: 0.6; }
-      50% { opacity: 1; }
-    }
+    @keyframes roomPulse { 0%, 100% { opacity: 0.6; } 50% { opacity: 1; } }
     .animate-shake { animation: shake 0.4s ease-in-out; }
 
     .avatar {
@@ -89,38 +105,25 @@
       box-shadow: 0 4px 12px rgba(0,0,0,0.4);
     }
     .avatar-sm { width: 32px; height: 32px; font-size: 0.9rem; }
-    .avatar-md { width: 48px; height: 48px; font-size: 1.4rem; }
-    .avatar-lg { width: 72px; height: 72px; font-size: 2rem; }
+    .avatar-md { width: 46px; height: 46px; font-size: 1.3rem; }
 
+    /* ============================================================
+       ТАЙМЕР ХОДА
+       ============================================================ */
     .turn-timer {
       position: fixed;
       top: calc(var(--safe-top) + 6px);
       left: 50%;
       transform: translateX(-50%);
       z-index: 60;
-      text-align: center;
       pointer-events: none;
       opacity: 0;
       transition: opacity 0.3s;
     }
     .turn-timer.active { opacity: 1; }
-
-    .turn-timer-ring {
-      position: relative;
-      width: 60px;
-      height: 60px;
-      margin: 0 auto;
-    }
-    .turn-timer-ring svg {
-      transform: rotate(-90deg);
-      width: 100%;
-      height: 100%;
-    }
-    .turn-timer-ring .bg {
-      fill: none;
-      stroke: rgba(255,255,255,0.1);
-      stroke-width: 6;
-    }
+    .turn-timer-ring { position: relative; width: 60px; height: 60px; margin: 0 auto; }
+    .turn-timer-ring svg { transform: rotate(-90deg); width: 100%; height: 100%; }
+    .turn-timer-ring .bg { fill: none; stroke: rgba(255,255,255,0.1); stroke-width: 6; }
     .turn-timer-ring .progress {
       fill: none;
       stroke: var(--team-color);
@@ -129,18 +132,15 @@
       transition: stroke-dashoffset 0.1s linear, stroke 0.3s;
       filter: drop-shadow(0 0 8px var(--team-color));
     }
-    .turn-timer-ring.danger .progress {
-      stroke: #ef4444;
-      filter: drop-shadow(0 0 12px #ef4444);
-    }
+    .turn-timer-ring.danger .progress { stroke: #ef4444; filter: drop-shadow(0 0 12px #ef4444); }
     .turn-timer-value {
       position: absolute;
       top: 50%; left: 50%;
       transform: translate(-50%, -50%);
-      font-size: 1.5rem;
+      font-size: 1.4rem;
       font-weight: 900;
       color: #fff;
-      font-variant-numeric: tabular-nums;
+      font-family: 'JetBrains Mono', monospace;
       text-shadow: 0 0 20px var(--team-color);
     }
     .turn-timer-ring.danger .turn-timer-value {
@@ -149,31 +149,27 @@
       animation: timerPulse 0.5s ease-in-out infinite;
     }
 
+    /* ============================================================
+       ИНФО ИГРОКА
+       ============================================================ */
     .player-info {
       position: fixed;
       top: calc(var(--safe-top) + 6px);
-      left: 12px;
-      background: rgba(0,0,0,0.65);
+      left: 10px;
+      background: rgba(0,0,0,0.7);
       padding: 6px 12px;
       border-radius: 14px;
       border: 1px solid rgba(127, 227, 255, 0.35);
-      text-align: left;
       z-index: 50;
-      backdrop-filter: blur(12px);
       min-width: 110px;
       display: flex;
       align-items: center;
       gap: 8px;
     }
-    .player-info .info-text {
-      display: flex;
-      flex-direction: column;
-      min-width: 0;
-    }
+    .player-info .info-text { display: flex; flex-direction: column; min-width: 0; }
     .player-info .name {
-      font-size: 0.8rem;
+      font-size: 0.78rem;
       font-weight: 900;
-      color: #fff;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -185,15 +181,20 @@
       letter-spacing: 1px;
     }
 
+    /* ============================================================
+       ИГРОВОЙ ЭКРАН
+       ============================================================ */
     .game-screen {
       display: flex;
       flex-direction: column;
       height: 100dvh;
       padding-top: calc(var(--safe-top) + 4px);
-      padding-bottom: calc(var(--safe-bottom) + 6px);
+      padding-bottom: calc(var(--safe-bottom) + 8px);
       padding-left: 8px;
       padding-right: 8px;
-      gap: 6px;
+      gap: 8px;
+      position: relative;
+      z-index: 1;
     }
 
     .game-content {
@@ -201,13 +202,15 @@
       display: flex;
       flex-direction: column;
       justify-content: center;
-      gap: 8px;
+      gap: 10px;
       min-height: 0;
       overflow-y: auto;
     }
 
-    .control-section {
+    .control-card {
       width: 100%;
+      max-width: 380px;
+      margin: 0 auto;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -215,245 +218,313 @@
     }
 
     .section-label {
+      font-size: 0.62rem;
+      font-weight: 900;
+      letter-spacing: 0.22em;
+      color: rgba(168, 230, 255, 0.7);
+      text-align: center;
+      text-transform: uppercase;
+    }
+
+    /* ============================================================
+       УГОЛ — SVG-полукруг с drag
+       ============================================================ */
+    .angle-control {
+      position: relative;
+      width: 100%;
+      max-width: 320px;
+      height: 130px;
+      margin: 0 auto;
+      touch-action: none;
+      cursor: grab;
+    }
+    .angle-control:active { cursor: grabbing; }
+    .angle-control svg {
+      width: 100%;
+      height: 100%;
+      display: block;
+      overflow: visible;
+    }
+    .angle-arc {
+      fill: none;
+      stroke: rgba(127, 227, 255, 0.15);
+      stroke-width: 14;
+      stroke-linecap: round;
+    }
+    .angle-arc-fill {
+      fill: none;
+      stroke: var(--team-color);
+      stroke-width: 14;
+      stroke-linecap: round;
+      filter: drop-shadow(0 0 10px var(--team-color));
+      transition: stroke 0.2s;
+    }
+    .angle-tick { stroke: rgba(168, 230, 255, 0.25); stroke-width: 2; }
+    .angle-pointer {
+      fill: #fff;
+      stroke: var(--team-color);
+      stroke-width: 3;
+      filter: drop-shadow(0 0 12px var(--team-color));
+    }
+    .angle-value-badge {
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 4px 14px;
+      border-radius: 999px;
+      background: rgba(0,0,0,0.7);
+      border: 1.5px solid var(--team-color);
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 900;
+      font-size: 1.05rem;
+      color: var(--team-color);
+      box-shadow: 0 0 20px var(--team-color);
+      white-space: nowrap;
+    }
+    .angle-hint {
+      position: absolute;
+      top: 6px;
+      left: 50%;
+      transform: translateX(-50%);
       font-size: 0.6rem;
       font-weight: 900;
       letter-spacing: 0.2em;
-      color: rgba(168, 230, 255, 0.6);
-      text-align: center;
-    }
-
-    .control-row {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      width: 100%;
-      max-width: 340px;
-    }
-
-    .control-btn {
-      width: clamp(54px, 15vw, 72px);
-      height: clamp(54px, 15vw, 72px);
-      border-radius: 18px;
-      background: rgba(10, 37, 64, 0.85);
-      border: 2px solid rgba(127, 227, 255, 0.35);
-      color: #fff;
-      font-size: clamp(1.5rem, 5vw, 2rem);
-      font-weight: 900;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: all 0.12s;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.4);
-      cursor: pointer;
-      touch-action: manipulation;
-      flex-shrink: 0;
-    }
-    .control-btn:active:not(:disabled) {
-      transform: scale(0.92);
-      background: rgba(34, 211, 238, 0.25);
-      border-color: var(--team-color);
-      box-shadow: 0 0 25px var(--team-color);
-    }
-    .control-btn:disabled {
-      opacity: 0.3;
-      cursor: not-allowed;
-    }
-
-    .control-btn.up, .control-btn.down { color: #22d3ee; }
-    .control-btn.left, .control-btn.right { color: #fbbf24; }
-
-    .control-display {
-      flex: 1;
-      min-height: clamp(54px, 15vw, 72px);
-      max-width: 130px;
-      border-radius: 18px;
-      background: radial-gradient(circle at 50% 30%, rgba(34, 211, 238, 0.15), rgba(10, 37, 64, 0.95));
-      border: 2px solid rgba(127, 227, 255, 0.4);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 2px 6px;
-    }
-
-    .display-value {
-      font-size: clamp(1.4rem, 5vw, 1.9rem);
-      font-weight: 900;
-      color: var(--team-color);
-      text-shadow: 0 0 15px var(--team-color);
-      line-height: 1;
-      font-variant-numeric: tabular-nums;
-    }
-
-    .display-unit {
-      font-size: 0.6rem;
       color: rgba(168, 230, 255, 0.5);
-      font-weight: 700;
-      margin-top: 1px;
     }
 
-    .power-bar {
+    /* ============================================================
+       СИЛА — вертикальный слайдер
+       ============================================================ */
+    .power-control {
       width: 100%;
-      max-width: 340px;
-      height: 10px;
-      background: rgba(0,0,0,0.6);
-      border-radius: 5px;
-      overflow: hidden;
-      border: 2px solid rgba(127, 227, 255, 0.2);
+      max-width: 380px;
+      margin: 0 auto;
+      display: flex;
+      gap: 12px;
+      align-items: stretch;
+      height: 84px;
+    }
+
+    .power-btn {
+      width: 54px;
+      height: 54px;
+      align-self: center;
+      border-radius: 16px;
+      background: rgba(10, 37, 64, 0.85);
+      border: 2px solid rgba(251, 191, 36, 0.35);
+      color: var(--amber);
+      font-size: 1.5rem;
+      font-weight: 900;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.12s;
+      flex-shrink: 0;
+      touch-action: manipulation;
+    }
+    .power-btn:active:not(:disabled) {
+      transform: scale(0.9);
+      background: rgba(251, 191, 36, 0.2);
+      border-color: var(--amber);
+      box-shadow: 0 0 25px var(--amber);
+    }
+    .power-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+    .power-bar-wrap {
+      flex: 1;
       position: relative;
+      border-radius: 14px;
+      background: rgba(0,0,0,0.5);
+      border: 2px solid rgba(127, 227, 255, 0.25);
+      overflow: hidden;
+      min-width: 0;
     }
     .power-bar-fill {
-      height: 100%;
-      background: linear-gradient(90deg, #22c55e, #fbbf24, #ef4444);
-      transition: width 0.15s ease;
-      border-radius: 5px;
+      position: absolute;
+      left: 0; top: 0; bottom: 0;
+      background: linear-gradient(90deg, #22c55e 0%, #fbbf24 55%, #ef4444 100%);
+      transition: width 0.12s ease;
+      border-radius: 10px;
+      box-shadow: 0 0 15px rgba(251, 191, 36, 0.4);
+    }
+    .power-bar-markers {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      justify-content: space-between;
+      padding: 0 4px;
+      align-items: center;
+      pointer-events: none;
+    }
+    .power-bar-markers span {
+      font-size: 0.55rem;
+      font-weight: 900;
+      color: rgba(255,255,255,0.35);
+      font-family: 'JetBrains Mono', monospace;
+      text-shadow: 0 1px 3px rgba(0,0,0,0.8);
+    }
+    .power-value {
+      position: absolute;
+      top: 50%;
+      right: 10px;
+      transform: translateY(-50%);
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 900;
+      font-size: 1.1rem;
+      color: #fff;
+      text-shadow: 0 0 10px rgba(0,0,0,0.9), 0 0 20px var(--amber);
+      z-index: 2;
+    }
+    .power-hint {
+      position: absolute;
+      top: 50%;
+      left: 12px;
+      transform: translateY(-50%);
+      font-size: 0.62rem;
+      font-weight: 900;
+      letter-spacing: 0.15em;
+      color: rgba(255,255,255,0.75);
+      text-shadow: 0 1px 4px rgba(0,0,0,0.9);
+      z-index: 2;
     }
 
+    /* ============================================================
+       СУПЕР-ПАНЕЛЬ
+       ============================================================ */
     .super-panel {
       width: 100%;
-      max-width: 340px;
+      max-width: 380px;
+      margin: 0 auto;
     }
-
     .super-header {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 4px 10px;
-      background: rgba(251, 191, 36, 0.15);
-      border: 1px solid rgba(251, 191, 36, 0.4);
+      padding: 5px 12px;
+      background: rgba(251, 191, 36, 0.12);
+      border: 1px solid rgba(251, 191, 36, 0.35);
       border-radius: 10px;
-      margin-bottom: 4px;
+      margin-bottom: 5px;
     }
     .super-title {
-      font-size: 0.6rem;
+      font-size: 0.62rem;
       font-weight: 900;
       letter-spacing: 0.15em;
-      color: #fbbf24;
-      text-shadow: 0 0 10px #fbbf24;
+      color: var(--amber);
     }
     .super-hearts {
       font-size: 0.65rem;
-      font-weight: 700;
-      color: rgba(251, 191, 36, 0.8);
+      font-weight: 900;
+      color: rgba(251, 191, 36, 0.85);
+      font-family: 'JetBrains Mono', monospace;
     }
-
     .super-grid {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
-      gap: 4px;
+      gap: 5px;
     }
-
     .super-btn {
-      padding: 6px 2px;
+      padding: 7px 2px;
       border-radius: 10px;
       background: rgba(10, 37, 64, 0.85);
-      border: 2px solid rgba(251, 191, 36, 0.4);
+      border: 2px solid rgba(251, 191, 36, 0.35);
       color: #fff;
       font-weight: 900;
       text-align: center;
       transition: all 0.15s;
       cursor: pointer;
-      position: relative;
-      overflow: hidden;
     }
-    .super-btn .super-emoji {
-      font-size: 1.1rem;
-      display: block;
-      line-height: 1;
-    }
+    .super-btn .super-emoji { font-size: 1.15rem; display: block; line-height: 1; }
     .super-btn .super-cost {
       font-size: 0.55rem;
       color: rgba(251, 191, 36, 0.9);
-      margin-top: 1px;
+      margin-top: 2px;
       font-weight: 900;
+      font-family: 'JetBrains Mono', monospace;
     }
     .super-btn:active:not(:disabled) {
       transform: scale(0.95);
       background: rgba(251, 191, 36, 0.25);
-      border-color: #fbbf24;
-      box-shadow: 0 0 20px #fbbf24;
+      border-color: var(--amber);
+      box-shadow: 0 0 20px var(--amber);
     }
-    .super-btn:disabled {
-      opacity: 0.3;
-      cursor: not-allowed;
-    }
-    .super-btn.can-use {
-      animation: superPulse 2s ease-in-out infinite;
-    }
+    .super-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+    .super-btn.can-use { animation: superPulse 2s ease-in-out infinite; }
 
+    /* ============================================================
+       КНОПКА БРОСКА
+       ============================================================ */
     .shoot-btn {
       width: 100%;
-      max-width: 340px;
-      height: clamp(52px, 12vh, 70px);
+      max-width: 380px;
+      margin: 0 auto;
+      height: clamp(58px, 13vh, 76px);
       border-radius: 20px;
-      font-size: clamp(1.1rem, 4vw, 1.4rem);
+      font-size: clamp(1.15rem, 4.2vw, 1.5rem);
       font-weight: 900;
       text-transform: uppercase;
-      letter-spacing: 3px;
+      letter-spacing: 4px;
       transition: all 0.15s;
       display: flex;
       align-items: center;
       justify-content: center;
-      background: radial-gradient(circle at 50% 30%, var(--team-color), rgba(0,0,0,0.7) 150%);
+      background: radial-gradient(circle at 50% 30%, var(--team-color), rgba(0,0,0,0.75) 160%);
       border: 3px solid rgba(255,255,255,0.25);
       color: #fff;
       box-shadow: 0 0 40px var(--team-color), inset 0 0 20px rgba(0,0,0,0.3);
-      text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+      text-shadow: 0 2px 10px rgba(0,0,0,0.6);
       flex-shrink: 0;
-      margin-top: auto;
     }
     .shoot-btn:active:not(:disabled) {
       transform: scale(0.97);
       box-shadow: 0 0 60px var(--team-color), inset 0 0 30px rgba(0,0,0,0.5);
     }
     .shoot-btn:disabled {
-      filter: grayscale(1);
+      filter: grayscale(0.9);
       opacity: 0.3;
       box-shadow: none;
     }
 
-    .super-modal {
+    /* ============================================================
+       МОДАЛКИ / ОВЕРЛЕИ
+       ============================================================ */
+    .super-modal, .overlay, .modal-backdrop {
       position: fixed;
       inset: 0;
-      background: rgba(0,0,0,0.9);
-      z-index: 150;
       display: flex;
       align-items: center;
       justify-content: center;
       flex-direction: column;
-      padding: 20px;
-      backdrop-filter: blur(10px);
-    }
-    .super-modal.hidden { display: none; }
-
-    .overlay {
-      position: fixed;
-      inset: 0;
-      z-index: 100;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-direction: column;
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
       padding: 20px;
       text-align: center;
     }
-    .overlay.hidden { display: none; }
+    .super-modal.hidden, .overlay.hidden, .modal-backdrop.hidden { display: none; }
 
-    .wait-overlay { background: rgba(0,0,0,0.88); }
+    .super-modal {
+      background: rgba(0,0,0,0.92);
+      z-index: 150;
+      backdrop-filter: blur(10px);
+    }
+
+    .overlay {
+      z-index: 100;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+    .wait-overlay { background: rgba(0,0,0,0.9); }
     .wait-overlay .pulse-dot {
       width: 18px; height: 18px;
       border-radius: 50%;
-      background: #22d3ee;
-      box-shadow: 0 0 20px #22d3ee;
+      background: var(--ice-bright);
+      box-shadow: 0 0 20px var(--ice-bright);
       animation: pulseGlow 1.2s ease-in-out infinite;
       margin: 0 4px;
     }
 
     .result-overlay {
-      background: rgba(0,0,0,0.92);
+      background: rgba(0,0,0,0.94);
       z-index: 200;
     }
     .result-title {
@@ -478,17 +549,48 @@
       color: transparent;
       filter: drop-shadow(0 0 20px rgba(148, 163, 184, 0.4));
     }
-    .result-subtitle {
-      font-size: 1rem;
-      color: rgba(168, 230, 255, 0.7);
-      margin-top: 1rem;
-    }
+    .result-subtitle { font-size: 1rem; color: var(--ice); margin-top: 1rem; }
     .result-emoji {
       font-size: 4rem;
       margin-bottom: 1rem;
       animation: winPop 0.8s 0.1s both;
       filter: drop-shadow(0 0 40px rgba(251, 191, 36, 0.6));
     }
+
+    /* Модалка подтверждения */
+    .modal-backdrop { background: rgba(0,0,0,0.8); z-index: 300; backdrop-filter: blur(8px); }
+    @keyframes modalIn {
+      from { transform: translateY(20px) scale(0.95); opacity: 0; }
+      to { transform: translateY(0) scale(1); opacity: 1; }
+    }
+    .modal-card {
+      background: rgba(10, 37, 64, 0.98);
+      border: 1px solid rgba(127, 227, 255, 0.35);
+      border-radius: 1.5rem;
+      padding: 1.5rem;
+      max-width: 400px;
+      width: 100%;
+      animation: modalIn 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    .modal-card .modal-icon { font-size: 2.4rem; text-align: center; margin-bottom: 0.6rem; }
+    .modal-card .modal-title { font-size: 1.1rem; font-weight: 900; text-align: center; margin-bottom: 0.4rem; }
+    .modal-card .modal-text { font-size: 0.85rem; text-align: center; color: var(--ice); opacity: 0.8; margin-bottom: 1.1rem; line-height: 1.5; }
+    .modal-card .modal-actions { display: flex; gap: 0.6rem; }
+    .modal-card .modal-btn {
+      flex: 1;
+      padding: 0.8rem 1rem;
+      border-radius: 0.85rem;
+      font-weight: 900;
+      font-size: 0.85rem;
+      border: 2px solid transparent;
+      cursor: pointer;
+      transition: all 0.15s;
+      letter-spacing: 0.05em;
+    }
+    .modal-card .modal-btn.cancel { background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.15); color: var(--ice); }
+    .modal-card .modal-btn.cancel:hover { background: rgba(255,255,255,0.12); color: #fff; }
+    .modal-card .modal-btn.confirm { background: linear-gradient(135deg, var(--ice-bright), var(--blue-team)); color: #000; }
+    .modal-card .modal-btn.danger { background: linear-gradient(135deg, #ef4444, #dc2626); color: #fff; }
 
     .confetti {
       position: fixed;
@@ -499,20 +601,24 @@
       animation: confettiFall linear forwards;
     }
 
-    .join-card {
-      animation: slideUp 0.5s ease-out;
-    }
+    /* ============================================================
+       JOIN SCREEN
+       ============================================================ */
+    .join-card { animation: slideUp 0.5s ease-out; }
     .join-input {
       background: rgba(0,0,0,0.5);
       border: 2px solid rgba(34, 211, 238, 0.5);
       transition: all 0.2s;
     }
     .join-input:focus {
-      border-color: #22d3ee;
+      border-color: var(--ice-bright);
       box-shadow: 0 0 20px rgba(34, 211, 238, 0.4);
       outline: none;
     }
 
+    /* ============================================================
+       ROOM SCREEN
+       ============================================================ */
     .room-screen {
       position: fixed;
       inset: 0;
@@ -522,137 +628,159 @@
       align-items: center;
       justify-content: center;
       padding: 20px;
-      background: radial-gradient(circle at 50% 0%, #0a2540 0%, #03080f 100%);
+      background: radial-gradient(circle at 50% 0%, #0a2540 0%, #03080f 70%);
       overflow-y: auto;
     }
-
     .room-status {
-      font-size: 1.4rem;
+      font-size: 1.3rem;
       font-weight: 900;
       letter-spacing: 0.15em;
-      color: rgba(168, 230, 255, 0.7);
+      color: var(--ice);
       margin-bottom: 8px;
       animation: roomPulse 2s ease-in-out infinite;
     }
-
     .room-title {
-      font-size: 1.8rem;
+      font-size: 1.7rem;
       font-weight: 900;
       color: #fff;
       margin-bottom: 24px;
       text-align: center;
     }
-
-    .room-section {
-      width: 100%;
-      max-width: 340px;
-      margin-bottom: 16px;
-    }
-
+    .room-section { width: 100%; max-width: 340px; margin-bottom: 16px; }
     .room-section-title {
       font-size: 0.65rem;
       font-weight: 900;
       letter-spacing: 0.2em;
-      color: rgba(168, 230, 255, 0.5);
+      color: rgba(168, 230, 255, 0.55);
       margin-bottom: 8px;
       text-align: center;
     }
-
     .room-player-row {
       display: flex;
       align-items: center;
       gap: 10px;
       padding: 8px 12px;
-      background: rgba(10, 37, 64, 0.6);
+      background: rgba(10, 37, 64, 0.7);
       border: 1px solid rgba(127, 227, 255, 0.2);
       border-radius: 12px;
       margin-bottom: 6px;
     }
-
     .room-player-row.me {
       border-color: var(--team-color);
       box-shadow: 0 0 20px var(--team-color);
     }
-
     .room-player-name {
       font-weight: 700;
-      font-size: 0.95rem;
-      color: #fff;
+      font-size: 0.9rem;
       flex: 1;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
     }
-
     .room-player-badge {
-      font-size: 0.6rem;
+      font-size: 0.58rem;
       font-weight: 900;
       padding: 2px 8px;
       border-radius: 999px;
       letter-spacing: 0.1em;
     }
-
     .room-player-badge.playing {
       background: rgba(34, 211, 238, 0.2);
-      color: #22d3ee;
+      color: var(--ice-bright);
       border: 1px solid rgba(34, 211, 238, 0.5);
     }
-
     .room-player-badge.waiting {
       background: rgba(251, 191, 36, 0.2);
-      color: #fbbf24;
+      color: var(--amber);
       border: 1px solid rgba(251, 191, 36, 0.4);
     }
 
-    @media (max-height: 720px) {
-      .game-content { gap: 5px; }
-      .control-section { gap: 4px; }
-      .control-row { gap: 6px; }
-      .super-grid { gap: 3px; }
-      .super-btn { padding: 4px 2px; }
-      .super-btn .super-emoji { font-size: 0.95rem; }
+    /* ============================================================
+       TOAST
+       ============================================================ */
+    .toast-container {
+      position: fixed;
+      top: calc(var(--safe-top) + 80px);
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 400;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      pointer-events: none;
+      max-width: 90vw;
     }
+    .toast {
+      padding: 10px 16px;
+      border-radius: 12px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      backdrop-filter: blur(12px);
+      animation: slideUp 0.3s ease-out;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+      white-space: nowrap;
+    }
+    .toast.success { background: rgba(34, 197, 94, 0.25); border: 1px solid rgba(34, 197, 94, 0.5); }
+    .toast.error { background: rgba(239, 68, 68, 0.25); border: 1px solid rgba(239, 68, 68, 0.5); }
+    .toast.info { background: rgba(34, 211, 238, 0.25); border: 1px solid rgba(34, 211, 238, 0.5); }
 
-    @media (max-height: 620px) {
-      .game-content { gap: 3px; }
-      .control-section { gap: 3px; }
-      .control-row { gap: 5px; }
-      .control-btn { width: clamp(44px, 12vw, 58px); height: clamp(44px, 12vw, 58px); border-radius: 14px; }
-      .control-display { min-height: clamp(44px, 12vw, 58px); }
-      .display-value { font-size: 1.3rem; }
-      .display-unit { font-size: 0.55rem; }
-      .super-header { padding: 3px 8px; }
-      .super-title { font-size: 0.55rem; }
-      .super-hearts { font-size: 0.6rem; }
-      .super-btn { padding: 3px 2px; }
+    /* ============================================================
+       АДАПТИВ
+       ============================================================ */
+    @media (max-height: 700px) {
+      .angle-control { height: 110px; }
+      .power-control { height: 74px; }
+      .power-btn { width: 48px; height: 48px; font-size: 1.3rem; }
+      .game-content { gap: 7px; }
+      .super-btn .super-emoji { font-size: 1rem; }
+      .super-btn { padding: 5px 2px; }
+    }
+    @media (max-height: 600px) {
+      .angle-control { height: 96px; }
+      .power-control { height: 68px; }
+      .power-btn { width: 44px; height: 44px; font-size: 1.2rem; }
+      .shoot-btn { height: 52px; font-size: 1.05rem; letter-spacing: 2px; }
+      .game-content { gap: 5px; }
       .super-btn .super-emoji { font-size: 0.9rem; }
-      .shoot-btn { height: clamp(46px, 10vh, 58px); font-size: 1rem; }
+      .super-btn { padding: 4px 2px; }
+      .super-btn .super-cost { font-size: 0.5rem; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
     }
   </style>
 </head>
 <body class="relative" id="main-body">
 
+  <!-- ============================================================
+       JOIN
+       ============================================================ -->
   <div id="join-screen" class="fixed inset-0 flex flex-col items-center justify-center p-6 z-10">
     <div class="glass-panel join-card p-7 rounded-3xl w-full max-w-sm flex flex-col items-center">
       <div class="text-4xl mb-3">❄️</div>
       <h1 class="text-2xl font-black text-cyan-300 mb-1 tracking-widest">ENDORPHIN</h1>
       <p class="text-cyan-100/50 text-[10px] tracking-[0.3em] mb-5">СНЕЖНЫЙ БАТТЛ</p>
-      
+
       <div class="w-full mb-5">
         <label class="block text-xs font-bold text-cyan-300/70 mb-2 tracking-wider">ТВОЁ ИМЯ</label>
-        <input 
-          type="text" 
-          id="input-name" 
-          placeholder="ВВЕДИ ИМЯ" 
+        <input
+          type="text"
+          id="input-name"
+          placeholder="ВВЕДИ ИМЯ"
           maxlength="16"
+          autocomplete="off"
           class="join-input w-full rounded-xl px-4 py-3 text-center text-lg font-bold text-white placeholder:text-white/30"
         >
       </div>
 
       <div id="team-badge" class="mb-5 px-5 py-1.5 rounded-full font-black text-xs tracking-wider"></div>
 
-      <button 
-        id="join-btn" 
+      <button
+        id="join-btn"
         class="w-full py-4 text-white font-black text-lg rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 shadow-lg active:scale-95 transition-all"
       >
         ПОДКЛЮЧИТЬСЯ
@@ -661,6 +789,9 @@
     </div>
   </div>
 
+  <!-- ============================================================
+       ROOM
+       ============================================================ -->
   <div id="room-screen" class="room-screen hidden">
     <div class="room-status" id="room-status">⏳ ОЖИДАНИЕ</div>
     <div class="room-title">ВЫ В КОМНАТЕ</div>
@@ -684,8 +815,11 @@
     </button>
   </div>
 
+  <!-- ============================================================
+       GAME
+       ============================================================ -->
   <div id="game-screen" class="hidden game-screen">
-    
+
     <div class="turn-timer" id="turn-timer">
       <div class="turn-timer-ring" id="turn-timer-ring">
         <svg viewBox="0 0 70 70">
@@ -707,45 +841,59 @@
     <div id="game-team-badge" class="self-center mb-1 px-4 py-1 rounded-full font-black text-[10px] tracking-widest"></div>
 
     <div class="game-content">
-      <div class="control-section">
-        <div class="section-label">УГОЛ</div>
-        <div class="control-row">
-          <button class="control-btn up" id="angle-up" disabled>▲</button>
-          <div class="control-display">
-            <div class="display-value" id="angle-display">45°</div>
-            <div class="display-unit" id="angle-hint">ВВЕРХ</div>
-          </div>
-          <button class="control-btn down" id="angle-down" disabled>▼</button>
+
+      <!-- УГОЛ -->
+      <div class="control-card">
+        <div class="section-label">Угол</div>
+        <div class="angle-control" id="angle-control">
+          <div class="angle-hint" id="angle-hint">ВВЕРХ</div>
+          <svg viewBox="0 0 320 130" preserveAspectRatio="xMidYMax meet" id="angle-svg">
+            <!-- Дуга -->
+            <path class="angle-arc" id="angle-arc-bg" d="M 40 120 A 120 120 0 0 1 280 120" />
+            <path class="angle-arc-fill" id="angle-arc-fill" d="M 40 120 A 120 120 0 0 1 280 120" />
+            <!-- Деления -->
+            <g id="angle-ticks"></g>
+            <!-- Указатель -->
+            <circle class="angle-pointer" id="angle-pointer" cx="40" cy="120" r="9" />
+          </svg>
+          <div class="angle-value-badge" id="angle-value-badge">45°</div>
         </div>
       </div>
 
-      <div class="control-section">
-        <div class="section-label">СИЛА</div>
-        <div class="control-row">
-          <button class="control-btn left" id="power-down" disabled>◀</button>
-          <div class="control-display">
-            <div class="display-value" id="power-value">30%</div>
-            <div class="display-unit" id="power-hint">СРЕДНЯЯ</div>
+      <!-- СИЛА -->
+      <div class="control-card">
+        <div class="section-label">Сила</div>
+        <div class="power-control">
+          <button class="power-btn" id="power-down" disabled aria-label="Уменьшить силу">−</button>
+          <div class="power-bar-wrap">
+            <div class="power-bar-fill" id="power-bar-fill" style="width: 30%"></div>
+            <div class="power-bar-markers">
+              <span>0</span><span>50</span><span>100</span>
+            </div>
+            <div class="power-hint" id="power-hint">СРЕДНЕ</div>
+            <div class="power-value" id="power-value">30%</div>
           </div>
-          <button class="control-btn right" id="power-up" disabled>▶</button>
-        </div>
-        <div class="power-bar">
-          <div class="power-bar-fill" id="power-bar-fill" style="width: 30%"></div>
+          <button class="power-btn" id="power-up" disabled aria-label="Увеличить силу">+</button>
         </div>
       </div>
 
+      <!-- СУПЕР -->
       <div class="super-panel hidden" id="super-panel">
         <div class="super-header">
-          <div class="super-title">⚡ СУПЕР</div>
+          <div class="super-title">⚡ СУПЕРБРОСОК</div>
           <div class="super-hearts" id="super-hearts-info">-1❤️</div>
         </div>
         <div class="super-grid" id="super-grid"></div>
       </div>
+
     </div>
 
     <button id="shoot-btn" class="shoot-btn self-center" disabled>БРОСОК</button>
   </div>
 
+  <!-- ============================================================
+       SUPER MODAL
+       ============================================================ -->
   <div id="super-modal" class="super-modal hidden">
     <div class="glass-panel p-5 rounded-3xl w-full max-w-sm">
       <h2 class="text-lg font-black text-center mb-3 text-yellow-400 tracking-widest">ВЫБЕРИ СУПЕРБРОСОК</h2>
@@ -754,6 +902,9 @@
     </div>
   </div>
 
+  <!-- ============================================================
+       ОВЕРЛЕИ
+       ============================================================ -->
   <div id="wait-overlay" class="overlay wait-overlay hidden">
     <div class="text-5xl mb-4">⏳</div>
     <h1 class="text-2xl font-black text-white mb-2 text-center">ХОД СОПЕРНИКА</h1>
@@ -767,7 +918,7 @@
 
   <div id="preload-overlay" class="overlay wait-overlay hidden">
     <p class="text-cyan-300 font-bold tracking-[0.3em] text-xs mb-3">ПРИГОТОВЬСЯ</p>
-    <div class="text-7xl font-black text-white" id="preload-count" style="text-shadow: 0 0 40px rgba(34,211,238,0.8); font-variant-numeric: tabular-nums;">10</div>
+    <div class="text-7xl font-black text-white mono" id="preload-count" style="text-shadow: 0 0 40px rgba(34,211,238,0.8);">10</div>
     <p class="text-gray-400 text-xs mt-3">ИГРА НАЧНЁТСЯ СЕЙЧАС</p>
   </div>
 
@@ -789,10 +940,10 @@
     <div class="result-emoji" id="result-emoji">🏆</div>
     <h1 class="result-title win" id="result-title">ПОБЕДА!</h1>
     <p class="result-subtitle" id="result-subtitle">Твоя команда победила</p>
-    
+
     <div class="mt-8 px-8 text-center">
       <p class="text-white/40 text-[10px] tracking-wider mb-4">ИГРА ЗАВЕРШЕНА</p>
-      <button 
+      <button
         id="result-close-btn"
         class="px-8 py-3 rounded-xl bg-white/10 border border-white/20 font-bold text-white hover:bg-white/20 transition active:scale-95 text-sm"
       >
@@ -801,13 +952,39 @@
     </div>
   </div>
 
+  <!-- ============================================================
+       MODAL ПОДТВЕРЖДЕНИЯ
+       ============================================================ -->
+  <div class="modal-backdrop hidden" id="modal">
+    <div class="modal-card">
+      <div class="modal-icon" id="modal-icon">⚠️</div>
+      <div class="modal-title" id="modal-title">Подтверждение</div>
+      <div class="modal-text" id="modal-text"></div>
+      <div class="modal-actions">
+        <button class="modal-btn cancel" id="modal-cancel">ОТМЕНА</button>
+        <button class="modal-btn confirm" id="modal-confirm">ОК</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST -->
+  <div class="toast-container" id="toast-container"></div>
+
   <div id="confetti-container"></div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getDatabase, ref, set, push, onDisconnect, onValue, update, get, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-    const firebaseConfig = { apiKey: "AIzaSyCXIR5Tv8lB6ivcGRC3yt1SC66MM6T5b_M", authDomain: "endorphin-battle.firebaseapp.com", databaseURL: "https://endorphin-battle-default-rtdb.europe-west1.firebasedatabase.app", projectId: "endorphin-battle", storageBucket: "endorphin-battle.firebasestorage.app", messagingSenderId: "185259733030", appId: "1:185259733030:web:d72a89a436880973e636e7" };
+    const firebaseConfig = {
+      apiKey: "AIzaSyCXIR5Tv8lB6ivcGRC3yt1SC66MM6T5b_M",
+      authDomain: "endorphin-battle.firebaseapp.com",
+      databaseURL: "https://endorphin-battle-default-rtdb.europe-west1.firebasedatabase.app",
+      projectId: "endorphin-battle",
+      storageBucket: "endorphin-battle.firebasestorage.app",
+      messagingSenderId: "185259733030",
+      appId: "1:185259733030:web:d72a89a436880973e636e7"
+    };
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
     const gameRef = ref(db, 'games/battle_1');
@@ -824,6 +1001,7 @@
 
     const joinedKey = `endorphin_joined_${team}_${playerId}`;
     let hasJoined = localStorage.getItem(joinedKey) === '1';
+    const nameStorageKey = `endorphin_name_${team}`;
 
     const playerRef = ref(db, `games/battle_1/players/${team}/${playerId}`);
     const roomRef = ref(db, `games/battle_1/room/${team}/${playerId}`);
@@ -864,8 +1042,40 @@
     let aimSyncTimeout = null;
     let lastAimSent = null;
 
-    // ✅ Флаг для предотвращения повторного показа результата
-    let resultShown = false;
+    // ============================================================
+    // ЗВУК
+    // ============================================================
+    let audioCtx = null;
+    function getAudioCtx() {
+      if (!audioCtx) {
+        try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch { return null; }
+      }
+      if (audioCtx.state === 'suspended') audioCtx.resume().catch(() => {});
+      return audioCtx;
+    }
+    function beep(freq = 800, duration = 0.08, type = 'sine', volume = 0.15) {
+      const ctx = getAudioCtx();
+      if (!ctx) return;
+      try {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = type;
+        osc.frequency.value = freq;
+        gain.gain.setValueAtTime(volume, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
+        osc.connect(gain).connect(ctx.destination);
+        osc.start();
+        osc.stop(ctx.currentTime + duration);
+      } catch {}
+    }
+    function playClick() { beep(600, 0.04, 'square', 0.06); }
+    function playTurnStart() { beep(880, 0.1, 'sine', 0.15); setTimeout(() => beep(1320, 0.12, 'sine', 0.15), 90); }
+    function playShoot() { beep(400, 0.08, 'sawtooth', 0.1); setTimeout(() => beep(220, 0.12, 'sawtooth', 0.08), 60); }
+    function playSuper() { [523, 659, 784, 1046].forEach((f, i) => setTimeout(() => beep(f, 0.1, 'sine', 0.13), i * 60)); }
+    function playTick() { beep(1200, 0.03, 'square', 0.08); }
+    function playError() { beep(200, 0.12, 'sawtooth', 0.1); }
+    function playVictory() { [523, 659, 784, 1046, 1318].forEach((f, i) => setTimeout(() => beep(f, 0.15, 'sine', 0.16), i * 100)); }
+    function playDefeat() { [400, 300, 220, 165].forEach((f, i) => setTimeout(() => beep(f, 0.15, 'sine', 0.13), i * 120)); }
 
     const vibrate = (p) => { if (navigator.vibrate) navigator.vibrate(p); };
     const showOverlay = (id) => document.getElementById(id).classList.remove('hidden');
@@ -875,11 +1085,8 @@
     function escapeHtml(str) {
       if (!str) return '';
       return String(str)
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#39;');
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
     }
 
     function getNameGradient(name) {
@@ -893,23 +1100,59 @@
       const hue2 = (hue1 + 60 + Math.abs(hash >> 8) % 60) % 360;
       return `linear-gradient(135deg, hsl(${hue1}, 70%, 55%), hsl(${hue2}, 70%, 45%))`;
     }
-
-    function getInitial(name) {
-      return (name || '?').trim().charAt(0).toUpperCase() || '?';
-    }
-
+    function getInitial(name) { return (name || '?').trim().charAt(0).toUpperCase() || '?'; }
     function applyAvatar(el, name, size) {
       el.style.background = getNameGradient(name);
       el.innerText = getInitial(name);
-      if (size) {
-        el.className = `avatar avatar-${size}`;
-      }
+      if (size) el.className = `avatar avatar-${size}`;
     }
 
+    // ============================================================
+    // TOAST
+    // ============================================================
+    function showToast(message, type = 'info') {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+      const icons = { success: '✅', error: '❌', info: 'ℹ️' };
+      toast.innerText = `${icons[type] || ''} ${message}`;
+      container.appendChild(toast);
+      setTimeout(() => toast.remove(), 2800);
+    }
+
+    // ============================================================
+    // MODAL
+    // ============================================================
+    let modalResolver = null;
+    function showModal({ icon = '⚠️', title = '', text = '', confirmText = 'ОК', cancelText = 'ОТМЕНА', danger = false }) {
+      return new Promise(resolve => {
+        modalResolver = resolve;
+        document.getElementById('modal-icon').innerText = icon;
+        document.getElementById('modal-title').innerText = title;
+        document.getElementById('modal-text').innerText = text;
+        const c = document.getElementById('modal-confirm');
+        c.innerText = confirmText;
+        c.className = `modal-btn ${danger ? 'danger' : 'confirm'}`;
+        document.getElementById('modal-cancel').innerText = cancelText;
+        document.getElementById('modal').classList.remove('hidden');
+      });
+    }
+    function closeModal(result) {
+      document.getElementById('modal').classList.add('hidden');
+      if (modalResolver) { modalResolver(result); modalResolver = null; }
+    }
+    document.getElementById('modal-confirm').onclick = () => { playClick(); closeModal(true); };
+    document.getElementById('modal-cancel').onclick = () => { playClick(); closeModal(false); };
+    document.getElementById('modal').addEventListener('click', (e) => {
+      if (e.target.id === 'modal') { playClick(); closeModal(false); }
+    });
+
+    // ============================================================
+    // ПОЗИЦИЯ
+    // ============================================================
     async function ensureMyPosition() {
       if (isEnsuringPosition) return;
       isEnsuringPosition = true;
-
       try {
         const snap = await get(playerRef);
         const me = snap.val();
@@ -919,9 +1162,7 @@
         const teamSnap = await get(ref(db, `games/battle_1/players/${team}`));
         const teamPlayers = teamSnap.val() || {};
         const usedY = [];
-        Object.values(teamPlayers).forEach(p => {
-          if (p.posY !== undefined) usedY.push(p.posY);
-        });
+        Object.values(teamPlayers).forEach(p => { if (p.posY !== undefined) usedY.push(p.posY); });
 
         let posX, posY, attempts = 0;
         do {
@@ -936,47 +1177,57 @@
       }
     }
 
+    // ============================================================
+    // JOIN
+    // ============================================================
     async function joinGame() {
       const nameInput = document.getElementById('input-name');
       let name = nameInput.value.trim() || 'Игрок';
       const errorEl = document.getElementById('join-error');
-      
+
       if (name.length < 2) {
+        playError();
         errorEl.innerText = 'Имя должно быть не короче 2 символов';
         errorEl.classList.remove('hidden');
         return;
       }
-      if (name.length > NAME_MAX) {
-        name = name.substring(0, NAME_MAX);
-      }
+      if (name.length > NAME_MAX) name = name.substring(0, NAME_MAX);
 
       myName = name;
+      errorEl.classList.add('hidden');
+      playClick();
 
-      const playersSnap = await get(playerRef);
-      const existingPlayer = playersSnap.val();
+      try {
+        const playersSnap = await get(playerRef);
+        const existingPlayer = playersSnap.val();
 
-      if (existingPlayer) {
-        await update(playerRef, { name, connected: true });
-      } else {
-        const roomSnap = await get(roomRef);
-        const existingRoom = roomSnap.val();
-        
-        if (existingRoom) {
-          await update(roomRef, { name, joinedAt: existingRoom.joinedAt || Date.now() });
+        if (existingPlayer) {
+          await update(playerRef, { name, connected: true });
         } else {
-          await set(roomRef, { name, joinedAt: Date.now() });
+          const roomSnap = await get(roomRef);
+          const existingRoom = roomSnap.val();
+          if (existingRoom) {
+            await update(roomRef, { name, joinedAt: existingRoom.joinedAt || Date.now() });
+          } else {
+            await set(roomRef, { name, joinedAt: Date.now() });
+          }
         }
+
+        onDisconnect(playerRef).update({ connected: false });
+        onDisconnect(roomRef).remove();
+        onDisconnect(aimRef).remove();
+
+        hasJoined = true;
+        localStorage.setItem(joinedKey, '1');
+        localStorage.setItem(nameStorageKey, name);
+        vibrate(50);
+
+        document.getElementById('join-screen').classList.add('hidden');
+      } catch (e) {
+        playError();
+        errorEl.innerText = 'Ошибка: ' + e.message;
+        errorEl.classList.remove('hidden');
       }
-
-      onDisconnect(playerRef).update({ connected: false });
-      onDisconnect(roomRef).remove();
-      onDisconnect(aimRef).remove();
-
-      hasJoined = true;
-      localStorage.setItem(joinedKey, '1');
-      vibrate(50);
-
-      document.getElementById('join-screen').classList.add('hidden');
     }
 
     document.getElementById('join-btn').onclick = joinGame;
@@ -984,10 +1235,20 @@
       if (e.key === 'Enter') joinGame();
     });
 
+    // Авто-подстановка имени
+    const savedName = localStorage.getItem(nameStorageKey);
+    if (savedName) document.getElementById('input-name').value = savedName;
+
+    // Звук после первого жеста
+    document.addEventListener('click', () => { getAudioCtx(); }, { once: true });
+    document.addEventListener('touchstart', () => { getAudioCtx(); }, { once: true });
+
     function updateTeamBadges() {
-      const color = isRed ? 'bg-red-500/20 text-red-300 border-red-500/50' : 'bg-blue-500/20 text-blue-300 border-blue-500/50';
+      const color = isRed
+        ? 'bg-red-500/20 text-red-300 border-red-500/50'
+        : 'bg-blue-500/20 text-blue-300 border-blue-500/50';
       const label = isRed ? '🔴 КРАСНЫЕ' : '🔵 СИНИЕ';
-      
+
       const joinBadge = document.getElementById('team-badge');
       joinBadge.className = `mb-5 px-5 py-1.5 rounded-full font-black text-xs tracking-wider border-2 ${color}`;
       joinBadge.innerText = label;
@@ -998,22 +1259,127 @@
     }
     updateTeamBadges();
 
-    function angleUp() {
-      if (!isMyTurn || isShooting) return;
-      currentAngle = clamp(currentAngle + ANGLE_STEP, 0, 180);
-      updateAngleDisplay();
-      syncAimToFirebase();
-      vibrate(10);
+    // ============================================================
+    // УГОЛ (SVG drag)
+    // ============================================================
+    const angleSvg = document.getElementById('angle-svg');
+    const anglePointer = document.getElementById('angle-pointer');
+    const angleArcFill = document.getElementById('angle-arc-fill');
+    const angleValueBadge = document.getElementById('angle-value-badge');
+    const angleHint = document.getElementById('angle-hint');
+    const angleControl = document.getElementById('angle-control');
+
+    // Дуга: центр (160, 120), радиус 120, от левого края до правого (180°..0°)
+    // Точка на дуге: x = 160 - cos(angleRad) * 120, y = 120 - sin(angleRad) * 120
+    // где angleRad = currentAngle * PI / 180, но currentAngle 0° = вправо, 180° = влево
+    // Для нашей игры: 0° = вправо (низко), 180° = влево (высоко над головой)
+    // На полукруге: угол 0° → точка (280, 120), угол 180° → точка (40, 120)
+
+    function angleToPoint(angleDeg) {
+      const rad = (angleDeg * Math.PI) / 180;
+      const cx = 160, cy = 120, r = 120;
+      const x = cx + Math.cos(rad) * r;
+      const y = cy - Math.sin(rad) * r;
+      return { x, y };
     }
 
-    function angleDown() {
-      if (!isMyTurn || isShooting) return;
-      currentAngle = clamp(currentAngle - ANGLE_STEP, 0, 180);
-      updateAngleDisplay();
-      syncAimToFirebase();
-      vibrate(10);
+    function pointToAngle(px, py) {
+      const cx = 160, cy = 120;
+      let rad = Math.atan2(cy - py, px - cx);
+      let deg = (rad * 180) / Math.PI;
+      if (deg < 0) deg = 0;
+      if (deg > 180) deg = 180;
+      return deg;
     }
 
+    function buildArcPath(angleDeg) {
+      // Дуга от 0 до angleDeg (по часовой от правого края к левому)
+      const start = angleToPoint(0);
+      const end = angleToPoint(angleDeg);
+      const largeArc = angleDeg > 180 ? 1 : 0;
+      // SVG arc: M startX startY A r r 0 largeArc 1 endX endY
+      // sweep=0 (против часовой), потому что у нас угол растёт вверх-влево
+      return `M ${start.x} ${start.y} A 120 120 0 ${largeArc} 0 ${end.x} ${end.y}`;
+    }
+
+    function drawAngleTicks() {
+      const group = document.getElementById('angle-ticks');
+      group.innerHTML = '';
+      for (let a = 0; a <= 180; a += 30) {
+        const p1 = angleToPoint(a);
+        const rad = (a * Math.PI) / 180;
+        const innerR = 108;
+        const p2 = {
+          x: 160 + Math.cos(rad) * innerR,
+          y: 120 - Math.sin(rad) * innerR
+        };
+        const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        line.setAttribute('class', 'angle-tick');
+        line.setAttribute('x1', p1.x);
+        line.setAttribute('y1', p1.y);
+        line.setAttribute('x2', p2.x);
+        line.setAttribute('y2', p2.y);
+        group.appendChild(line);
+      }
+    }
+    drawAngleTicks();
+
+    function updateAngleDisplay() {
+      const a = Math.round(currentAngle);
+      angleValueBadge.innerText = a + '°';
+      const p = angleToPoint(a);
+      anglePointer.setAttribute('cx', p.x);
+      anglePointer.setAttribute('cy', p.y);
+      angleArcFill.setAttribute('d', buildArcPath(a));
+
+      let hint;
+      if (a < 22) hint = 'ПРЯМО';
+      else if (a < 67) hint = 'ВВЕРХ';
+      else if (a < 112) hint = 'ВЫСОКО';
+      else if (a < 157) hint = 'ВНИЗ';
+      else hint = 'НАЗАД';
+      angleHint.innerText = hint;
+    }
+
+    let isDraggingAngle = false;
+
+    function handleAnglePointer(clientX, clientY) {
+      if (!isMyTurn || isShooting) return;
+      const rect = angleSvg.getBoundingClientRect();
+      // Переводим clientX/Y в координаты viewBox (320x130)
+      const sx = ((clientX - rect.left) / rect.width) * 320;
+      const sy = ((clientY - rect.top) / rect.height) * 130;
+      const deg = pointToAngle(sx, sy);
+      const newAngle = Math.round(deg / 1) * 1;
+      if (newAngle !== currentAngle) {
+        currentAngle = newAngle;
+        updateAngleDisplay();
+        syncAimToFirebase();
+      }
+    }
+
+    angleControl.addEventListener('pointerdown', (e) => {
+      if (!isMyTurn || isShooting) return;
+      isDraggingAngle = true;
+      angleControl.setPointerCapture(e.pointerId);
+      handleAnglePointer(e.clientX, e.clientY);
+      vibrate(8);
+      e.preventDefault();
+    });
+    angleControl.addEventListener('pointermove', (e) => {
+      if (!isDraggingAngle) return;
+      handleAnglePointer(e.clientX, e.clientY);
+      e.preventDefault();
+    });
+    angleControl.addEventListener('pointerup', (e) => {
+      isDraggingAngle = false;
+      try { angleControl.releasePointerCapture(e.pointerId); } catch {}
+    });
+    angleControl.addEventListener('pointercancel', () => { isDraggingAngle = false; });
+
+    // ============================================================
+    // СИЛА
+    // ============================================================
     function powerUp() {
       if (!isMyTurn || isShooting) return;
       currentPower = clamp(currentPower + POWER_STEP, 10, 100);
@@ -1021,7 +1387,6 @@
       syncAimToFirebase();
       vibrate(10);
     }
-
     function powerDown() {
       if (!isMyTurn || isShooting) return;
       currentPower = clamp(currentPower - POWER_STEP, 10, 100);
@@ -1030,95 +1395,96 @@
       vibrate(10);
     }
 
-    function updateAngleDisplay() {
-      document.getElementById('angle-display').innerText = Math.round(currentAngle) + '°';
-      
-      let hint;
-      if (currentAngle < 22) hint = 'ПРЯМО';
-      else if (currentAngle < 67) hint = 'ВВЕРХ';
-      else if (currentAngle < 112) hint = 'ВЫСОКО';
-      else if (currentAngle < 157) hint = 'ВНИЗ';
-      else hint = 'НАЗАД';
-      
-      document.getElementById('angle-hint').innerText = hint;
-    }
-
     function updatePowerDisplay() {
       document.getElementById('power-value').innerText = currentPower + '%';
       document.getElementById('power-bar-fill').style.width = currentPower + '%';
-      
       let hint;
       if (currentPower < 30) hint = 'СЛАБО';
       else if (currentPower < 60) hint = 'СРЕДНЕ';
       else if (currentPower < 85) hint = 'СИЛЬНО';
       else hint = 'МАКС';
-      
       document.getElementById('power-hint').innerText = hint;
     }
 
+    function addHoldSupport(btnId, action) {
+      const btn = document.getElementById(btnId);
+      let holdInterval = null;
+      const start = (e) => {
+        e.preventDefault();
+        action();
+        holdInterval = setInterval(action, 70);
+      };
+      const stop = () => {
+        if (holdInterval) { clearInterval(holdInterval); holdInterval = null; }
+      };
+      btn.addEventListener('mousedown', start);
+      btn.addEventListener('mouseup', stop);
+      btn.addEventListener('mouseleave', stop);
+      btn.addEventListener('touchstart', start, { passive: false });
+      btn.addEventListener('touchend', stop);
+      btn.addEventListener('touchcancel', stop);
+    }
+    addHoldSupport('power-up', powerUp);
+    addHoldSupport('power-down', powerDown);
+
+    // ============================================================
+    // SYNC AIM
+    // ============================================================
     function syncAimToFirebase() {
       if (!isMyTurn) return;
       if (aimSyncTimeout) return;
-      
       aimSyncTimeout = setTimeout(() => {
         aimSyncTimeout = null;
-        
-        // ✅ ФИКС: fallback на 'Игрок', если имя пустое
         const aimData = {
           angle: currentAngle,
           power: currentPower,
           team,
-          name: myName || 'Игрок',
+          name: myName,
           time: Date.now()
         };
-        
-        if (lastAimSent && 
-            Math.abs(lastAimSent.angle - aimData.angle) < 1 && 
-            Math.abs(lastAimSent.power - aimData.power) < 2) {
-          return;
-        }
+        if (lastAimSent &&
+            Math.abs(lastAimSent.angle - aimData.angle) < 1 &&
+            Math.abs(lastAimSent.power - aimData.power) < 2) return;
         lastAimSent = aimData;
-        
         update(aimRef, aimData).catch(() => {});
       }, 60);
     }
 
+    // ============================================================
+    // ТАЙМЕР ХОДА
+    // ============================================================
     function startTurnTimer() {
       stopTurnTimer();
       turnDeadline = Date.now() + TURN_TIME * 1000;
-      
       const timerEl = document.getElementById('turn-timer');
       const progressEl = document.getElementById('turn-timer-progress');
       const valueEl = document.getElementById('turn-timer-value');
       const ringEl = document.getElementById('turn-timer-ring');
-      
+
       timerEl.classList.add('active');
-      
       const CIRCUMFERENCE = 2 * Math.PI * 30;
       progressEl.style.strokeDasharray = CIRCUMFERENCE;
       progressEl.style.strokeDashoffset = 0;
-      
       let lastSec = -1;
-      
+
       turnTimerInterval = setInterval(() => {
         const remaining = Math.max(0, turnDeadline - Date.now());
         const sec = Math.ceil(remaining / 1000);
         const ratio = remaining / (TURN_TIME * 1000);
-        
         progressEl.style.strokeDashoffset = CIRCUMFERENCE * (1 - ratio);
-        
+
         if (sec !== lastSec) {
           valueEl.innerText = sec;
           lastSec = sec;
-          
           if (sec <= 3 && sec > 0) {
             ringEl.classList.add('danger');
             vibrate(30);
+            playTick();
           } else {
             ringEl.classList.remove('danger');
           }
         }
-        
+
         if (remaining <= 0) {
           stopTurnTimer();
           if (isMyTurn && !isShooting) autoShoot();
@@ -1127,10 +1493,7 @@
     }
 
     function stopTurnTimer() {
-      if (turnTimerInterval) {
-        clearInterval(turnTimerInterval);
-        turnTimerInterval = null;
-      }
+      if (turnTimerInterval) { clearInterval(turnTimerInterval); turnTimerInterval = null; }
       document.getElementById('turn-timer').classList.remove('active');
       document.getElementById('turn-timer-ring').classList.remove('danger');
     }
@@ -1138,66 +1501,57 @@
     async function autoShoot() {
       if (!isMyTurn || isShooting) return;
       vibrate([100, 50, 100]);
-      
+      playError();
       const notif = document.createElement('div');
-      notif.className = 'fixed top-1/3 left-1/2 -translate-x-1/2 bg-red-500/90 text-white px-5 py-2 rounded-xl font-black text-base z-[150] animate-shake';
+      notif.className = 'fixed top-1/3 left-1/2 -translate-x-1/2 bg-red-500/90 text-white px-5 py-2 rounded-xl font-black text-sm z-[150] animate-shake';
       notif.innerText = '⏰ ВРЕМЯ ВЫШЛО!';
       document.body.appendChild(notif);
       setTimeout(() => notif.remove(), 1500);
-      
       await executeShot();
     }
 
-    function getSuperCost(baseCost) {
-      return baseCost * costMultiplier;
-    }
+    // ============================================================
+    // СУПЕРЫ
+    // ============================================================
+    function getSuperCost(baseCost) { return baseCost * costMultiplier; }
 
     function updateSuperPanel() {
       const panel = document.getElementById('super-panel');
-      
-      if (!isUnfairMode) {
-        panel.classList.add('hidden');
-        return;
-      }
-      
+      if (!isUnfairMode) { panel.classList.add('hidden'); return; }
       panel.classList.remove('hidden');
-      
+
       const hash = `${myLives}_${isMyTurn}_${isShooting}_${costMultiplier}`;
       if (hash === lastSuperPanelHash) return;
       lastSuperPanelHash = hash;
-      
-      const costInfo = costMultiplier > 1 
-        ? `×${costMultiplier} (вы в большинстве)` 
+
+      document.getElementById('super-hearts-info').innerText = costMultiplier > 1
+        ? `×${costMultiplier} (большинство)`
         : `БОНУС`;
-      document.getElementById('super-hearts-info').innerText = costInfo;
-      
+
       const grid = document.getElementById('super-grid');
       grid.innerHTML = '';
-      
-      Object.values(SUPERS).forEach(superItem => {
-        const actualCost = getSuperCost(superItem.cost);
+      Object.values(SUPERS).forEach(si => {
+        const actualCost = getSuperCost(si.cost);
         const canUse = myLives > actualCost && isMyTurn && !isShooting;
-        
         const btn = document.createElement('button');
         btn.className = 'super-btn' + (canUse ? ' can-use' : '');
         btn.disabled = !canUse;
         btn.innerHTML = `
-          <span class="super-emoji">${superItem.emoji}</span>
-          <span class="super-cost">${actualCost > superItem.cost ? '⚠' : ''}-${actualCost}❤️</span>
+          <span class="super-emoji">${si.emoji}</span>
+          <span class="super-cost">${actualCost > si.cost ? '⚠' : ''}-${actualCost}❤️</span>
         `;
-        btn.onclick = () => openSuperModal(superItem);
+        btn.onclick = () => openSuperModal(si);
         grid.appendChild(btn);
       });
     }
 
     function openSuperModal(superItem) {
       if (!isMyTurn || isShooting) return;
-      
       const actualCost = getSuperCost(superItem.cost);
       if (myLives <= actualCost) return;
-      
+      playClick();
       document.getElementById('super-modal').classList.remove('hidden');
-      
+
       const list = document.getElementById('super-modal-list');
       list.innerHTML = `
         <div class="text-center mb-4">
@@ -1211,7 +1565,6 @@
           ПРИМЕНИТЬ
         </button>
       `;
-      
       document.getElementById('super-confirm').onclick = () => {
         closeSuperModal();
         executeSuperShot(superItem);
@@ -1221,11 +1574,10 @@
     function closeSuperModal() {
       document.getElementById('super-modal').classList.add('hidden');
     }
-    document.getElementById('super-cancel').onclick = closeSuperModal;
+    document.getElementById('super-cancel').onclick = () => { playClick(); closeSuperModal(); };
 
     function generateSuperShots(superItem) {
       const shots = [];
-      
       if (superItem.id === 'fan') {
         for (let i = 0; i < superItem.count; i++) {
           shots.push({
@@ -1244,7 +1596,6 @@
         const same = Math.random() < 0.1;
         const sameAngle = Math.random() * 180;
         const samePower = 20 + Math.random() * 80;
-        
         for (let i = 0; i < superItem.count; i++) {
           shots.push({
             angle: same ? sameAngle : Math.random() * 180,
@@ -1254,30 +1605,34 @@
       } else if (superItem.id === 'nuke') {
         shots.push({ angle: currentAngle, power: currentPower, damage: 3 });
       }
-      
       return shots;
     }
 
+    // ============================================================
+    // БРОСОК
+    // ============================================================
     async function executeShot() {
       if (isShooting) return;
+      playShoot();
       await doShot([{ angle: currentAngle, power: currentPower }], false, null);
     }
 
     async function executeSuperShot(superItem) {
       if (isShooting) return;
-      
       const actualCost = getSuperCost(superItem.cost);
       if (myLives <= actualCost) return;
-      
       const shots = generateSuperShots(superItem);
-      
       vibrate([60, 30, 60, 30, 100]);
-      
-      const newLives = Math.max(1, myLives - actualCost);
-      await update(playerRef, { lives: newLives });
-      myLives = newLives;
-      
-      await doShot(shots, true, superItem.id);
+      playSuper();
+
+      try {
+        const newLives = Math.max(1, myLives - actualCost);
+        await update(playerRef, { lives: newLives });
+        myLives = newLives;
+        await doShot(shots, true, superItem.id);
+      } catch (e) {
+        showToast('Ошибка: ' + e.message, 'error');
+      }
     }
 
     async function doShot(shots, isSuper, superType) {
@@ -1287,18 +1642,13 @@
 
       const btn = document.getElementById('shoot-btn');
       btn.disabled = true;
-
       remove(aimRef).catch(() => {});
 
       const now = Date.now();
       const shotData = {
         team,
         shooterId: playerId,
-        shots: shots.map(s => ({
-          angle: s.angle,
-          power: s.power,
-          damage: s.damage || 1
-        })),
+        shots: shots.map(s => ({ angle: s.angle, power: s.power, damage: s.damage || 1 })),
         time: now,
         state: 'forming',
         formTime: now,
@@ -1306,8 +1656,15 @@
         superType: superType || null
       };
 
-      await push(ref(db, 'games/battle_1/shots'), shotData);
-      await set(ref(db, 'games/battle_1/last_shot'), shotData);
+      try {
+        await push(ref(db, 'games/battle_1/shots'), shotData);
+        await set(ref(db, 'games/battle_1/last_shot'), shotData);
+      } catch (e) {
+        showToast('Ошибка выстрела: ' + e.message, 'error');
+        isShooting = false;
+        if (isMyTurn) btn.disabled = false;
+        return;
+      }
 
       setTimeout(async () => {
         try {
@@ -1319,25 +1676,32 @@
       }, FORM_TIME);
 
       setTimeout(async () => {
-        const playersSnap = await get(ref(db, 'games/battle_1/players'));
-        const players = playersSnap.val() || {};
+        try {
+          const playersSnap = await get(ref(db, 'games/battle_1/players'));
+          const players = playersSnap.val() || {};
 
-        const myTeamPlayers = Object.entries(players[team] || {}).filter(([id, p]) => p.alive && p.lives > 0);
-        const myIdx = myTeamPlayers.findIndex(([id]) => id === playerId);
+          const myTeamPlayers = Object.entries(players[team] || {}).filter(([id, p]) => p.alive && p.lives > 0);
+          const myIdx = myTeamPlayers.findIndex(([id]) => id === playerId);
 
-        let nextPlayer = null;
-        if (myIdx !== -1 && myIdx < myTeamPlayers.length - 1) {
-          nextPlayer = myTeamPlayers[myIdx + 1];
-        } else {
-          const enemyTeam = Object.entries(players[isRed ? 'blue' : 'red'] || {}).filter(([id, p]) => p.alive && p.lives > 0);
-          if (enemyTeam.length > 0) nextPlayer = enemyTeam[0];
-        }
+          let nextPlayer = null;
+          if (myIdx !== -1 && myIdx < myTeamPlayers.length - 1) {
+            nextPlayer = myTeamPlayers[myIdx + 1];
+          } else {
+            const enemyTeam = Object.entries(players[isRed ? 'blue' : 'red'] || {}).filter(([id, p]) => p.alive && p.lives > 0);
+            if (enemyTeam.length > 0) nextPlayer = enemyTeam[0];
+          }
 
-        if (nextPlayer) {
-          await update(gameRef, {
-            activePlayerId: nextPlayer[0],
-            turn: { team: isRed ? 'blue' : 'red', name: nextPlayer[1].name }
-          });
+          if (nextPlayer) {
+            await update(gameRef, {
+              activePlayerId: nextPlayer[0],
+              turn: {
+                team: (players[team]?.[nextPlayer[0]] ? team : (isRed ? 'blue' : 'red')),
+                name: nextPlayer[1].name
+              }
+            });
+          }
+        } catch (e) {
+          showToast('Ошибка хода: ' + e.message, 'error');
         }
 
         isShooting = false;
@@ -1350,6 +1714,9 @@
       await executeShot();
     };
 
+    // ============================================================
+    // ROOM RENDER
+    // ============================================================
     function renderRoom(data) {
       const room = data.room || {};
       const players = data.players || {};
@@ -1370,9 +1737,7 @@
             <div class="room-player-badge playing">В ИГРЕ</div>
           </div>
         `).join('');
-        playingList.querySelectorAll('.avatar[data-name]').forEach(el => {
-          applyAvatar(el, el.dataset.name, 'md');
-        });
+        playingList.querySelectorAll('.avatar[data-name]').forEach(el => applyAvatar(el, el.dataset.name, 'md'));
       }
 
       const waitingList = document.getElementById('room-waiting-list');
@@ -1394,28 +1759,24 @@
             </div>
           `;
         }).join('');
-        waitingList.querySelectorAll('.avatar[data-name]').forEach(el => {
-          applyAvatar(el, el.dataset.name, 'md');
-        });
+        waitingList.querySelectorAll('.avatar[data-name]').forEach(el => applyAvatar(el, el.dataset.name, 'md'));
       }
 
       const statusEl = document.getElementById('room-status');
-      if (data.screen === 'qr') {
-        statusEl.innerText = '📱 СКАНИРУЙ И ЖДИ';
-      } else if (data.screen === 'game') {
-        statusEl.innerText = '🎮 ИГРА ИДЁТ';
-      } else {
-        statusEl.innerText = '⏳ ОЖИДАНИЕ';
-      }
+      if (data.screen === 'qr') statusEl.innerText = '📱 СКАНИРУЙ И ЖДИ';
+      else if (data.screen === 'game') statusEl.innerText = '🎮 ИГРА ИДЁТ';
+      else statusEl.innerText = '⏳ ОЖИДАНИЕ';
     }
 
+    // ============================================================
+    // SCREENS
+    // ============================================================
     function showJoinScreen() {
       document.getElementById('join-screen').classList.remove('hidden');
       document.getElementById('room-screen').classList.add('hidden');
       document.getElementById('game-screen').classList.add('hidden');
       document.getElementById('player-info').classList.add('hidden');
     }
-
     function showRoomScreen(data) {
       document.getElementById('join-screen').classList.add('hidden');
       document.getElementById('room-screen').classList.remove('hidden');
@@ -1423,13 +1784,12 @@
       document.getElementById('player-info').classList.add('hidden');
       renderRoom(data);
     }
-
     function showGameScreen(data) {
       document.getElementById('join-screen').classList.add('hidden');
       document.getElementById('room-screen').classList.add('hidden');
       document.getElementById('game-screen').classList.remove('hidden');
       document.getElementById('player-info').classList.remove('hidden');
-      
+
       const me = data.players?.[team]?.[playerId];
       if (me) {
         myLives = me.lives;
@@ -1440,24 +1800,23 @@
       }
     }
 
+    // ============================================================
+    // MAIN LISTENER
+    // ============================================================
     onValue(gameRef, (snapshot) => {
       const data = snapshot.val();
       if (!data) return;
 
-      const prevStatus = gameStatus;
       gameStatus = data.status || 'lobby';
-
       if (data.mode) updateModeInfo(data.mode);
 
       const inPlayers = data.players?.[team]?.[playerId];
       const inRoom = data.room?.[team]?.[playerId];
 
-      // ✅ ФИКС: восстановление hasJoined + myName при перезагрузке
       if (!hasJoined && (inPlayers || inRoom)) {
         hasJoined = true;
         localStorage.setItem(joinedKey, '1');
         document.getElementById('join-screen').classList.add('hidden');
-        myName = inPlayers?.name || inRoom?.name || myName;
       }
 
       if (hasJoined && !inPlayers && !inRoom) {
@@ -1474,19 +1833,14 @@
         myLives = inPlayers.lives;
         myName = inPlayers.name || myName;
 
-        if (inPlayers.posX == null || inPlayers.posY == null) {
-          ensureMyPosition();
-        }
+        if (inPlayers.posX == null || inPlayers.posY == null) ensureMyPosition();
 
         if (gameStatus === 'finished') {
           isMyTurn = false;
-          // ✅ ФИКС: показываем финиш только если ещё не показан И это смена статуса
-          if (!resultShown || prevStatus !== 'finished') {
-            const resultOverlay = document.getElementById('result-overlay');
-            if (resultOverlay.classList.contains('hidden')) {
-              showGameScreen(data);
-              handleFinished(data);
-            }
+          const resultOverlay = document.getElementById('result-overlay');
+          if (resultOverlay.classList.contains('hidden')) {
+            showGameScreen(data);
+            handleFinished(data);
           }
           return;
         }
@@ -1499,9 +1853,7 @@
           showGameScreen(data);
           if (gameStatus === 'playing' && data.preloadDone) {
             const deadOverlay = document.getElementById('dead-overlay');
-            if (deadOverlay.classList.contains('hidden')) {
-              showOverlay('dead-overlay');
-            }
+            if (deadOverlay.classList.contains('hidden')) showOverlay('dead-overlay');
           }
           isMyTurn = false;
           stopTurnTimer();
@@ -1510,24 +1862,18 @@
       }
 
       if (inRoom) {
-        // ✅ ФИКС: восстановление myName из room
-        myName = inRoom.name || myName;
-        
         isMyTurn = false;
         isShooting = false;
         stopTurnTimer();
         remove(aimRef).catch(() => {});
         lastAimSent = null;
         lastSuperPanelHash = '';
-        
+
         hideOverlay('dead-overlay');
         hideOverlay('wait-overlay');
         hideOverlay('preload-overlay');
         hideOverlay('result-overlay');
-        
-        // ✅ Сброс флага результата при возврате в комнату
-        resultShown = false;
-        
+
         showRoomScreen(data);
         return;
       }
@@ -1540,6 +1886,7 @@
         document.getElementById('preload-count').innerText = data.timer;
         if (data.timer !== lastPreloadValue) {
           vibrate(20);
+          playTick();
           lastPreloadValue = data.timer;
         }
         return;
@@ -1553,14 +1900,14 @@
       isMyTurn = (data.activePlayerId === playerId);
 
       const btn = document.getElementById('shoot-btn');
-      const buttons = ['angle-up', 'angle-down', 'power-up', 'power-down'].map(id => document.getElementById(id));
-      
+      const powerBtns = ['power-up', 'power-down'].map(id => document.getElementById(id));
+
       if (isMyTurn) {
         if (!wasMyTurn) {
           vibrate([40, 20, 40]);
+          playTurnStart();
           btn.classList.add('animate-shake');
           setTimeout(() => btn.classList.remove('animate-shake'), 500);
-          
           startTurnTimer();
           currentAngle = 45;
           currentPower = 30;
@@ -1569,7 +1916,7 @@
           syncAimToFirebase();
         }
         btn.disabled = false;
-        buttons.forEach(b => b.disabled = false);
+        powerBtns.forEach(b => b.disabled = false);
         hideOverlay('wait-overlay');
       } else {
         if (wasMyTurn) {
@@ -1578,14 +1925,13 @@
           lastAimSent = null;
         }
         btn.disabled = true;
-        buttons.forEach(b => b.disabled = true);
+        powerBtns.forEach(b => b.disabled = true);
         if (!isShooting && meAlive) showOverlay('wait-overlay');
       }
 
       const me = data.players?.[team]?.[playerId];
       if (me) {
         myLives = me.lives;
-        meAlive = me.alive;  // ✅ дублируем
         document.getElementById('info-name').innerText = me.name;
         document.getElementById('info-lives').innerHTML = renderHearts(me.lives, me.alive);
         updateSuperPanel();
@@ -1601,51 +1947,18 @@
         myTeamMax = 1;
         enemyTeamMax = 1;
       }
-      
       isUnfairMode = myTeamMax !== enemyTeamMax;
-      
       if (isUnfairMode) {
-        if (myTeamMax > enemyTeamMax) {
-          costMultiplier = Math.ceil(myTeamMax / enemyTeamMax);
-        } else {
-          costMultiplier = 1;
-        }
+        costMultiplier = myTeamMax > enemyTeamMax ? Math.ceil(myTeamMax / enemyTeamMax) : 1;
       } else {
         costMultiplier = 1;
       }
-      
       updateSuperPanel();
     }
 
-    function addHoldSupport(btnId, action) {
-      const btn = document.getElementById(btnId);
-      let holdInterval = null;
-      
-      const start = (e) => {
-        e.preventDefault();
-        action();
-        holdInterval = setInterval(action, 80);
-      };
-      const stop = () => {
-        if (holdInterval) {
-          clearInterval(holdInterval);
-          holdInterval = null;
-        }
-      };
-      
-      btn.addEventListener('mousedown', start);
-      btn.addEventListener('mouseup', stop);
-      btn.addEventListener('mouseleave', stop);
-      btn.addEventListener('touchstart', start, { passive: false });
-      btn.addEventListener('touchend', stop);
-      btn.addEventListener('touchcancel', stop);
-    }
-
-    addHoldSupport('angle-up', angleUp);
-    addHoldSupport('angle-down', angleDown);
-    addHoldSupport('power-up', powerUp);
-    addHoldSupport('power-down', powerDown);
-
+    // ============================================================
+    // FINISHED
+    // ============================================================
     function handleFinished(data) {
       hideOverlay('wait-overlay');
       hideOverlay('preload-overlay');
@@ -1653,12 +1966,8 @@
       stopTurnTimer();
       remove(aimRef).catch(() => {});
 
-      if (resultShown) return;
-      
       const resultOverlay = document.getElementById('result-overlay');
       if (!resultOverlay.classList.contains('hidden')) return;
-
-      resultShown = true;  // ✅
 
       const titleEl = document.getElementById('result-title');
       const subtitleEl = document.getElementById('result-subtitle');
@@ -1673,6 +1982,7 @@
         emojiEl.innerText = '🏆';
         subtitleEl.innerText = 'Твоя команда победила!';
         vibrate([100, 50, 100, 50, 200]);
+        playVictory();
         launchConfetti();
       } else if (winner === 'none' || !winner) {
         titleEl.innerText = 'ИГРА ОКОНЧЕНА';
@@ -1686,6 +1996,7 @@
         emojiEl.innerText = '💀';
         subtitleEl.innerText = 'В следующий раз повезёт больше!';
         vibrate([200, 100, 200]);
+        playDefeat();
         document.getElementById('main-body').classList.add('animate-shake');
         setTimeout(() => document.getElementById('main-body').classList.remove('animate-shake'), 500);
       }
@@ -1694,28 +2005,36 @@
     }
 
     document.getElementById('result-close-btn').onclick = () => {
+      playClick();
       hideOverlay('result-overlay');
       document.getElementById('confetti-container').innerHTML = '';
     };
 
     document.getElementById('watch-btn').onclick = () => {
+      playClick();
       hideOverlay('dead-overlay');
     };
-
     document.getElementById('leave-dead-btn').onclick = () => {
+      playClick();
       hideOverlay('dead-overlay');
     };
 
     document.getElementById('room-leave-btn').onclick = async () => {
-      if (!confirm('Выйти из комнаты?')) return;
-      
-      await remove(roomRef);
-      await remove(playerRef).catch(() => {});
-      localStorage.removeItem(joinedKey);
-      
-      hasJoined = false;
-      resultShown = false;
-      showJoinScreen();
+      const ok = await showModal({
+        icon: '🚪', title: 'Выйти из комнаты?',
+        text: 'Ты покинешь игру. Вернуться можно, открыв ссылку заново.',
+        confirmText: 'ВЫЙТИ', danger: true
+      });
+      if (!ok) return;
+      try {
+        await remove(roomRef);
+        await remove(playerRef).catch(() => {});
+        localStorage.removeItem(joinedKey);
+        hasJoined = false;
+        showJoinScreen();
+      } catch (e) {
+        showToast(e.message, 'error');
+      }
     };
 
     function renderHearts(lives, alive) {
@@ -1726,10 +2045,8 @@
 
     function launchConfetti() {
       const container = document.getElementById('confetti-container');
-      const colors = ['#fbbf24', '#f59e0b', '#22d3ee', '#3b82f6', '#ef4444', '#a855f7', '#22c55e'];
-      
+      const colors = ['#fbbf24', '#f59e0b', '#22d3ee', '#3d8bff', '#ff3b5c', '#a855f7', '#22c55e'];
       container.innerHTML = '';
-      
       for (let i = 0; i < 60; i++) {
         const c = document.createElement('div');
         c.className = 'confetti';
@@ -1742,10 +2059,12 @@
         c.style.animationDelay = (Math.random() * 0.5) + 's';
         container.appendChild(c);
       }
-      
       setTimeout(() => { container.innerHTML = ''; }, 5000);
     }
 
+    // ============================================================
+    // INIT
+    // ============================================================
     updateAngleDisplay();
     updatePowerDisplay();
 
