@@ -3,31 +3,181 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ENDORPHIN | АДМИН</title>
+  <title>ENDORPHIN | АДМИН-ПАНЕЛЬ</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <style> body { background: #03080f; color: #fff; font-family: system-ui, sans-serif; } .glass { background: rgba(10, 37, 64, 0.8); border: 1px solid rgba(127, 227, 255, 0.3); } </style>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap');
+    body { 
+      background: radial-gradient(circle at 50% 0%, #0a2540 0%, #03080f 100%);
+      font-family: 'Montserrat', sans-serif; 
+      color: #fff; 
+      min-height: 100vh;
+    }
+    .glass { 
+      background: rgba(10, 37, 64, 0.8); 
+      border: 1px solid rgba(127, 227, 255, 0.3); 
+      backdrop-filter: blur(16px);
+      border-radius: 1.5rem;
+    }
+    .msg-item {
+      transition: all 0.3s ease;
+    }
+    .msg-item:hover {
+      background: rgba(239, 68, 68, 0.1);
+      border-color: rgba(239, 68, 68, 0.5);
+    }
+    .msg-item:hover .delete-btn {
+      opacity: 1;
+    }
+    .delete-btn {
+      opacity: 0.5;
+      transition: opacity 0.2s;
+    }
+  </style>
 </head>
 <body class="min-h-screen p-8 flex items-center justify-center">
-  <div class="glass max-w-md w-full p-8 rounded-2xl">
-    <h1 class="text-2xl font-black mb-6 text-cyan-400 text-center">АДМИН-ПАНЕЛЬ</h1>
-    <div class="space-y-6">
-      <div>
-        <label class="block text-sm font-bold mb-2">Текст бегущей строки:</label>
-        <textarea id="ticker-input" class="w-full h-24 bg-gray-900 border border-gray-700 rounded-lg p-3 text-white" placeholder="Введите текст рекламы..."></textarea>
+  <div class="glass max-w-2xl w-full p-8 rounded-3xl">
+    <h1 class="text-3xl font-black mb-8 text-cyan-400 text-center tracking-widest">АДМИН-ПАНЕЛЬ</h1>
+    
+    <!-- Форма отправки -->
+    <div class="mb-8">
+      <label class="block text-sm font-bold mb-2 text-cyan-200">НОВОЕ СООБЩЕНИЕ (бегущая строка):</label>
+      <div class="flex gap-2">
+        <input 
+          type="text" 
+          id="ticker-input" 
+          class="flex-1 bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 text-white outline-none focus:border-cyan-400 transition"
+          placeholder="Введите текст рекламы..."
+          onkeydown="if(event.key === 'Enter') addMessage()"
+        >
+        <button onclick="addMessage()" class="px-6 py-3 bg-cyan-600 rounded-xl font-bold hover:bg-cyan-500 transition active:scale-95">
+          ОТПРАВИТЬ
+        </button>
       </div>
-      <button onclick="updateTicker()" class="w-full py-3 bg-cyan-600 rounded-lg font-bold hover:bg-cyan-500 transition">ОТПРАВИТЬ НА ЭКРАН</button>
-      <hr class="border-gray-700">
-      <button onclick="clearGame()" class="w-full py-3 bg-red-600 rounded-lg font-bold hover:bg-red-500 transition">ПОЛНЫЙ СБРОС ИГРЫ</button>
+      <p class="text-[10px] text-gray-500 mt-2">* Максимум 10 сообщений. Самое старое удаляется автоматически.</p>
+    </div>
+
+    <hr class="border-gray-700 mb-8">
+
+    <!-- История сообщений -->
+    <div>
+      <h2 class="text-xl font-bold mb-4 text-cyan-300">ИСТОРИЯ СООБЩЕНИЙ</h2>
+      <div id="messages-list" class="space-y-3 max-h-96 overflow-y-auto pr-2">
+        <!-- Сюда будут загружаться сообщения -->
+        <div class="text-center text-gray-500 py-8 italic" id="empty-history">
+          Пока нет отправленных сообщений
+        </div>
+      </div>
+    </div>
+
+    <hr class="border-gray-700 my-8">
+
+    <!-- Сброс -->
+    <div>
+      <button onclick="clearGame()" class="w-full py-4 bg-red-600/20 border-2 border-red-500/50 text-red-400 rounded-xl font-black text-lg hover:bg-red-600/40 transition active:scale-95">
+        ПОЛНЫЙ СБРОС ИГРЫ
+      </button>
     </div>
   </div>
+
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+    import { getDatabase, ref, set, onValue, push, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
     const firebaseConfig = { apiKey: "AIzaSyCXIR5Tv8lB6ivcGRC3yt1SC66MM6T5b_M", authDomain: "endorphin-battle.firebaseapp.com", databaseURL: "https://endorphin-battle-default-rtdb.europe-west1.firebasedatabase.app", projectId: "endorphin-battle", storageBucket: "endorphin-battle.firebasestorage.app", messagingSenderId: "185259733030", appId: "1:185259733030:web:d72a89a436880973e636e7" };
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
-    window.updateTicker = () => { set(ref(db, 'games/battle_1/ticker'), document.getElementById('ticker-input').value); alert('Текст отправлен на ТВ!'); };
-    window.clearGame = () => { if(confirm('Сбросить ВСЮ игру?')) { set(ref(db, 'games/battle_1'), { status: 'lobby', mode: '1v1', lives: { red: 3, blue: 3 }, players: { red: {}, blue: {} }, turn: { team: 'red', name: '...' }, activePlayerId: null, timer: null }); alert('Игра сброшена'); } };
+    const tickerRef = ref(db, 'games/battle_1/ticker_messages');
+
+    // ============================================================
+    // ДОБАВЛЕНИЕ СООБЩЕНИЯ
+    // ============================================================
+    window.addMessage = () => {
+      const input = document.getElementById('ticker-input');
+      const text = input.value.trim();
+      if (!text) return;
+
+      // Получаем текущий список сообщений
+      onValue(tickerRef, (snap) => {
+        const messages = snap.val() || {};
+        const keys = Object.keys(messages).sort((a, b) => messages[a].time - messages[b].time);
+        
+        // Если сообщений больше 10, удаляем самое старое
+        if (keys.length >= 10) {
+          remove(ref(db, `games/battle_1/ticker_messages/${keys[0]}`));
+        }
+
+        // Добавляем новое
+        const newRef = push(tickerRef);
+        set(newRef, {
+          text: text,
+          time: Date.now()
+        });
+
+        input.value = '';
+      }, { onlyOnce: true });
+    };
+
+    // ============================================================
+    // УДАЛЕНИЕ СООБЩЕНИЯ
+    // ============================================================
+    window.deleteMessage = (key) => {
+      if (confirm('Удалить это сообщение?')) {
+        remove(ref(db, `games/battle_1/ticker_messages/${key}`));
+      }
+    };
+
+    // ============================================================
+    // ОТОБРАЖЕНИЕ ИСТОРИИ
+    // ============================================================
+    onValue(tickerRef, (snap) => {
+      const messages = snap.val() || {};
+      const keys = Object.keys(messages).sort((a, b) => messages[a].time - messages[b].time);
+      const list = document.getElementById('messages-list');
+      const empty = document.getElementById('empty-history');
+
+      if (keys.length === 0) {
+        list.innerHTML = '';
+        list.appendChild(empty);
+        empty.style.display = 'block';
+        return;
+      }
+
+      empty.style.display = 'none';
+
+      list.innerHTML = keys.map(key => {
+        const msg = messages[key];
+        return `
+          <div class="msg-item flex justify-between items-center bg-gray-900/60 border border-gray-700 rounded-xl p-4">
+            <div class="flex-1 min-w-0">
+              <p class="text-sm text-gray-300 truncate">${msg.text}</p>
+              <p class="text-[10px] text-gray-500 mt-1">${new Date(msg.time).toLocaleString()}</p>
+            </div>
+            <button onclick="deleteMessage('${key}')" class="delete-btn ml-4 text-red-400 hover:text-red-300 font-black text-xl px-2">
+              ✖
+            </button>
+          </div>
+        `;
+      }).join('');
+    });
+
+    // ============================================================
+    // СБРОС
+    // ============================================================
+    window.clearGame = () => {
+      if (confirm('Сбросить ВСЮ игру? Все игроки отключатся.')) {
+        set(ref(db, 'games/battle_1'), {
+          status: 'lobby',
+          mode: '1v1',
+          lives: { red: 3, blue: 3 },
+          players: { red: {}, blue: {} },
+          turn: { team: 'red', name: '...' },
+          activePlayerId: null,
+          timer: null
+        });
+        alert('Игра сброшена');
+      }
+    };
   </script>
 </body>
 </html>
