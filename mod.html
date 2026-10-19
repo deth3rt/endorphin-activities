@@ -267,17 +267,33 @@
       overflow: hidden;
       text-overflow: ellipsis;
     }
+    .player-row .offline-tag {
+      font-size: 0.55rem;
+      font-weight: 900;
+      color: #fca5a5;
+      background: rgba(239, 68, 68, 0.2);
+      border: 1px solid rgba(239, 68, 68, 0.4);
+      padding: 1px 6px;
+      border-radius: 999px;
+      letter-spacing: 0.05em;
+      flex-shrink: 0;
+    }
     .player-row .kick-btn {
       background: none;
       border: none;
       color: var(--red-team);
       font-weight: 900;
       font-size: 1rem;
-      padding: 2px 6px;
+      padding: 6px 8px;
+      min-width: 32px;
+      min-height: 32px;
       cursor: pointer;
       opacity: 0.6;
       transition: opacity 0.15s, transform 0.15s;
       line-height: 1;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
     }
     .player-row .kick-btn:hover { opacity: 1; transform: scale(1.15); }
 
@@ -299,6 +315,22 @@
       cursor: not-allowed;
       box-shadow: none;
     }
+
+    .skip-btn {
+      background: rgba(251, 191, 36, 0.15);
+      border: 2px solid rgba(251, 191, 36, 0.5);
+      color: #fcd34d;
+      font-weight: 900;
+      letter-spacing: 0.04em;
+      transition: all 0.2s;
+    }
+    .skip-btn:hover:not(:disabled) {
+      background: rgba(251, 191, 36, 0.3);
+      color: #fff;
+      box-shadow: 0 0 30px rgba(251, 191, 36, 0.3);
+    }
+    .skip-btn:active:not(:disabled) { transform: scale(0.98); }
+    .skip-btn:disabled { opacity: 0.4; cursor: not-allowed; }
 
     .modal-backdrop {
       position: fixed;
@@ -408,8 +440,9 @@
     @media (max-width: 640px) {
       body { padding: 1rem 0.75rem 2rem; }
       .glass { border-radius: 1.25rem; }
-      .num-btn { width: 38px; height: 38px; font-size: 1.1rem; }
+      .num-btn { width: 40px; height: 40px; font-size: 1.15rem; }
       .num-value { width: 56px; height: 46px; font-size: 1.5rem; }
+      .player-row .kick-btn { padding: 6px; min-width: 32px; min-height: 32px; }
     }
 
     @media (prefers-reduced-motion: reduce) {
@@ -571,7 +604,10 @@
         <div class="text-sm text-white/50 font-mono" id="mod-timer-info"></div>
       </div>
 
-      <div class="w-full grid grid-cols-1 md:grid-cols-2 gap-3">
+      <div class="w-full grid grid-cols-1 md:grid-cols-3 gap-3">
+        <button onclick="skipTurn()" id="btn-skip-turn" class="skip-btn w-full py-5 rounded-xl text-lg">
+          ⏭️ ПРОПУСТИТЬ ХОД
+        </button>
         <button onclick="endGame()" class="w-full py-5 bg-red-600/20 border-2 border-red-500/50 text-red-300 rounded-xl font-black text-lg hover:bg-red-600/40 transition">
           ⏹️ ЗАКОНЧИТЬ БОЙ
         </button>
@@ -614,7 +650,7 @@
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getDatabase, ref, set, onValue, update, remove, get, onDisconnect } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+    import { getDatabase, ref, set, onValue, update, remove, get } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyCXIR5Tv8lB6ivcGRC3yt1SC66MM6T5b_M",
@@ -629,13 +665,22 @@
     const db = getDatabase(app);
     const gameRef = ref(db, 'games/battle_1');
 
+    const TURN_TIME = 15;
+    const AUTO_SKIP_GRACE_MS = 3000; // +3 сек сверх хода, чтобы точно не помешать игроку
+
     let currentData = null;
     let firstTeam = 'red';
     let isStarting = false;
     let unfairRed = 1;
     let unfairBlue = 1;
     let countdownInterval = null;
+
+    // Хеш для предотвращения лишних ререндеров (aim-апдейты не должны перерисовывать всё)
     let lastUIHash = '';
+
+    // Авто-пропуск: таймер, который переключает ход, если текущий игрок offline
+    let autoSkipTimer = null;
+    let autoSkipForPlayerId = null;
 
     // ============================================================
     // АУДИО
@@ -680,6 +725,12 @@
 
     function getPlayerEmoji(p) {
       return (p && p.emoji) ? p.emoji : '😀';
+    }
+
+    function isPlayerConnected(p) {
+      if (!p) return false;
+      // Если connected явно false — offline. Если undefined — считаем online (старые данные)
+      return p.connected !== false;
     }
 
     function parseMode(mode) {
@@ -743,6 +794,65 @@
     });
 
     // ============================================================
+    // TURN ORDER
+    // ============================================================
+    // Строит turnOrder из текущих players, отсортированных по joinedAt.
+    // Возвращает массив ID.
+    function buildTurnOrderFromPlayers(playersData) {
+      const all = [
+        ...Object.entries(playersData.red || {}).map(([id, p]) => ({ id, team: 'red', joinedAt: p.joinedAt || 0 })),
+        ...Object.entries(playersData.blue || {}).map(([id, p]) => ({ id, team: 'blue', joinedAt: p.joinedAt || 0 }))
+      ].sort((a, b) => a.joinedAt - b.joinedAt);
+      return all.map(p => p.id);
+    }
+
+    // Возвращает следующего живого игрока по turnOrder.
+    // Если turnOrder нет — fallback: следующий по команде, потом первая живая вражеская.
+    function findNextPlayer(data, currentPlayerId) {
+      const players = data?.players || {};
+      const isAlive = (p) => p && p.alive && p.lives > 0;
+
+      const order = Array.isArray(data?.turnOrder) ? data.turnOrder : null;
+      if (order && order.length > 0) {
+        const idx = order.indexOf(currentPlayerId);
+        if (idx !== -1) {
+          for (let step = 1; step <= order.length; step++) {
+            const nextId = order[(idx + step) % order.length];
+            const nextTeam = players.red?.[nextId] ? 'red' : (players.blue?.[nextId] ? 'blue' : null);
+            if (!nextTeam) continue;
+            const nextPlayer = players[nextTeam]?.[nextId];
+            if (isAlive(nextPlayer)) {
+              return { id: nextId, team: nextTeam, name: nextPlayer.name };
+            }
+          }
+        }
+      }
+
+      // Fallback
+      const currentTeam = players.red?.[currentPlayerId] ? 'red' : (players.blue?.[currentPlayerId] ? 'blue' : null);
+      if (currentTeam) {
+        const teamPlayers = Object.entries(players[currentTeam] || {})
+          .filter(([id, p]) => isAlive(p))
+          .sort((a, b) => (a[1].joinedAt || 0) - (b[1].joinedAt || 0));
+        const myIdx = teamPlayers.findIndex(([id]) => id === currentPlayerId);
+        if (myIdx !== -1 && myIdx < teamPlayers.length - 1) {
+          const [id, p] = teamPlayers[myIdx + 1];
+          return { id, team: currentTeam, name: p.name };
+        }
+      }
+
+      const enemyTeam = currentTeam === 'red' ? 'blue' : (currentTeam === 'blue' ? 'red' : (firstTeam === 'red' ? 'blue' : 'red'));
+      const enemyPlayers = Object.entries(players[enemyTeam] || {})
+        .filter(([id, p]) => isAlive(p))
+        .sort((a, b) => (a[1].joinedAt || 0) - (b[1].joinedAt || 0));
+      if (enemyPlayers.length > 0) {
+        const [id, p] = enemyPlayers[0];
+        return { id, team: enemyTeam, name: p.name };
+      }
+      return null;
+    }
+
+    // ============================================================
     // ИНИЦИАЛИЗАЦИЯ
     // ============================================================
     async function initGame() {
@@ -758,7 +868,8 @@
             room: { red: {}, blue: {} },
             firstTeam: 'red',
             turn: { team: 'red', name: '...' },
-            activePlayerId: null, timer: null, preloadDone: false
+            activePlayerId: null, timer: null, preloadDone: false,
+            turnOrder: []
           });
           return;
         }
@@ -766,46 +877,50 @@
         firstTeam = existing.firstTeam || 'red';
 
         if (existing.status === 'finished') {
-          // ВАЖНО: после завершённой игры — НЕ возвращаем всех в комнату.
-          // Просто очищаем players, комнату оставляем как есть.
-          // Кто хочет играть — сканирует QR заново (play.html с hasJoined = false).
-          firstTeam = existing.firstTeam || 'red';
-          await clearPlayersKeepRoom(existing);
+          // ВАЖНО: НЕ переводим автоматически в лобби — пусть TV покажет победителя.
+          // Ведущий сам нажмёт «НОВАЯ ИГРА».
+          // Но если старый формат (нет winner) — на всякий случай почистим.
+          if (existing.winner === undefined) {
+            await clearPlayersKeepRoom(existing);
+          }
         } else if (existing.status === 'playing') {
           const ok = await showModal({
             icon: '⚠️', title: 'Игра уже идёт',
-            text: 'Сбросить текущую игру и вернуться в лобби?',
+            text: 'Сбросить текущую игру и вернуться в лобби? Все игроки вернутся в комнату.',
             confirmText: 'СБРОСИТЬ', danger: true
           });
           if (ok) {
-            // Сброс посреди игры — вернуть всех в комнату (они ещё на телефонах)
             await moveAllPlayersToRoom(existing);
           }
         } else {
           if (existing.screen !== 'attract') await update(gameRef, { screen: 'attract' });
           if (!existing.room) await update(gameRef, { room: { red: {}, blue: {} } });
+          if (!existing.turnOrder) await update(gameRef, { turnOrder: [] });
         }
       } catch (e) {
         showToast('Ошибка подключения: ' + e.message, 'error');
       }
     }
 
-    // Очищает players, комнату НЕ трогает
     async function clearPlayersKeepRoom(data) {
       if (countdownInterval) { clearInterval(countdownInterval); countdownInterval = null; }
+      stopAutoSkip();
       await update(gameRef, {
         screen: 'attract', status: 'lobby',
         players: { red: {}, blue: {} },
         activePlayerId: null, timer: null, preloadDone: false,
         winner: null, last_shot: null, shots: null,
+        turnOrder: [],
         turn: { team: firstTeam, name: '...' }
       });
       try { await remove(ref(db, 'games/battle_1/aim')); } catch {}
+      try { await remove(ref(db, 'games/battle_1/last_shot')); } catch {}
+      try { await remove(ref(db, 'games/battle_1/shots')); } catch {}
     }
 
-    // Возвращает ВСЕХ игроков из players в room (используется при "В ЛОББИ" во время игры)
     async function moveAllPlayersToRoom(data) {
       if (countdownInterval) { clearInterval(countdownInterval); countdownInterval = null; }
+      stopAutoSkip();
 
       const players = data.players || {};
       const roomUpdates = [];
@@ -814,7 +929,8 @@
           roomUpdates.push(set(ref(db, `games/battle_1/room/${team}/${id}`), {
             name: p.name,
             emoji: getPlayerEmoji(p),
-            joinedAt: p.joinedAt || Date.now()
+            joinedAt: p.joinedAt || Date.now(),
+            lastSeen: Date.now()
           }));
         });
       });
@@ -825,13 +941,102 @@
         players: { red: {}, blue: {} },
         activePlayerId: null, timer: null, preloadDone: false,
         winner: null, last_shot: null, shots: null,
+        turnOrder: [],
         turn: { team: firstTeam, name: '...' }
       });
 
       try { await remove(ref(db, 'games/battle_1/aim')); } catch {}
+      try { await remove(ref(db, 'games/battle_1/last_shot')); } catch {}
+      try { await remove(ref(db, 'games/battle_1/shots')); } catch {}
     }
 
     initGame();
+
+    // ============================================================
+    // АВТО-ПРОПУСК ХОДА
+    // ============================================================
+    function stopAutoSkip() {
+      if (autoSkipTimer) { clearTimeout(autoSkipTimer); autoSkipTimer = null; }
+      autoSkipForPlayerId = null;
+    }
+
+    // Проверяет, надо ли запланировать авто-пропуск.
+    // Если текущий activePlayerId offline — планирует skip через TURN_TIME + grace.
+    function scheduleAutoSkipIfNeeded(data) {
+      if (!data || data.status !== 'playing' || !data.preloadDone) {
+        stopAutoSkip();
+        return;
+      }
+      const activeId = data.activePlayerId;
+      if (!activeId) { stopAutoSkip(); return; }
+      if (autoSkipForPlayerId === activeId) return; // уже запланирован
+
+      const activeTeam = data.players?.red?.[activeId] ? 'red' : (data.players?.blue?.[activeId] ? 'blue' : null);
+      if (!activeTeam) { stopAutoSkip(); return; }
+      const activePlayer = data.players[activeTeam][activeId];
+      if (!activePlayer || !activePlayer.alive) { stopAutoSkip(); return; }
+
+      const online = isPlayerConnected(activePlayer);
+      stopAutoSkip();
+      if (online) return; // если онлайн — не трогаем, у него есть таймер на телефоне
+
+      // Игрок offline — планируем авто-пропуск
+      autoSkipForPlayerId = activeId;
+      autoSkipTimer = setTimeout(async () => {
+        autoSkipTimer = null;
+        autoSkipForPlayerId = null;
+        // Перечитываем данные перед skip
+        try {
+          const snap = await get(gameRef);
+          const fresh = snap.val();
+          if (!fresh || fresh.status !== 'playing') return;
+          if (fresh.activePlayerId !== activeId) return; // ход уже ушёл
+          await performSkipTurn(fresh, activeId, 'auto');
+        } catch {}
+      }, TURN_TIME * 1000 + AUTO_SKIP_GRACE_MS);
+    }
+
+    async function performSkipTurn(data, currentPlayerId, source) {
+      const next = findNextPlayer(data, currentPlayerId);
+      if (!next) {
+        showToast('Нет живых игроков для передачи хода', 'error');
+        return;
+      }
+      try {
+        await update(gameRef, {
+          activePlayerId: next.id,
+          turn: { team: next.team, name: next.name }
+        });
+        try { await remove(ref(db, 'games/battle_1/aim')); } catch {}
+        if (source === 'auto') {
+          showToast(`Авто-пропуск: ход → ${next.name}`, 'info');
+        } else {
+          showToast(`Ход передан: ${next.name}`, 'success');
+        }
+      } catch (e) {
+        showToast('Ошибка пропуска: ' + e.message, 'error');
+      }
+    }
+
+    window.skipTurn = async () => {
+      if (currentData?.status !== 'playing') return;
+      const activeId = currentData.activePlayerId;
+      if (!activeId) {
+        playError();
+        showToast('Нет активного игрока', 'error');
+        return;
+      }
+
+      const ok = await showModal({
+        icon: '⏭️', title: 'Пропустить ход?',
+        text: 'Текущий игрок потеряет ход, очередь перейдёт следующему.',
+        confirmText: 'ПРОПУСТИТЬ', danger: false
+      });
+      if (!ok) return;
+
+      playClick();
+      await performSkipTurn(currentData, activeId, 'manual');
+    };
 
     // ============================================================
     // ДЕЙСТВИЯ
@@ -888,6 +1093,7 @@
 
     window.showQR = async () => {
       if (currentData?.status !== 'lobby') return;
+      if (currentData?.screen === 'qr') return;
       playClick();
       await update(gameRef, { screen: 'qr' }).catch(e => showToast(e.message, 'error'));
     };
@@ -910,15 +1116,19 @@
       const roomPlayer = currentData.room?.[team]?.[id];
       if (!roomPlayer) return;
 
+      const { redLives, blueLives } = calculateLives(currentData.mode);
+      const lives = team === 'red' ? redLives : blueLives;
+
       playClick();
       try {
         await set(ref(db, `games/battle_1/players/${team}/${id}`), {
           name: roomPlayer.name,
           emoji: getPlayerEmoji(roomPlayer),
-          lives: 3,
+          lives,
           alive: true,
           connected: true,
-          joinedAt: roomPlayer.joinedAt || Date.now()
+          joinedAt: roomPlayer.joinedAt || Date.now(),
+          lastSeen: Date.now()
         });
         await remove(ref(db, `games/battle_1/room/${team}/${id}`));
       } catch (e) {
@@ -935,7 +1145,8 @@
         await set(ref(db, `games/battle_1/room/${team}/${id}`), {
           name: player.name,
           emoji: getPlayerEmoji(player),
-          joinedAt: player.joinedAt || Date.now()
+          joinedAt: player.joinedAt || Date.now(),
+          lastSeen: Date.now()
         });
         await remove(ref(db, `games/battle_1/players/${team}/${id}`));
       } catch (e) {
@@ -972,11 +1183,31 @@
       const mode = data.mode || '1v1';
       const { redMax, blueMax, isUnfair } = parseMode(mode);
 
-      document.getElementById('lobby-controls').classList.toggle('hidden', status !== 'lobby');
-      document.getElementById('game-controls').classList.toggle('hidden', status !== 'playing');
-      document.getElementById('finished-controls').classList.toggle('hidden', status !== 'finished');
-      document.getElementById('game-controls').classList.toggle('flex', status === 'playing');
-      document.getElementById('finished-controls').classList.toggle('flex', status === 'finished');
+      // Переключение панелей — дёшево, но тоже через хеш, чтобы не дёргать DOM
+      const panelHash = `panel:${status}`;
+      if (panelHash !== `panel:${window.__lastPanelStatus || ''}`) {
+        window.__lastPanelStatus = status;
+        document.getElementById('lobby-controls').classList.toggle('hidden', status !== 'lobby');
+        document.getElementById('game-controls').classList.toggle('hidden', status !== 'playing');
+        document.getElementById('finished-controls').classList.toggle('hidden', status !== 'finished');
+        document.getElementById('game-controls').classList.toggle('flex', status === 'playing');
+        document.getElementById('finished-controls').classList.toggle('flex', status === 'finished');
+      }
+
+      // Хеш для остального UI
+      const uiHash = JSON.stringify({
+        s: status,
+        sc: screen,
+        m: mode,
+        ft: data.firstTeam,
+        ap: data.activePlayerId,
+        t: data.turn,
+        tm: data.timer,
+        pd: data.preloadDone,
+        w: data.winner,
+        pr: data.players,
+        rm: data.room
+      });
 
       const screenLabels = { attract: 'ЗАСТАВКА', qr: 'QR-КОДЫ', game: 'ИГРА', winner: 'ПОБЕДИТЕЛЬ' };
       const screenColors = { attract: '#fff', qr: '#22d3ee', game: '#22c55e', winner: '#fbbf24' };
@@ -994,8 +1225,10 @@
         document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
         document.getElementById(`btn-${data.mode}`)?.classList.add('active');
         if (isUnfair) {
-          unfairRed = redMax; unfairBlue = blueMax;
-          updateUnfairSelectorUI();
+          if (unfairRed !== redMax || unfairBlue !== blueMax) {
+            unfairRed = redMax; unfairBlue = blueMax;
+            updateUnfairSelectorUI();
+          }
         }
         document.getElementById('mode-display').innerText = `РЕЖИМ: ${redMax} vs ${blueMax}${isUnfair ? ' ⚔️' : ''}`;
         document.getElementById('mode-display').style.color = isUnfair ? '#fbbf24' : '#22d3ee';
@@ -1005,12 +1238,22 @@
       document.querySelectorAll('.mode-btn, .team-btn, .num-btn, #unfair-apply-btn').forEach(b => b.disabled = inGame);
       document.getElementById('btn-show-qr').disabled = inGame || screen === 'qr';
 
-      renderActivePlayers(data, redMax, blueMax);
-      renderRoomPlayers(data);
-      updateStartButton(data, redMax, blueMax);
+      // Кнопка skip-turn доступна только в игре
+      const skipBtn = document.getElementById('btn-skip-turn');
+      if (skipBtn) skipBtn.disabled = status !== 'playing' || !data.activePlayerId;
 
-      if (status === 'playing') updateGameView(data, mode);
-      if (status === 'finished') updateFinishedView(data);
+      // Ререндер — только если реально изменилось
+      if (uiHash !== lastUIHash) {
+        lastUIHash = uiHash;
+        renderActivePlayers(data, redMax, blueMax);
+        renderRoomPlayers(data);
+        updateStartButton(data, redMax, blueMax);
+        if (status === 'playing') updateGameView(data, mode);
+        if (status === 'finished') updateFinishedView(data);
+      }
+
+      // Авто-пропуск — всегда, даже если UI не менялся
+      scheduleAutoSkipIfNeeded(data);
     });
 
     // ============================================================
@@ -1026,13 +1269,16 @@
           container.innerHTML = `<div class="text-center text-white/25 italic py-3 text-xs">Пусто</div>`;
           return;
         }
-        container.innerHTML = players.map(([id, p]) => `
-          <div class="player-row active">
-            <div class="avatar avatar-sm">${getPlayerEmoji(p)}</div>
-            <div class="name">${escapeHtml(p.name)}</div>
-            <button class="kick-btn" onclick="removeFromGame('${team}', '${id}')" title="Вернуть в комнату">↩</button>
-          </div>
-        `).join('');
+        container.innerHTML = players.map(([id, p]) => {
+          const offline = !isPlayerConnected(p);
+          return `
+            <div class="player-row active">
+              <div class="avatar avatar-sm">${escapeHtml(getPlayerEmoji(p))}</div>
+              <div class="name">${escapeHtml(p.name)}${offline ? ' <span class="offline-tag">OFFLINE</span>' : ''}</div>
+              <button class="kick-btn" onclick="removeFromGame('${team}', '${id}')" title="Вернуть в комнату">↩</button>
+            </div>
+          `;
+        }).join('');
       };
       render('red', 'active-red', 'count-red', redMax);
       render('blue', 'active-blue', 'count-blue', blueMax);
@@ -1049,14 +1295,17 @@
           container.innerHTML = `<div class="text-center text-white/25 italic py-3 text-xs">Пусто</div>`;
           return;
         }
-        container.innerHTML = players.map(([id, p]) => `
-          <div class="player-row clickable" onclick="addToGame('${team}', '${id}')">
-            <div class="avatar avatar-sm">${getPlayerEmoji(p)}</div>
-            <div class="name">${escapeHtml(p.name)}</div>
-            <span class="text-cyan-400/60 text-sm">➕</span>
-            <button class="kick-btn" onclick="event.stopPropagation(); kickFromRoom('${team}', '${id}')" title="Кикнуть">✖</button>
-          </div>
-        `).join('');
+        container.innerHTML = players.map(([id, p]) => {
+          const offline = !isPlayerConnected(p);
+          return `
+            <div class="player-row clickable" onclick="addToGame('${team}', '${id}')">
+              <div class="avatar avatar-sm">${escapeHtml(getPlayerEmoji(p))}</div>
+              <div class="name">${escapeHtml(p.name)}${offline ? ' <span class="offline-tag">OFFLINE</span>' : ''}</div>
+              <span class="text-cyan-400/60 text-sm">➕</span>
+              <button class="kick-btn" onclick="event.stopPropagation(); kickFromRoom('${team}', '${id}')" title="Кикнуть">✖</button>
+            </div>
+          `;
+        }).join('');
       };
       render('red', 'room-red', 'room-count-red');
       render('blue', 'room-blue', 'room-count-blue');
@@ -1066,25 +1315,28 @@
 
     function updateStartButton(data, redMax, blueMax) {
       const btn = document.getElementById('btn-start');
+      if (data.status !== 'lobby') return;
+
       const redCount = Object.keys(data.players?.red || {}).length;
       const blueCount = Object.keys(data.players?.blue || {}).length;
       const roomRed = Object.keys(data.room?.red || {}).length;
       const roomBlue = Object.keys(data.room?.blue || {}).length;
 
-      if (data.status !== 'lobby') return;
-
       const activeReady = redCount >= redMax && blueCount >= blueMax;
       const canAutoFill = (redCount + roomRed) >= redMax && (blueCount + roomBlue) >= blueMax;
+
+      const shownRed = Math.min(redCount + roomRed, redMax);
+      const shownBlue = Math.min(blueCount + roomBlue, blueMax);
 
       if (activeReady || canAutoFill) {
         btn.disabled = false;
         btn.innerText = canAutoFill && !activeReady
-          ? `🚀 НАЧАТЬ БОЙ (${redCount + roomRed}/${redMax} vs ${blueCount + roomBlue}/${blueMax})`
+          ? `🚀 НАЧАТЬ БОЙ (${shownRed}/${redMax} vs ${shownBlue}/${blueMax})`
           : '🚀 НАЧАТЬ БОЙ';
         btn.classList.add('pulse-status');
       } else {
         btn.disabled = true;
-        btn.innerText = `ОЖИДАНИЕ (${redCount + roomRed}/${redMax} vs ${blueCount + roomBlue}/${blueMax})`;
+        btn.innerText = `ОЖИДАНИЕ (${shownRed}/${redMax} vs ${shownBlue}/${blueMax})`;
         btn.classList.remove('pulse-status');
       }
     }
@@ -1134,10 +1386,11 @@
         list.innerHTML = players.map(([id, p]) => {
           const isDead = !p.alive || p.lives <= 0;
           const isActive = data.activePlayerId === id;
+          const offline = !isPlayerConnected(p);
           const hearts = isDead ? '💀' : (p.lives <= 5 ? '❤️'.repeat(p.lives) : `❤️×${p.lives}`);
           return `
             <li class="flex justify-between items-center p-2 rounded-lg ${isActive ? 'bg-yellow-500/15 border border-yellow-500/40' : 'bg-black/25'} ${isDead ? 'opacity-40' : ''}">
-              <span class="font-bold truncate text-sm">${isActive ? '▶ ' : ''}${getPlayerEmoji(p)} ${escapeHtml(p.name)}</span>
+              <span class="font-bold truncate text-sm">${isActive ? '▶ ' : ''}${escapeHtml(getPlayerEmoji(p))} ${escapeHtml(p.name)}${offline ? ' <span class="offline-tag">OFF</span>' : ''}</span>
               <span class="ml-2 text-xs">${hearts}</span>
             </li>
           `;
@@ -1185,6 +1438,7 @@
       });
       if (!ok) return;
       try {
+        stopAutoSkip();
         await update(gameRef, {
           status: 'finished', screen: 'winner', winner: 'none',
           activePlayerId: null, timer: null
@@ -1203,13 +1457,11 @@
       });
       if (!ok) return;
       try {
-        // Здесь намеренно возвращаем всех в комнату — они ещё на телефонах
         await moveAllPlayersToRoom(currentData);
         playSuccess();
       } catch (e) { showToast(e.message, 'error'); }
     };
 
-    // НОВАЯ ИГРА после finished — НЕ возвращает в комнату
     window.newGame = async () => {
       if (currentData?.status !== 'finished') return;
       playClick();
@@ -1222,7 +1474,6 @@
       if (!ok) return;
 
       try {
-        // Очищаем только players, room не трогаем
         await clearPlayersKeepRoom(currentData);
         playSuccess();
         showToast('Готово к новой игре. Покажите QR-код.', 'success');
@@ -1258,13 +1509,15 @@
         const roomRed = data.room?.red || {};
         const roomBlue = data.room?.blue || {};
 
+        // Убираем лишних из активных в комнату
         const extraRed = Object.keys(playersRed).slice(redMax);
         const extraBlue = Object.keys(playersBlue).slice(blueMax);
         for (const id of extraRed) {
           await set(ref(db, `games/battle_1/room/red/${id}`), {
             name: playersRed[id].name,
             emoji: getPlayerEmoji(playersRed[id]),
-            joinedAt: playersRed[id].joinedAt || Date.now()
+            joinedAt: playersRed[id].joinedAt || Date.now(),
+            lastSeen: Date.now()
           });
           await remove(ref(db, `games/battle_1/players/red/${id}`));
           delete playersRed[id];
@@ -1273,12 +1526,14 @@
           await set(ref(db, `games/battle_1/room/blue/${id}`), {
             name: playersBlue[id].name,
             emoji: getPlayerEmoji(playersBlue[id]),
-            joinedAt: playersBlue[id].joinedAt || Date.now()
+            joinedAt: playersBlue[id].joinedAt || Date.now(),
+            lastSeen: Date.now()
           });
           await remove(ref(db, `games/battle_1/players/blue/${id}`));
           delete playersBlue[id];
         }
 
+        // Добираем из комнаты
         if (Object.keys(playersRed).length < redMax) {
           const sorted = Object.entries(roomRed).sort((a, b) => (a[1].joinedAt || 0) - (b[1].joinedAt || 0));
           for (const [id, p] of sorted) {
@@ -1289,7 +1544,8 @@
               lives: redLives,
               alive: true,
               connected: true,
-              joinedAt: p.joinedAt || Date.now()
+              joinedAt: p.joinedAt || Date.now(),
+              lastSeen: Date.now()
             };
             await set(ref(db, `games/battle_1/players/red/${id}`), playersRed[id]);
             await remove(ref(db, `games/battle_1/room/red/${id}`));
@@ -1305,7 +1561,8 @@
               lives: blueLives,
               alive: true,
               connected: true,
-              joinedAt: p.joinedAt || Date.now()
+              joinedAt: p.joinedAt || Date.now(),
+              lastSeen: Date.now()
             };
             await set(ref(db, `games/battle_1/players/blue/${id}`), playersBlue[id]);
             await remove(ref(db, `games/battle_1/room/blue/${id}`));
@@ -1321,6 +1578,7 @@
           return;
         }
 
+        // Координаты
         const usedYRed = [], usedYBlue = [];
         const coordUpdates = [];
         Object.entries(playersRed).forEach(([id, p]) => {
@@ -1349,14 +1607,18 @@
         });
         if (coordUpdates.length > 0) await Promise.all(coordUpdates);
 
+        // Жизни
         const livesUpdates = [];
         Object.keys(playersRed).forEach(id => livesUpdates.push(update(ref(db, `games/battle_1/players/red/${id}`), { lives: redLives, alive: true })));
         Object.keys(playersBlue).forEach(id => livesUpdates.push(update(ref(db, `games/battle_1/players/blue/${id}`), { lives: blueLives, alive: true })));
         await Promise.all(livesUpdates);
         await update(gameRef, { lives: { red: redLives, blue: blueLives } });
 
+        // Первый игрок — из выбранной firstTeam, отсортированный по joinedAt
         const firstTeamPlayers = firstTeam === 'red' ? playersRed : playersBlue;
-        const firstEntry = Object.entries(firstTeamPlayers)[0];
+        const firstSorted = Object.entries(firstTeamPlayers)
+          .sort((a, b) => (a[1].joinedAt || 0) - (b[1].joinedAt || 0));
+        const firstEntry = firstSorted[0];
         if (!firstEntry) {
           playError();
           showToast('Нет игроков в выбранной команде!', 'error');
@@ -1366,11 +1628,22 @@
           return;
         }
 
+        // Строим turnOrder (красные и синие по joinedAt, но с учётом firstTeam —
+        // чтобы первый игрок был из выбранной команды; полный порядок — по joinedAt)
+        const turnOrder = buildTurnOrderFromPlayers({ red: playersRed, blue: playersBlue });
+        // Убедимся, что первый ход у firstEntry.id — если нет, переставим в начало
+        const idxFirst = turnOrder.indexOf(firstEntry[0]);
+        if (idxFirst > 0) {
+          turnOrder.splice(idxFirst, 1);
+          turnOrder.unshift(firstEntry[0]);
+        }
+
         await update(gameRef, {
           screen: 'game', status: 'playing',
           turn: { team: firstTeam, name: firstEntry[1].name },
           activePlayerId: firstEntry[0],
-          timer: 10, preloadDone: false, winner: null
+          timer: 10, preloadDone: false, winner: null,
+          turnOrder
         });
 
         playStart();
