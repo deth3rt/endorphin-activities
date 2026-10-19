@@ -33,50 +33,127 @@
       opacity: 0.5;
       transition: opacity 0.2s;
     }
+    .tab-btn {
+      transition: all 0.2s;
+    }
+    .tab-btn.active {
+      background: rgba(34, 211, 238, 0.2);
+      color: #22d3ee;
+      border-color: #22d3ee;
+    }
   </style>
 </head>
-<body class="min-h-screen p-8 flex items-center justify-center">
-  <div class="glass max-w-2xl w-full p-8 rounded-3xl">
-    <h1 class="text-3xl font-black mb-8 text-cyan-400 text-center tracking-widest">АДМИН-ПАНЕЛЬ</h1>
+<body class="min-h-screen p-4 flex items-center justify-center">
+  <div class="glass max-w-2xl w-full p-6 rounded-3xl">
+    <h1 class="text-3xl font-black mb-6 text-cyan-400 text-center tracking-widest">АДМИН-ПАНЕЛЬ</h1>
     
-    <!-- Форма отправки -->
-    <div class="mb-8">
-      <label class="block text-sm font-bold mb-2 text-cyan-200">НОВОЕ СООБЩЕНИЕ (бегущая строка):</label>
-      <div class="flex gap-2">
-        <input 
-          type="text" 
-          id="ticker-input" 
-          class="flex-1 bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 text-white outline-none focus:border-cyan-400 transition"
-          placeholder="Введите текст рекламы..."
-          onkeydown="if(event.key === 'Enter') addMessage()"
-        >
-        <button onclick="addMessage()" class="px-6 py-3 bg-cyan-600 rounded-xl font-bold hover:bg-cyan-500 transition active:scale-95">
-          ОТПРАВИТЬ
-        </button>
-      </div>
-      <p class="text-[10px] text-gray-500 mt-2">* Максимум 10 сообщений. Самое старое удаляется автоматически.</p>
+    <!-- Табы -->
+    <div class="flex gap-2 mb-6">
+      <button onclick="switchTab('ad')" id="tab-btn-ad" class="tab-btn active flex-1 py-3 rounded-xl border-2 border-gray-700 font-bold text-sm">📢 РЕКЛАМА</button>
+      <button onclick="switchTab('ticker')" id="tab-btn-ticker" class="tab-btn flex-1 py-3 rounded-xl border-2 border-gray-700 font-bold text-sm">📜 БЕГУЩАЯ СТРОКА</button>
+      <button onclick="switchTab('reset')" id="tab-btn-reset" class="tab-btn flex-1 py-3 rounded-xl border-2 border-gray-700 font-bold text-sm">🗑️ СБРОС</button>
     </div>
 
-    <hr class="border-gray-700 mb-8">
+    <!-- ============================================================ -->
+    <!-- ВКЛАДКА: РЕКЛАМА -->
+    <!-- ============================================================ -->
+    <div id="tab-ad">
+      
+      <!-- Реклама в прелоудинге -->
+      <div class="mb-6">
+        <h2 class="text-lg font-bold mb-3 text-cyan-300">🎬 Реклама в прелоудинге</h2>
+        
+        <div class="space-y-3">
+          <div>
+            <label class="block text-xs font-bold mb-1 text-gray-400">URL картинки (JPG/PNG/GIF):</label>
+            <input type="text" id="preload-img" class="w-full bg-gray-900 border border-gray-700 rounded-xl px-3 py-2 text-sm text-white outline-none focus:border-cyan-400" placeholder="https://example.com/banner.jpg">
+          </div>
+          <div>
+            <label class="block text-xs font-bold mb-1 text-gray-400">Ссылка (куда ведёт):</label>
+            <input type="text" id="preload-link" class="w-full bg-gray-900 border border-gray-700 rounded-xl px-3 py-2 text-sm text-white outline-none focus:border-cyan-400" placeholder="https://t.me/yourchannel">
+          </div>
+          <div>
+            <label class="block text-xs font-bold mb-1 text-gray-400">Текст-заглушка (если картинки нет):</label>
+            <input type="text" id="preload-text" class="w-full bg-gray-900 border border-gray-700 rounded-xl px-3 py-2 text-sm text-white outline-none focus:border-cyan-400" placeholder="РЕКЛАМА">
+          </div>
+        </div>
+      </div>
 
-    <!-- История сообщений -->
-    <div>
-      <h2 class="text-xl font-bold mb-4 text-cyan-300">ИСТОРИЯ СООБЩЕНИЙ</h2>
-      <div id="messages-list" class="space-y-3 max-h-96 overflow-y-auto pr-2">
-        <div class="text-center text-gray-500 py-8 italic" id="empty-history">
-          Пока нет отправленных сообщений
+      <hr class="border-gray-700 my-6">
+
+      <!-- Реклама в лобби -->
+      <div class="mb-6">
+        <h2 class="text-lg font-bold mb-3 text-cyan-300">🏠 Реклама в лобби</h2>
+        
+        <div class="space-y-3">
+          <div>
+            <label class="block text-xs font-bold mb-1 text-gray-400">URL картинки:</label>
+            <input type="text" id="lobby-img" class="w-full bg-gray-900 border border-gray-700 rounded-xl px-3 py-2 text-sm text-white outline-none focus:border-cyan-400" placeholder="https://example.com/banner.jpg">
+          </div>
+          <div>
+            <label class="block text-xs font-bold mb-1 text-gray-400">Ссылка:</label>
+            <input type="text" id="lobby-link" class="w-full bg-gray-900 border border-gray-700 rounded-xl px-3 py-2 text-sm text-white outline-none focus:border-cyan-400" placeholder="https://t.me/yourchannel">
+          </div>
+          <div>
+            <label class="block text-xs font-bold mb-1 text-gray-400">Текст-заглушка:</label>
+            <input type="text" id="lobby-text" class="w-full bg-gray-900 border border-gray-700 rounded-xl px-3 py-2 text-sm text-white outline-none focus:border-cyan-400" placeholder="РЕКЛАМА">
+          </div>
+        </div>
+      </div>
+
+      <button onclick="saveAdSettings()" class="w-full py-4 bg-cyan-600 rounded-xl font-black text-lg hover:bg-cyan-500 transition active:scale-95">
+        💾 СОХРАНИТЬ РЕКЛАМУ
+      </button>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- ВКЛАДКА: БЕГУЩАЯ СТРОКА -->
+    <!-- ============================================================ -->
+    <div id="tab-ticker" class="hidden">
+      <!-- Форма отправки -->
+      <div class="mb-6">
+        <label class="block text-sm font-bold mb-2 text-cyan-200">НОВОЕ СООБЩЕНИЕ:</label>
+        <div class="flex gap-2">
+          <input 
+            type="text" 
+            id="ticker-input" 
+            class="flex-1 bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 text-white outline-none focus:border-cyan-400 transition"
+            placeholder="Введите текст..."
+            onkeydown="if(event.key === 'Enter') addMessage()"
+          >
+          <button onclick="addMessage()" class="px-6 py-3 bg-cyan-600 rounded-xl font-bold hover:bg-cyan-500 transition active:scale-95">
+            ОТПРАВИТЬ
+          </button>
+        </div>
+        <p class="text-[10px] text-gray-500 mt-2">* Максимум 10 сообщений. Самое старое удаляется автоматически.</p>
+      </div>
+
+      <hr class="border-gray-700 mb-6">
+
+      <!-- История сообщений -->
+      <div>
+        <h2 class="text-xl font-bold mb-4 text-cyan-300">ИСТОРИЯ</h2>
+        <div id="messages-list" class="space-y-3 max-h-96 overflow-y-auto pr-2">
+          <div class="text-center text-gray-500 py-8 italic" id="empty-history">
+            Пока нет отправленных сообщений
+          </div>
         </div>
       </div>
     </div>
 
-    <hr class="border-gray-700 my-8">
-
-    <!-- Сброс -->
-    <div>
-      <button onclick="clearGame()" class="w-full py-4 bg-red-600/20 border-2 border-red-500/50 text-red-400 rounded-xl font-black text-lg hover:bg-red-600/40 transition active:scale-95">
-        ПОЛНЫЙ СБРОС ИГРЫ
-      </button>
+    <!-- ============================================================ -->
+    <!-- ВКЛАДКА: СБРОС -->
+    <!-- ============================================================ -->
+    <div id="tab-reset" class="hidden">
+      <div class="text-center py-8">
+        <div class="text-6xl mb-4">🗑️</div>
+        <p class="text-gray-400 mb-6">Сбросить ВСЮ игру? Все игроки отключатся.</p>
+        <button onclick="clearGame()" class="w-full py-4 bg-red-600/20 border-2 border-red-500/50 text-red-400 rounded-xl font-black text-lg hover:bg-red-600/40 transition active:scale-95">
+          ПОЛНЫЙ СБРОС ИГРЫ
+        </button>
+      </div>
     </div>
+
   </div>
 
   <script type="module">
@@ -87,8 +164,58 @@
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
     const tickerRef = ref(db, 'games/battle_1/ticker_messages');
+    const adRef = ref(db, 'games/battle_1/ad_settings');
 
-    // ДОБАВЛЕНИЕ СООБЩЕНИЯ
+    // ============================================================
+    // ТАБЫ
+    // ============================================================
+    window.switchTab = (tab) => {
+      ['ad', 'ticker', 'reset'].forEach(t => {
+        document.getElementById(`tab-${t}`).classList.add('hidden');
+        document.getElementById(`tab-btn-${t}`).classList.remove('active');
+      });
+      document.getElementById(`tab-${tab}`).classList.remove('hidden');
+      document.getElementById(`tab-btn-${tab}`).classList.add('active');
+    };
+
+    // ============================================================
+    // РЕКЛАМА
+    // ============================================================
+    window.saveAdSettings = () => {
+      const settings = {
+        preload: {
+          img: document.getElementById('preload-img').value.trim(),
+          link: document.getElementById('preload-link').value.trim(),
+          text: document.getElementById('preload-text').value.trim()
+        },
+        lobby: {
+          img: document.getElementById('lobby-img').value.trim(),
+          link: document.getElementById('lobby-link').value.trim(),
+          text: document.getElementById('lobby-text').value.trim()
+        }
+      };
+      set(adRef, settings);
+      alert('✅ Реклама сохранена!');
+    };
+
+    onValue(adRef, (snap) => {
+      const data = snap.val();
+      if (!data) return;
+      if (data.preload) {
+        document.getElementById('preload-img').value = data.preload.img || '';
+        document.getElementById('preload-link').value = data.preload.link || '';
+        document.getElementById('preload-text').value = data.preload.text || '';
+      }
+      if (data.lobby) {
+        document.getElementById('lobby-img').value = data.lobby.img || '';
+        document.getElementById('lobby-link').value = data.lobby.link || '';
+        document.getElementById('lobby-text').value = data.lobby.text || '';
+      }
+    });
+
+    // ============================================================
+    // БЕГУЩАЯ СТРОКА
+    // ============================================================
     window.addMessage = () => {
       const input = document.getElementById('ticker-input');
       const text = input.value.trim();
@@ -98,30 +225,22 @@
         const messages = snap.val() || {};
         const keys = Object.keys(messages).sort((a, b) => messages[a].time - messages[b].time);
         
-        // Если сообщений >= 10, удаляем самое старое
         if (keys.length >= 10) {
           remove(ref(db, `games/battle_1/ticker_messages/${keys[0]}`));
         }
 
-        // Добавляем новое
         const newRef = push(tickerRef);
-        set(newRef, {
-          text: text,
-          time: Date.now()
-        });
-
+        set(newRef, { text, time: Date.now() });
         input.value = '';
       }, { onlyOnce: true });
     };
 
-    // УДАЛЕНИЕ СООБЩЕНИЯ
     window.deleteMessage = (key) => {
       if (confirm('Удалить это сообщение?')) {
         remove(ref(db, `games/battle_1/ticker_messages/${key}`));
       }
     };
 
-    // ОТОБРАЖЕНИЕ ИСТОРИИ
     onValue(tickerRef, (snap) => {
       const messages = snap.val() || {};
       const keys = Object.keys(messages).sort((a, b) => messages[a].time - messages[b].time);
@@ -145,15 +264,15 @@
               <p class="text-sm text-gray-300 truncate">${msg.text}</p>
               <p class="text-[10px] text-gray-500 mt-1">${new Date(msg.time).toLocaleString()}</p>
             </div>
-            <button onclick="deleteMessage('${key}')" class="delete-btn ml-4 text-red-400 hover:text-red-300 font-black text-xl px-2">
-              ✖
-            </button>
+            <button onclick="deleteMessage('${key}')" class="delete-btn ml-4 text-red-400 hover:text-red-300 font-black text-xl px-2">✖</button>
           </div>
         `;
       }).join('');
     });
 
+    // ============================================================
     // СБРОС
+    // ============================================================
     window.clearGame = () => {
       if (confirm('Сбросить ВСЮ игру? Все игроки отключатся.')) {
         set(ref(db, 'games/battle_1'), {
