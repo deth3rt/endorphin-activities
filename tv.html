@@ -1834,11 +1834,10 @@ function drawBattleBackground() {
         class Snowball {
             constructor(shooter, power, angle, damage = 1, isSuper = false) {
                 this.x = shooter.x;
-                this.y = shooter.y;
-                const direction = shooter.team === 'red' ? 1 : -1;
+                this.y = shooter.y; 
                 const rad = angle * Math.PI / 180;
                 const speed = power * 0.4;
-                this.vx = Math.cos(rad) * speed * direction;
+                this.vx = Math.cos(rad) * speed;
                 this.vy = -Math.sin(rad) * speed;
                 this.gravity = 0.3;
                 this.isMega = (power > 90);
@@ -2282,22 +2281,24 @@ function drawBattleBackground() {
         }
 
         function startWinnerCountdown() {
-            clearWinnerTimers();
-            let countdown = WINNER_AUTO_HIDE;
-            const countdownEl = document.getElementById('win-countdown');
+    clearWinnerTimers();
+    let countdown = WINNER_AUTO_HIDE;
+    const countdownEl = document.getElementById('win-countdown');
 
-            const tick = () => {
-                countdownEl.innerText = `ПЕРЕХОД ЧЕРЕЗ ${countdown} СЕК`;
-                if (countdown <= 0) {
-                    clearWinnerTimers();
-                    window.location.href = 'end.html';
-                    return;
-                }
-                countdown--;
-            };
-            tick();
-            winnerCountdownInterval = setInterval(tick, 1000);
+    const tick = () => {
+        countdownEl.innerText = `ПЕРЕХОД К ЗАСТАВКЕ ЧЕРЕЗ ${countdown} СЕК`;
+        if (countdown <= 0) {
+            clearWinnerTimers();
+            showAttract();
+            lastScreen = 'attract';
+            winnerShown = false;
+            return;
         }
+        countdown--;
+    };
+    tick();
+    winnerCountdownInterval = setInterval(tick, 1000);
+}
 
         function clearWinnerTimers() {
             if (winnerCountdownInterval) {
