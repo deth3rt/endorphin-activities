@@ -1033,9 +1033,78 @@
         let winnerCountdownInterval = null;
         let superTextTimeout = null;
 
+        // Фон: предрасчитанные деревья, сугробы, лёд, звёзды
+        let bgTrees = [];
+        let bgMounds = [];
+        let bgIce = [];
+        let bgStars = [];
+
         const canvas = document.getElementById('game-canvas');
         const ctx = canvas.getContext('2d');
         let width = 0, height = 0, dpr = 1;
+
+        const CHAR_RADIUS = 52;
+        const EMOJI_FONT = 46;
+
+        function generateBackground() {
+            bgTrees = [];
+            bgMounds = [];
+            bgIce = [];
+            bgStars = [];
+
+            // Ёлки — 3 слоя по глубине
+            const treeLayers = 3;
+            for (let layer = 0; layer < treeLayers; layer++) {
+                const count = 4 + layer * 2;
+                const depth = (layer + 1) / treeLayers; // 0.33, 0.66, 1.0
+                for (let i = 0; i < count; i++) {
+                    bgTrees.push({
+                        x: Math.random() * width,
+                        y: height * (0.62 + Math.random() * 0.22),
+                        size: (18 + Math.random() * 22) * (0.5 + depth * 0.5),
+                        alpha: 0.1 + depth * 0.15,
+                        swayOffset: Math.random() * Math.PI * 2
+                    });
+                }
+            }
+
+            // Сугробы на земле
+            for (let i = 0; i < 12; i++) {
+                bgMounds.push({
+                    x: Math.random() * width,
+                    y: height * (0.72 + Math.random() * 0.2),
+                    w: 60 + Math.random() * 160,
+                    h: 12 + Math.random() * 20,
+                    alpha: 0.1 + Math.random() * 0.15
+                });
+            }
+
+            // Лёд — трещины
+            for (let i = 0; i < 8; i++) {
+                const x1 = Math.random() * width;
+                const y1 = height * (0.78 + Math.random() * 0.15);
+                const segments = 3 + Math.floor(Math.random() * 3);
+                const path = [{ x: x1, y: y1 }];
+                let curX = x1, curY = y1;
+                for (let s = 0; s < segments; s++) {
+                    curX += (Math.random() - 0.5) * 80;
+                    curY += (Math.random() - 0.3) * 30;
+                    path.push({ x: curX, y: curY });
+                }
+                bgIce.push({ path, alpha: 0.08 + Math.random() * 0.1 });
+            }
+
+            // Звёзды
+            for (let i = 0; i < 60; i++) {
+                bgStars.push({
+                    x: Math.random() * width,
+                    y: Math.random() * height * 0.5,
+                    size: Math.random() * 1.5 + 0.5,
+                    phase: Math.random() * Math.PI * 2,
+                    speed: 0.5 + Math.random()
+                });
+            }
+        }
 
         function resizeCanvas() {
             dpr = Math.min(window.devicePixelRatio || 1, 2);
@@ -1046,6 +1115,8 @@
             canvas.style.width = width + 'px';
             canvas.style.height = height + 'px';
             ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+            generateBackground();
 
             if (currentData) {
                 players.forEach((p, id) => {
@@ -1062,13 +1133,129 @@
         const FORM_TIME = 1500;
         const WINNER_AUTO_HIDE = 30;
 
-        const CHAR_RADIUS = 52;
-        const EMOJI_FONT = 46;
-
         window.addEventListener('resize', resizeCanvas);
         resizeCanvas();
 
         currentBaseUrl = getBaseUrl();
+
+        // ============================================================
+        // ФОН БОЯ — псевдо-3D снег, лёд, деревья
+        // ============================================================
+        function drawBattleBackground() {
+            const now = Date.now() / 1000;
+
+            // 1. Небо — градиент (уже есть в CSS, но подстрахуемся)
+            const skyGrad = ctx.createLinearGradient(0, 0, 0, height);
+            skyGrad.addColorStop(0, 'rgba(10, 37, 64, 0.4)');
+            skyGrad.addColorStop(0.5, 'rgba(5, 20, 40, 0.5)');
+            skyGrad.addColorStop(1, 'rgba(2, 8, 18, 0.6)');
+            ctx.fillStyle = skyGrad;
+            ctx.fillRect(0, 0, width, height);
+
+            // 2. Луна
+            const moonX = width * 0.82;
+            const moonY = height * 0.16;
+            const moonR = 70;
+            const moonGrad = ctx.createRadialGradient(moonX, moonY, 0, moonX, moonY, moonR * 2);
+            moonGrad.addColorStop(0, 'rgba(255, 255, 230, 0.25)');
+            moonGrad.addColorStop(0.4, 'rgba(255, 255, 230, 0.08)');
+            moonGrad.addColorStop(1, 'rgba(255, 255, 230, 0)');
+            ctx.fillStyle = moonGrad;
+            ctx.beginPath();
+            ctx.arc(moonX, moonY, moonR * 2, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = 'rgba(255, 255, 240, 0.35)';
+            ctx.beginPath();
+            ctx.arc(moonX, moonY, moonR * 0.5, 0, Math.PI * 2);
+            ctx.fill();
+
+            // 3. Звёзды
+            bgStars.forEach(s => {
+                const twinkle = 0.4 + 0.6 * Math.sin(now * s.speed + s.phase);
+                ctx.fillStyle = `rgba(255, 255, 255, ${0.15 + twinkle * 0.25})`;
+                ctx.beginPath();
+                ctx.arc(s.x, s.y, s.size, 0, Math.PI * 2);
+                ctx.fill();
+            });
+
+            // 4. Земля — заливка нижней части
+            const groundY = height * 0.68;
+            const groundGrad = ctx.createLinearGradient(0, groundY, 0, height);
+            groundGrad.addColorStop(0, 'rgba(180, 210, 240, 0.06)');
+            groundGrad.addColorStop(0.3, 'rgba(200, 230, 255, 0.1)');
+            groundGrad.addColorStop(1, 'rgba(220, 240, 255, 0.12)');
+            ctx.fillStyle = groundGrad;
+            ctx.beginPath();
+            ctx.moveTo(0, groundY);
+            ctx.bezierCurveTo(width * 0.25, groundY - 20, width * 0.5, groundY + 10, width * 0.75, groundY - 5);
+            ctx.bezierCurveTo(width * 0.85, groundY - 10, width * 0.95, groundY + 5, width, groundY);
+            ctx.lineTo(width, height);
+            ctx.lineTo(0, height);
+            ctx.closePath();
+            ctx.fill();
+
+            // 5. Сугробы
+            bgMounds.forEach(m => {
+                ctx.save();
+                ctx.fillStyle = `rgba(220, 240, 255, ${m.alpha})`;
+                ctx.beginPath();
+                ctx.ellipse(m.x, m.y, m.w / 2, m.h / 2, 0, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+            });
+
+            // 6. Лёд — трещины
+            bgIce.forEach(ice => {
+                ctx.save();
+                ctx.strokeStyle = `rgba(127, 227, 255, ${ice.alpha})`;
+                ctx.lineWidth = 1.5;
+                ctx.shadowColor = 'rgba(127, 227, 255, 0.3)';
+                ctx.shadowBlur = 6;
+                ctx.beginPath();
+                ice.path.forEach((p, i) => {
+                    if (i === 0) ctx.moveTo(p.x, p.y);
+                    else ctx.lineTo(p.x, p.y);
+                });
+                ctx.stroke();
+                ctx.restore();
+            });
+
+            // 7. Ёлки (сзади — тёмные, спереди — светлее)
+            bgTrees.forEach(t => {
+                const sway = Math.sin(now * 0.8 + t.swayOffset) * 2;
+                const baseY = t.y;
+                const topY = baseY - t.size * 2.2;
+                const halfW = t.size * 0.55;
+
+                ctx.save();
+                ctx.fillStyle = `rgba(15, 45, 75, ${t.alpha})`;
+                ctx.shadowColor = 'rgba(34, 211, 238, 0.15)';
+                ctx.shadowBlur = 8;
+
+                // 3 треугольника
+                for (let layer = 0; layer < 3; layer++) {
+                    const layerY = topY + t.size * 0.7 * layer;
+                    const layerW = halfW * (0.6 + layer * 0.25);
+                    ctx.beginPath();
+                    ctx.moveTo(t.x + sway, layerY);
+                    ctx.lineTo(t.x - layerW, layerY + t.size * 0.9);
+                    ctx.lineTo(t.x + layerW, layerY + t.size * 0.9);
+                    ctx.closePath();
+                    ctx.fill();
+                }
+                ctx.restore();
+            });
+
+            // 8. Снег на земле — точки
+            for (let i = 0; i < 80; i++) {
+                const sx = (i * 73.7) % width;
+                const sy = groundY + ((i * 41.3) % (height - groundY));
+                ctx.fillStyle = `rgba(255, 255, 255, ${0.15 + Math.random() * 0.15})`;
+                ctx.beginPath();
+                ctx.arc(sx, sy, Math.random() * 1.5 + 0.5, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
 
         // ============================================================
         // ATTRACT DEMO
@@ -1149,7 +1336,7 @@
         }
 
         // ============================================================
-        // КРУГ С ЭМОДЗИ — ЭМОДЗИ ПОВЕРХ ВСЕГО
+        // КРУГ С ЭМОДЗИ — ЭМОДЗИ ПОВЕРХ ВСЕГО, ЯРКИЙ
         // ============================================================
         function drawEmojiCharacter(c, data) {
             const { x, y, name, emoji, team, lives, alive, isActive, scale = 1 } = data;
@@ -1157,7 +1344,7 @@
             const time = Date.now();
             const r = CHAR_RADIUS * scale;
 
-            // 1. Ореол активного (самый нижний слой)
+            // 1. Ореол активного
             if (isActive && alive) {
                 const pulse = 0.5 + 0.5 * Math.sin(time / 200);
                 c.save();
@@ -1171,7 +1358,7 @@
                 c.restore();
             }
 
-            // 2. Мёртвый — скелет и стоп
+            // 2. Мёртвый
             if (!alive) {
                 c.save();
                 c.globalAlpha = 0.35;
@@ -1191,20 +1378,33 @@
             c.fill();
             c.restore();
 
-            // 4. Круг-подложка с глоу
+            // 4. Круг-подложка — СВЕТЛЕЕ в центре
             c.save();
             c.shadowColor = teamColor;
             c.shadowBlur = 25 * scale;
-            const grad = c.createRadialGradient(x - r * 0.3, y - r * 0.3, r * 0.15, x, y, r);
-            grad.addColorStop(0, 'rgba(20, 50, 85, 0.95)');
-            grad.addColorStop(1, 'rgba(5, 15, 30, 0.95)');
+            const grad = c.createRadialGradient(x - r * 0.25, y - r * 0.25, r * 0.1, x, y, r);
+            grad.addColorStop(0, 'rgba(60, 105, 160, 0.95)');   // светлый центр
+            grad.addColorStop(0.5, 'rgba(30, 65, 110, 0.95)');
+            grad.addColorStop(1, 'rgba(10, 25, 50, 0.96)');     // тёмный край
             c.fillStyle = grad;
             c.beginPath();
             c.arc(x, y, r, 0, Math.PI * 2);
             c.fill();
             c.restore();
 
-            // 5. Рамка команды (без shadow, чтобы не мазала эмодзи)
+            // 5. Светлый блик под эмодзи (для яркости)
+            c.save();
+            const glowGrad = c.createRadialGradient(x, y - r * 0.1, 0, x, y, r * 0.85);
+            glowGrad.addColorStop(0, 'rgba(255, 255, 255, 0.22)');
+            glowGrad.addColorStop(0.6, 'rgba(255, 255, 255, 0.06)');
+            glowGrad.addColorStop(1, 'rgba(255, 255, 255, 0)');
+            c.fillStyle = glowGrad;
+            c.beginPath();
+            c.arc(x, y, r * 0.85, 0, Math.PI * 2);
+            c.fill();
+            c.restore();
+
+            // 6. Рамка команды
             c.save();
             c.strokeStyle = teamColor;
             c.lineWidth = 4 * scale;
@@ -1213,16 +1413,16 @@
             c.stroke();
             c.restore();
 
-            // 6. Внутреннее тонкое кольцо
+            // 7. Внутреннее тонкое кольцо
             c.save();
-            c.strokeStyle = 'rgba(255,255,255,0.15)';
+            c.strokeStyle = 'rgba(255,255,255,0.18)';
             c.lineWidth = 1.5 * scale;
             c.beginPath();
             c.arc(x, y, r - 6 * scale, 0, Math.PI * 2);
             c.stroke();
             c.restore();
 
-            // 7. ЭМОДЗИ — ПОВЕРХ ВСЕГО, без тени, чистый fillText
+            // 8. ЭМОДЗИ — поверх всего, без тени
             c.save();
             c.shadowBlur = 0;
             c.shadowColor = 'transparent';
@@ -1232,7 +1432,7 @@
             c.fillText(emoji || '😀', x, y + 2 * scale);
             c.restore();
 
-            // 8. Имя под кругом
+            // 9. Имя под кругом
             c.save();
             c.font = `bold ${Math.round(16 * scale)}px Montserrat, sans-serif`;
             c.fillStyle = '#ffffff';
@@ -1243,15 +1443,31 @@
             c.fillText(name, x, y + r + 12 * scale);
             c.restore();
 
-            // 9. Сердечки HP сверху
+            // 10. Сердечки HP сверху с подложкой
             c.save();
             c.font = `${Math.round(20 * scale)}px "Apple Color Emoji", "Segoe UI Emoji", sans-serif`;
             c.textAlign = 'center';
             c.textBaseline = 'bottom';
+            const hearts = lives <= 5 ? '❤️'.repeat(Math.max(0, lives)) : `❤️×${lives}`;
+            const heartsY = y - r - 10 * scale;
+            const textWidth = c.measureText(hearts).width;
+            const padX = 8 * scale, padY = 4 * scale;
+            const bW = textWidth + padX * 2;
+            const bH = 22 * scale;
+            const bX = x - bW / 2;
+            const bY = heartsY - bH + padY;
+            c.fillStyle = 'rgba(0,0,0,0.6)';
+            c.beginPath();
+            if (c.roundRect) {
+                c.roundRect(bX, bY, bW, bH, 6 * scale);
+            } else {
+                c.rect(bX, bY, bW, bH);
+            }
+            c.fill();
             c.shadowColor = 'rgba(0,0,0,0.9)';
             c.shadowBlur = 6 * scale;
-            const hearts = lives <= 5 ? '❤️'.repeat(Math.max(0, lives)) : `❤️×${lives}`;
-            c.fillText(hearts, x, y - r - 10 * scale);
+            c.fillStyle = '#fff';
+            c.fillText(hearts, x, heartsY);
             c.restore();
         }
 
@@ -1262,6 +1478,9 @@
             });
         }
 
+        // ============================================================
+        // СТРЕЛКА ПРИЦЕЛА — КОРОТКАЯ, не дотянется до врага
+        // ============================================================
         function drawAimArc(aimer, angle, power) {
             const direction = aimer.team === 'red' ? 1 : -1;
             const teamColor = aimer.team === 'red' ? '#ff3b5c' : '#3d8bff';
@@ -1274,18 +1493,19 @@
             let x = aimer.x;
             let y = aimer.y - CHAR_RADIUS * 0.7;
 
+            // Короткая дуга — 18 шагов, обрывается раньше
             let sx = x, sy = y, svx = vx, svy = vy;
             ctx.save();
-            ctx.setLineDash([8, 10]);
-            ctx.lineDashOffset = -(Date.now() / 50) % 18;
+            ctx.setLineDash([6, 8]);
+            ctx.lineDashOffset = -(Date.now() / 50) % 14;
             ctx.strokeStyle = teamColor;
-            ctx.lineWidth = 2.5;
-            ctx.globalAlpha = 0.5;
+            ctx.lineWidth = 2;
+            ctx.globalAlpha = 0.45;
             ctx.shadowColor = teamColor;
-            ctx.shadowBlur = 12;
+            ctx.shadowBlur = 10;
             ctx.beginPath();
             ctx.moveTo(sx, sy);
-            for (let i = 0; i < 40; i++) {
+            for (let i = 0; i < 18; i++) {
                 sx += svx; sy += svy; svy += gravity;
                 ctx.lineTo(sx, sy);
                 if (sx < -50 || sx > width + 50 || sy > height + 50) break;
@@ -1293,7 +1513,8 @@
             ctx.stroke();
             ctx.restore();
 
-            const lineLength = 40 + power * 0.35;
+            // Короткая стрелка — 25 + power * 0.18 (макс ~43px)
+            const lineLength = 25 + power * 0.18;
             const endX = x + Math.cos(rad) * lineLength * direction;
             const endY = y - Math.sin(rad) * lineLength;
 
@@ -1309,6 +1530,7 @@
             ctx.stroke();
             ctx.restore();
 
+            // Наконечник
             const headAngle = Math.atan2(endY - y, endX - x);
             ctx.save();
             ctx.translate(endX, endY);
@@ -1318,23 +1540,24 @@
             ctx.shadowBlur = 25;
             ctx.beginPath();
             ctx.moveTo(0, 0);
-            ctx.lineTo(-20, -9);
-            ctx.lineTo(-20, 9);
+            ctx.lineTo(-16, -7);
+            ctx.lineTo(-16, 7);
             ctx.closePath();
             ctx.fill();
             ctx.restore();
 
+            // Бейдж % — меньше
             ctx.save();
             ctx.fillStyle = 'rgba(0,0,0,0.75)';
             ctx.strokeStyle = teamColor;
             ctx.lineWidth = 2;
             ctx.shadowColor = teamColor;
-            ctx.shadowBlur = 18;
+            ctx.shadowBlur = 14;
             ctx.beginPath();
-            ctx.arc(endX, endY, 24, 0, Math.PI * 2);
+            ctx.arc(endX, endY, 20, 0, Math.PI * 2);
             ctx.fill();
             ctx.stroke();
-            ctx.font = 'bold 15px JetBrains Mono, monospace';
+            ctx.font = 'bold 13px JetBrains Mono, monospace';
             ctx.fillStyle = teamColor;
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
@@ -1491,8 +1714,7 @@
             if (lastScreen !== 'attract') return;
             ctx.clearRect(0, 0, width, height);
 
-            ctx.fillStyle = 'rgba(10, 37, 64, 0.3)';
-            ctx.fillRect(0, 0, width, height);
+            // Фон для attract — лёгкие подложки сторон
             ctx.fillStyle = 'rgba(255, 59, 92, 0.03)';
             ctx.fillRect(0, 0, width * 0.4, height);
             ctx.fillStyle = 'rgba(61, 139, 255, 0.03)';
@@ -1601,7 +1823,6 @@
                 if (this.lives < prevLives) this.hitFlash = Date.now();
             }
             draw(ctx, isActive) {
-                // hitFlash рисуем как кольцо ПОД кругом, НЕ заливая эмодзи
                 const elapsedHit = (Date.now() - this.hitFlash) / 1000;
                 const flash = elapsedHit < 0.3 ? 0.5 + 0.5 * Math.sin(elapsedHit * 40) : 0;
 
@@ -1732,19 +1953,16 @@
             } else if (lastScreen === 'game' && currentData?.preloadDone && currentData?.status === 'playing') {
                 ctx.clearRect(0, 0, width, height);
 
-                ctx.fillStyle = 'rgba(10, 37, 64, 0.2)';
-                ctx.fillRect(0, 0, width, height);
-                ctx.fillStyle = 'rgba(255, 59, 92, 0.05)';
-                ctx.fillRect(0, 0, width * 0.25, height);
-                ctx.fillStyle = 'rgba(61, 139, 255, 0.05)';
-                ctx.fillRect(width * 0.75, 0, width * 0.25, height);
+                // 3D-фон боя
+                drawBattleBackground();
 
-                ctx.strokeStyle = 'rgba(127, 227, 255, 0.05)';
+                // Сетка
+                ctx.strokeStyle = 'rgba(127, 227, 255, 0.04)';
                 ctx.lineWidth = 1;
-                for (let x = 0; x < width; x += 50) {
+                for (let x = 0; x < width; x += 60) {
                     ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, height); ctx.stroke();
                 }
-                for (let y = 0; y < height; y += 50) {
+                for (let y = 0; y < height; y += 60) {
                     ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(width, y); ctx.stroke();
                 }
 
