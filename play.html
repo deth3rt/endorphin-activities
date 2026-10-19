@@ -24,29 +24,32 @@
     }
 
     /* ============================================================
-       СТРЕЛКА УГЛА (360 ГРАДУСОВ)
+       НОВАЯ СТРЕЛКА (ПОЛУКРУГ)
        ============================================================ */
     .aim-container {
       position: relative;
-      width: 260px;
-      height: 260px;
+      width: 300px;
+      height: 150px; /* Полукруг */
       margin: 0 auto;
+      overflow: hidden;
     }
     .aim-bg {
       position: absolute;
       inset: 0;
-      border-radius: 50%;
+      border-radius: 150px 150px 0 0; /* Верхний полукруг */
       border: 2px dashed rgba(255,255,255,0.2);
+      border-bottom: none;
+      background: radial-gradient(circle at 50% 100%, transparent 60%, rgba(34, 211, 238, 0.05) 100%);
     }
     .aim-arrow {
       position: absolute;
-      top: 50%;
+      bottom: 0;
       left: 50%;
       width: 4px;
-      height: 120px;
+      height: 130px;
       background: linear-gradient(to top, transparent, #22d3ee);
       transform-origin: bottom center;
-      transform: translate(-50%, -100%) rotate(0deg);
+      transform: translate(-50%, 0) rotate(0deg);
       transition: transform 0.1s linear;
       border-radius: 4px;
     }
@@ -62,18 +65,27 @@
     }
     .aim-center-dot {
       position: absolute;
-      top: 50%;
+      bottom: 0;
       left: 50%;
       width: 20px;
       height: 20px;
       background: #fff;
       border-radius: 50%;
-      transform: translate(-50%, -50%);
+      transform: translate(-50%, 50%);
       box-shadow: 0 0 15px #22d3ee;
+    }
+    
+    /* Для синей команды переворачиваем контейнер */
+    .aim-container.blue-team {
+      transform: scaleX(-1);
+    }
+    .aim-container.blue-team .aim-arrow {
+      /* Стрелка тоже должна смотреть влево (внутри перевернутого контейнера она будет смотреть вправо, но визуально влево) */
+      /* Оставляем как есть, так как контейнер перевернут */
     }
 
     /* ============================================================
-       ШКАЛА СИЛЫ (С ОБВОДКОЙ)
+       ШКАЛА СИЛЫ
        ============================================================ */
     .power-track {
       position: relative;
@@ -177,15 +189,13 @@
 </head>
 <body class="h-screen w-screen flex flex-col relative" id="main-body">
 
-  <!-- ИНФО-ПАНЕЛЬ (видна во время игры) -->
+  <!-- ИНФО-ПАНЕЛЬ -->
   <div class="player-info hidden" id="player-info">
     <div class="name" id="info-name">Игрок</div>
     <div class="lives" id="info-lives">❤️❤️❤️</div>
   </div>
 
-  <!-- ============================================================
-       ЭКРАН ВХОДА
-       ============================================================ -->
+  <!-- ЭКРАН ВХОДА -->
   <div id="join-screen" class="flex flex-col items-center justify-center h-full p-6 text-center z-10">
     <div class="glass-panel p-8 rounded-3xl w-full max-w-sm flex flex-col items-center">
       <h1 class="text-3xl font-black text-cyan-300 mb-6 tracking-widest">ВХОД</h1>
@@ -194,9 +204,7 @@
     </div>
   </div>
   
-  <!-- ============================================================
-       ЭКРАН ИГРЫ
-       ============================================================ -->
+  <!-- ЭКРАН ИГРЫ -->
   <div id="game-screen" class="hidden w-full h-full flex flex-col items-center justify-center relative z-10">
     
     <!-- Угол (Стрелка 360) -->
@@ -225,17 +233,12 @@
     <button id="shoot-btn" class="shoot-btn" disabled>БРОСОК</button>
   </div>
 
-  <!-- ============================================================
-       ОВЕРЛЕЙ ОЖИДАНИЯ
-       ============================================================ -->
+  <!-- ОВЕРЛЕЙ ОЖИДАНИЯ -->
   <div id="wait-overlay" class="disabled-overlay hidden">
     <h1 class="text-4xl font-black text-white mb-4">ХОД СОПЕРНИКА</h1>
     <p class="text-xl text-gray-400">ЖДИ СВОЕГО ЧАСА...</p>
   </div>
 
-  <!-- ============================================================
-       СКРИПТ
-       ============================================================ -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getDatabase, ref, set, push, onDisconnect, onValue, update } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
@@ -253,9 +256,7 @@
     const playerRef = ref(db, `games/battle_1/players/${team}/${playerId}`);
     onDisconnect(playerRef).remove();
 
-    // ============================================================
-    // ВХОД
-    // ============================================================
+    // Вход
     window.joinGame = async () => {
       const name = document.getElementById('input-name').value.trim() || 'Игрок';
       set(playerRef, { name, lives: 3, alive: true });
@@ -268,19 +269,14 @@
     };
     document.getElementById('join-btn').onclick = window.joinGame;
 
-    // ============================================================
-    // ПЕРЕМЕННЫЕ
-    // ============================================================
     let isMyTurn = false;
     let currentAngle = 45;
     let currentPower = 10;
     let powerDirection = 1;
     let powerInterval = null;
-    let isShooting = false; // Защита от спама
+    let isShooting = false;
 
-    // ============================================================
-    // АНИМАЦИЯ ПОЛЗУНКА СИЛЫ
-    // ============================================================
+    // Анимация ползунка
     function startPowerAnimation() {
       if (powerInterval) clearInterval(powerInterval);
       powerInterval = setInterval(() => {
@@ -293,16 +289,13 @@
         document.getElementById('power-thumb').style.left = currentPower + '%';
         document.getElementById('power-display').innerText = currentPower + '%';
         
-        // Цвет
         if (currentPower > 80) document.getElementById('power-display').style.color = '#ef4444';
         else if (currentPower > 50) document.getElementById('power-display').style.color = '#fbbf24';
         else document.getElementById('power-display').style.color = '#22c55e';
       }, 30);
     }
 
-    // ============================================================
-    // ЛОГИКА ХОДА
-    // ============================================================
+    // Логика хода
     onValue(ref(db, 'games/battle_1'), (snapshot) => {
       const data = snapshot.val();
       if (!data) return;
@@ -325,7 +318,6 @@
           overlay.classList.remove('hidden');
         }
 
-        // Обновляем жизни и имя
         const me = data.players[team]?.[playerId];
         if (me) {
           document.getElementById('info-name').innerText = me.name;
@@ -335,10 +327,15 @@
     });
 
     // ============================================================
-    // УГОЛ (360 ГРАДУСОВ)
+    // УГОЛ (ПОЛУКРУГ)
     // ============================================================
     const container = document.getElementById('angle-container');
     const arrow = document.getElementById('angle-arrow');
+    
+    // Если команда синяя, переворачиваем контейнер (чтобы полукруг был справа)
+    if (!isRed) {
+      container.classList.add('blue-team');
+    }
     
     const handleMove = (e) => {
       if (!isMyTurn || isShooting) return;
@@ -348,26 +345,29 @@
       const clientX = e.clientX || e.touches[0].clientX;
       const clientY = e.clientY || e.touches[0].clientY;
       
+      // Для красных (полукруг слева): центр внизу по центру.
+      // Вычисляем угол от центра внизу.
       const centerX = rect.left + rect.width / 2;
-      const centerY = rect.top + rect.height / 2;
+      const bottomY = rect.bottom;
       
-      // Вычисляем угол от центра
-      let rad = Math.atan2(clientY - centerY, clientX - centerX);
+      let rad = Math.atan2(bottomY - clientY, clientX - centerX); // Инвертируем Y, чтобы 0 был справа
       let deg = (rad * 180) / Math.PI;
       
-      // Для красных: 0 градусов — вправо, 180 — влево. Ограничиваем [-90, 90], чтобы не стрелять в себя.
+      // Ограничиваем 0..180
       if (isRed) {
-        deg = Math.max(-90, Math.min(90, deg));
+        deg = Math.max(0, Math.min(180, deg));
       } else {
-        // Для синих: 180 градусов — влево, 0 — вправо.
-        // Приводим к диапазону [90, 270].
-        if (deg < 0) deg += 360;
-        deg = Math.max(90, Math.min(270, deg));
+        // Для синих контейнер перевернут, поэтому визуально стрелка смотрит влево.
+        // Но математика та же, только контейнер отзеркален.
+        // Нам нужно, чтобы ползунок двигался в пределах 0..180.
+        deg = Math.max(0, Math.min(180, deg));
       }
       
       currentAngle = deg;
-      arrow.style.transform = `translate(-50%, -100%) rotate(${deg}deg)`;
+      // Внутри контейнера стрелка всегда от 0 до 180
+      arrow.style.transform = `translate(-50%, 0) rotate(${deg}deg)`;
     };
+    
     container.addEventListener('touchmove', handleMove, { passive: false });
     container.addEventListener('touchstart', handleMove, { passive: false });
     container.addEventListener('mousemove', handleMove);
@@ -413,7 +413,6 @@
           update(ref(db, 'games/battle_1'), { activePlayerId: nextPlayer[0], turn: { team: isRed ? 'blue' : 'red', name: nextPlayer[1].name } });
         }
         
-        // Разблокировка через 1.5 секунды
         setTimeout(() => {
           isShooting = false;
           if (isMyTurn) btn.disabled = false;
