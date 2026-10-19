@@ -1349,16 +1349,17 @@
 
       angleValueBadge.innerText = Math.round(a) + '°';
 
-      let hint;
-      if (a < 22 || a > 338) hint = 'ВПЕРЁД';
-      else if (a < 67) hint = 'ВВЕРХ-ВПЕРЁД';
-      else if (a < 112) hint = 'ВВЕРХ';
-      else if (a < 157) hint = 'ВВЕРХ-НАЗАД';
-      else if (a < 202) hint = 'НАЗАД';
-      else if (a < 247) hint = 'ВНИЗ-НАЗАД';
-      else if (a < 292) hint = 'ВНИЗ';
-      else hint = 'ВНИЗ-ВПЕРЁД';
-      angleHint.innerText = hint;
+      const displayAngle = isRed ? a : (180 - a + 360) % 360;
+let hint;
+if (displayAngle < 22 || displayAngle > 338) hint = 'ВПЕРЁД';
+else if (displayAngle < 67) hint = 'ВВЕРХ-ВПЕРЁД';
+else if (displayAngle < 112) hint = 'ВВЕРХ';
+else if (displayAngle < 157) hint = 'ВВЕРХ-НАЗАД';
+else if (displayAngle < 202) hint = 'НАЗАД';
+else if (displayAngle < 247) hint = 'ВНИЗ-НАЗАД';
+else if (displayAngle < 292) hint = 'ВНИЗ';
+else hint = 'ВНИЗ-ВПЕРЁД';
+angleHint.innerText = hint;
     }
 
     let isDraggingAngle = false;
@@ -1939,11 +1940,11 @@
           btn.classList.add('animate-shake');
           setTimeout(() => btn.classList.remove('animate-shake'), 500);
           startTurnTimer();
-          currentAngle = 0;
-          currentPower = 30;
-          updateAngleVisual();
-          updatePowerDisplay();
-          syncAimToFirebase();
+currentAngle = isRed ? 0 : 180;
+currentPower = 30;
+updateAngleVisual();
+updatePowerDisplay();
+syncAimToFirebase();
         }
         btn.disabled = false;
         hideOverlay('wait-overlay');
