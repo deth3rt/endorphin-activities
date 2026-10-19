@@ -702,10 +702,11 @@
         .hp-display .hp-value {
             font-family: 'Montserrat', sans-serif;
             font-weight: 900;
-            font-size: clamp(1.8rem, 3.4vw, 3rem);
+            font-size: clamp(1.4rem, 2.6vw, 2.2rem);
             color: #fff;
             text-shadow: 0 0 20px currentColor;
-            font-variant-numeric: tabular-nums;
+            letter-spacing: 1px;
+            line-height: 1;
         }
         .hp-display .hp-label {
             font-size: clamp(0.7rem, 1.2vw, 0.9rem);
@@ -853,13 +854,13 @@
             <span class="hp-icon">🔴</span>
             <div>
                 <div class="hp-label">Красные</div>
-                <div class="hp-value" id="heart-red-value">0</div>
+                <div class="hp-value" id="heart-red-value">❤️❤️❤️</div>
             </div>
         </div>
         <div class="hp-display hp-blue" id="heart-blue" style="display: none;">
             <div>
                 <div class="hp-label">Синие</div>
-                <div class="hp-value" id="heart-blue-value">0</div>
+                <div class="hp-value" id="heart-blue-value">❤️❤️❤️</div>
             </div>
             <span class="hp-icon">🔵</span>
         </div>
@@ -1062,7 +1063,7 @@
         const WINNER_AUTO_HIDE = 30;
 
         const CHAR_RADIUS = 52;
-        const EMOJI_FONT = 42;
+        const EMOJI_FONT = 46;
 
         window.addEventListener('resize', resizeCanvas);
         resizeCanvas();
@@ -1072,11 +1073,6 @@
         // ============================================================
         // ATTRACT DEMO
         // ============================================================
-        const DEMO_ACT = [
-            { id: 'r1', team: 'red', name: 'Игрок', emoji: '😎' },
-            { id: 'b1', team: 'blue', name: 'Соперник', emoji: '🤠' }
-        ];
-
         const DEMO_ACTS = [
             { id: 'act1', duration: 8000, phrase: 'ИГРАЙ С ДРУЗЬЯМИ', players: [
                 { id: 'r1', team: 'red', name: 'Игрок', emoji: '😎' },
@@ -1153,7 +1149,7 @@
         }
 
         // ============================================================
-        // КРУГ С ЭМОДЗИ
+        // КРУГ С ЭМОДЗИ — ЭМОДЗИ ПОВЕРХ ВСЕГО
         // ============================================================
         function drawEmojiCharacter(c, data) {
             const { x, y, name, emoji, team, lives, alive, isActive, scale = 1 } = data;
@@ -1161,6 +1157,7 @@
             const time = Date.now();
             const r = CHAR_RADIUS * scale;
 
+            // 1. Ореол активного (самый нижний слой)
             if (isActive && alive) {
                 const pulse = 0.5 + 0.5 * Math.sin(time / 200);
                 c.save();
@@ -1174,6 +1171,7 @@
                 c.restore();
             }
 
+            // 2. Мёртвый — скелет и стоп
             if (!alive) {
                 c.save();
                 c.globalAlpha = 0.35;
@@ -1185,7 +1183,7 @@
                 return;
             }
 
-            // Тень
+            // 3. Тень под кругом
             c.save();
             c.fillStyle = 'rgba(0,0,0,0.55)';
             c.beginPath();
@@ -1193,7 +1191,7 @@
             c.fill();
             c.restore();
 
-            // Круг-подложка
+            // 4. Круг-подложка с глоу
             c.save();
             c.shadowColor = teamColor;
             c.shadowBlur = 25 * scale;
@@ -1204,32 +1202,37 @@
             c.beginPath();
             c.arc(x, y, r, 0, Math.PI * 2);
             c.fill();
+            c.restore();
 
+            // 5. Рамка команды (без shadow, чтобы не мазала эмодзи)
+            c.save();
             c.strokeStyle = teamColor;
             c.lineWidth = 4 * scale;
+            c.beginPath();
+            c.arc(x, y, r, 0, Math.PI * 2);
             c.stroke();
             c.restore();
 
-            // Внутреннее тонкое кольцо
+            // 6. Внутреннее тонкое кольцо
             c.save();
-            c.strokeStyle = 'rgba(255,255,255,0.12)';
+            c.strokeStyle = 'rgba(255,255,255,0.15)';
             c.lineWidth = 1.5 * scale;
             c.beginPath();
             c.arc(x, y, r - 6 * scale, 0, Math.PI * 2);
             c.stroke();
             c.restore();
 
-            // Эмодзи
+            // 7. ЭМОДЗИ — ПОВЕРХ ВСЕГО, без тени, чистый fillText
             c.save();
+            c.shadowBlur = 0;
+            c.shadowColor = 'transparent';
             c.font = `${Math.round(EMOJI_FONT * scale)}px "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif`;
             c.textAlign = 'center';
             c.textBaseline = 'middle';
-            c.shadowColor = 'rgba(0,0,0,0.5)';
-            c.shadowBlur = 4 * scale;
             c.fillText(emoji || '😀', x, y + 2 * scale);
             c.restore();
 
-            // Имя под кругом
+            // 8. Имя под кругом
             c.save();
             c.font = `bold ${Math.round(16 * scale)}px Montserrat, sans-serif`;
             c.fillStyle = '#ffffff';
@@ -1240,9 +1243,9 @@
             c.fillText(name, x, y + r + 12 * scale);
             c.restore();
 
-            // HP сверху
+            // 9. Сердечки HP сверху
             c.save();
-            c.font = `${Math.round(20 * scale)}px Montserrat, sans-serif`;
+            c.font = `${Math.round(20 * scale)}px "Apple Color Emoji", "Segoe UI Emoji", sans-serif`;
             c.textAlign = 'center';
             c.textBaseline = 'bottom';
             c.shadowColor = 'rgba(0,0,0,0.9)';
@@ -1568,7 +1571,7 @@
         }
 
         // ============================================================
-        // PLAYER CLASS — КРУГ С ЭМОДЗИ
+        // PLAYER CLASS
         // ============================================================
         class Player {
             constructor(id, data, team) {
@@ -1598,16 +1601,20 @@
                 if (this.lives < prevLives) this.hitFlash = Date.now();
             }
             draw(ctx, isActive) {
+                // hitFlash рисуем как кольцо ПОД кругом, НЕ заливая эмодзи
                 const elapsedHit = (Date.now() - this.hitFlash) / 1000;
                 const flash = elapsedHit < 0.3 ? 0.5 + 0.5 * Math.sin(elapsedHit * 40) : 0;
 
                 if (flash > 0) {
                     ctx.save();
-                    ctx.globalAlpha = flash * 0.6;
-                    ctx.fillStyle = '#ffffff';
+                    ctx.globalAlpha = flash * 0.9;
+                    ctx.strokeStyle = '#ffffff';
+                    ctx.lineWidth = 4;
+                    ctx.shadowColor = '#ffffff';
+                    ctx.shadowBlur = 20;
                     ctx.beginPath();
-                    ctx.arc(this.x, this.y, CHAR_RADIUS, 0, Math.PI * 2);
-                    ctx.fill();
+                    ctx.arc(this.x, this.y, CHAR_RADIUS + 6, 0, Math.PI * 2);
+                    ctx.stroke();
                     ctx.restore();
                 }
 
@@ -2118,7 +2125,6 @@
                 countdownEl.innerText = `ПЕРЕХОД ЧЕРЕЗ ${countdown} СЕК`;
                 if (countdown <= 0) {
                     clearWinnerTimers();
-                    // Редирект на end.html
                     window.location.href = 'end.html';
                     return;
                 }
@@ -2427,8 +2433,8 @@
                     else blue += p.lives;
                 }
             });
-            document.getElementById('heart-red-value').innerText = red;
-            document.getElementById('heart-blue-value').innerText = blue;
+            document.getElementById('heart-red-value').innerText = renderHeartsCompact(red);
+            document.getElementById('heart-blue-value').innerText = renderHeartsCompact(blue);
         }
 
         function launchConfetti(colors) {
