@@ -202,7 +202,7 @@
         .ad-block {
             width: 100%;
             max-width: 560px;
-            height: 76px;
+            height: clamp(60px, 8vh, 96px);
             background: rgba(10, 37, 64, 0.75);
             border: 1px solid rgba(127, 227, 255, 0.35);
             border-radius: 1rem;
@@ -216,7 +216,7 @@
         .ad-block img { width: 100%; height: 100%; object-fit: contain; }
         .ad-block span {
             color: var(--text-dimmer);
-            font-size: 0.9rem;
+            font-size: clamp(0.8rem, 1.2vw, 1.1rem);
             font-weight: 700;
             letter-spacing: 0.2em;
         }
@@ -236,7 +236,7 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            width: clamp(300px, 26vw, 380px);
+            width: clamp(320px, 28vw, 480px);
         }
 
         .qr-team-badge {
@@ -263,7 +263,7 @@
             justify-content: center;
             box-shadow: 0 8px 30px rgba(0,0,0,0.4);
         }
-        .qr-box img { display: block; }
+        .qr-box img { display: block; width: 100%; height: auto; max-width: clamp(200px, 22vw, 320px); image-rendering: pixelated; }
 
         .qr-players {
             margin-top: 1rem;
@@ -286,7 +286,7 @@
         }
         .qr-player.red { border-color: rgba(255, 59, 92, 0.4); }
         .qr-player.blue { border-color: rgba(61, 139, 255, 0.4); }
-        .qr-player .name { flex: 1; }
+        .qr-player .name { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
         .qr-vs {
             font-size: clamp(3rem, 6vw, 5rem);
@@ -377,7 +377,7 @@
             justify-content: center;
             gap: clamp(1.5rem, 4vw, 4rem);
             width: 100%;
-            max-width: 1500px;
+            max-width: min(1800px, 92vw);
             padding: 0 2rem;
         }
 
@@ -392,7 +392,7 @@
         .preload-side.blue { align-items: flex-start; text-align: left; }
 
         .preload-name {
-            font-size: clamp(2rem, 5.5vw, 4.5rem);
+            font-size: clamp(2rem, 5.5vw, 7rem);
             font-weight: 900;
             line-height: 1.05;
             letter-spacing: -0.02em;
@@ -427,7 +427,7 @@
         }
 
         .preload-list-item {
-            font-size: clamp(1.2rem, 2.6vw, 2.2rem);
+            font-size: clamp(1.2rem, 2.6vw, 3rem);
             font-weight: 900;
             line-height: 1.1;
             letter-spacing: 0.02em;
@@ -524,7 +524,7 @@
             text-align: center;
         }
         .preload-timer {
-            font-size: clamp(4rem, 10vw, 7rem);
+            font-size: clamp(4rem, 10vw, 9rem);
             font-weight: 900;
             color: #fff;
             text-shadow: 0 0 40px rgba(34, 211, 238, 0.7), 0 0 80px rgba(34, 211, 238, 0.4);
@@ -656,7 +656,7 @@
             bottom: 0;
             left: 0;
             width: 100%;
-            height: 64px;
+            height: clamp(52px, 6.5vh, 88px);
             background: rgba(0, 0, 0, 0.92);
             overflow: hidden;
             border-top: 2px solid var(--ice-bright);
@@ -669,7 +669,7 @@
             white-space: nowrap;
             padding-left: 100%;
             animation: tickerMove 18s linear infinite;
-            font-size: 26px;
+            font-size: clamp(22px, 2.2vw, 40px);
             font-weight: 700;
             color: var(--ice-bright);
             text-transform: uppercase;
@@ -702,7 +702,7 @@
         .hp-display .hp-value {
             font-family: 'Montserrat', sans-serif;
             font-weight: 900;
-            font-size: clamp(1.4rem, 2.6vw, 2.2rem);
+            font-size: clamp(1.4rem, 2.6vw, 2.4rem);
             color: #fff;
             text-shadow: 0 0 20px currentColor;
             letter-spacing: 1px;
@@ -727,7 +727,7 @@
             border: 1.5px solid rgba(127, 227, 255, 0.4);
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
-            font-size: clamp(1.1rem, 2.2vw, 1.8rem);
+            font-size: clamp(1.1rem, 2.2vw, 2rem);
             font-weight: 900;
             letter-spacing: 0.1em;
             z-index: 22;
@@ -746,8 +746,8 @@
 
         .tv-turn-timer-ring {
             position: relative;
-            width: clamp(72px, 5.5vw, 100px);
-            height: clamp(72px, 5.5vw, 100px);
+            width: clamp(72px, 5.5vw, 120px);
+            height: clamp(72px, 5.5vw, 120px);
         }
 
         .tv-turn-timer-ring svg {
@@ -787,7 +787,7 @@
             position: absolute;
             top: 50%; left: 50%;
             transform: translate(-50%, -50%);
-            font-size: clamp(1.6rem, 2.4vw, 2.4rem);
+            font-size: clamp(1.6rem, 2.4vw, 2.8rem);
             font-weight: 900;
             color: #fff;
             font-family: 'JetBrains Mono', monospace;
@@ -797,10 +797,10 @@
 
         .tv-turn-timer-name {
             position: absolute;
-            bottom: -30px;
+            bottom: -32px;
             left: 50%;
             transform: translateX(-50%);
-            font-size: clamp(0.8rem, 1.2vw, 1rem);
+            font-size: clamp(0.8rem, 1.2vw, 1.1rem);
             font-weight: 900;
             letter-spacing: 0.15em;
             white-space: nowrap;
@@ -833,6 +833,13 @@
             0% { transform: scale(0.3); opacity: 0; }
             60% { transform: scale(1.1); opacity: 1; }
             100% { transform: scale(1); opacity: 1; }
+        }
+
+        #win-text {
+            font-size: clamp(3rem, 7vw, 8rem);
+        }
+        #win-emoji {
+            font-size: clamp(4rem, 8vw, 9rem);
         }
 
         @media (prefers-reduced-motion: reduce) {
@@ -928,8 +935,8 @@
 
     <!-- QR -->
     <div id="qr-view" class="full-screen hidden">
-        <h1 class="text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 via-blue-400 to-indigo-500 mb-6 tracking-tighter">ЭНДОРФИН</h1>
-        <p class="text-2xl font-bold text-cyan-100/70 tracking-[0.25em] mb-8">СКАНИРУЙ И ИГРАЙ</p>
+        <h1 class="text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 via-blue-400 to-indigo-500 mb-6 tracking-tighter" style="font-size: clamp(2.5rem, 6vw, 6rem);">ЭНДОРФИН</h1>
+        <p class="text-2xl font-bold text-cyan-100/70 tracking-[0.25em] mb-8" style="font-size: clamp(1rem, 2.2vw, 2rem);">СКАНИРУЙ И ИГРАЙ</p>
 
         <div id="qr-container" class="qr-container">
             <div class="qr-team glass-panel">
@@ -947,7 +954,7 @@
             </div>
         </div>
 
-        <div class="mt-8 text-xl font-black text-white/60 tracking-wider" id="qr-status">ОЖИДАНИЕ ИГРОКОВ...</div>
+        <div class="mt-8 text-xl font-black text-white/60 tracking-wider" id="qr-status" style="font-size: clamp(1rem, 1.8vw, 1.6rem);">ОЖИДАНИЕ ИГРОКОВ...</div>
     </div>
 
     <!-- PRELOAD -->
@@ -975,10 +982,10 @@
 
     <!-- WINNER -->
     <div id="win-view" class="full-screen hidden">
-        <div class="text-8xl mb-6" id="win-emoji">🏆</div>
-        <h1 class="text-8xl font-black text-white mb-10" id="win-text">ПОБЕДА!</h1>
-        <p class="text-2xl text-cyan-300/70 font-bold tracking-widest" id="win-subtitle"></p>
-        <p class="text-sm text-white/30 mt-8 tracking-wider" id="win-countdown"></p>
+        <div id="win-emoji">🏆</div>
+        <h1 id="win-text" class="font-black text-white mb-10">ПОБЕДА!</h1>
+        <p class="text-cyan-300/70 font-bold tracking-widest" id="win-subtitle" style="font-size: clamp(1rem, 2vw, 2rem);"></p>
+        <p class="text-white/30 mt-8 tracking-wider" id="win-countdown" style="font-size: clamp(0.8rem, 1.2vw, 1.1rem);"></p>
     </div>
 
     <div id="confetti-container"></div>
@@ -989,7 +996,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getDatabase, ref, onValue, update, set, get, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+        import { getDatabase, ref, onValue, update, set, get, remove, runTransaction } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyCXIR5Tv8lB6ivcGRC3yt1SC66MM6T5b_M",
@@ -1005,6 +1012,9 @@
         const gameId = 'battle_1';
         const gameRef = ref(db, `games/${gameId}`);
 
+        // ============================================================
+        // Состояние
+        // ============================================================
         let currentData = null;
         let currentBaseUrl = '';
         const players = new Map();
@@ -1019,12 +1029,14 @@
         let lastScreen = 'attract';
         let lastMode = null;
         let winnerShown = false;
+        let attractInitialized = false;
 
         let turnTimerStart = 0;
         let turnTimerPlayerId = null;
         let turnTimerActive = false;
 
         let formingShots = [];
+        let formingShotsTimeout = null;
 
         let currentAim = null;
         let displayedAimAngle = null;
@@ -1033,91 +1045,35 @@
         let winnerCountdownInterval = null;
         let superTextTimeout = null;
 
-        // Фон: предрасчитанные деревья, сугробы, лёд, звёзды, озеро
-        let bgTrees = [];
-        let bgMounds = [];
-        let bgIce = [];
-        let bgStars = [];
-        let bgLake = null;
+        // Счётчик «в полёте» — чтобы checkGameOver не срабатывал раньше времени
+        let pendingHits = 0;
+        let checkGameOverScheduled = null;
 
         const canvas = document.getElementById('game-canvas');
         const ctx = canvas.getContext('2d');
         let width = 0, height = 0, dpr = 1;
 
-        const CHAR_RADIUS = 52;
-        const EMOJI_FONT = 46;
+        // База под 1080p. На 4K масштабируется пропорционально.
+        const BASE_CHAR_RADIUS = 52;
+        const BASE_EMOJI_FONT = 46;
+        let CHAR_RADIUS = BASE_CHAR_RADIUS;
+        let EMOJI_FONT = BASE_EMOJI_FONT;
 
-        function generateBackground() {
-            bgTrees = [];
-            bgMounds = [];
-            bgIce = [];
-            bgStars = [];
-            bgLake = null;
+        const TURN_TIME = 15;
+        const FORM_TIME = 1500;
+        const WINNER_AUTO_HIDE = 30;
+        const MAX_BALLS_ALIVE = 200; // защита от утечки
 
-            // Озеро в центре-низу
-            bgLake = {
-                cx: width * 0.5,
-                cy: height * 0.82,
-                rx: width * 0.32,
-                ry: height * 0.14
-            };
-
-            // Ёлки — 3 слоя по глубине
-            const treeLayers = 3;
-            for (let layer = 0; layer < treeLayers; layer++) {
-                const count = 5 + layer * 3;
-                const depth = (layer + 1) / treeLayers;
-                for (let i = 0; i < count; i++) {
-                    bgTrees.push({
-                        x: Math.random() * width,
-                        y: height * (0.6 + Math.random() * 0.24),
-                        size: (20 + Math.random() * 26) * (0.5 + depth * 0.5),
-                        alpha: 0.12 + depth * 0.18,
-                        swayOffset: Math.random() * Math.PI * 2,
-                        layer
-                    });
-                }
-            }
-            bgTrees.sort((a, b) => a.y - b.y);
-
-            // Сугробы на земле
-            for (let i = 0; i < 16; i++) {
-                bgMounds.push({
-                    x: Math.random() * width,
-                    y: height * (0.7 + Math.random() * 0.22),
-                    w: 70 + Math.random() * 200,
-                    h: 14 + Math.random() * 26,
-                    alpha: 0.12 + Math.random() * 0.18
-                });
-            }
-
-            // Лёд — трещины
-            for (let i = 0; i < 10; i++) {
-                const x1 = Math.random() * width;
-                const y1 = height * (0.78 + Math.random() * 0.16);
-                const segments = 3 + Math.floor(Math.random() * 4);
-                const path = [{ x: x1, y: y1 }];
-                let curX = x1, curY = y1;
-                for (let s = 0; s < segments; s++) {
-                    curX += (Math.random() - 0.5) * 100;
-                    curY += (Math.random() - 0.3) * 34;
-                    path.push({ x: curX, y: curY });
-                }
-                bgIce.push({ path, alpha: 0.08 + Math.random() * 0.12 });
-            }
-
-            // Звёзды
-            for (let i = 0; i < 90; i++) {
-                bgStars.push({
-                    x: Math.random() * width,
-                    y: Math.random() * height * 0.55,
-                    size: Math.random() * 1.8 + 0.4,
-                    phase: Math.random() * Math.PI * 2,
-                    speed: 0.4 + Math.random() * 1.2
-                });
-            }
+        function recomputeSizes() {
+            const minDim = Math.min(width, height);
+            // 1080 → 52, 2160 → 104
+            CHAR_RADIUS = Math.max(28, Math.round(BASE_CHAR_RADIUS * (minDim / 1080)));
+            EMOJI_FONT = Math.max(24, Math.round(BASE_EMOJI_FONT * (minDim / 1080)));
         }
 
+        // ============================================================
+        // Canvas
+        // ============================================================
         function resizeCanvas() {
             dpr = Math.min(window.devicePixelRatio || 1, 2);
             width = window.innerWidth;
@@ -1128,7 +1084,7 @@
             canvas.style.height = height + 'px';
             ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
-            generateBackground();
+            recomputeSizes();
 
             if (currentData) {
                 players.forEach((p, id) => {
@@ -1141,69 +1097,74 @@
             }
         }
 
-        const TURN_TIME = 15;
-        const FORM_TIME = 1500;
-        const WINNER_AUTO_HIDE = 30;
-
         window.addEventListener('resize', resizeCanvas);
         resizeCanvas();
 
+        function getBaseUrl() {
+            const url = new URL(window.location.href);
+            return url.origin + url.pathname.substring(0, url.pathname.lastIndexOf('/') + 1);
+        }
         currentBaseUrl = getBaseUrl();
 
         // ============================================================
-// ФОН БОЯ — простой: зона красных, зона синих, сетка, снег
-// ============================================================
-function drawBattleBackground() {
-  // 1. Небо / общий фон
-  ctx.fillStyle = 'rgba(5, 20, 40, 0.6)';
-  ctx.fillRect(0, 0, width, height);
+        // Фон боя
+        // ============================================================
+        function drawBattleBackground() {
+            // Небо / общий фон
+            ctx.fillStyle = 'rgba(5, 20, 40, 0.6)';
+            ctx.fillRect(0, 0, width, height);
 
-  // 2. ЗОНА КРАСНЫХ (левая половина)
-  const redGrad = ctx.createLinearGradient(0, 0, width * 0.5, 0);
-  redGrad.addColorStop(0, 'rgba(255, 59, 92, 0.10)');
-  redGrad.addColorStop(1, 'rgba(255, 59, 92, 0.02)');
-  ctx.fillStyle = redGrad;
-  ctx.fillRect(0, 0, width * 0.5, height);
+            // Зона красных
+            const redGrad = ctx.createLinearGradient(0, 0, width * 0.5, 0);
+            redGrad.addColorStop(0, 'rgba(255, 59, 92, 0.10)');
+            redGrad.addColorStop(1, 'rgba(255, 59, 92, 0.02)');
+            ctx.fillStyle = redGrad;
+            ctx.fillRect(0, 0, width * 0.5, height);
 
-  // 3. ЗОНА СИНИХ (правая половина)
-  const blueGrad = ctx.createLinearGradient(width * 0.5, 0, width, 0);
-  blueGrad.addColorStop(0, 'rgba(61, 139, 255, 0.02)');
-  blueGrad.addColorStop(1, 'rgba(61, 139, 255, 0.10)');
-  ctx.fillStyle = blueGrad;
-  ctx.fillRect(width * 0.5, 0, width * 0.5, height);
+            // Зона синих
+            const blueGrad = ctx.createLinearGradient(width * 0.5, 0, width, 0);
+            blueGrad.addColorStop(0, 'rgba(61, 139, 255, 0.02)');
+            blueGrad.addColorStop(1, 'rgba(61, 139, 255, 0.10)');
+            ctx.fillStyle = blueGrad;
+            ctx.fillRect(width * 0.5, 0, width * 0.5, height);
 
-  // 4. РАЗДЕЛИТЕЛЬНАЯ ЛИНИЯ ПО ЦЕНТРУ
-  ctx.save();
-  ctx.strokeStyle = 'rgba(127, 227, 255, 0.15)';
-  ctx.lineWidth = 2;
-  ctx.setLineDash([12, 12]);
-  ctx.beginPath();
-  ctx.moveTo(width * 0.5, 0);
-  ctx.lineTo(width * 0.5, height);
-  ctx.stroke();
-  ctx.restore();
+            // Разделитель
+            ctx.save();
+            ctx.strokeStyle = 'rgba(127, 227, 255, 0.15)';
+            ctx.lineWidth = 2;
+            ctx.setLineDash([12, 12]);
+            ctx.beginPath();
+            ctx.moveTo(width * 0.5, 0);
+            ctx.lineTo(width * 0.5, height);
+            ctx.stroke();
+            ctx.restore();
 
-  // 5. СЕТКА
-  ctx.strokeStyle = 'rgba(127, 227, 255, 0.04)';
-  ctx.lineWidth = 1;
-  for (let x = 0; x < width; x += 60) {
-    ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, height); ctx.stroke();
-  }
-  for (let y = 0; y < height; y += 60) {
-    ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(width, y); ctx.stroke();
-  }
+            // Сетка (одна path на слой — дешевле, чем 576 отдельных stroke)
+            ctx.strokeStyle = 'rgba(127, 227, 255, 0.04)';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            for (let x = 0; x < width; x += 60) {
+                ctx.moveTo(x, 0);
+                ctx.lineTo(x, height);
+            }
+            for (let y = 0; y < height; y += 60) {
+                ctx.moveTo(0, y);
+                ctx.lineTo(width, y);
+            }
+            ctx.stroke();
 
-  // 6. СНЕГ НА ЗЕМЛЕ — точки внизу
-  const groundY = height * 0.75;
-  for (let i = 0; i < 80; i++) {
-    const sx = (i * 73.7) % width;
-    const sy = groundY + ((i * 41.3) % (height - groundY));
-    ctx.fillStyle = `rgba(255, 255, 255, ${0.08 + Math.random() * 0.08})`;
-    ctx.beginPath();
-    ctx.arc(sx, sy, Math.random() * 1.4 + 0.4, 0, Math.PI * 2);
-    ctx.fill();
-  }
-}
+            // Снег на земле — детерминированно (без Math.random() в кадре, чтобы не мигал)
+            const groundY = height * 0.75;
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.10)';
+            for (let i = 0; i < 80; i++) {
+                const sx = (i * 73.7) % width;
+                const sy = groundY + ((i * 41.3) % (height - groundY));
+                const r = ((i * 13) % 14) / 10 + 0.4;
+                ctx.beginPath();
+                ctx.arc(sx, sy, r, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
 
         // ============================================================
         // ATTRACT DEMO
@@ -1284,7 +1245,7 @@ function drawBattleBackground() {
         }
 
         // ============================================================
-        // ПЕРСОНАЖ — HP выше, без мигающей тени у эмодзи
+        // ПЕРСОНАЖ (кэш градиентов — без createRadialGradient в кадре)
         // ============================================================
         function drawEmojiCharacter(c, data) {
             const { x, y, name, emoji, team, lives, alive, isActive, scale = 1 } = data;
@@ -1310,7 +1271,7 @@ function drawBattleBackground() {
             if (!alive) {
                 c.save();
                 c.globalAlpha = 0.35;
-                c.font = `${Math.round(48 * scale)}px Montserrat`;
+                c.font = `${Math.round(EMOJI_FONT * 1.05 * scale)}px Montserrat`;
                 c.textAlign = 'center';
                 c.textBaseline = 'middle';
                 c.fillText('💀', x, y);
@@ -1326,29 +1287,30 @@ function drawBattleBackground() {
             c.fill();
             c.restore();
 
-            // 4. Круг-подложка
+            // 4. Круг-подложка (без градиента — 3 концентрических круга, дешевле)
             c.save();
-            c.shadowColor = teamColor;
-            c.shadowBlur = 0;
-            const grad = c.createRadialGradient(x - r * 0.25, y - r * 0.25, r * 0.1, x, y, r);
-            grad.addColorStop(0, 'rgba(70, 120, 175, 0.96)');
-            grad.addColorStop(0.5, 'rgba(35, 75, 125, 0.96)');
-            grad.addColorStop(1, 'rgba(12, 30, 55, 0.97)');
-            c.fillStyle = grad;
+            c.fillStyle = 'rgba(70, 120, 175, 0.96)';
             c.beginPath();
             c.arc(x, y, r, 0, Math.PI * 2);
             c.fill();
+
+            c.fillStyle = 'rgba(35, 75, 125, 0.85)';
+            c.beginPath();
+            c.arc(x + r * 0.08, y + r * 0.08, r * 0.85, 0, Math.PI * 2);
+            c.fill();
+
+            c.fillStyle = 'rgba(12, 30, 55, 0.92)';
+            c.beginPath();
+            c.arc(x + r * 0.15, y + r * 0.15, r * 0.62, 0, Math.PI * 2);
+            c.fill();
             c.restore();
 
-            // 5. Светлый блик
+            // 5. Светлый блик (один полупрозрачный круг)
             c.save();
-            const glowGrad = c.createRadialGradient(x, y - r * 0.1, 0, x, y, r * 0.85);
-            glowGrad.addColorStop(0, 'rgba(255, 255, 255, 0.25)');
-            glowGrad.addColorStop(0.6, 'rgba(255, 255, 255, 0.07)');
-            glowGrad.addColorStop(1, 'rgba(255, 255, 255, 0)');
-            c.fillStyle = glowGrad;
+            c.globalAlpha = 0.16;
+            c.fillStyle = '#ffffff';
             c.beginPath();
-            c.arc(x, y, r * 0.85, 0, Math.PI * 2);
+            c.arc(x - r * 0.2, y - r * 0.25, r * 0.55, 0, Math.PI * 2);
             c.fill();
             c.restore();
 
@@ -1370,7 +1332,7 @@ function drawBattleBackground() {
             c.stroke();
             c.restore();
 
-            // 8. ЭМОДЗИ — без тени, без мигания
+            // 8. Эмодзи
             c.save();
             c.shadowBlur = 0;
             c.shadowColor = 'transparent';
@@ -1392,16 +1354,15 @@ function drawBattleBackground() {
             c.fillText(name, x, y + r + 14 * scale);
             c.restore();
 
-            // 10. HP-бейдж — ВЫШЕ круга, БЕЗ тени (убрано мигание)
+            // 10. HP-бейдж над кругом
             c.save();
             c.font = `${Math.round(20 * scale)}px "Apple Color Emoji", "Segoe UI Emoji", sans-serif`;
             c.textAlign = 'center';
             c.textBaseline = 'middle';
             const hearts = lives <= 5 ? '❤️'.repeat(Math.max(0, lives)) : `❤️×${lives}`;
-            const badgeY = y - r - 30 * scale;   // подняли выше
+            const badgeY = y - r - 30 * scale;
             const textWidth = c.measureText(hearts).width;
             const padX = 10 * scale;
-            const padY = 5 * scale;
             const bW = textWidth + padX * 2;
             const bH = 24 * scale;
             const bX = x - bW / 2;
@@ -1428,9 +1389,9 @@ function drawBattleBackground() {
         }
 
         // ============================================================
-        // ПРИЦЕЛ — поддерживает угол 0..360
+        // ПРИЦЕЛ
         // ============================================================
-        function drawAimArc(aimer, angle, power) {            
+        function drawAimArc(aimer, angle, power) {
             const teamColor = aimer.team === 'red' ? '#ff3b5c' : '#3d8bff';
             const rad = (angle * Math.PI) / 180;
             const speed = power * 0.4;
@@ -1441,7 +1402,6 @@ function drawBattleBackground() {
             let x = aimer.x;
             let y = aimer.y - CHAR_RADIUS * 0.7;
 
-            // Короткая дуга
             let sx = x, sy = y, svx = vx, svy = vy;
             ctx.save();
             ctx.setLineDash([6, 8]);
@@ -1461,7 +1421,6 @@ function drawBattleBackground() {
             ctx.stroke();
             ctx.restore();
 
-            // Стрелка направления (для любого угла 0..360)
             const lineLength = 25 + power * 0.18;
             const endX = x + Math.cos(rad) * lineLength;
             const endY = y - Math.sin(rad) * lineLength;
@@ -1478,7 +1437,6 @@ function drawBattleBackground() {
             ctx.stroke();
             ctx.restore();
 
-            // Наконечник
             const headAngle = Math.atan2(endY - y, endX - x);
             ctx.save();
             ctx.translate(endX, endY);
@@ -1494,7 +1452,6 @@ function drawBattleBackground() {
             ctx.fill();
             ctx.restore();
 
-            // Бейдж %
             ctx.save();
             ctx.fillStyle = 'rgba(0,0,0,0.75)';
             ctx.strokeStyle = teamColor;
@@ -1518,12 +1475,12 @@ function drawBattleBackground() {
         }
 
         function demoShoot(shooter, target, isSuper = false, superType = null) {
-    if (!target) return;
+            if (!target) return;
 
-    const dx = target.x - shooter.x;
-    const dy = target.y - shooter.y;
-    let baseAngle = Math.atan2(-dy, dx) * 180 / Math.PI;
-    const power = isSuper ? 70 + Math.random() * 30 : shooter.aimPower;
+            const dx = target.x - shooter.x;
+            const dy = target.y - shooter.y;
+            let baseAngle = Math.atan2(-dy, dx) * 180 / Math.PI;
+            const power = isSuper ? 70 + Math.random() * 30 : shooter.aimPower;
 
             if (isSuper) {
                 const shots = [];
@@ -1599,7 +1556,6 @@ function drawBattleBackground() {
             if (!currentActive || !currentActive.alive) return;
 
             if (demoState === 'aiming') {
-                // Демо: крутим угол в диапазоне 0..180 (красные) или 0..180 (синие), но с разбросом
                 currentActive.aimAngle += (Math.random() - 0.5) * 5;
                 currentActive.aimAngle = Math.max(5, Math.min(175, currentActive.aimAngle));
                 currentActive.aimPower = 50 + Math.sin(now / 400) * 30 + 20;
@@ -1662,7 +1618,6 @@ function drawBattleBackground() {
             if (lastScreen !== 'attract') return;
             ctx.clearRect(0, 0, width, height);
 
-            // Лёгкий фон attract
             ctx.fillStyle = 'rgba(255, 59, 92, 0.03)';
             ctx.fillRect(0, 0, width * 0.4, height);
             ctx.fillStyle = 'rgba(61, 139, 255, 0.03)';
@@ -1722,11 +1677,6 @@ function drawBattleBackground() {
         // ============================================================
         // УТИЛИТЫ
         // ============================================================
-        function getBaseUrl() {
-            const url = new URL(window.location.href);
-            return url.origin + url.pathname.substring(0, url.pathname.lastIndexOf('/') + 1);
-        }
-
         function escapeHtml(str) {
             if (!str) return '';
             return String(str)
@@ -1834,7 +1784,7 @@ function drawBattleBackground() {
         class Snowball {
             constructor(shooter, power, angle, damage = 1, isSuper = false) {
                 this.x = shooter.x;
-                this.y = shooter.y; 
+                this.y = shooter.y;
                 const rad = angle * Math.PI / 180;
                 const speed = power * 0.4;
                 this.vx = Math.cos(rad) * speed;
@@ -1845,6 +1795,8 @@ function drawBattleBackground() {
                 this.damage = damage;
                 this.team = shooter.team;
                 this.trailCooldown = 0;
+                this.dead = false;
+                this.hitApplied = false;
             }
             update() {
                 this.x += this.vx;
@@ -1902,16 +1854,6 @@ function drawBattleBackground() {
 
                 drawBattleBackground();
 
-                // Сетка
-                ctx.strokeStyle = 'rgba(127, 227, 255, 0.035)';
-                ctx.lineWidth = 1;
-                for (let x = 0; x < width; x += 60) {
-                    ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, height); ctx.stroke();
-                }
-                for (let y = 0; y < height; y += 60) {
-                    ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(width, y); ctx.stroke();
-                }
-
                 const activeId = currentData?.activePlayerId;
                 players.forEach(p => p.draw(ctx, p.id === activeId));
 
@@ -1939,18 +1881,21 @@ function drawBattleBackground() {
                     ball.update();
                     ball.draw(ctx);
                     let hit = false;
-                    players.forEach(p => {
-                        if (hit) return;
-                        if (p.team !== ball.team && p.alive) {
-                            const dx = ball.x - p.x;
-                            const dy = ball.y - p.y;
-                            const dist = Math.sqrt(dx * dx + dy * dy);
-                            if (dist < CHAR_RADIUS) {
-                                hit = true;
-                                handleHit(ball, p);
+                    if (!ball.hitApplied) {
+                        players.forEach(p => {
+                            if (hit) return;
+                            if (p.team !== ball.team && p.alive) {
+                                const dx = ball.x - p.x;
+                                const dy = ball.y - p.y;
+                                const dist = Math.sqrt(dx * dx + dy * dy);
+                                if (dist < CHAR_RADIUS) {
+                                    hit = true;
+                                    ball.hitApplied = true;
+                                    handleHit(ball, p);
+                                }
                             }
-                        }
-                    });
+                        });
+                    }
                     if (hit || ball.x < -120 || ball.x > width + 120 || ball.y > height + 120 || ball.y < -300) {
                         snowballs.splice(i, 1);
                     }
@@ -1969,6 +1914,11 @@ function drawBattleBackground() {
                 }
 
                 updateTurnTimerPosition(now);
+
+                // Защита от утечки шаров
+                if (snowballs.length > MAX_BALLS_ALIVE) {
+                    snowballs = snowballs.slice(-MAX_BALLS_ALIVE);
+                }
             } else {
                 ctx.clearRect(0, 0, width, height);
             }
@@ -2045,24 +1995,38 @@ function drawBattleBackground() {
         }
 
         // ============================================================
-        // HIT + GAME OVER
+        // HIT + GAME OVER (атомарно через runTransaction)
         // ============================================================
         async function handleHit(ball, p) {
             const damage = ball.damage || 1;
-            const newLives = Math.max(0, p.lives - damage);
-            const newAlive = newLives > 0;
+            pendingHits++;
 
-            p.lives = newLives;
-            p.alive = newAlive;
+            // Оптимистично обновляем локальную копию для мгновенной визуальной реакции
+            const prevLives = p.lives;
+            p.lives = Math.max(0, p.lives - damage);
+            p.alive = p.lives > 0;
             p.hitFlash = Date.now();
 
             try {
-                await update(ref(db, `games/${gameId}/players/${p.team}/${p.id}`), {
-                    lives: newLives,
-                    alive: newAlive
+                // Атомарно: если два снежка попали одновременно — оба учтутся
+                const livesRef = ref(db, `games/${gameId}/players/${p.team}/${p.id}/lives`);
+                const result = await runTransaction(livesRef, (current) => {
+                    const cur = typeof current === 'number' ? current : prevLives;
+                    return Math.max(0, cur - damage);
+                });
+                const finalLives = result.snapshot.val();
+                p.lives = typeof finalLives === 'number' ? finalLives : p.lives;
+                p.alive = p.lives > 0;
+
+                // alive пишем отдельно — тоже через транзакцию на весь узел, чтобы не перетереть
+                const playerRef = ref(db, `games/${gameId}/players/${p.team}/${p.id}`);
+                await runTransaction(playerRef, (current) => {
+                    if (!current) return current;
+                    const lives = typeof current.lives === 'number' ? current.lives : p.lives;
+                    return { ...current, lives, alive: lives > 0 };
                 });
             } catch (e) {
-                console.error('handleHit update failed:', e);
+                console.error('handleHit transaction failed:', e);
             }
 
             spawnParticles(ball.x, ball.y, p.team === 'red' ? '#ff3b5c' : '#3d8bff', 30 + damage * 20);
@@ -2087,7 +2051,17 @@ function drawBattleBackground() {
                 setTimeout(() => megaDiv.remove(), 2000);
             }
 
-            await checkGameOver();
+            pendingHits--;
+            scheduleGameOverCheck();
+        }
+
+        function scheduleGameOverCheck() {
+            if (checkGameOverScheduled) clearTimeout(checkGameOverScheduled);
+            checkGameOverScheduled = setTimeout(async () => {
+                checkGameOverScheduled = null;
+                if (pendingHits > 0) return; // ещё снежки в полёте
+                await checkGameOver();
+            }, 120);
         }
 
         let checkingGameOver = false;
@@ -2136,10 +2110,10 @@ function drawBattleBackground() {
 
             try {
                 const qrRed = qrcode(0, 'M'); qrRed.addData(redUrl); qrRed.make();
-                document.getElementById('qr-red').innerHTML = qrRed.createImgTag(5, 10);
+                document.getElementById('qr-red').innerHTML = qrRed.createImgTag(8, 24);
 
                 const qrBlue = qrcode(0, 'M'); qrBlue.addData(blueUrl); qrBlue.make();
-                document.getElementById('qr-blue').innerHTML = qrBlue.createImgTag(5, 10);
+                document.getElementById('qr-blue').innerHTML = qrBlue.createImgTag(8, 24);
             } catch (e) {
                 console.error('QR generation failed:', e);
             }
@@ -2160,7 +2134,7 @@ function drawBattleBackground() {
 
                 container.innerHTML = activePlayers.map(([id, p]) => `
                     <div class="qr-player ${team}">
-                        <div class="avatar avatar-sm">${p.emoji || '😀'}</div>
+                        <div class="avatar avatar-sm">${escapeHtml(p.emoji || '😀')}</div>
                         <span class="name">${escapeHtml(p.name)}</span>
                         <span class="text-xs text-cyan-300 font-bold">В БОЮ</span>
                     </div>
@@ -2170,8 +2144,9 @@ function drawBattleBackground() {
             renderList('qr-players-red', 'red');
             renderList('qr-players-blue', 'blue');
 
-            const redMax = parseInt((data.mode || '1v1').split('v')[0]) || 1;
-            const blueMax = parseInt((data.mode || '1v1').split('v')[1]) || 1;
+            const modeParts = (data.mode || '1v1').split('v');
+            const redMax = Math.max(1, parseInt(modeParts[0]) || 1);
+            const blueMax = Math.max(1, parseInt(modeParts[1]) || 1);
             const redCount = Object.keys(data.room?.red || {}).length + Object.keys(data.players?.red || {}).length;
             const blueCount = Object.keys(data.room?.blue || {}).length + Object.keys(data.players?.blue || {}).length;
 
@@ -2179,10 +2154,12 @@ function drawBattleBackground() {
             const statusEl = document.getElementById('qr-status');
             if (isReady) {
                 statusEl.innerText = '✅ ВСЕ ГОТОВЫ!';
-                statusEl.className = 'mt-8 text-xl font-black text-green-400 tracking-wider';
+                statusEl.className = 'mt-8 font-black text-green-400 tracking-wider';
+                statusEl.style.fontSize = 'clamp(1rem, 1.8vw, 1.6rem)';
             } else {
                 statusEl.innerText = `ОЖИДАНИЕ: ${redCount}/${redMax} vs ${blueCount}/${blueMax}`;
-                statusEl.className = 'mt-8 text-xl font-black text-white/60 tracking-wider';
+                statusEl.className = 'mt-8 font-black text-white/60 tracking-wider';
+                statusEl.style.fontSize = 'clamp(1rem, 1.8vw, 1.6rem)';
             }
         }
 
@@ -2201,6 +2178,8 @@ function drawBattleBackground() {
             document.getElementById('tv-turn-timer').classList.remove('active');
             document.getElementById('heart-red').style.display = 'none';
             document.getElementById('heart-blue').style.display = 'none';
+            turnTimerActive = false;
+            turnTimerPlayerId = null;
         }
 
         function showAttract() {
@@ -2208,12 +2187,15 @@ function drawBattleBackground() {
             hideGameUI();
             document.getElementById('attract-view').classList.remove('hidden');
 
-            demoPlayers = [];
-            demoSnowballs = [];
-            demoParticles = [];
-            demoSuperTexts = [];
-            demoActIndex = 0;
-            initDemoAct(0);
+            if (!attractInitialized) {
+                attractInitialized = true;
+                demoPlayers = [];
+                demoSnowballs = [];
+                demoParticles = [];
+                demoSuperTexts = [];
+                demoActIndex = 0;
+                initDemoAct(0);
+            }
         }
 
         function showQR(data) {
@@ -2221,6 +2203,7 @@ function drawBattleBackground() {
             demoSnowballs = [];
             demoParticles = [];
             demoSuperTexts = [];
+            attractInitialized = false;
 
             hideAllScreens();
             hideGameUI();
@@ -2235,6 +2218,7 @@ function drawBattleBackground() {
             demoSnowballs = [];
             demoParticles = [];
             demoSuperTexts = [];
+            attractInitialized = false;
 
             hideAllScreens();
             document.getElementById('heart-red').style.display = 'flex';
@@ -2246,6 +2230,7 @@ function drawBattleBackground() {
             demoSnowballs = [];
             demoParticles = [];
             demoSuperTexts = [];
+            attractInitialized = false;
 
             hideAllScreens();
             hideGameUI();
@@ -2260,19 +2245,19 @@ function drawBattleBackground() {
 
             if (data.winner === 'red') {
                 winText.innerText = 'КРАСНЫЕ ПОБЕДИЛИ!';
-                winText.className = 'text-7xl font-black text-red-500 mb-10';
+                winText.className = 'font-black text-red-500 mb-10';
                 winEmoji.innerText = '🔴';
                 winSubtitle.innerText = 'ТАКТИКА, СИЛА, ПОБЕДА';
                 launchConfetti(['#ff3b5c', '#f87171', '#fca5a5']);
             } else if (data.winner === 'blue') {
                 winText.innerText = 'СИНИЕ ПОБЕДИЛИ!';
-                winText.className = 'text-7xl font-black text-blue-500 mb-10';
+                winText.className = 'font-black text-blue-500 mb-10';
                 winEmoji.innerText = '🔵';
                 winSubtitle.innerText = 'ЛЁД, СКОРОСТЬ, ТОЧНОСТЬ';
                 launchConfetti(['#3d8bff', '#60a5fa', '#93c5fd']);
             } else {
                 winText.innerText = 'ИГРА ОКОНЧЕНА';
-                winText.className = 'text-7xl font-black text-white mb-10';
+                winText.className = 'font-black text-white mb-10';
                 winEmoji.innerText = '🏁';
                 winSubtitle.innerText = 'СПАСИБО ЗА ИГРУ';
             }
@@ -2281,24 +2266,24 @@ function drawBattleBackground() {
         }
 
         function startWinnerCountdown() {
-    clearWinnerTimers();
-    let countdown = WINNER_AUTO_HIDE;
-    const countdownEl = document.getElementById('win-countdown');
-
-    const tick = () => {
-        countdownEl.innerText = `ПЕРЕХОД К ЗАСТАВКЕ ЧЕРЕЗ ${countdown} СЕК`;
-        if (countdown <= 0) {
             clearWinnerTimers();
-            showAttract();
-            lastScreen = 'attract';
-            winnerShown = false;
-            return;
+            let countdown = WINNER_AUTO_HIDE;
+            const countdownEl = document.getElementById('win-countdown');
+
+            const tick = () => {
+                countdownEl.innerText = `ПЕРЕХОД К ЗАСТАВКЕ ЧЕРЕЗ ${countdown} СЕК`;
+                if (countdown <= 0) {
+                    clearWinnerTimers();
+                    showAttract();
+                    lastScreen = 'attract';
+                    winnerShown = false;
+                    return;
+                }
+                countdown--;
+            };
+            tick();
+            winnerCountdownInterval = setInterval(tick, 1000);
         }
-        countdown--;
-    };
-    tick();
-    winnerCountdownInterval = setInterval(tick, 1000);
-}
 
         function clearWinnerTimers() {
             if (winnerCountdownInterval) {
@@ -2377,7 +2362,13 @@ function drawBattleBackground() {
             lastShotState = shot.state;
 
             let shotsArray = shot.shots;
-            if (!shotsArray) shotsArray = [{ angle: shot.angle, power: shot.power, damage: 1 }];
+            if (!Array.isArray(shotsArray) || shotsArray.length === 0) {
+                shotsArray = [{ angle: shot.angle ?? 0, power: shot.power ?? 50, damage: 1 }];
+            }
+
+            const formDuration = (typeof shot.formDuration === 'number' && shot.formDuration > 0)
+                ? shot.formDuration
+                : FORM_TIME;
 
             if (isNewShot) {
                 const shooter = players.get(shot.shooterId);
@@ -2391,7 +2382,8 @@ function drawBattleBackground() {
                         damage: s.damage || 1,
                         isSuper: shot.isSuper || false,
                         team: shot.team,
-                        startTime: performance.now()
+                        startTime: performance.now(),
+                        formDuration
                     }));
 
                     currentAim = null;
@@ -2399,6 +2391,13 @@ function drawBattleBackground() {
                     displayedAimPower = null;
 
                     if (shot.isSuper && shot.superType) showSuperTitle(shot.superType);
+
+                    // Страховка: если state 'flying' не придёт — очистим forming через formDuration + 2.5с
+                    if (formingShotsTimeout) clearTimeout(formingShotsTimeout);
+                    formingShotsTimeout = setTimeout(() => {
+                        formingShots = [];
+                        formingShotsTimeout = null;
+                    }, formDuration + 2500);
                 }
             }
 
@@ -2414,6 +2413,10 @@ function drawBattleBackground() {
                     });
                 }
                 formingShots = [];
+                if (formingShotsTimeout) {
+                    clearTimeout(formingShotsTimeout);
+                    formingShotsTimeout = null;
+                }
             }
         });
 
@@ -2439,10 +2442,15 @@ function drawBattleBackground() {
         onValue(ref(db, `games/${gameId}/timer`), (snap) => {
             const val = snap.val();
             const preloadTimer = document.getElementById('preload-timer');
-            if (val !== null && val !== undefined) {
-                if (preloadTimer) preloadTimer.innerText = val;
+            if (val !== null && val !== undefined && preloadTimer) {
+                preloadTimer.innerText = val;
             }
         });
+
+        // ============================================================
+        // ГЛАВНЫЙ СЛУШАТЕЛЬ
+        // ============================================================
+        let lastRenderedScreen = null;
 
         onValue(gameRef, (snapshot) => {
             const data = snapshot.val();
@@ -2469,9 +2477,13 @@ function drawBattleBackground() {
                 if (screen !== 'game') isPreloading = false;
             }
 
+            // Отрисовку панелей делаем только при смене экрана — иначе просто обновляем данные
+            const screenChanged = lastRenderedScreen !== screen;
+            lastRenderedScreen = screen;
+
             switch (screen) {
                 case 'attract':
-                    showAttract();
+                    if (screenChanged) showAttract();
                     formingShots = [];
                     snowballs = [];
                     particles = [];
@@ -2481,7 +2493,8 @@ function drawBattleBackground() {
                     break;
 
                 case 'qr':
-                    showQR(data);
+                    if (screenChanged) showQR(data);
+                    else updateQRPlayersList(data);
                     break;
 
                 case 'game':
@@ -2490,12 +2503,12 @@ function drawBattleBackground() {
                     } else {
                         isPreloading = false;
                         document.getElementById('preload-view').classList.add('hidden');
-                        showGame();
+                        if (screenChanged) showGame();
 
                         const turnIndicator = document.getElementById('turn-indicator');
                         if (data.turn && data.preloadDone) {
                             turnIndicator.style.display = 'block';
-                            turnIndicator.innerText = `ХОД: ${data.turn.name.toUpperCase()}`;
+                            turnIndicator.innerText = `ХОД: ${(data.turn.name || '').toUpperCase()}`;
                             turnIndicator.style.color = data.turn.team === 'red' ? '#ff3b5c' : '#3d8bff';
                         } else {
                             turnIndicator.style.display = 'none';
@@ -2515,7 +2528,7 @@ function drawBattleBackground() {
                     break;
 
                 case 'winner':
-                    showWinner(data);
+                    if (screenChanged) showWinner(data);
                     break;
             }
 
@@ -2593,12 +2606,22 @@ function drawBattleBackground() {
 
         function updateHeartsUI() {
             let red = 0, blue = 0;
-            players.forEach(p => {
-                if (p.alive && p.lives > 0) {
-                    if (p.team === 'red') red += p.lives;
-                    else blue += p.lives;
-                }
-            });
+            // Берём из currentData (свежие из БД), fallback — из Map
+            if (currentData?.players) {
+                Object.values(currentData.players.red || {}).forEach(p => {
+                    if (p.alive && p.lives > 0) red += p.lives;
+                });
+                Object.values(currentData.players.blue || {}).forEach(p => {
+                    if (p.alive && p.lives > 0) blue += p.lives;
+                });
+            } else {
+                players.forEach(p => {
+                    if (p.alive && p.lives > 0) {
+                        if (p.team === 'red') red += p.lives;
+                        else blue += p.lives;
+                    }
+                });
+            }
             document.getElementById('heart-red-value').innerText = renderHeartsCompact(red);
             document.getElementById('heart-blue-value').innerText = renderHeartsCompact(blue);
         }
@@ -2624,17 +2647,23 @@ function drawBattleBackground() {
             setTimeout(() => { container.innerHTML = ''; }, 6000);
         }
 
-        const snowContainer = document.getElementById('snow-container');
-        for (let i = 0; i < 40; i++) {
-            const s = document.createElement('div');
-            s.className = 'snowflake';
-            s.innerText = '❄';
-            s.style.left = Math.random() * 100 + '%';
-            s.style.fontSize = (10 + Math.random() * 20) + 'px';
-            s.style.animationDuration = (4 + Math.random() * 8) + 's';
-            s.style.animationDelay = (-Math.random() * 10) + 's';
-            s.style.opacity = Math.random() * 0.7 + 0.3;
-            snowContainer.appendChild(s);
+        // ============================================================
+        // Снежинки (с учётом reduced-motion)
+        // ============================================================
+        const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        if (!prefersReducedMotion) {
+            const snowContainer = document.getElementById('snow-container');
+            for (let i = 0; i < 40; i++) {
+                const s = document.createElement('div');
+                s.className = 'snowflake';
+                s.innerText = '❄';
+                s.style.left = Math.random() * 100 + '%';
+                s.style.fontSize = (10 + Math.random() * 20) + 'px';
+                s.style.animationDuration = (4 + Math.random() * 8) + 's';
+                s.style.animationDelay = (-Math.random() * 10) + 's';
+                s.style.opacity = Math.random() * 0.7 + 0.3;
+                snowContainer.appendChild(s);
+            }
         }
 
         gameLoop();
