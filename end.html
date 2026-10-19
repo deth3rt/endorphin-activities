@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta name="theme-color" content="#03080f">
+  <meta name="description" content="ЭНДОРФИН — Снежный Баттл. Хочешь ещё? Попроси QR у ведущего.">
   <title>ЭНДОРФИН | ХОЧЕШЬ ЕЩЁ?</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -35,7 +36,8 @@
       justify-content: center;
       padding: 2rem 1.5rem;
       position: relative;
-      overflow: hidden;
+      overflow-x: hidden;
+      overflow-y: auto;
     }
 
     body::before {
@@ -101,13 +103,99 @@
     }
     .hint .amber { color: var(--amber); }
 
+    /* Live-уведомление о новом QR */
+    .qr-live-banner {
+      display: none;
+      background: rgba(34, 197, 94, 0.15);
+      border: 2px solid rgba(34, 197, 94, 0.6);
+      border-radius: 14px;
+      padding: 12px 18px;
+      max-width: 380px;
+      width: 100%;
+      animation: qrPulse 2s ease-in-out infinite;
+    }
+    .qr-live-banner.show { display: block; }
+    .qr-live-banner .qr-live-title {
+      font-size: 0.95rem;
+      font-weight: 900;
+      color: #22c55e;
+      letter-spacing: 0.05em;
+      margin-bottom: 4px;
+      text-shadow: 0 0 20px rgba(34, 197, 94, 0.5);
+    }
+    .qr-live-banner .qr-live-text {
+      font-size: 0.8rem;
+      color: rgba(255,255,255,0.75);
+      font-weight: 700;
+    }
+    @keyframes qrPulse {
+      0%, 100% { box-shadow: 0 0 0 rgba(34, 197, 94, 0); }
+      50% { box-shadow: 0 0 30px rgba(34, 197, 94, 0.4); }
+    }
+
+    .actions {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.6rem;
+      margin-top: 1rem;
+      width: 100%;
+      max-width: 340px;
+    }
+
+    .action-btn {
+      display: block;
+      width: 100%;
+      padding: 0.85rem 1rem;
+      border-radius: 14px;
+      font-weight: 900;
+      font-size: 0.82rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      text-decoration: none;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      border: 2px solid transparent;
+    }
+
+    .action-btn.primary {
+      background: linear-gradient(135deg, var(--ice-bright), #3d8bff);
+      color: #000;
+      box-shadow: 0 0 25px rgba(34, 211, 238, 0.4);
+    }
+    .action-btn.primary:hover { transform: translateY(-1px); box-shadow: 0 0 40px rgba(34, 211, 238, 0.7); }
+    .action-btn.primary:active { transform: scale(0.98); }
+
+    .action-btn.secondary {
+      background: rgba(255,255,255,0.06);
+      border-color: rgba(255,255,255,0.15);
+      color: var(--ice);
+    }
+    .action-btn.secondary:hover { background: rgba(255,255,255,0.12); color: #fff; }
+    .action-btn.secondary:active { transform: scale(0.98); }
+
     .footer {
       font-size: 0.65rem;
       color: var(--text-dimmer);
       letter-spacing: 0.18em;
       text-transform: uppercase;
-      margin-top: 2rem;
+      margin-top: 1.5rem;
       opacity: 0.7;
+    }
+
+    @media (max-height: 600px) {
+      body { padding: 1rem; }
+      .inner { gap: 0.8rem; }
+      .logo-wrap { width: clamp(160px, 40vw, 240px); }
+      .footer { margin-top: 0.8rem; }
+      .hint { margin-top: 0.2rem; }
+    }
+
+    @media (max-height: 480px) {
+      .logo-wrap { display: none; }
+      .inner { gap: 0.6rem; }
+      .title { font-size: clamp(2rem, 9vw, 3rem); }
     }
 
     @media (prefers-reduced-motion: reduce) {
@@ -116,6 +204,7 @@
         animation-iteration-count: 1 !important;
         transition-duration: 0.01ms !important;
       }
+      .qr-live-banner { animation: none; }
     }
   </style>
 </head>
@@ -155,14 +244,84 @@
     <h1 class="title">ХОЧЕШЬ ЕЩЁ?</h1>
     <p class="subtitle">Снежный Баттл</p>
 
-    <p class="hint">
+    <!-- Live-баннер, если ведущий уже показал QR -->
+    <div class="qr-live-banner" id="qr-live-banner" role="status" aria-live="polite">
+      <div class="qr-live-title">✅ Ведущий уже показывает QR!</div>
+      <div class="qr-live-text">Сканируй код с экрана — и возвращайся в игру</div>
+    </div>
+
+    <p class="hint" id="hint-text">
       Попроси ведущего — он покажет <span class="amber">QR-код</span>.<br>
       Сканируй его и возвращайся играть.
     </p>
 
+    <div class="actions">
+      <a href="index.html" class="action-btn primary">🏠 НА ГЛАВНУЮ</a>
+      <a href="#" id="refresh-btn" class="action-btn secondary">🔄 ОБНОВИТЬ</a>
+    </div>
+
     <div class="footer">ЭНДОРФИН · СНЕЖНЫЙ БАТТЛ</div>
 
   </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCXIR5Tv8lB6ivcGRC3yt1SC66MM6T5b_M",
+      authDomain: "endorphin-battle.firebaseapp.com",
+      databaseURL: "https://endorphin-battle-default-rtdb.europe-west1.firebasedatabase.app",
+      projectId: "endorphin-battle",
+      storageBucket: "endorphin-battle.firebasestorage.app",
+      messagingSenderId: "185259733030",
+      appId: "1:185259733030:web:d72a89a436880973e636e7"
+    };
+
+    let app, db, gameRef;
+    try {
+      app = initializeApp(firebaseConfig);
+      db = getDatabase(app);
+      gameRef = ref(db, 'games/battle_1');
+    } catch (e) {
+      // Если Firebase упал — страница всё равно показывается
+      console.error('Firebase init failed:', e);
+    }
+
+    const banner = document.getElementById('qr-live-banner');
+    const hintText = document.getElementById('hint-text');
+
+    // Авто-проверка: если ведущий уже показал QR (screen = 'qr' и status = 'lobby') —
+    // показываем зелёный баннер, чтобы игрок не сидел в ожидании
+    if (gameRef) {
+      try {
+        onValue(gameRef, (snap) => {
+          const data = snap.val();
+          if (!data) return;
+
+          const isQRActive = data.status === 'lobby' && data.screen === 'qr';
+
+          if (isQRActive) {
+            banner.classList.add('show');
+            hintText.innerHTML = 'Ведущий уже показывает <span class="amber">QR-код</span>.<br>Сканируй его с экрана TV!';
+          } else {
+            banner.classList.remove('show');
+          }
+        }, (err) => {
+          // Тихо — не критично, страница работает и без live-статуса
+          console.warn('QR live-check failed:', err);
+        });
+      } catch (e) {
+        console.warn('QR live-check error:', e);
+      }
+    }
+
+    // Кнопка «Обновить» — перезагружает страницу
+    document.getElementById('refresh-btn').addEventListener('click', (e) => {
+      e.preventDefault();
+      location.reload();
+    });
+  </script>
 
 </body>
 </html>
