@@ -114,9 +114,7 @@
         }
         .full-screen.hidden { display: none; }
 
-        /* ============================================================
-           ATTRACT
-           ============================================================ */
+        /* ATTRACT */
         #attract-view {
             background: transparent;
             justify-content: space-between;
@@ -223,9 +221,7 @@
             letter-spacing: 0.2em;
         }
 
-        /* ============================================================
-           QR
-           ============================================================ */
+        /* QR */
         .qr-container {
             display: flex;
             gap: clamp(2rem, 6vw, 6rem);
@@ -306,17 +302,16 @@
             justify-content: center;
             font-weight: 900;
             color: #fff;
-            text-shadow: 0 2px 8px rgba(0,0,0,0.5);
             flex-shrink: 0;
             border: 2px solid rgba(255,255,255,0.3);
             box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+            background: rgba(0,0,0,0.4);
+            line-height: 1;
         }
-        .avatar-xs { width: 24px; height: 24px; font-size: 0.75rem; }
-        .avatar-sm { width: 34px; height: 34px; font-size: 0.95rem; }
+        .avatar-xs { width: 24px; height: 24px; font-size: 0.9rem; }
+        .avatar-sm { width: 34px; height: 34px; font-size: 1.2rem; }
 
-        /* ============================================================
-           PRELOAD
-           ============================================================ */
+        /* PRELOAD */
         #preload-view {
             background: radial-gradient(ellipse at 50% 40%, #0a2540 0%, #03080f 80%);
             overflow: hidden;
@@ -576,9 +571,7 @@
             100% { opacity: 0; transform: translate(-50%, -50%) scale(1.6); }
         }
 
-        /* ============================================================
-           MEGA / SUPER TEXT
-           ============================================================ */
+        /* MEGA / SUPER TEXT */
         @keyframes megaZoom {
             0% { transform: translate(-50%, -50%) scale(0.1); opacity: 0; }
             50% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
@@ -627,7 +620,6 @@
             margin-bottom: 10px;
         }
 
-        /* Shockwave при попадании */
         @keyframes shockwave {
             0% { transform: translate(-50%, -50%) scale(0.2); opacity: 1; border-width: 6px; }
             100% { transform: translate(-50%, -50%) scale(3); opacity: 0; border-width: 1px; }
@@ -642,7 +634,6 @@
             box-shadow: 0 0 40px var(--amber);
         }
 
-        /* Damage floating */
         @keyframes damageFloat {
             0% { transform: translate(-50%, 0); opacity: 0; }
             20% { opacity: 1; }
@@ -659,9 +650,7 @@
             animation: damageFloat 1.2s ease-out forwards;
         }
 
-        /* ============================================================
-           ТИКЕР
-           ============================================================ */
+        /* ТИКЕР */
         .ticker-wrap {
             position: fixed;
             bottom: 0;
@@ -691,9 +680,7 @@
             100% { transform: translate3d(-100%, 0, 0); }
         }
 
-        /* ============================================================
-           HP-ДИСПЛЕЙ
-           ============================================================ */
+        /* HP */
         .hp-display {
             position: absolute;
             top: 20px;
@@ -728,9 +715,6 @@
             text-transform: uppercase;
         }
 
-        /* ============================================================
-           ИНДИКАТОР ХОДА
-           ============================================================ */
         #turn-indicator {
             position: absolute;
             top: 16px;
@@ -750,9 +734,6 @@
             text-transform: uppercase;
         }
 
-        /* ============================================================
-           ТАЙМЕР НАД ИГРОКОМ
-           ============================================================ */
         .tv-turn-timer {
             position: absolute;
             z-index: 25;
@@ -834,9 +815,6 @@
             pointer-events: none;
         }
 
-        /* ============================================================
-           CONFETTI
-           ============================================================ */
         @keyframes confettiFall {
             0% { transform: translateY(-100vh) rotate(0deg); opacity: 1; }
             100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
@@ -1026,15 +1004,11 @@
         const gameId = 'battle_1';
         const gameRef = ref(db, `games/${gameId}`);
 
-        // ============================================================
-        // СОСТОЯНИЕ
-        // ============================================================
         let currentData = null;
         let currentBaseUrl = '';
         const players = new Map();
         let snowballs = [];
         let particles = [];
-        let shockwaves = [];
         let lastShotTime = 0;
         let lastShotState = null;
 
@@ -1058,9 +1032,6 @@
         let winnerCountdownInterval = null;
         let superTextTimeout = null;
 
-        // ============================================================
-        // CANVAS + DPR
-        // ============================================================
         const canvas = document.getElementById('game-canvas');
         const ctx = canvas.getContext('2d');
         let width = 0, height = 0, dpr = 1;
@@ -1090,9 +1061,8 @@
         const FORM_TIME = 1500;
         const WINNER_AUTO_HIDE = 30;
 
-        // Размеры прямоугольного персонажа
-        const CHAR_W = 78;
-        const CHAR_H = 100;
+        const CHAR_RADIUS = 52;
+        const EMOJI_FONT = 42;
 
         window.addEventListener('resize', resizeCanvas);
         resizeCanvas();
@@ -1102,35 +1072,31 @@
         // ============================================================
         // ATTRACT DEMO
         // ============================================================
+        const DEMO_ACT = [
+            { id: 'r1', team: 'red', name: 'Игрок', emoji: '😎' },
+            { id: 'b1', team: 'blue', name: 'Соперник', emoji: '🤠' }
+        ];
+
         const DEMO_ACTS = [
-            {
-                id: 'act1', duration: 8000, phrase: 'ИГРАЙ С ДРУЗЬЯМИ',
-                players: [
-                    { id: 'r1', team: 'red', name: 'Игрок' },
-                    { id: 'b1', team: 'blue', name: 'Соперник' }
-                ]
-            },
-            {
-                id: 'act2', duration: 10000, phrase: 'ПРОВЕРЬ, КАКОЙ ТЫ СНАЙПЕР',
-                players: [
-                    { id: 'r1', team: 'red', name: 'Аня' },
-                    { id: 'r2', team: 'red', name: 'Дима' },
-                    { id: 'r3', team: 'red', name: 'Макс' },
-                    { id: 'b1', team: 'blue', name: 'Оля' },
-                    { id: 'b2', team: 'blue', name: 'Костя' },
-                    { id: 'b3', team: 'blue', name: 'Женя' }
-                ]
-            },
-            {
-                id: 'act3', duration: 12000, phrase: 'ИГРАЙ НЕЧЕСТНО · ИСПОЛЬЗУЙ СУПЕРБРОСКИ',
-                players: [
-                    { id: 'r1', team: 'red', name: 'Герой' },
-                    { id: 'b1', team: 'blue', name: 'Син' },
-                    { id: 'b2', team: 'blue', name: 'Син' },
-                    { id: 'b3', team: 'blue', name: 'Син' },
-                    { id: 'b4', team: 'blue', name: 'Син' }
-                ]
-            }
+            { id: 'act1', duration: 8000, phrase: 'ИГРАЙ С ДРУЗЬЯМИ', players: [
+                { id: 'r1', team: 'red', name: 'Игрок', emoji: '😎' },
+                { id: 'b1', team: 'blue', name: 'Соперник', emoji: '🤠' }
+            ]},
+            { id: 'act2', duration: 10000, phrase: 'ПРОВЕРЬ, КАКОЙ ТЫ СНАЙПЕР', players: [
+                { id: 'r1', team: 'red', name: 'Аня', emoji: '🥳' },
+                { id: 'r2', team: 'red', name: 'Дима', emoji: '😎' },
+                { id: 'r3', team: 'red', name: 'Макс', emoji: '🦊' },
+                { id: 'b1', team: 'blue', name: 'Оля', emoji: '😺' },
+                { id: 'b2', team: 'blue', name: 'Костя', emoji: '🐯' },
+                { id: 'b3', team: 'blue', name: 'Женя', emoji: '🐼' }
+            ]},
+            { id: 'act3', duration: 12000, phrase: 'ИГРАЙ НЕЧЕСТНО · ИСПОЛЬЗУЙ СУПЕРБРОСКИ', players: [
+                { id: 'r1', team: 'red', name: 'Герой', emoji: '🦁' },
+                { id: 'b1', team: 'blue', name: 'Син', emoji: '🐸' },
+                { id: 'b2', team: 'blue', name: 'Син', emoji: '🐵' },
+                { id: 'b3', team: 'blue', name: 'Син', emoji: '🦄' },
+                { id: 'b4', team: 'blue', name: 'Син', emoji: '🐻' }
+            ]}
         ];
 
         let demoActIndex = 0;
@@ -1142,17 +1108,6 @@
         let demoParticles = [];
         let demoActiveId = null;
         let demoSuperTexts = [];
-
-        function getDemoGradient(name) {
-            let hash = 0;
-            for (let i = 0; i < name.length; i++) {
-                hash = name.charCodeAt(i) + ((hash << 5) - hash);
-                hash |= 0;
-            }
-            const hue1 = Math.abs(hash) % 360;
-            const hue2 = (hue1 + 60) % 360;
-            return [`hsl(${hue1}, 70%, 60%)`, `hsl(${hue2}, 70%, 40%)`];
-        }
 
         function initDemoAct(index) {
             const act = DEMO_ACTS[index];
@@ -1177,7 +1132,7 @@
                     : 0;
 
                 return {
-                    id: p.id, name: p.name, team: p.team,
+                    id: p.id, name: p.name, emoji: p.emoji, team: p.team,
                     x: width * (baseX + (Math.random() - 0.5) * 0.02),
                     y: height * (0.5 + yOffset + (Math.random() - 0.5) * 0.04),
                     lives: 3, alive: true,
@@ -1198,29 +1153,23 @@
         }
 
         // ============================================================
-        // ПРЯМОУГОЛЬНЫЙ ПЕРСОНАЖ (общий рендер)
+        // КРУГ С ЭМОДЗИ
         // ============================================================
-        function drawRectCharacter(c, data) {
-            const { x, y, name, team, lives, alive, isActive, scale = 1 } = data;
+        function drawEmojiCharacter(c, data) {
+            const { x, y, name, emoji, team, lives, alive, isActive, scale = 1 } = data;
             const teamColor = team === 'red' ? '#ff3b5c' : '#3d8bff';
-            const teamColor2 = team === 'red' ? '#ff6b84' : '#6ba5ff';
-            const [c1, c2] = getDemoGradient(name);
-
-            const w = CHAR_W * scale;
-            const h = CHAR_H * scale;
-            const corner = 14 * scale;
             const time = Date.now();
+            const r = CHAR_RADIUS * scale;
 
-            // Ореол активного
             if (isActive && alive) {
                 const pulse = 0.5 + 0.5 * Math.sin(time / 200);
                 c.save();
                 c.strokeStyle = teamColor;
-                c.lineWidth = 3 * scale;
+                c.lineWidth = 4 * scale;
                 c.shadowColor = teamColor;
-                c.shadowBlur = 30 * pulse;
+                c.shadowBlur = 35 * pulse;
                 c.beginPath();
-                roundRectPath(c, x - w / 2 - 10 * scale, y - h / 2 - 10 * scale, w + 20 * scale, h + 20 * scale, corner + 6 * scale);
+                c.arc(x, y, r + 10 * scale + pulse * 8 * scale, 0, Math.PI * 2);
                 c.stroke();
                 c.restore();
             }
@@ -1236,101 +1185,83 @@
                 return;
             }
 
-            // Тень снизу
+            // Тень
             c.save();
-            c.fillStyle = 'rgba(0,0,0,0.5)';
+            c.fillStyle = 'rgba(0,0,0,0.55)';
             c.beginPath();
-            c.ellipse(x, y + h / 2 + 4 * scale, w * 0.45, 8 * scale, 0, 0, Math.PI * 2);
+            c.ellipse(x, y + r + 4 * scale, r * 0.85, 10 * scale, 0, 0, Math.PI * 2);
             c.fill();
             c.restore();
 
-            // Тело (карточка)
+            // Круг-подложка
             c.save();
             c.shadowColor = teamColor;
             c.shadowBlur = 25 * scale;
-
-            const gradient = c.createLinearGradient(x - w / 2, y - h / 2, x + w / 2, y + h / 2);
-            gradient.addColorStop(0, c1);
-            gradient.addColorStop(1, c2);
-
-            c.fillStyle = gradient;
+            const grad = c.createRadialGradient(x - r * 0.3, y - r * 0.3, r * 0.15, x, y, r);
+            grad.addColorStop(0, 'rgba(20, 50, 85, 0.95)');
+            grad.addColorStop(1, 'rgba(5, 15, 30, 0.95)');
+            c.fillStyle = grad;
             c.beginPath();
-            roundRectPath(c, x - w / 2, y - h / 2, w, h, corner);
+            c.arc(x, y, r, 0, Math.PI * 2);
             c.fill();
 
-            // Рамка команды
             c.strokeStyle = teamColor;
-            c.lineWidth = 3.5 * scale;
+            c.lineWidth = 4 * scale;
             c.stroke();
-
-            // Верхняя полоса команды
-            c.fillStyle = teamColor;
-            c.beginPath();
-            roundRectPath(c, x - w / 2, y - h / 2, w, 16 * scale, corner);
-            c.fill();
             c.restore();
 
-            // Буква/инициал внутри (крупно)
+            // Внутреннее тонкое кольцо
             c.save();
-            c.font = `bold ${Math.round(44 * scale)}px Montserrat`;
-            c.fillStyle = '#ffffff';
+            c.strokeStyle = 'rgba(255,255,255,0.12)';
+            c.lineWidth = 1.5 * scale;
+            c.beginPath();
+            c.arc(x, y, r - 6 * scale, 0, Math.PI * 2);
+            c.stroke();
+            c.restore();
+
+            // Эмодзи
+            c.save();
+            c.font = `${Math.round(EMOJI_FONT * scale)}px "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif`;
             c.textAlign = 'center';
             c.textBaseline = 'middle';
-            c.shadowColor = 'rgba(0,0,0,0.7)';
-            c.shadowBlur = 6 * scale;
-            c.fillText(getInitial(name), x, y - 4 * scale);
+            c.shadowColor = 'rgba(0,0,0,0.5)';
+            c.shadowBlur = 4 * scale;
+            c.fillText(emoji || '😀', x, y + 2 * scale);
             c.restore();
 
-            // Имя под карточкой
+            // Имя под кругом
             c.save();
-            c.font = `bold ${Math.round(16 * scale)}px Montserrat`;
+            c.font = `bold ${Math.round(16 * scale)}px Montserrat, sans-serif`;
             c.fillStyle = '#ffffff';
             c.textAlign = 'center';
             c.textBaseline = 'top';
             c.shadowColor = 'rgba(0,0,0,0.95)';
             c.shadowBlur = 8 * scale;
-            c.fillText(name, x, y + h / 2 + 10 * scale);
+            c.fillText(name, x, y + r + 12 * scale);
             c.restore();
 
-            // HP сверху над карточкой
+            // HP сверху
             c.save();
-            c.font = `${Math.round(20 * scale)}px Montserrat`;
+            c.font = `${Math.round(20 * scale)}px Montserrat, sans-serif`;
             c.textAlign = 'center';
+            c.textBaseline = 'bottom';
+            c.shadowColor = 'rgba(0,0,0,0.9)';
+            c.shadowBlur = 6 * scale;
             const hearts = lives <= 5 ? '❤️'.repeat(Math.max(0, lives)) : `❤️×${lives}`;
-            c.fillText(hearts, x, y - h / 2 - 12 * scale);
+            c.fillText(hearts, x, y - r - 10 * scale);
             c.restore();
         }
 
-        function roundRectPath(c, x, y, w, h, r) {
-            c.beginPath();
-            c.moveTo(x + r, y);
-            c.lineTo(x + w - r, y);
-            c.quadraticCurveTo(x + w, y, x + w, y + r);
-            c.lineTo(x + w, y + h - r);
-            c.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
-            c.lineTo(x + r, y + h);
-            c.quadraticCurveTo(x, y + h, x, y + h - r);
-            c.lineTo(x, y + r);
-            c.quadraticCurveTo(x, y, x + r, y);
-            c.closePath();
-        }
-
-        // ============================================================
-        // ДЕМО
-        // ============================================================
         function drawDemoPlayer(p, isActive) {
-            drawRectCharacter(ctx, {
-                x: p.x, y: p.y, name: p.name, team: p.team,
+            drawEmojiCharacter(ctx, {
+                x: p.x, y: p.y, name: p.name, emoji: p.emoji, team: p.team,
                 lives: p.lives, alive: p.alive, isActive, scale: 0.75
             });
         }
 
-        // КРИВАЯ ДУГА ПРИЦЕЛА: у красных идёт вправо, у синих — влево (зеркально)
         function drawAimArc(aimer, angle, power) {
             const direction = aimer.team === 'red' ? 1 : -1;
             const teamColor = aimer.team === 'red' ? '#ff3b5c' : '#3d8bff';
-
-            // Угол отсчитывается от "вправо" для красных, и от "влево" для синих
             const rad = (angle * Math.PI) / 180;
             const speed = power * 0.4;
             const vx = Math.cos(rad) * speed * direction;
@@ -1338,9 +1269,8 @@
             const gravity = 0.3;
 
             let x = aimer.x;
-            let y = aimer.y - 20;
+            let y = aimer.y - CHAR_RADIUS * 0.7;
 
-            // Дуга траектории (тонкая, длинная)
             let sx = x, sy = y, svx = vx, svy = vy;
             ctx.save();
             ctx.setLineDash([8, 10]);
@@ -1360,7 +1290,6 @@
             ctx.stroke();
             ctx.restore();
 
-            // Стрелка-указатель (короткая) на конце
             const lineLength = 40 + power * 0.35;
             const endX = x + Math.cos(rad) * lineLength * direction;
             const endY = y - Math.sin(rad) * lineLength;
@@ -1392,7 +1321,6 @@
             ctx.fill();
             ctx.restore();
 
-            // Бейдж с процентом силы
             ctx.save();
             ctx.fillStyle = 'rgba(0,0,0,0.75)';
             ctx.strokeStyle = teamColor;
@@ -1633,26 +1561,6 @@
                 .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
         }
 
-        function getNameGradient(name) {
-            let hash = 0;
-            const s = name || '?';
-            for (let i = 0; i < s.length; i++) {
-                hash = s.charCodeAt(i) + ((hash << 5) - hash);
-                hash |= 0;
-            }
-            const hue1 = Math.abs(hash) % 360;
-            const hue2 = (hue1 + 60 + Math.abs(hash >> 8) % 60) % 360;
-            return `linear-gradient(135deg, hsl(${hue1}, 70%, 55%), hsl(${hue2}, 70%, 45%))`;
-        }
-
-        function getInitial(name) { return (name || '?').trim().charAt(0).toUpperCase() || '?'; }
-
-        function applyAvatar(el, name, size = 'sm') {
-            el.style.background = getNameGradient(name);
-            el.innerText = getInitial(name);
-            el.className = `avatar avatar-${size}`;
-        }
-
         function renderHeartsCompact(lives) {
             if (lives <= 0) return '💀';
             if (lives <= 5) return '❤️'.repeat(lives);
@@ -1660,12 +1568,13 @@
         }
 
         // ============================================================
-        // PLAYER CLASS — ПРЯМОУГОЛЬНАЯ КАРТОЧКА
+        // PLAYER CLASS — КРУГ С ЭМОДЗИ
         // ============================================================
         class Player {
             constructor(id, data, team) {
                 this.id = id;
                 this.name = data.name || 'Игрок';
+                this.emoji = data.emoji || '😀';
                 this.lives = data.lives ?? 3;
                 this.alive = data.alive ?? true;
                 this.team = team;
@@ -1681,6 +1590,7 @@
             update(data) {
                 const prevLives = this.lives;
                 this.name = data.name || this.name;
+                this.emoji = data.emoji || this.emoji;
                 this.lives = data.lives ?? this.lives;
                 this.alive = data.alive ?? this.alive;
                 if (data.posX !== undefined) this.x = (data.posX / 100) * width;
@@ -1696,13 +1606,13 @@
                     ctx.globalAlpha = flash * 0.6;
                     ctx.fillStyle = '#ffffff';
                     ctx.beginPath();
-                    roundRectPath(ctx, this.x - CHAR_W / 2, this.y - CHAR_H / 2, CHAR_W, CHAR_H, 14);
+                    ctx.arc(this.x, this.y, CHAR_RADIUS, 0, Math.PI * 2);
                     ctx.fill();
                     ctx.restore();
                 }
 
-                drawRectCharacter(ctx, {
-                    x: this.x, y: this.y, name: this.name, team: this.team,
+                drawEmojiCharacter(ctx, {
+                    x: this.x, y: this.y, name: this.name, emoji: this.emoji, team: this.team,
                     lives: this.lives, alive: this.alive, isActive, scale: 1
                 });
             }
@@ -1861,9 +1771,10 @@
                     players.forEach(p => {
                         if (hit) return;
                         if (p.team !== ball.team && p.alive) {
-                            const dx = Math.abs(ball.x - p.x);
-                            const dy = Math.abs(ball.y - p.y);
-                            if (dx < CHAR_W / 2 && dy < CHAR_H / 2) {
+                            const dx = ball.x - p.x;
+                            const dy = ball.y - p.y;
+                            const dist = Math.sqrt(dx * dx + dy * dy);
+                            if (dist < CHAR_RADIUS) {
                                 hit = true;
                                 handleHit(ball, p);
                             }
@@ -1939,7 +1850,7 @@
                 return;
             }
             timerEl.style.left = `${player.x}px`;
-            timerEl.style.top = `${player.y - CHAR_H / 2 - 100}px`;
+            timerEl.style.top = `${player.y - CHAR_RADIUS - 100}px`;
             timerEl.style.transform = 'translateX(-50%)';
             timerEl.classList.add('active');
 
@@ -1985,7 +1896,7 @@
 
             spawnParticles(ball.x, ball.y, p.team === 'red' ? '#ff3b5c' : '#3d8bff', 30 + damage * 20);
             spawnShockwave(ball.x, ball.y, p.team === 'red' ? '#ff3b5c' : '#3d8bff');
-            spawnDamageFloat(p.x, p.y - CHAR_H / 2, `-${damage}❤️`, p.team === 'red' ? '#ff3b5c' : '#3d8bff');
+            spawnDamageFloat(p.x, p.y - CHAR_RADIUS, `-${damage}❤️`, p.team === 'red' ? '#ff3b5c' : '#3d8bff');
 
             document.getElementById('main-body').classList.add('screen-shake');
             setTimeout(() => document.getElementById('main-body').classList.remove('screen-shake'), 400);
@@ -2078,15 +1989,11 @@
 
                 container.innerHTML = activePlayers.map(([id, p]) => `
                     <div class="qr-player ${team}">
-                        <div class="avatar avatar-sm" data-name="${escapeHtml(p.name)}"></div>
+                        <div class="avatar avatar-sm">${p.emoji || '😀'}</div>
                         <span class="name">${escapeHtml(p.name)}</span>
                         <span class="text-xs text-cyan-300 font-bold">В БОЮ</span>
                     </div>
                 `).join('');
-
-                container.querySelectorAll('.avatar[data-name]').forEach(el => {
-                    applyAvatar(el, el.dataset.name);
-                });
             };
 
             renderList('qr-players-red', 'red');
@@ -2208,10 +2115,11 @@
             const countdownEl = document.getElementById('win-countdown');
 
             const tick = () => {
-                countdownEl.innerText = `ЗАСТАВКА ЧЕРЕЗ ${countdown} СЕК`;
+                countdownEl.innerText = `ПЕРЕХОД ЧЕРЕЗ ${countdown} СЕК`;
                 if (countdown <= 0) {
                     clearWinnerTimers();
-                    update(gameRef, { screen: 'attract' }).catch(() => {});
+                    // Редирект на end.html
+                    window.location.href = 'end.html';
                     return;
                 }
                 countdown--;
@@ -2305,7 +2213,7 @@
                     formingShots = shotsArray.map(s => ({
                         shooterId: shot.shooterId,
                         x: shooter.x + (Math.random() - 0.5) * 30,
-                        y: shooter.y - CHAR_H / 2 - 5,
+                        y: shooter.y - CHAR_RADIUS - 5,
                         angle: s.angle,
                         power: s.power,
                         damage: s.damage || 1,
