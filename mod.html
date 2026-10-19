@@ -76,6 +76,23 @@
     }
     .animate-shake { animation: shake 0.4s ease-in-out; }
 
+    /* Аватар */
+    .avatar {
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 900;
+      color: #fff;
+      text-shadow: 0 2px 8px rgba(0,0,0,0.5);
+      flex-shrink: 0;
+      border: 2px solid rgba(255,255,255,0.3);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    }
+    .avatar-xs { width: 24px; height: 24px; font-size: 0.7rem; }
+    .avatar-sm { width: 32px; height: 32px; font-size: 0.9rem; }
+    .avatar-md { width: 40px; height: 40px; font-size: 1.1rem; }
+
     /* Селектор чисел */
     .num-selector {
       display: flex;
@@ -133,6 +150,60 @@
       letter-spacing: 0.1em;
       animation: pulseStatus 2s ease-in-out infinite;
     }
+
+    /* Строка игрока */
+    .player-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 12px;
+      background: rgba(0,0,0,0.35);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 12px;
+      margin-bottom: 6px;
+      transition: all 0.15s;
+    }
+    .player-row.clickable {
+      cursor: pointer;
+    }
+    .player-row.clickable:hover {
+      background: rgba(34, 211, 238, 0.12);
+      border-color: rgba(34, 211, 238, 0.5);
+    }
+    .player-row.active {
+      background: rgba(251, 191, 36, 0.12);
+      border-color: rgba(251, 191, 36, 0.5);
+    }
+    .player-row .name {
+      flex: 1;
+      font-weight: 700;
+      font-size: 0.9rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .player-row .hearts {
+      font-size: 0.8rem;
+      letter-spacing: -1px;
+    }
+    .player-row .action-icon {
+      font-size: 1.1rem;
+      opacity: 0.6;
+    }
+    .player-row .kick-btn {
+      background: none;
+      border: none;
+      color: #ef4444;
+      font-weight: 900;
+      font-size: 1rem;
+      padding: 2px 6px;
+      cursor: pointer;
+      opacity: 0.6;
+      transition: opacity 0.15s;
+    }
+    .player-row .kick-btn:hover {
+      opacity: 1;
+    }
   </style>
 </head>
 <body>
@@ -146,6 +217,17 @@
        ============================================================ -->
   <div id="lobby-controls" class="w-full flex flex-col items-center">
     
+    <!-- Статус экрана -->
+    <div class="glass w-full max-w-4xl p-4 mb-4 flex justify-between items-center">
+      <div>
+        <div class="text-xs font-bold text-cyan-300/60 tracking-wider mb-1">ЭКРАН ТВ</div>
+        <div id="screen-status" class="text-lg font-black text-white">ЗАСТАВКА</div>
+      </div>
+      <button onclick="showQR()" id="btn-show-qr" class="px-6 py-3 bg-cyan-600 hover:bg-cyan-500 rounded-xl font-black text-white transition active:scale-95">
+        📱 ПОКАЗАТЬ QR
+      </button>
+    </div>
+
     <!-- Обычные режимы -->
     <div class="glass w-full max-w-4xl p-6 mb-4 flex flex-col items-center">
       <h2 class="text-lg font-bold mb-3 text-cyan-100">БЫСТРЫЙ ВЫБОР</h2>
@@ -158,7 +240,7 @@
     </div>
 
     <!-- Нечестный режим -->
-    <div class="glass w-full max-w-4xl p-6 mb-8 flex flex-col items-center">
+    <div class="glass w-full max-w-4xl p-6 mb-6 flex flex-col items-center">
       <div class="flex items-center gap-3 mb-4 flex-wrap justify-center">
         <h2 class="text-lg font-bold text-cyan-100">НЕЧЕСТНЫЙ БОЙ</h2>
         <span class="unfair-badge" id="unfair-badge" style="display: none;">⚔️ МЕНЬШАЯ КОМАНДА ПОЛУЧИТ БОНУС</span>
@@ -199,38 +281,65 @@
       </p>
     </div>
 
-    <!-- Команды -->
-    <div class="glass w-full max-w-4xl p-6 mb-6">
-      <div class="flex justify-between items-center mb-3">
-        <h2 class="text-xl font-bold text-cyan-100">КОМАНДЫ</h2>
-        <div id="mode-display" class="text-sm font-black text-cyan-400">РЕЖИМ: 1 vs 1</div>
-      </div>
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div class="bg-red-900/20 p-5 rounded-xl border border-red-500/30">
-          <div class="flex justify-between items-center mb-3">
-            <h3 class="font-bold text-red-400 text-lg">🔴 КРАСНЫЕ</h3>
-            <span class="text-red-300/70 text-sm font-bold" id="count-red">0</span>
-          </div>
-          <ul id="list-red" class="space-y-2 text-sm"></ul>
-          <p class="text-center text-red-300/50 text-xs mt-3" id="lives-red-info"></p>
-        </div>
-        <div class="bg-blue-900/20 p-5 rounded-xl border border-blue-500/30">
-          <div class="flex justify-between items-center mb-3">
-            <h3 class="font-bold text-blue-400 text-lg">🔵 СИНИЕ</h3>
-            <span class="text-blue-300/70 text-sm font-bold" id="count-blue">0</span>
-          </div>
-          <ul id="list-blue" class="space-y-2 text-sm"></ul>
-          <p class="text-center text-blue-300/50 text-xs mt-3" id="lives-blue-info"></p>
-        </div>
-      </div>
-    </div>
-
     <!-- Первая команда -->
     <div class="glass w-full max-w-4xl p-6 mb-6">
       <h2 class="text-xl font-bold mb-4 text-cyan-100 text-center">КАКАЯ КОМАНДА НАЧИНАЕТ?</h2>
       <div class="flex justify-center gap-6">
         <button onclick="setFirstTeam('red')" class="team-btn px-12 py-4 rounded-xl border-2 font-bold text-xl" id="btn-first-red">КРАСНЫЕ</button>
         <button onclick="setFirstTeam('blue')" class="team-btn px-12 py-4 rounded-xl border-2 font-bold text-xl" id="btn-first-blue">СИНИЕ</button>
+      </div>
+    </div>
+
+    <!-- ============================================================
+         АКТИВНЫЕ ИГРОКИ (в текущей игре)
+         ============================================================ -->
+    <div class="glass w-full max-w-4xl p-6 mb-4">
+      <div class="flex justify-between items-center mb-3">
+        <h2 class="text-xl font-bold text-cyan-100">🎮 В ИГРЕ</h2>
+        <div id="mode-display" class="text-sm font-black text-cyan-400">РЕЖИМ: 1 vs 1</div>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="bg-red-900/20 p-4 rounded-xl border border-red-500/30">
+          <div class="flex justify-between items-center mb-3">
+            <h3 class="font-bold text-red-400 text-base">🔴 КРАСНЫЕ</h3>
+            <span class="text-red-300/70 text-sm font-bold" id="count-red">0/1</span>
+          </div>
+          <div id="active-red"></div>
+        </div>
+        <div class="bg-blue-900/20 p-4 rounded-xl border border-blue-500/30">
+          <div class="flex justify-between items-center mb-3">
+            <h3 class="font-bold text-blue-400 text-base">🔵 СИНИЕ</h3>
+            <span class="text-blue-300/70 text-sm font-bold" id="count-blue">0/1</span>
+          </div>
+          <div id="active-blue"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================================
+         КОМНАТА ОЖИДАНИЯ
+         ============================================================ -->
+    <div class="glass w-full max-w-4xl p-6 mb-6">
+      <div class="flex justify-between items-center mb-3">
+        <h2 class="text-xl font-bold text-cyan-100">⏳ КОМНАТА ОЖИДАНИЯ</h2>
+        <div id="room-count" class="text-sm font-black text-yellow-400">0 игроков</div>
+      </div>
+      <p class="text-xs text-white/40 mb-3">Кликни на игрока — чтобы добавить в игру. Кликни на активного — чтобы вернуть в комнату.</p>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="bg-red-900/10 p-4 rounded-xl border border-red-500/20">
+          <div class="flex justify-between items-center mb-3">
+            <h3 class="font-bold text-red-400/80 text-sm">🔴 КРАСНЫЕ</h3>
+            <span class="text-red-300/50 text-xs font-bold" id="room-count-red">0</span>
+          </div>
+          <div id="room-red"></div>
+        </div>
+        <div class="bg-blue-900/10 p-4 rounded-xl border border-blue-500/20">
+          <div class="flex justify-between items-center mb-3">
+            <h3 class="font-bold text-blue-400/80 text-sm">🔵 СИНИЕ</h3>
+            <span class="text-blue-300/50 text-xs font-bold" id="room-count-blue">0</span>
+          </div>
+          <div id="room-blue"></div>
+        </div>
       </div>
     </div>
 
@@ -284,8 +393,8 @@
       <h2 class="text-5xl font-black mb-4" id="finish-title">ИГРА ОКОНЧЕНА</h2>
       <p class="text-xl text-white/60" id="finish-subtitle"></p>
     </div>
-    <button onclick="returnToLobby()" class="w-full py-8 bg-gradient-to-r from-cyan-500 to-blue-600 rounded-2xl text-3xl font-black text-white shadow-[0_0_40px_rgba(6,182,212,0.6)] hover:shadow-[0_0_60px_rgba(6,182,212,0.9)] transition-all">
-      🔄 ВЕРНУТЬСЯ В ЛОББИ
+    <button onclick="newGame()" class="w-full py-8 bg-gradient-to-r from-cyan-500 to-blue-600 rounded-2xl text-3xl font-black text-white shadow-[0_0_40px_rgba(6,182,212,0.6)] hover:shadow-[0_0_60px_rgba(6,182,212,0.9)] transition-all">
+      🔄 НОВАЯ ИГРА
     </button>
   </div>
 
@@ -309,13 +418,41 @@
     let currentData = null;
     let firstTeam = 'red';
     let isStarting = false;
-
-    // Состояние нечестного селектора
     let unfairRed = 1;
     let unfairBlue = 1;
 
     // ============================================================
-    // ПАРСИНГ РЕЖИМА (с защитой от кривых данных)
+    // УТИЛИТЫ
+    // ============================================================
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    function getNameGradient(name) {
+      let hash = 0;
+      const s = name || '?';
+      for (let i = 0; i < s.length; i++) {
+        hash = s.charCodeAt(i) + ((hash << 5) - hash);
+        hash |= 0;
+      }
+      const hue1 = Math.abs(hash) % 360;
+      const hue2 = (hue1 + 60 + Math.abs(hash >> 8) % 60) % 360;
+      return `linear-gradient(135deg, hsl(${hue1}, 70%, 55%), hsl(${hue2}, 70%, 45%))`;
+    }
+
+    function applyAvatar(el, name) {
+      el.style.background = getNameGradient(name);
+      el.innerText = (name || '?').trim().charAt(0).toUpperCase() || '?';
+    }
+
+    // ============================================================
+    // ПАРСИНГ РЕЖИМА
     // ============================================================
     function parseMode(mode) {
       if (!mode || typeof mode !== 'string') return { redMax: 1, blueMax: 1, isUnfair: false };
@@ -331,9 +468,6 @@
       return { redMax: n, blueMax: n, isUnfair: false };
     }
 
-    // ============================================================
-    // РАСЧЁТ ЖИЗНЕЙ
-    // ============================================================
     function calculateLives(mode) {
       const { redMax, blueMax, isUnfair } = parseMode(mode);
       
@@ -359,11 +493,14 @@
       const existing = snap.val();
 
       if (!existing || !existing.status) {
+        // Первый запуск
         await set(gameRef, {
+          screen: 'attract',
           status: 'lobby',
           mode: '1v1',
           lives: { red: 3, blue: 3 },
           players: { red: {}, blue: {} },
+          room: { red: {}, blue: {} },
           firstTeam: 'red',
           turn: { team: 'red', name: '...' },
           activePlayerId: null,
@@ -371,42 +508,65 @@
           preloadDone: false
         });
       } else if (existing.status === 'playing') {
-        if (confirm('Игра уже идёт. Сбросить её и вернуться в лобби?')) {
-          await update(gameRef, {
-            status: 'lobby',
-            players: { red: {}, blue: {} },
-            turn: { team: existing.firstTeam || 'red', name: '...' },
-            activePlayerId: null,
-            timer: null,
-            preloadDone: false,
-            winner: null,
-            last_shot: null,
-            shots: null
-          });
-          try { await remove(ref(db, 'games/battle_1/aim')); } catch {}
+        // Игра уже идёт
+        if (!confirm('Игра уже идёт. Сбросить её и вернуться в лобби?')) {
+          return;
         }
+        // Переносим всех из players в room
+        await moveAllPlayersToRoom(existing);
+      } else if (existing.status === 'finished') {
+        // Была финиш-фаза — возвращаем в attract
+        await newGame();
       } else {
-        await update(gameRef, {
-          status: 'lobby',
-          players: { red: {}, blue: {} },
-          turn: { team: existing.firstTeam || 'red', name: '...' },
-          activePlayerId: null,
-          timer: null,
-          preloadDone: false,
-          winner: null,
-          last_shot: null,
-          shots: null
-        });
+        // Лобби — просто убедимся, что screen: attract
+        if (existing.screen !== 'attract') {
+          await update(gameRef, { screen: 'attract' });
+        }
+        // Убедимся, что room существует
+        if (!existing.room) {
+          await update(gameRef, { room: { red: {}, blue: {} } });
+        }
       }
     }
+
+    async function moveAllPlayersToRoom(data) {
+      const players = data.players || {};
+      const roomUpdates = [];
+      
+      ['red', 'blue'].forEach(team => {
+        Object.entries(players[team] || {}).forEach(([id, p]) => {
+          roomUpdates.push(set(ref(db, `games/battle_1/room/${team}/${id}`), {
+            name: p.name,
+            joinedAt: Date.now()
+          }));
+        });
+      });
+      
+      await Promise.all(roomUpdates);
+      
+      await update(gameRef, {
+        screen: 'attract',
+        status: 'lobby',
+        players: { red: {}, blue: {} },
+        activePlayerId: null,
+        timer: null,
+        preloadDone: false,
+        winner: null,
+        last_shot: null,
+        shots: null,
+        turn: { team: firstTeam, name: '...' }
+      });
+      
+      try { await remove(ref(db, 'games/battle_1/aim')); } catch {}
+    }
+
     initGame();
 
     // ============================================================
-    // РЕЖИМ (со сбросом нечестного селектора)
+    // РЕЖИМ
     // ============================================================
     window.setMode = (mode) => { 
-      if (currentData?.status === 'playing') return;
-      if (currentData?.status === 'finished') return;
+      if (currentData?.status === 'playing' || currentData?.status === 'finished') return;
       
       const parts = mode.split('v');
       const n = Math.max(1, Math.min(4, parseInt(parts[0]) || 1));
@@ -417,22 +577,14 @@
       update(gameRef, { mode });
     };
 
-    // ============================================================
-    // ПЕРВАЯ КОМАНДА
-    // ============================================================
     window.setFirstTeam = (team) => {
-      if (currentData?.status === 'playing') return;
-      if (currentData?.status === 'finished') return;
+      if (currentData?.status === 'playing' || currentData?.status === 'finished') return;
       firstTeam = team;
       update(gameRef, { firstTeam: team });
     };
 
-    // ============================================================
-    // НЕЧЕСТНЫЙ РЕЖИМ
-    // ============================================================
     window.changeUnfair = (team, delta) => {
-      if (currentData?.status === 'playing') return;
-      if (currentData?.status === 'finished') return;
+      if (currentData?.status === 'playing' || currentData?.status === 'finished') return;
       
       if (team === 'red') {
         unfairRed = Math.max(1, Math.min(4, unfairRed + delta));
@@ -456,8 +608,7 @@
     }
 
     window.applyUnfair = (event) => {
-      if (currentData?.status === 'playing') return;
-      if (currentData?.status === 'finished') return;
+      if (currentData?.status === 'playing' || currentData?.status === 'finished') return;
       
       if (unfairRed === unfairBlue) {
         const btn = event?.target || document.getElementById('unfair-apply-btn');
@@ -478,6 +629,62 @@
     };
 
     // ============================================================
+    // ПОКАЗАТЬ QR
+    // ============================================================
+    window.showQR = async () => {
+      if (currentData?.status !== 'lobby') return;
+      await update(gameRef, { screen: 'qr' });
+    };
+
+    // ============================================================
+    // РУЧНОЙ ВЫБОР ИГРОКА
+    // ============================================================
+    window.addToGame = async (team, id) => {
+      if (currentData?.status !== 'lobby') return;
+      
+      const { redMax, blueMax } = parseMode(currentData.mode);
+      const max = team === 'red' ? redMax : blueMax;
+      const activeCount = Object.keys(currentData.players?.[team] || {}).length;
+      
+      if (activeCount >= max) {
+        alert(`В команде ${team === 'red' ? 'красных' : 'синих'} уже ${max} игрок(ов)`);
+        return;
+      }
+      
+      const roomPlayer = currentData.room?.[team]?.[id];
+      if (!roomPlayer) return;
+      
+      // Переносим из room в players
+      await set(ref(db, `games/battle_1/players/${team}/${id}`), {
+        name: roomPlayer.name,
+        lives: 3,
+        alive: true,
+        connected: true
+      });
+      await remove(ref(db, `games/battle_1/room/${team}/${id}`));
+    };
+
+    window.removeFromGame = async (team, id) => {
+      if (currentData?.status !== 'lobby') return;
+      
+      const player = currentData.players?.[team]?.[id];
+      if (!player) return;
+      
+      // Возвращаем в room
+      await set(ref(db, `games/battle_1/room/${team}/${id}`), {
+        name: player.name,
+        joinedAt: Date.now()
+      });
+      await remove(ref(db, `games/battle_1/players/${team}/${id}`));
+    };
+
+    window.kickFromRoom = async (team, id) => {
+      if (currentData?.status !== 'lobby') return;
+      if (!confirm('Кикнуть игрока?')) return;
+      await remove(ref(db, `games/battle_1/room/${team}/${id}`));
+    };
+
+    // ============================================================
     // ОСНОВНОЙ СЛУШАТЕЛЬ
     // ============================================================
     onValue(gameRef, (snapshot) => {
@@ -486,9 +693,11 @@
       currentData = data;
 
       const status = data.status || 'lobby';
+      const screen = data.screen || 'attract';
       const mode = data.mode || '1v1';
       const { redMax, blueMax, isUnfair } = parseMode(mode);
 
+      // Видимость панелей
       document.getElementById('lobby-controls').classList.toggle('hidden', status !== 'lobby');
       document.getElementById('game-controls').classList.toggle('hidden', status !== 'playing');
       document.getElementById('finished-controls').classList.toggle('hidden', status !== 'finished');
@@ -496,12 +705,25 @@
       document.getElementById('game-controls').classList.toggle('flex', status === 'playing');
       document.getElementById('finished-controls').classList.toggle('flex', status === 'finished');
 
+      // Screen status
+      const screenEl = document.getElementById('screen-status');
+      const screenLabels = {
+        attract: 'ЗАСТАВКА',
+        qr: 'QR-КОДЫ',
+        game: 'ИГРА',
+        winner: 'ПОБЕДИТЕЛЬ'
+      };
+      screenEl.innerText = screenLabels[screen] || 'ЗАСТАВКА';
+      screenEl.style.color = screen === 'qr' ? '#22d3ee' : screen === 'game' ? '#22c55e' : screen === 'winner' ? '#fbbf24' : '#fff';
+
+      // Первая команда
       if (data.firstTeam) {
         firstTeam = data.firstTeam;
         document.getElementById('btn-first-red').classList.toggle('active-red', firstTeam === 'red');
         document.getElementById('btn-first-blue').classList.toggle('active-blue', firstTeam === 'blue');
       }
 
+      // Режим
       if (data.mode) {
         document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
         document.getElementById(`btn-${data.mode}`)?.classList.add('active');
@@ -518,97 +740,98 @@
         document.getElementById('mode-display').style.color = isUnfair ? '#fbbf24' : '#22d3ee';
       }
 
+      // Блокировка
       const inGame = status === 'playing' || status === 'finished';
       document.querySelectorAll('.mode-btn, .team-btn, .num-btn, #unfair-apply-btn').forEach(b => {
         b.disabled = inGame;
       });
+      document.getElementById('btn-show-qr').disabled = inGame || screen === 'qr';
 
-      renderLobbyLists(data, redMax, blueMax);
-      renderGameLists(data);
-      updateLivesInfo(data, mode);
+      // Рендер
+      renderActivePlayers(data, redMax, blueMax);
+      renderRoomPlayers(data);
       updateStartButton(data, redMax, blueMax);
 
+      // Игра
       if (status === 'playing') {
         updateGameView(data, mode);
       }
 
+      // Финиш
       if (status === 'finished') {
         updateFinishedView(data);
       }
     });
 
     // ============================================================
-    // РЕНДЕР СПИСКОВ
+    // РЕНДЕР АКТИВНЫХ
     // ============================================================
-    function renderLobbyLists(data, redMax, blueMax) {
-      const render = (team, listId, countId, max) => {
+    function renderActivePlayers(data, redMax, blueMax) {
+      const render = (team, containerId, countId, max) => {
         const players = Object.entries(data.players?.[team] || {});
-        const list = document.getElementById(listId);
+        const container = document.getElementById(containerId);
         const count = document.getElementById(countId);
         
-        if (players.length === 0) {
-          list.innerHTML = `<li class="text-center text-white/30 italic py-4">Нет игроков</li>`;
-        } else {
-          list.innerHTML = players.map(([id, p]) => `
-            <li class="flex justify-between items-center bg-black/40 p-3 rounded-lg border border-white/10">
-              <span class="font-bold truncate">👤 ${escapeHtml(p.name)}</span>
-              <button onclick="kickPlayer('${team}', '${id}')" class="text-red-400 hover:text-red-300 font-black px-2 text-lg ml-2">✖</button>
-            </li>
-          `).join('');
-        }
         count.innerText = `${players.length}/${max}`;
-      };
-      render('red', 'list-red', 'count-red', redMax);
-      render('blue', 'list-blue', 'count-blue', blueMax);
-    }
-
-    function renderGameLists(data) {
-      const render = (team, listId) => {
-        const players = Object.entries(data.players?.[team] || {});
-        const list = document.getElementById(listId);
         
         if (players.length === 0) {
-          list.innerHTML = `<li class="text-white/30 italic text-center py-2">—</li>`;
-        } else {
-          list.innerHTML = players.map(([id, p]) => {
-            const isDead = !p.alive || p.lives <= 0;
-            const isActive = data.activePlayerId === id;
-            const hearts = isDead ? '💀' : '❤️'.repeat(p.lives);
-            return `
-              <li class="flex justify-between items-center p-2 rounded-lg ${isActive ? 'bg-yellow-500/20 border border-yellow-500/50' : 'bg-black/30'} ${isDead ? 'opacity-50' : ''}">
-                <span class="font-bold truncate">${isActive ? '▶ ' : ''}${escapeHtml(p.name)}</span>
-                <span class="ml-2 text-xs">${hearts}</span>
-              </li>
-            `;
-          }).join('');
+          container.innerHTML = `<div class="text-center text-white/30 italic py-4 text-sm">Пусто</div>`;
+          return;
         }
+        
+        container.innerHTML = players.map(([id, p]) => `
+          <div class="player-row active">
+            <div class="avatar avatar-sm" data-name="${escapeHtml(p.name)}"></div>
+            <div class="name">${escapeHtml(p.name)}</div>
+            <button class="kick-btn" onclick="removeFromGame('${team}', '${id}')" title="Вернуть в комнату">↩</button>
+          </div>
+        `).join('');
+        
+        container.querySelectorAll('.avatar[data-name]').forEach(el => {
+          applyAvatar(el, el.dataset.name);
+        });
       };
-      render('red', 'game-list-red');
-      render('blue', 'game-list-blue');
+      
+      render('red', 'active-red', 'count-red', redMax);
+      render('blue', 'active-blue', 'count-blue', blueMax);
     }
 
     // ============================================================
-    // ИНФО О ЖИЗНЯХ
+    // РЕНДЕР КОМНАТЫ
     // ============================================================
-    function updateLivesInfo(data, mode) {
-      const { redLives, blueLives } = calculateLives(mode);
-      const { redMax, blueMax, isUnfair } = parseMode(mode);
-      
-      const redInfo = document.getElementById('lives-red-info');
-      const blueInfo = document.getElementById('lives-blue-info');
-      
-      if (isUnfair) {
-        if (redMax < blueMax) {
-          redInfo.innerHTML = `⚔️ <b class="text-yellow-400">${redLives}❤️ у каждого</b> (компенсация)`;
-          blueInfo.innerText = `${blueLives}❤️ у каждого`;
-        } else {
-          redInfo.innerText = `${redLives}❤️ у каждого`;
-          blueInfo.innerHTML = `⚔️ <b class="text-yellow-400">${blueLives}❤️ у каждого</b> (компенсация)`;
+    function renderRoomPlayers(data) {
+      const render = (team, containerId, countId) => {
+        const players = Object.entries(data.room?.[team] || {})
+          .sort((a, b) => (a[1].joinedAt || 0) - (b[1].joinedAt || 0));
+        const container = document.getElementById(containerId);
+        const count = document.getElementById(countId);
+        
+        count.innerText = players.length;
+        
+        if (players.length === 0) {
+          container.innerHTML = `<div class="text-center text-white/30 italic py-4 text-sm">Пусто</div>`;
+          return;
         }
-      } else {
-        redInfo.innerText = `${redLives}❤️ у каждого`;
-        blueInfo.innerText = `${blueLives}❤️ у каждого`;
-      }
+        
+        container.innerHTML = players.map(([id, p]) => `
+          <div class="player-row clickable" onclick="addToGame('${team}', '${id}')">
+            <div class="avatar avatar-sm" data-name="${escapeHtml(p.name)}"></div>
+            <div class="name">${escapeHtml(p.name)}</div>
+            <span class="action-icon">➕</span>
+            <button class="kick-btn" onclick="event.stopPropagation(); kickFromRoom('${team}', '${id}')" title="Кикнуть">✖</button>
+          </div>
+        `).join('');
+        
+        container.querySelectorAll('.avatar[data-name]').forEach(el => {
+          applyAvatar(el, el.dataset.name);
+        });
+      };
+      
+      render('red', 'room-red', 'room-count-red');
+      render('blue', 'room-blue', 'room-count-blue');
+      
+      const total = Object.keys(data.room?.red || {}).length + Object.keys(data.room?.blue || {}).length;
+      document.getElementById('room-count').innerText = `${total} игроков`;
     }
 
     // ============================================================
@@ -618,15 +841,24 @@
       const btn = document.getElementById('btn-start');
       const redCount = Object.keys(data.players?.red || {}).length;
       const blueCount = Object.keys(data.players?.blue || {}).length;
+      const roomRed = Object.keys(data.room?.red || {}).length;
+      const roomBlue = Object.keys(data.room?.blue || {}).length;
 
       if (data.status === 'lobby') {
-        if (redCount >= redMax && blueCount >= blueMax) {
+        const activeReady = redCount >= redMax && blueCount >= blueMax;
+        const canAutoFill = (redCount + roomRed) >= redMax && (blueCount + roomBlue) >= blueMax;
+        
+        if (activeReady) {
           btn.disabled = false;
           btn.innerText = '🚀 НАЧАТЬ БОЙ';
           btn.classList.add('pulse-status');
+        } else if (canAutoFill) {
+          btn.disabled = false;
+          btn.innerText = `🚀 НАЧАТЬ БОЙ (автовыбор: ${redCount + roomRed}/${redMax} vs ${blueCount + roomBlue}/${blueMax})`;
+          btn.classList.add('pulse-status');
         } else {
           btn.disabled = true;
-          btn.innerText = `ОЖИДАНИЕ (${redCount}/${redMax} vs ${blueCount}/${blueMax})`;
+          btn.innerText = `ОЖИДАНИЕ (${redCount + roomRed}/${redMax} vs ${blueCount + roomBlue}/${blueMax})`;
           btn.classList.remove('pulse-status');
         }
       }
@@ -671,6 +903,31 @@
       document.getElementById('hp-fill-red').style.width = maxRed > 0 ? `${(redTotal / maxRed) * 100}%` : '0%';
       document.getElementById('hp-fill-blue').style.width = maxBlue > 0 ? `${(blueTotal / maxBlue) * 100}%` : '0%';
 
+      // Списки игроков
+      const renderGameList = (team, listId) => {
+        const players = Object.entries(data.players?.[team] || {});
+        const list = document.getElementById(listId);
+        
+        if (players.length === 0) {
+          list.innerHTML = `<li class="text-white/30 italic text-center py-2">—</li>`;
+          return;
+        }
+        
+        list.innerHTML = players.map(([id, p]) => {
+          const isDead = !p.alive || p.lives <= 0;
+          const isActive = data.activePlayerId === id;
+          const hearts = isDead ? '💀' : '❤️'.repeat(p.lives);
+          return `
+            <li class="flex justify-between items-center p-2 rounded-lg ${isActive ? 'bg-yellow-500/20 border border-yellow-500/50' : 'bg-black/30'} ${isDead ? 'opacity-50' : ''}">
+              <span class="font-bold truncate">${isActive ? '▶ ' : ''}${escapeHtml(p.name)}</span>
+              <span class="ml-2 text-xs">${hearts}</span>
+            </li>
+          `;
+        }).join('');
+      };
+      renderGameList('red', 'game-list-red');
+      renderGameList('blue', 'game-list-blue');
+
       const timerInfo = document.getElementById('mod-timer-info');
       if (data.timer !== null && data.timer !== undefined) {
         timerInfo.innerText = `⏱️ Прелоадинг: ${data.timer} сек`;
@@ -706,15 +963,6 @@
     }
 
     // ============================================================
-    // КИК
-    // ============================================================
-    window.kickPlayer = (team, id) => { 
-      if (currentData?.status !== 'lobby') return;
-      if (!confirm('Кикнуть игрока?')) return;
-      remove(ref(db, `games/battle_1/players/${team}/${id}`)); 
-    };
-
-    // ============================================================
     // ЗАВЕРШЕНИЕ
     // ============================================================
     window.endGame = async () => {
@@ -723,6 +971,7 @@
       
       await update(gameRef, { 
         status: 'finished', 
+        screen: 'winner',
         winner: 'none',
         activePlayerId: null,
         timer: null
@@ -735,27 +984,47 @@
     // ВОЗВРАТ В ЛОББИ
     // ============================================================
     window.returnToLobby = async () => {
-      if (!confirm('Вернуться в лобби? Все игроки отключатся.')) return;
+      if (currentData?.status !== 'playing') return;
+      if (!confirm('Вернуться в лобби? Все игроки перейдут в комнату.')) return;
+      
+      await moveAllPlayersToRoom(currentData);
+    };
 
+    // ============================================================
+    // НОВАЯ ИГРА (после финиша)
+    // ============================================================
+    window.newGame = async () => {
+      if (currentData?.status !== 'finished') return;
+      
+      // Переносим всех из players в room
+      const players = currentData.players || {};
+      const roomUpdates = [];
+      
+      ['red', 'blue'].forEach(team => {
+        Object.entries(players[team] || {}).forEach(([id, p]) => {
+          roomUpdates.push(set(ref(db, `games/battle_1/room/${team}/${id}`), {
+            name: p.name,
+            joinedAt: Date.now()
+          }));
+        });
+      });
+      
+      await Promise.all(roomUpdates);
+      
       await update(gameRef, {
+        screen: 'attract',
         status: 'lobby',
         players: { red: {}, blue: {} },
-        turn: { team: firstTeam, name: '...' },
         activePlayerId: null,
         timer: null,
         preloadDone: false,
         winner: null,
         last_shot: null,
-        shots: null
+        shots: null,
+        turn: { team: firstTeam, name: '...' }
       });
       
-      try {
-        await remove(ref(db, 'games/battle_1/shots'));
-        await remove(ref(db, 'games/battle_1/last_shot'));
-        await remove(ref(db, 'games/battle_1/aim'));
-      } catch (e) {
-        console.warn('Не удалось очистить игровые данные', e);
-      }
+      try { await remove(ref(db, 'games/battle_1/aim')); } catch {}
     };
 
     // ============================================================
@@ -768,22 +1037,46 @@
       try {
         const snap = await get(gameRef);
         const data = snap.val();
-        if (!data) return;
+        if (!data || data.status !== 'lobby') return;
 
         const mode = data.mode || '1v1';
         const { redMax, blueMax, isUnfair } = parseMode(mode);
         const { redLives, blueLives } = calculateLives(mode);
 
-        const playersRed = data.players?.red || {};
-        const playersBlue = data.players?.blue || {};
+        let playersRed = { ...data.players?.red || {} };
+        let playersBlue = { ...data.players?.blue || {} };
+        const roomRed = data.room?.red || {};
+        const roomBlue = data.room?.blue || {};
+
+        // ---------- АВТОВЫБОР ----------
+        // Если не хватает — добираем из room по joinedAt
+        if (Object.keys(playersRed).length < redMax) {
+          const sorted = Object.entries(roomRed).sort((a, b) => (a[1].joinedAt || 0) - (b[1].joinedAt || 0));
+          for (const [id, p] of sorted) {
+            if (Object.keys(playersRed).length >= redMax) break;
+            playersRed[id] = { name: p.name, lives: redLives, alive: true, connected: true };
+            await set(ref(db, `games/battle_1/players/red/${id}`), playersRed[id]);
+            await remove(ref(db, `games/battle_1/room/red/${id}`));
+          }
+        }
+        
+        if (Object.keys(playersBlue).length < blueMax) {
+          const sorted = Object.entries(roomBlue).sort((a, b) => (a[1].joinedAt || 0) - (b[1].joinedAt || 0));
+          for (const [id, p] of sorted) {
+            if (Object.keys(playersBlue).length >= blueMax) break;
+            playersBlue[id] = { name: p.name, lives: blueLives, alive: true, connected: true };
+            await set(ref(db, `games/battle_1/players/blue/${id}`), playersBlue[id]);
+            await remove(ref(db, `games/battle_1/room/blue/${id}`));
+          }
+        }
 
         if (Object.keys(playersRed).length < redMax || Object.keys(playersBlue).length < blueMax) {
           alert(`Недостаточно игроков (нужно: ${redMax} vs ${blueMax})`);
+          isStarting = false;
           return;
         }
 
         // ---------- FALLBACK КООРДИНАТ ----------
-        // play.html генерирует при входе, но могут не успеть (async)
         const usedYRed = [];
         const usedYBlue = [];
         const coordUpdates = [];
@@ -822,10 +1115,8 @@
           await Promise.all(coordUpdates);
         }
 
-        // ---------- ОБНОВЛЕНИЕ ЖИЗНЕЙ ----------
-        // calculateLives уже возвращает правильные значения
+        // ---------- ЖИЗНИ ----------
         const livesUpdates = [];
-        
         Object.keys(playersRed).forEach(id => {
           livesUpdates.push(update(ref(db, `games/battle_1/players/red/${id}`), { 
             lives: redLives, 
@@ -838,10 +1129,8 @@
             alive: true 
           }));
         });
-        
         await Promise.all(livesUpdates);
 
-        // ---------- СОХРАНЯЕМ LIVES В GAME ----------
         await update(gameRef, {
           lives: { red: redLives, blue: blueLives }
         });
@@ -857,6 +1146,7 @@
 
         // ---------- СТАРТ ----------
         await update(gameRef, { 
+          screen: 'game',
           status: 'playing', 
           turn: { team: firstTeam, name: firstPlayerEntry[1].name }, 
           activePlayerId: firstPlayerEntry[0],
@@ -865,7 +1155,6 @@
           winner: null
         });
 
-        // ---------- ТИК ТАЙМЕРА ----------
         let countdown = 10;
         const tick = setInterval(async () => {
           countdown--;
@@ -882,20 +1171,7 @@
       }
     };
 
-    // ============================================================
-    // УТИЛИТЫ
-    // ============================================================
-    function escapeHtml(str) {
-      if (!str) return '';
-      return String(str)
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#39;');
-    }
-
-    // Инициализация селектора
+    // Инициализация
     updateUnfairSelectorUI();
   </script>
 </body>
