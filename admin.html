@@ -100,6 +100,33 @@
       box-shadow: 0 0 18px rgba(34, 211, 238, 0.3), inset 0 0 15px rgba(34, 211, 238, 0.08);
     }
 
+    /* СТАТУС-ПЛАШКА */
+    .status-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px 14px;
+      padding: 10px 16px;
+      background: rgba(0,0,0,0.4);
+      border: 1px solid rgba(127, 227, 255, 0.2);
+      border-radius: 12px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+    }
+    .status-bar .sb-item {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      color: rgba(168, 230, 255, 0.6);
+    }
+    .status-bar .sb-val {
+      color: #fff;
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .status-bar .sb-val.ok { color: #22c55e; }
+    .status-bar .sb-val.warn { color: var(--amber); }
+    .status-bar .sb-val.danger { color: var(--red-team); }
+
     .msg-item {
       transition: all 0.2s ease;
     }
@@ -288,21 +315,56 @@
     .send-btn:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(34,211,238,0.4); }
     .send-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
+    /* КНОПКИ СБРОСА — 3 уровня */
     .reset-btn {
-      background: rgba(239, 68, 68, 0.15);
-      border: 2px solid rgba(239, 68, 68, 0.5);
-      color: #fca5a5;
       font-weight: 900;
       letter-spacing: 0.04em;
       transition: all 0.2s;
     }
-    .reset-btn:hover:not(:disabled) {
+    .reset-btn:active:not(:disabled) { transform: scale(0.98); }
+    .reset-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+    .reset-btn.soft {
+      background: rgba(251, 191, 36, 0.15);
+      border: 2px solid rgba(251, 191, 36, 0.5);
+      color: #fcd34d;
+    }
+    .reset-btn.soft:hover:not(:disabled) {
+      background: rgba(251, 191, 36, 0.3);
+      color: #fff;
+      box-shadow: 0 0 30px rgba(251, 191, 36, 0.3);
+    }
+
+    .reset-btn.full {
+      background: rgba(239, 68, 68, 0.15);
+      border: 2px solid rgba(239, 68, 68, 0.5);
+      color: #fca5a5;
+    }
+    .reset-btn.full:hover:not(:disabled) {
       background: rgba(239, 68, 68, 0.3);
       color: #fff;
       box-shadow: 0 0 30px rgba(239, 68, 68, 0.3);
     }
-    .reset-btn:active:not(:disabled) { transform: scale(0.98); }
-    .reset-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+    .reset-btn.hard {
+      background: linear-gradient(135deg, #7f1d1d, #991b1b);
+      border: 2px solid #ef4444;
+      color: #fff;
+    }
+    .reset-btn.hard:hover:not(:disabled) {
+      background: linear-gradient(135deg, #991b1b, #b91c1c);
+      box-shadow: 0 0 40px rgba(239, 68, 68, 0.5);
+    }
+
+    .reset-card {
+      background: rgba(0,0,0,0.3);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 14px;
+      padding: 16px;
+    }
+    .reset-card.soft { border-color: rgba(251, 191, 36, 0.3); }
+    .reset-card.full { border-color: rgba(239, 68, 68, 0.3); }
+    .reset-card.hard { border-color: rgba(239, 68, 68, 0.6); }
 
     .clear-btn {
       color: #fca5a5;
@@ -350,7 +412,7 @@
       border: 1px solid rgba(127, 227, 255, 0.35);
       border-radius: 1.5rem;
       padding: 1.6rem;
-      max-width: 400px;
+      max-width: 420px;
       width: 100%;
       animation: modalIn 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
       box-shadow: 0 20px 60px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.06);
@@ -358,6 +420,13 @@
     .modal-icon { font-size: 2.5rem; text-align: center; margin-bottom: 0.6rem; }
     .modal-title { font-size: 1.15rem; font-weight: 900; text-align: center; margin-bottom: 0.5rem; letter-spacing: 0.03em; }
     .modal-text { font-size: 0.85rem; text-align: center; color: var(--text-dim); line-height: 1.5; margin-bottom: 1.2rem; }
+    .modal-text .highlight {
+      color: #fff;
+      font-weight: 700;
+      background: rgba(34, 211, 238, 0.1);
+      padding: 1px 6px;
+      border-radius: 4px;
+    }
     .modal-actions { display: flex; gap: 0.6rem; }
     .modal-btn {
       flex: 1;
@@ -396,9 +465,18 @@
   <div class="toast-container" id="toast-container"></div>
 
   <div class="glass max-w-2xl w-full p-6 my-4">
-    <div class="flex justify-between items-center mb-6 flex-wrap gap-3">
+    <div class="flex justify-between items-center mb-4 flex-wrap gap-3">
       <h1 class="page-title text-2xl font-black tracking-widest">АДМИН-ПАНЕЛЬ</h1>
       <a href="index.html" class="back-btn">← НАЗАД</a>
+    </div>
+
+    <!-- Живой статус -->
+    <div class="status-bar mb-5" id="status-bar">
+      <div class="sb-item">СТАТУС: <span class="sb-val" id="sb-status">—</span></div>
+      <div class="sb-item">ЭКРАН: <span class="sb-val" id="sb-screen">—</span></div>
+      <div class="sb-item">ИГРОКОВ: <span class="sb-val" id="sb-players">0</span></div>
+      <div class="sb-item">В КОМНАТЕ: <span class="sb-val" id="sb-room">0</span></div>
+      <div class="sb-item">РЕЖИМ: <span class="sb-val" id="sb-mode">—</span></div>
     </div>
 
     <!-- Табы -->
@@ -519,37 +597,102 @@
     <!-- ВКЛАДКА: СБРОС -->
     <!-- ============================================================ -->
     <div id="tab-reset" class="hidden">
-      <div class="text-center py-4">
-        <div class="text-6xl mb-4">⚠️</div>
+      <div class="text-center py-2 mb-4">
+        <div class="text-5xl mb-3">⚠️</div>
         <h2 class="text-2xl font-black text-red-400 mb-2 tracking-wider">ОПАСНАЯ ЗОНА</h2>
-        <p class="text-gray-400 mb-6 text-sm max-w-md mx-auto leading-relaxed">
-          Сброс очистит игроков, комнату ожидания, выстрелы, прицелы и
-          вернёт TV на заставку.
-          Реклама и бегущая строка <span class="text-cyan-300 font-bold">не будут затронуты</span>.
+        <p class="text-gray-400 text-sm max-w-md mx-auto leading-relaxed">
+          Три уровня сброса. Выбирай по ситуации.
+          Реклама и бегущая строка <span class="text-cyan-300 font-bold">не затрагиваются</span> (кроме хард-ресета).
         </p>
+      </div>
 
-        <div class="bg-red-900/10 border border-red-500/30 rounded-xl p-4 max-w-md mx-auto mb-6 text-left">
-          <label class="admin-label text-red-300/80">Для подтверждения введите:</label>
-          <p class="text-red-400 font-black text-lg mb-2 select-all mono">СБРОС</p>
-          <input
-            type="text"
-            id="reset-confirm"
-            class="admin-input"
-            placeholder="Введите слово"
-            autocomplete="off"
-            oninput="validateResetInput()"
-          >
+      <!-- 1. МЯГКИЙ -->
+      <div class="reset-card soft mb-4">
+        <div class="flex items-start gap-3 mb-3">
+          <div class="text-2xl flex-shrink-0">🧹</div>
+          <div class="flex-1">
+            <h3 class="text-amber-300 font-black text-sm tracking-wider mb-1">МЯГКИЙ СБРОС</h3>
+            <p class="text-[0.72rem] text-white/50 leading-relaxed">
+              Только убирает игроков из игры и очищает выстрелы/прицелы.
+              <span class="text-amber-200/80 font-bold">Комната ожидания не трогается</span> —
+              кто ждёт, остаётся. Используй между раундами.
+            </p>
+          </div>
         </div>
-
-        <button
-          onclick="clearGame()"
-          id="reset-btn"
-          disabled
-          class="reset-btn w-full py-4 rounded-xl text-base"
-        >
-          🗑️ ПОЛНЫЙ СБРОС ИГРЫ
+        <div class="bg-black/30 rounded-lg p-3 mb-3">
+          <label class="admin-label text-amber-300/80">Введи для подтверждения:</label>
+          <div class="flex items-center gap-3">
+            <p class="text-amber-400 font-black text-base select-all mono">МЯГКО</p>
+            <input type="text" id="confirm-soft" class="admin-input flex-1" placeholder="..." autocomplete="off" oninput="validateConfirm('soft')">
+          </div>
+        </div>
+        <button onclick="doSoftReset()" id="btn-soft" disabled class="reset-btn soft w-full py-3 rounded-xl text-sm">
+          🧹 ОЧИСТИТЬ ИГРУ (комната остаётся)
         </button>
       </div>
+
+      <!-- 2. ПОЛНЫЙ -->
+      <div class="reset-card full mb-4">
+        <div class="flex items-start gap-3 mb-3">
+          <div class="text-2xl flex-shrink-0">🗑️</div>
+          <div class="flex-1">
+            <h3 class="text-red-300 font-black text-sm tracking-wider mb-1">ПОЛНЫЙ СБРОС</h3>
+            <p class="text-[0.72rem] text-white/50 leading-relaxed">
+              Очищает игроков <span class="text-red-200 font-bold">и комнату</span>, сбрасывает режим и первый ход.
+              Реклама и строка остаются.
+            </p>
+          </div>
+        </div>
+        <div class="bg-black/30 rounded-lg p-3 mb-3">
+          <label class="admin-label text-red-300/80">Введи для подтверждения:</label>
+          <div class="flex items-center gap-3">
+            <p class="text-red-400 font-black text-base select-all mono">СБРОС</p>
+            <input type="text" id="confirm-full" class="admin-input flex-1" placeholder="..." autocomplete="off" oninput="validateConfirm('full')">
+          </div>
+        </div>
+        <button onclick="doFullReset()" id="btn-full" disabled class="reset-btn full w-full py-3 rounded-xl text-sm">
+          🗑️ ПОЛНЫЙ СБРОС (игроки + комната)
+        </button>
+      </div>
+
+      <!-- 3. ХАРД -->
+      <div class="reset-card hard mb-4">
+        <div class="flex items-start gap-3 mb-3">
+          <div class="text-2xl flex-shrink-0">🔥</div>
+          <div class="flex-1">
+            <h3 class="text-white font-black text-sm tracking-wider mb-1">ХАРД-РЕСЕТ</h3>
+            <p class="text-[0.72rem] text-white/60 leading-relaxed">
+              Всё то же + <span class="text-red-300 font-bold">удаление рекламы и бегущей строки</span>.
+              Полная очистка игровой базы. Используй перед новой вечеринкой.
+            </p>
+          </div>
+        </div>
+        <div class="bg-black/30 rounded-lg p-3 mb-3">
+          <label class="admin-label text-red-300/80">Введи для подтверждения:</label>
+          <div class="flex items-center gap-3">
+            <p class="text-red-400 font-black text-base select-all mono">ВСЁ</p>
+            <input type="text" id="confirm-hard" class="admin-input flex-1" placeholder="..." autocomplete="off" oninput="validateConfirm('hard')">
+          </div>
+        </div>
+        <button onclick="doHardReset()" id="btn-hard" disabled class="reset-btn hard w-full py-3 rounded-xl text-sm">
+          🔥 ХАРД-РЕСЕТ (включая рекламу)
+        </button>
+      </div>
+
+      <!-- Быстрые действия -->
+      <hr class="border-gray-700/50 my-5">
+      <h3 class="text-xs font-black text-cyan-300 tracking-widest mb-3">БЫСТРЫЕ ДЕЙСТВИЯ</h3>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <button onclick="quickShowQR()" id="btn-show-qr" class="w-full py-3 rounded-xl bg-cyan-600/20 border-2 border-cyan-500/50 text-cyan-300 font-black text-sm hover:bg-cyan-600/40 transition">
+          📱 ПОКАЗАТЬ QR НА TV
+        </button>
+        <button onclick="quickAttract()" id="btn-attract" class="w-full py-3 rounded-xl bg-gray-700/30 border-2 border-gray-500/50 text-gray-300 font-black text-sm hover:bg-gray-600/40 transition">
+          🏠 ВЕРНУТЬ НА ЗАСТАВКУ
+        </button>
+      </div>
+      <p class="text-[0.68rem] text-white/30 mt-2 text-center">
+        Полезно, если ведущий отошёл от пульта и нужно срочно переключить экран
+      </p>
     </div>
 
   </div>
@@ -582,6 +725,7 @@
     };
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
+    const gameRef = ref(db, 'games/battle_1');
     const tickerRef = ref(db, 'games/battle_1/ticker_messages');
     const adRef = ref(db, 'games/battle_1/ad_settings');
 
@@ -591,6 +735,7 @@
     let adFieldsDirty = false;
     let isAdLoading = false;
     let lastMessagesHash = '';
+    let currentGameState = null;
 
     // ============================================================
     // ЗВУК
@@ -662,15 +807,17 @@
     }
 
     // ============================================================
-    // МОДАЛКА (замена confirm)
+    // МОДАЛКА
     // ============================================================
     let modalResolver = null;
-    function showModal({ icon = '⚠️', title = '', text = '', confirmText = 'ОК', cancelText = 'ОТМЕНА' }) {
+    function showModal({ icon = '⚠️', title = '', html = '', text = '', confirmText = 'ОК', cancelText = 'ОТМЕНА' }) {
       return new Promise(resolve => {
         modalResolver = resolve;
         document.getElementById('modal-icon').innerText = icon;
         document.getElementById('modal-title').innerText = title;
-        document.getElementById('modal-text').innerText = text;
+        const textEl = document.getElementById('modal-text');
+        if (html) textEl.innerHTML = html;
+        else textEl.innerText = text;
         document.getElementById('modal-confirm').innerText = confirmText;
         document.getElementById('modal-cancel').innerText = cancelText;
         document.getElementById('modal').classList.remove('hidden');
@@ -702,6 +849,35 @@
 
     const savedTab = localStorage.getItem('endorphin_admin_tab') || 'ad';
     switchTab(savedTab);
+
+    // ============================================================
+    // ЖИВОЙ СТАТУС
+    // ============================================================
+    onValue(gameRef, (snap) => {
+      const data = snap.val() || {};
+      currentGameState = data;
+
+      const status = data.status || '—';
+      const screen = data.screen || '—';
+      const redP = Object.keys(data.players?.red || {}).length;
+      const blueP = Object.keys(data.players?.blue || {}).length;
+      const redR = Object.keys(data.room?.red || {}).length;
+      const blueR = Object.keys(data.room?.blue || {}).length;
+      const mode = data.mode || '—';
+
+      const statusEl = document.getElementById('sb-status');
+      statusEl.innerText = status.toUpperCase();
+      statusEl.className = 'sb-val ' + (
+        status === 'playing' ? 'ok' :
+        status === 'finished' ? 'warn' :
+        status === 'lobby' ? 'ok' : ''
+      );
+
+      document.getElementById('sb-screen').innerText = screen.toUpperCase();
+      document.getElementById('sb-players').innerText = redP + blueP;
+      document.getElementById('sb-room').innerText = redR + blueR;
+      document.getElementById('sb-mode').innerText = mode;
+    });
 
     // ============================================================
     // ПРЕВЬЮ РЕКЛАМЫ
@@ -744,8 +920,10 @@
 
       const preloadImg = document.getElementById('preload-img').value.trim();
       const preloadLink = document.getElementById('preload-link').value.trim();
+      const preloadText = document.getElementById('preload-text').value.trim();
       const lobbyImg = document.getElementById('lobby-img').value.trim();
       const lobbyLink = document.getElementById('lobby-link').value.trim();
+      const lobbyText = document.getElementById('lobby-text').value.trim();
 
       if (!isValidUrl(preloadImg) || !isValidUrl(lobbyImg)) {
         playError();
@@ -757,18 +935,20 @@
         showToast('Неверный URL ссылки', 'error');
         return;
       }
+      if (!preloadImg && !preloadText) {
+        playError();
+        showToast('Заполни картинку или текст для прелоадинга', 'error');
+        return;
+      }
+      if (!lobbyImg && !lobbyText) {
+        playError();
+        showToast('Заполни картинку или текст для заставки', 'error');
+        return;
+      }
 
       const settings = {
-        preload: {
-          img: preloadImg,
-          link: preloadLink,
-          text: document.getElementById('preload-text').value.trim()
-        },
-        lobby: {
-          img: lobbyImg,
-          link: lobbyLink,
-          text: document.getElementById('lobby-text').value.trim()
-        }
+        preload: { img: preloadImg, link: preloadLink, text: preloadText },
+        lobby: { img: lobbyImg, link: lobbyLink, text: lobbyText }
       };
 
       btn.disabled = true;
@@ -788,7 +968,6 @@
       }
     };
 
-    // Загрузка рекламы
     onValue(adRef, (snap) => {
       const data = snap.val();
       if (!data) return;
@@ -852,7 +1031,6 @@
         const messages = snap.val() || {};
         const keys = Object.keys(messages).sort((a, b) => messages[a].time - messages[b].time);
 
-        // Оставляем 9 старых, добавляем 10-е
         const toDelete = keys.slice(0, Math.max(0, keys.length - 9));
         await Promise.all(toDelete.map(k => remove(ref(db, `games/battle_1/ticker_messages/${k}`))));
 
@@ -902,17 +1080,14 @@
       }
     };
 
-    // ЕДИНЫЙ слушатель — и обновляет список, и обновляет превью
     onValue(tickerRef, (snap) => {
       const messages = snap.val() || {};
       const keys = Object.keys(messages).sort((a, b) => messages[a].time - messages[b].time);
 
-      // Хэш для отсечения лишних перерисовок
       const hash = keys.map(k => `${k}:${messages[k].time}`).join('|');
       if (hash === lastMessagesHash) return;
       lastMessagesHash = hash;
 
-      // Список
       const list = document.getElementById('messages-list');
       if (keys.length === 0) {
         list.innerHTML = `
@@ -939,7 +1114,6 @@
         }).join('');
       }
 
-      // Превью
       const previewEl = document.getElementById('ticker-preview-text');
       if (keys.length === 0) {
         previewEl.innerText = 'ДОБРО ПОЖАЛОВАТЬ НА ВЕЧЕРИНКУ ENDORPHIN!';
@@ -952,36 +1126,188 @@
     });
 
     // ============================================================
-    // СБРОС
+    // СБРОС — 3 УРОВНЯ
     // ============================================================
-    window.validateResetInput = () => {
-      const input = document.getElementById('reset-confirm');
-      const btn = document.getElementById('reset-btn');
-      const isValid = input.value.trim().toUpperCase() === 'СБРОС';
+    const CONFIRM_WORDS = {
+      soft: 'МЯГКО',
+      full: 'СБРОС',
+      hard: 'ВСЁ'
+    };
+
+    window.validateConfirm = (level) => {
+      const input = document.getElementById(`confirm-${level}`);
+      const btn = document.getElementById(`btn-${level}`);
+      const isValid = input.value.trim().toUpperCase() === CONFIRM_WORDS[level];
       btn.disabled = !isValid;
       input.classList.toggle('error', input.value.length > 0 && !isValid);
     };
 
-    window.clearGame = async () => {
-      if (document.getElementById('reset-confirm').value.trim().toUpperCase() !== 'СБРОС') return;
+    function getStateSummary() {
+      if (!currentGameState) return 'нет данных';
+      const redP = Object.keys(currentGameState.players?.red || {}).length;
+      const blueP = Object.keys(currentGameState.players?.blue || {}).length;
+      const redR = Object.keys(currentGameState.room?.red || {}).length;
+      const blueR = Object.keys(currentGameState.room?.blue || {}).length;
+      return `
+        Статус: <span class="highlight">${currentGameState.status || '—'}</span> ·
+        Экран: <span class="highlight">${currentGameState.screen || '—'}</span><br>
+        Игроков: <span class="highlight">${redP + blueP}</span> (🔴${redP} / 🔵${blueP}) ·
+        В комнате: <span class="highlight">${redR + blueR}</span> (🔴${redR} / 🔵${blueR})
+      `;
+    }
+
+    // 1. МЯГКИЙ
+    window.doSoftReset = async () => {
+      if (document.getElementById('confirm-soft').value.trim().toUpperCase() !== CONFIRM_WORDS.soft) return;
 
       const ok = await showModal({
-        icon: '🚨',
-        title: 'Полный сброс?',
-        text: 'Будут очищены все игроки, комнаты, выстрелы и прицелы. Реклама и строка не тронуты.',
-        confirmText: 'СБРОСИТЬ'
+        icon: '🧹',
+        title: 'Мягкий сброс?',
+        html: `
+          <div class="text-left text-sm leading-relaxed">
+            Будет очищено:<br>
+            • игроки в игре<br>
+            • выстрелы и прицелы<br><br>
+            <b class="text-amber-300">Комната ожидания не трогается</b> — кто ждёт, остаётся.<br><br>
+            <span class="text-white/60 text-xs">Сейчас в базе:</span><br>
+            ${getStateSummary()}
+          </div>
+        `,
+        confirmText: 'ОЧИСТИТЬ'
       });
       if (!ok) return;
 
-      const btn = document.getElementById('reset-btn');
+      const btn = document.getElementById('btn-soft');
       btn.disabled = true;
       btn.innerHTML = '<span class="spinner"></span> СБРОС...';
 
       try {
-        await update(ref(db, 'games/battle_1'), {
-          screen: 'attract',
+        await update(gameRef, {
           status: 'lobby',
+          screen: 'attract',
+          players: { red: {}, blue: {} },
+          turn: { team: currentGameState?.firstTeam || 'red', name: '...' },
+          activePlayerId: null,
+          timer: null,
+          preloadDone: false,
+          winner: null
+        });
+        try {
+          await remove(ref(db, 'games/battle_1/shots'));
+          await remove(ref(db, 'games/battle_1/last_shot'));
+          await remove(ref(db, 'games/battle_1/aim'));
+        } catch {}
+
+        document.getElementById('confirm-soft').value = '';
+        validateConfirm('soft');
+        playSuccess();
+        showToast('Мягкий сброс выполнен. Комната сохранена.', 'success');
+      } catch (e) {
+        playError();
+        showToast('Ошибка: ' + e.message, 'error');
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '🧹 ОЧИСТИТЬ ИГРУ (комната остаётся)';
+      }
+    };
+
+    // 2. ПОЛНЫЙ
+    window.doFullReset = async () => {
+      if (document.getElementById('confirm-full').value.trim().toUpperCase() !== CONFIRM_WORDS.full) return;
+
+      const ok = await showModal({
+        icon: '🗑️',
+        title: 'Полный сброс?',
+        html: `
+          <div class="text-left text-sm leading-relaxed">
+            Будет очищено:<br>
+            • игроки в игре<br>
+            • <b class="text-red-300">комната ожидания</b><br>
+            • выстрелы и прицелы<br>
+            • режим и первый ход<br><br>
+            Реклама и бегущая строка <b class="text-cyan-300">не затрагиваются</b>.<br><br>
+            <span class="text-white/60 text-xs">Сейчас в базе:</span><br>
+            ${getStateSummary()}
+          </div>
+        `,
+        confirmText: 'СБРОСИТЬ ВСЁ'
+      });
+      if (!ok) return;
+
+      const btn = document.getElementById('btn-full');
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner"></span> СБРОС...';
+
+      try {
+        await update(gameRef, {
+          status: 'lobby',
+          screen: 'attract',
           mode: '1v1',
+          firstTeam: 'red',
+          players: { red: {}, blue: {} },
+          room: { red: {}, blue: {} },
+          turn: { team: 'red', name: '...' },
+          activePlayerId: null,
+          timer: null,
+          preloadDone: false,
+          winner: null,
+          last_shot: null,
+          shots: null,
+          lives: { red: 3, blue: 3 }
+        });
+        try {
+          await remove(ref(db, 'games/battle_1/shots'));
+          await remove(ref(db, 'games/battle_1/last_shot'));
+          await remove(ref(db, 'games/battle_1/aim'));
+        } catch {}
+
+        document.getElementById('confirm-full').value = '';
+        validateConfirm('full');
+        playSuccess();
+        showToast('Полный сброс выполнен', 'success');
+      } catch (e) {
+        playError();
+        showToast('Ошибка: ' + e.message, 'error');
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '🗑️ ПОЛНЫЙ СБРОС (игроки + комната)';
+      }
+    };
+
+    // 3. ХАРД
+    window.doHardReset = async () => {
+      if (document.getElementById('confirm-hard').value.trim().toUpperCase() !== CONFIRM_WORDS.hard) return;
+
+      const ok = await showModal({
+        icon: '🔥',
+        title: 'ХАРД-РЕСЕТ?',
+        html: `
+          <div class="text-left text-sm leading-relaxed">
+            Будет <b class="text-red-300">полностью очищено ВСЁ</b>:<br>
+            • игроки, комната, выстрелы<br>
+            • <b class="text-red-300">реклама</b><br>
+            • <b class="text-red-300">бегущая строка</b><br>
+            • режим, первый ход, жизни<br><br>
+            <span class="text-white/60 text-xs">Сейчас в базе:</span><br>
+            ${getStateSummary()}<br>
+            <span class="text-xs text-amber-300 mt-2 block">⚠ Сообщений в строке: ${document.querySelectorAll('#messages-list .msg-item').length}</span>
+          </div>
+        `,
+        confirmText: 'УДАЛИТЬ ВСЁ'
+      });
+      if (!ok) return;
+
+      const btn = document.getElementById('btn-hard');
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner"></span> УДАЛЕНИЕ...';
+
+      try {
+        // Полный сброс игровых данных
+        await update(gameRef, {
+          status: 'lobby',
+          screen: 'attract',
+          mode: '1v1',
+          firstTeam: 'red',
           players: { red: {}, blue: {} },
           room: { red: {}, blue: {} },
           turn: { team: 'red', name: '...' },
@@ -994,22 +1320,61 @@
           lives: { red: 3, blue: 3 }
         });
 
+        // Удаление рекламы и строки
+        try { await remove(adRef); } catch {}
+        try { await remove(tickerRef); } catch {}
         try {
           await remove(ref(db, 'games/battle_1/shots'));
           await remove(ref(db, 'games/battle_1/last_shot'));
           await remove(ref(db, 'games/battle_1/aim'));
         } catch {}
 
-        document.getElementById('reset-confirm').value = '';
-        validateResetInput();
+        // Очистка полей рекламы в UI
+        ['preload-img', 'preload-link', 'preload-text', 'lobby-img', 'lobby-link', 'lobby-text'].forEach(id => {
+          document.getElementById(id).value = '';
+        });
+        adFieldsDirty = false;
+        updateAdPreview('preload');
+        updateAdPreview('lobby');
 
+        document.getElementById('confirm-hard').value = '';
+        validateConfirm('hard');
         playSuccess();
-        showToast('Игра сброшена. TV на заставке.', 'success');
+        showToast('Хард-ресет выполнен. Всё очищено.', 'success');
       } catch (e) {
         playError();
-        showToast('Ошибка сброса: ' + e.message, 'error');
+        showToast('Ошибка: ' + e.message, 'error');
+      } finally {
         btn.disabled = false;
-        btn.innerHTML = '🗑️ ПОЛНЫЙ СБРОС ИГРЫ';
+        btn.innerHTML = '🔥 ХАРД-РЕСЕТ (включая рекламу)';
+      }
+    };
+
+    // ============================================================
+    // БЫСТРЫЕ ДЕЙСТВИЯ
+    // ============================================================
+    window.quickShowQR = async () => {
+      if (!currentGameState || currentGameState.status !== 'lobby') {
+        playError();
+        showToast('QR можно показать только в лобби', 'error');
+        return;
+      }
+      playClick();
+      try {
+        await update(gameRef, { screen: 'qr' });
+        showToast('QR показан на TV', 'success');
+      } catch (e) {
+        showToast(e.message, 'error');
+      }
+    };
+
+    window.quickAttract = async () => {
+      playClick();
+      try {
+        await update(gameRef, { screen: 'attract' });
+        showToast('TV возвращён на заставку', 'success');
+      } catch (e) {
+        showToast(e.message, 'error');
       }
     };
 
