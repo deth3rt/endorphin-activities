@@ -90,11 +90,6 @@
       50% { box-shadow: 0 0 40px rgba(251,191,36,0.9); }
     }
     @keyframes roomPulse { 0%, 100% { opacity: 0.6; } 50% { opacity: 1; } }
-    @keyframes emojiPop {
-      0% { transform: scale(0.5); opacity: 0; }
-      60% { transform: scale(1.15); opacity: 1; }
-      100% { transform: scale(1); opacity: 1; }
-    }
     .animate-shake { animation: shake 0.4s ease-in-out; }
 
     .avatar {
@@ -104,7 +99,6 @@
       justify-content: center;
       font-weight: 900;
       color: #fff;
-      text-shadow: 0 2px 8px rgba(0,0,0,0.5);
       flex-shrink: 0;
       border: 2px solid rgba(255,255,255,0.3);
       box-shadow: 0 4px 12px rgba(0,0,0,0.4);
@@ -227,7 +221,7 @@
       text-transform: uppercase;
     }
 
-    /* УГОЛ — SVG-полукруг с drag */
+    /* УГОЛ */
     .angle-control {
       position: relative;
       width: 100%;
@@ -292,7 +286,7 @@
       color: rgba(168, 230, 255, 0.5);
     }
 
-    /* СИЛА — drag-слайдер без кнопок */
+    /* СИЛА */
     .power-drag {
       width: 100%;
       max-width: 400px;
@@ -1244,30 +1238,39 @@
     updateTeamBadges();
 
     // ============================================================
-    // УГОЛ
+    // УГОЛ — ИСПРАВЛЕННАЯ МАТЕМАТИКА
     // ============================================================
-    const angleSvg = document.getElementById('angle-svg');
-    const anglePointer = document.getElementById('angle-pointer');
-    const angleArcFill = document.getElementById('angle-arc-fill');
-    const angleValueBadge = document.getElementById('angle-value-badge');
-    const angleHint = document.getElementById('angle-hint');
-    const angleControl = document.getElementById('angle-control');
+    // Красные: 0° = правый край (280,120), 90° = верх (160,0), 180° = левый край (40,120).
+    // Синие:   0° = левый край (40,120),  90° = верх (160,0), 180° = правый край (280,120).
+    const ANGLE_CX = 160;
+    const ANGLE_CY = 120;
+    const ANGLE_R = 120;
 
     function angleToPoint(angleDeg) {
       const rad = (angleDeg * Math.PI) / 180;
-      const cx = 160, cy = 120, r = 120;
-      const visual = isRed ? (Math.PI - rad) : rad;
-      const x = cx + Math.cos(visual) * r;
-      const y = cy - Math.sin(visual) * r;
+      let x, y;
+      if (isRed) {
+        // Красные: от правого края против часовой
+        x = ANGLE_CX + Math.cos(rad) * ANGLE_R;
+        y = ANGLE_CY - Math.sin(rad) * ANGLE_R;
+      } else {
+        // Синие: от левого края по часовой (зеркально)
+        x = ANGLE_CX - Math.cos(rad) * ANGLE_R;
+        y = ANGLE_CY - Math.sin(rad) * ANGLE_R;
+      }
       return { x, y };
     }
 
     function pointToAngle(px, py) {
-      const cx = 160, cy = 120;
-      let rad = Math.atan2(cy - py, px - cx);
-      let deg = (rad * 180) / Math.PI;
-      if (!isRed) deg = 180 - deg;
-      if (deg < 0) deg = 0;
+      const dx = px - ANGLE_CX;
+      const dy = ANGLE_CY - py;
+      let deg;
+      if (isRed) {
+        deg = Math.atan2(dy, dx) * 180 / Math.PI;
+      } else {
+        deg = Math.atan2(dy, -dx) * 180 / Math.PI;
+      }
+      if (deg < 0) deg += 360;
       if (deg > 180) deg = 180;
       return deg;
     }
@@ -1275,8 +1278,19 @@
     function buildArcPath(angleDeg) {
       const start = angleToPoint(0);
       const end = angleToPoint(angleDeg);
-      return `M ${start.x} ${start.y} A 120 120 0 0 0 ${end.x} ${end.y}`;
+      // Красные: sweep=0 (против часовой от правого края)
+      // Синие: sweep=1 (по часовой от левого края)
+      const sweep = isRed ? 0 : 1;
+      return `M ${start.x} ${start.y} A ${ANGLE_R} ${ANGLE_R} 0 0 ${sweep} ${end.x} ${end.y}`;
     }
+
+    const angleSvg = document.getElementById('angle-svg');
+    const anglePointer = document.getElementById('angle-pointer');
+    const angleArcFill = document.getElementById('angle-arc-fill');
+    const angleArcBg = document.getElementById('angle-arc-bg');
+    const angleValueBadge = document.getElementById('angle-value-badge');
+    const angleHint = document.getElementById('angle-hint');
+    const angleControl = document.getElementById('angle-control');
 
     function drawAngleTicks() {
       const group = document.getElementById('angle-ticks');
@@ -1284,12 +1298,19 @@
       for (let a = 0; a <= 180; a += 30) {
         const p1 = angleToPoint(a);
         const rad = (a * Math.PI) / 180;
-        const visual = isRed ? (Math.PI - rad) : rad;
         const innerR = 108;
-        const p2 = {
-          x: 160 + Math.cos(visual) * innerR,
-          y: 120 - Math.sin(visual) * innerR
-        };
+        let p2;
+        if (isRed) {
+          p2 = {
+            x: ANGLE_CX + Math.cos(rad) * innerR,
+            y: ANGLE_CY - Math.sin(rad) * innerR
+          };
+        } else {
+          p2 = {
+            x: ANGLE_CX - Math.cos(rad) * innerR,
+            y: ANGLE_CY - Math.sin(rad) * innerR
+          };
+        }
         const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
         line.setAttribute('class', 'angle-tick');
         line.setAttribute('x1', p1.x);
