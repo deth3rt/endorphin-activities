@@ -221,15 +221,18 @@
       text-transform: uppercase;
     }
 
-    /* УГОЛ */
+    /* УГОЛ — ПОЛНЫЙ КРУГ 360° */
     .angle-control {
       position: relative;
       width: 100%;
-      max-width: 340px;
-      height: 140px;
+      max-width: 260px;
+      height: 260px;
       margin: 0 auto;
       touch-action: none;
       cursor: grab;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
     .angle-control:active { cursor: grabbing; }
     .angle-control svg {
@@ -237,53 +240,66 @@
       height: 100%;
       display: block;
       overflow: visible;
+      position: absolute;
+      inset: 0;
     }
     .angle-arc {
       fill: none;
-      stroke: rgba(127, 227, 255, 0.15);
-      stroke-width: 14;
-      stroke-linecap: round;
+      stroke: rgba(127, 227, 255, 0.12);
+      stroke-width: 12;
     }
     .angle-arc-fill {
       fill: none;
       stroke: var(--team-color);
-      stroke-width: 14;
+      stroke-width: 12;
       stroke-linecap: round;
       filter: drop-shadow(0 0 10px var(--team-color));
       transition: stroke 0.2s;
     }
-    .angle-tick { stroke: rgba(168, 230, 255, 0.25); stroke-width: 2; }
+    .angle-tick { stroke: rgba(168, 230, 255, 0.22); stroke-width: 2; }
+    .angle-tick-major { stroke: rgba(168, 230, 255, 0.5); stroke-width: 3; }
     .angle-pointer {
       fill: #fff;
       stroke: var(--team-color);
       stroke-width: 3;
-      filter: drop-shadow(0 0 12px var(--team-color));
+      filter: drop-shadow(0 0 14px var(--team-color));
+    }
+    .angle-center-dot {
+      fill: rgba(0,0,0,0.6);
+      stroke: var(--team-color);
+      stroke-width: 2;
     }
     .angle-value-badge {
       position: absolute;
-      bottom: 0;
+      bottom: -8px;
       left: 50%;
       transform: translateX(-50%);
       padding: 4px 14px;
       border-radius: 999px;
-      background: rgba(0,0,0,0.7);
+      background: rgba(0,0,0,0.85);
       border: 1.5px solid var(--team-color);
       font-family: 'JetBrains Mono', monospace;
       font-weight: 900;
-      font-size: 1.05rem;
+      font-size: 1rem;
       color: var(--team-color);
       box-shadow: 0 0 20px var(--team-color);
       white-space: nowrap;
+      z-index: 2;
     }
     .angle-hint {
       position: absolute;
-      top: 6px;
+      top: -6px;
       left: 50%;
       transform: translateX(-50%);
       font-size: 0.6rem;
       font-weight: 900;
       letter-spacing: 0.2em;
-      color: rgba(168, 230, 255, 0.5);
+      color: rgba(168, 230, 255, 0.7);
+      white-space: nowrap;
+      z-index: 2;
+      background: rgba(0,0,0,0.6);
+      padding: 2px 10px;
+      border-radius: 999px;
     }
 
     /* СИЛА */
@@ -380,6 +396,7 @@
       border: 1px solid rgba(251, 191, 36, 0.35);
       border-radius: 10px;
       margin-bottom: 5px;
+      gap: 6px;
     }
     .super-title {
       font-size: 0.62rem;
@@ -392,6 +409,16 @@
       font-weight: 900;
       color: rgba(251, 191, 36, 0.85);
       font-family: 'JetBrains Mono', monospace;
+    }
+    .super-penalty {
+      font-size: 0.58rem;
+      font-weight: 900;
+      color: #fca5a5;
+      background: rgba(239, 68, 68, 0.2);
+      border: 1px solid rgba(239, 68, 68, 0.5);
+      padding: 2px 8px;
+      border-radius: 999px;
+      letter-spacing: 0.08em;
     }
     .super-grid {
       display: grid;
@@ -417,6 +444,7 @@
       font-weight: 900;
       font-family: 'JetBrains Mono', monospace;
     }
+    .super-btn .super-cost.penalty { color: #fca5a5; }
     .super-btn:active:not(:disabled) {
       transform: scale(0.95);
       background: rgba(251, 191, 36, 0.25);
@@ -717,15 +745,15 @@
     .toast.info { background: rgba(34, 211, 238, 0.25); border: 1px solid rgba(34, 211, 238, 0.5); }
 
     /* АДАПТИВ */
-    @media (max-height: 700px) {
-      .angle-control { height: 118px; }
+    @media (max-height: 760px) {
+      .angle-control { height: 220px; max-width: 220px; }
       .power-drag { height: 62px; }
       .game-content { gap: 9px; }
       .super-btn .super-emoji { font-size: 1rem; }
       .super-btn { padding: 5px 2px; }
     }
-    @media (max-height: 600px) {
-      .angle-control { height: 100px; }
+    @media (max-height: 660px) {
+      .angle-control { height: 180px; max-width: 180px; }
       .power-drag { height: 56px; }
       .shoot-btn { height: 52px; font-size: 1.05rem; letter-spacing: 2px; }
       .game-content { gap: 6px; }
@@ -827,16 +855,20 @@
     <div class="game-content">
 
       <div class="control-card">
-        <div class="section-label">Угол</div>
+        <div class="section-label">Угол · полный круг</div>
         <div class="angle-control" id="angle-control">
-          <div class="angle-hint" id="angle-hint">ВВЕРХ</div>
-          <svg viewBox="0 0 320 130" preserveAspectRatio="xMidYMax meet" id="angle-svg">
-            <path class="angle-arc" id="angle-arc-bg" d="M 40 120 A 120 120 0 0 1 280 120" />
-            <path class="angle-arc-fill" id="angle-arc-fill" d="M 40 120 A 120 120 0 0 1 280 120" />
+          <div class="angle-hint" id="angle-hint">ВПЕРЁД</div>
+          <svg viewBox="0 0 260 260" id="angle-svg">
+            <circle class="angle-arc" cx="130" cy="130" r="100" />
+            <circle class="angle-arc-fill" cx="130" cy="130" r="100"
+                    id="angle-arc-fill"
+                    stroke-dasharray="0 628.32"
+                    transform="rotate(-90 130 130)" />
             <g id="angle-ticks"></g>
-            <circle class="angle-pointer" id="angle-pointer" cx="40" cy="120" r="9" />
+            <circle class="angle-center-dot" cx="130" cy="130" r="10" />
+            <circle class="angle-pointer" id="angle-pointer" cx="130" cy="230" r="9" />
           </svg>
-          <div class="angle-value-badge" id="angle-value-badge">45°</div>
+          <div class="angle-value-badge" id="angle-value-badge">0°</div>
         </div>
       </div>
 
@@ -857,6 +889,9 @@
         <div class="super-header">
           <div class="super-title">⚡ СУПЕРБРОСОК</div>
           <div class="super-hearts" id="super-hearts-info">-1❤️</div>
+        </div>
+        <div id="super-penalty-info" class="hidden mb-1 text-center">
+          <span class="super-penalty">⚠ ШТРАФ ×2 — БОЛЬШАЯ КОМАНДА</span>
         </div>
         <div class="super-grid" id="super-grid"></div>
       </div>
@@ -970,7 +1005,8 @@
     localStorage.setItem(storageKey, playerId);
 
     const joinedKey = `endorphin_joined_${team}_${playerId}`;
-    let hasJoined = localStorage.getItem(joinedKey) === '1';
+    let hasJoined = false; // ВСЕГДА начинаем с экрана входа — вход только через join()
+
     const nameStorageKey = `endorphin_name_${team}`;
     const emojiStorageKey = `endorphin_emoji_${team}`;
 
@@ -997,7 +1033,7 @@
     };
 
     let isMyTurn = false;
-    let currentAngle = 45;
+    let currentAngle = 0;
     let currentPower = 30;
     let isShooting = false;
     let myName = '';
@@ -1238,56 +1274,48 @@
     updateTeamBadges();
 
     // ============================================================
-    // УГОЛ — ИСПРАВЛЕННАЯ МАТЕМАТИКА
+    // УГОЛ — ПОЛНЫЙ КРУГ 360°
     // ============================================================
-    // Красные: 0° = правый край (280,120), 90° = верх (160,0), 180° = левый край (40,120).
-    // Синие:   0° = левый край (40,120),  90° = верх (160,0), 180° = правый край (280,120).
-    const ANGLE_CX = 160;
-    const ANGLE_CY = 120;
-    const ANGLE_R = 120;
+    // Красные: 0° = вправо (3 часа), 90° = вверх, 180° = влево, 270° = вниз
+    // Синие:   0° = влево (9 часов), 90° = вверх, 180° = вправо, 270° = вниз
+    // Формула: угол в градусах, direction = isRed ? 1 : -1
+    // В play шлём angle (0..360). TV: vx = cos(angle)*speed*direction, vy = -sin(angle)*speed.
+    // Это значит: для красных при 0° cos(0)=1 → вправо, sin(0)=0 → гориз.
+    //               при 90° cos=0, sin=1 → vy=-1*speed → вверх.
+    //               при 180° cos=-1 → влево.
+    //               при 270° cos=0, sin=-1 → vy=+speed → вниз.
+    // Для синих direction=-1: при 0° vx = cos(0)*(-1) = -1 → влево.
+    //                         при 90° vx=0, vy=-speed → вверх.
+    //                         при 180° vx=+1 → вправо.
+    //                         при 270° vy=+speed → вниз.
+    // Всё сходится. В виджете: 0° — вправо для красных, 0° — влево для синих (зеркально).
 
+    const ANGLE_CX = 130;
+    const ANGLE_CY = 130;
+    const ANGLE_R = 100;
+    const CIRCUMFERENCE = 2 * Math.PI * ANGLE_R;
+
+    // Преобразование угла (в градусах) в точку на круге
     function angleToPoint(angleDeg) {
       const rad = (angleDeg * Math.PI) / 180;
-      let x, y;
-      if (isRed) {
-        // Красные: от правого края против часовой
-        x = ANGLE_CX + Math.cos(rad) * ANGLE_R;
-        y = ANGLE_CY - Math.sin(rad) * ANGLE_R;
-      } else {
-        // Синие: от левого края по часовой (зеркально)
-        x = ANGLE_CX - Math.cos(rad) * ANGLE_R;
-        y = ANGLE_CY - Math.sin(rad) * ANGLE_R;
-      }
-      return { x, y };
+      return {
+        x: ANGLE_CX + Math.cos(rad) * ANGLE_R,
+        y: ANGLE_CY - Math.sin(rad) * ANGLE_R  // минус, т.к. canvas Y вниз
+      };
     }
 
+    // Преобразование точки на круге в угол (0..360)
     function pointToAngle(px, py) {
       const dx = px - ANGLE_CX;
-      const dy = ANGLE_CY - py;
-      let deg;
-      if (isRed) {
-        deg = Math.atan2(dy, dx) * 180 / Math.PI;
-      } else {
-        deg = Math.atan2(dy, -dx) * 180 / Math.PI;
-      }
+      const dy = ANGLE_CY - py; // минус, т.к. canvas Y вниз
+      let deg = Math.atan2(dy, dx) * 180 / Math.PI;
       if (deg < 0) deg += 360;
-      if (deg > 180) deg = 180;
       return deg;
-    }
-
-    function buildArcPath(angleDeg) {
-      const start = angleToPoint(0);
-      const end = angleToPoint(angleDeg);
-      // Красные: sweep=0 (против часовой от правого края)
-      // Синие: sweep=1 (по часовой от левого края)
-      const sweep = isRed ? 0 : 1;
-      return `M ${start.x} ${start.y} A ${ANGLE_R} ${ANGLE_R} 0 0 ${sweep} ${end.x} ${end.y}`;
     }
 
     const angleSvg = document.getElementById('angle-svg');
     const anglePointer = document.getElementById('angle-pointer');
     const angleArcFill = document.getElementById('angle-arc-fill');
-    const angleArcBg = document.getElementById('angle-arc-bg');
     const angleValueBadge = document.getElementById('angle-value-badge');
     const angleHint = document.getElementById('angle-hint');
     const angleControl = document.getElementById('angle-control');
@@ -1295,46 +1323,53 @@
     function drawAngleTicks() {
       const group = document.getElementById('angle-ticks');
       group.innerHTML = '';
-      for (let a = 0; a <= 180; a += 30) {
-        const p1 = angleToPoint(a);
+      // 24 деления (каждые 15°)
+      for (let a = 0; a < 360; a += 15) {
+        const isMajor = a % 90 === 0;
         const rad = (a * Math.PI) / 180;
-        const innerR = 108;
-        let p2;
-        if (isRed) {
-          p2 = {
-            x: ANGLE_CX + Math.cos(rad) * innerR,
-            y: ANGLE_CY - Math.sin(rad) * innerR
-          };
-        } else {
-          p2 = {
-            x: ANGLE_CX - Math.cos(rad) * innerR,
-            y: ANGLE_CY - Math.sin(rad) * innerR
-          };
-        }
+        const outerR = ANGLE_R;
+        const innerR = isMajor ? ANGLE_R - 18 : ANGLE_R - 10;
+        const x1 = ANGLE_CX + Math.cos(rad) * outerR;
+        const y1 = ANGLE_CY - Math.sin(rad) * outerR;
+        const x2 = ANGLE_CX + Math.cos(rad) * innerR;
+        const y2 = ANGLE_CY - Math.sin(rad) * innerR;
         const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-        line.setAttribute('class', 'angle-tick');
-        line.setAttribute('x1', p1.x);
-        line.setAttribute('y1', p1.y);
-        line.setAttribute('x2', p2.x);
-        line.setAttribute('y2', p2.y);
+        line.setAttribute('class', isMajor ? 'angle-tick-major' : 'angle-tick');
+        line.setAttribute('x1', x1);
+        line.setAttribute('y1', y1);
+        line.setAttribute('x2', x2);
+        line.setAttribute('y2', y2);
         group.appendChild(line);
       }
     }
 
     function updateAngleDisplay() {
-      const a = Math.round(currentAngle);
+      const a = Math.round(currentAngle) % 360;
       angleValueBadge.innerText = a + '°';
+
       const p = angleToPoint(a);
       anglePointer.setAttribute('cx', p.x);
       anglePointer.setAttribute('cy', p.y);
-      angleArcFill.setAttribute('d', buildArcPath(a));
+
+      // Заполнение дуги от 0° (или 180°, если синие?) — нет, всегда от 0° для простоты
+      // Но у синих 0° — слева. Визуально: синие видят круг зеркально.
+      // Чтобы наглядно, для синих развернём: 0° у них = 180° визуально.
+      // Но проще: не зеркалим — красные видят 0° справа, синие — тоже 0° справа (но стреляют влево, т.к. direction=-1).
+      // Однако запутает. Лучше: синие видят 0° слева (зеркально).
+      // Для этого при отрисовке для синих используем (360 - a) % 360.
+      const displayAngle = isRed ? a : (360 - a) % 360;
+      const arcLength = (displayAngle / 360) * CIRCUMFERENCE;
+      angleArcFill.setAttribute('stroke-dasharray', `${arcLength} ${CIRCUMFERENCE}`);
 
       let hint;
-      if (a < 22) hint = 'ПРЯМО';
-      else if (a < 67) hint = 'ВВЕРХ';
-      else if (a < 112) hint = 'ВЫСОКО';
-      else if (a < 157) hint = 'ВНИЗ';
-      else hint = 'НАВЕСОМ';
+      if (a < 22 || a > 338) hint = 'ВПЕРЁД';
+      else if (a < 67) hint = 'ВВЕРХ-ВПЕРЁД';
+      else if (a < 112) hint = 'ВВЕРХ';
+      else if (a < 157) hint = 'ВВЕРХ-НАЗАД';
+      else if (a < 202) hint = 'НАЗАД';
+      else if (a < 247) hint = 'ВНИЗ-НАЗАД';
+      else if (a < 292) hint = 'ВНИЗ';
+      else hint = 'ВНИЗ-ВПЕРЁД';
       angleHint.innerText = hint;
     }
 
@@ -1343,10 +1378,18 @@
     function handleAnglePointer(clientX, clientY) {
       if (!isMyTurn || isShooting) return;
       const rect = angleSvg.getBoundingClientRect();
-      const sx = ((clientX - rect.left) / rect.width) * 320;
-      const sy = ((clientY - rect.top) / rect.height) * 130;
-      const deg = pointToAngle(sx, sy);
-      const newAngle = Math.round(deg);
+      // viewBox 260x260, preserveAspectRatio default (xMidYMid meet)
+      // Проще: использовать getScreenCTM для точного преобразования
+      const pt = angleSvg.createSVGPoint();
+      pt.x = clientX;
+      pt.y = clientY;
+      const svgP = pt.matrixTransform(angleSvg.getScreenCTM().inverse());
+
+      let deg = pointToAngle(svgP.x, svgP.y);
+      // Для синих: зеркально по горизонтали (0° у них слева)
+      if (!isRed) deg = (360 - deg) % 360;
+
+      const newAngle = Math.round(deg) % 360;
       if (newAngle !== currentAngle) {
         currentAngle = newAngle;
         updateAngleDisplay();
@@ -1459,8 +1502,8 @@
       const ringEl = document.getElementById('turn-timer-ring');
 
       timerEl.classList.add('active');
-      const CIRCUMFERENCE = 2 * Math.PI * 30;
-      progressEl.style.strokeDasharray = CIRCUMFERENCE;
+      const TIMER_C = 2 * Math.PI * 30;
+      progressEl.style.strokeDasharray = TIMER_C;
       progressEl.style.strokeDashoffset = 0;
       let lastSec = -1;
 
@@ -1468,7 +1511,7 @@
         const remaining = Math.max(0, turnDeadline - Date.now());
         const sec = Math.ceil(remaining / 1000);
         const ratio = remaining / (TURN_TIME * 1000);
-        progressEl.style.strokeDashoffset = CIRCUMFERENCE * (1 - ratio);
+        progressEl.style.strokeDashoffset = TIMER_C * (1 - ratio);
 
         if (sec !== lastSec) {
           valueEl.innerText = sec;
@@ -1518,21 +1561,33 @@
       if (hash === lastSuperPanelHash) return;
       lastSuperPanelHash = hash;
 
+      // Плашка штрафа
+      const penaltyEl = document.getElementById('super-penalty-info');
+      if (costMultiplier > 1) {
+        penaltyEl.classList.remove('hidden');
+        penaltyEl.innerHTML = `<span class="super-penalty">⚠ ШТРАФ ×${costMultiplier} — БОЛЬШАЯ КОМАНДА</span>`;
+      } else {
+        penaltyEl.classList.add('hidden');
+      }
+
+      // Инфо о жизнях
       document.getElementById('super-hearts-info').innerText = costMultiplier > 1
-        ? `×${costMultiplier} (большинство)`
-        : `БОНУС`;
+        ? `×${costMultiplier}`
+        : `-1❤️`;
 
       const grid = document.getElementById('super-grid');
       grid.innerHTML = '';
       Object.values(SUPERS).forEach(si => {
         const actualCost = getSuperCost(si.cost);
-        const canUse = myLives > actualCost && isMyTurn && !isShooting;
+        // Нельзя убить себя супером: myLives - cost >= 1
+        const canUse = (myLives - actualCost) >= 1 && isMyTurn && !isShooting;
         const btn = document.createElement('button');
         btn.className = 'super-btn' + (canUse ? ' can-use' : '');
         btn.disabled = !canUse;
+        const penaltyCls = actualCost > si.cost ? ' penalty' : '';
         btn.innerHTML = `
           <span class="super-emoji">${si.emoji}</span>
-          <span class="super-cost">${actualCost > si.cost ? '⚠' : ''}-${actualCost}❤️</span>
+          <span class="super-cost${penaltyCls}">-${actualCost}❤️</span>
         `;
         btn.onclick = () => openSuperModal(si);
         grid.appendChild(btn);
@@ -1542,7 +1597,7 @@
     function openSuperModal(superItem) {
       if (!isMyTurn || isShooting) return;
       const actualCost = getSuperCost(superItem.cost);
-      if (myLives <= actualCost) return;
+      if ((myLives - actualCost) < 1) return;
       playClick();
       document.getElementById('super-modal').classList.remove('hidden');
 
@@ -1575,24 +1630,24 @@
       if (superItem.id === 'fan') {
         for (let i = 0; i < superItem.count; i++) {
           shots.push({
-            angle: clamp(currentAngle + (Math.random() - 0.5) * 60, 0, 180),
+            angle: (currentAngle + (Math.random() - 0.5) * 60 + 360) % 360,
             power: clamp(currentPower + (Math.random() - 0.5) * 40, 20, 100)
           });
         }
       } else if (superItem.id === 'shotgun') {
         for (let i = 0; i < superItem.count; i++) {
           shots.push({
-            angle: clamp(currentAngle + (Math.random() - 0.5) * 20, 0, 180),
+            angle: (currentAngle + (Math.random() - 0.5) * 20 + 360) % 360,
             power: clamp(currentPower + (Math.random() - 0.5) * 10, 20, 100)
           });
         }
       } else if (superItem.id === 'chaos') {
         const same = Math.random() < 0.1;
-        const sameAngle = Math.random() * 180;
+        const sameAngle = Math.random() * 360;
         const samePower = 20 + Math.random() * 80;
         for (let i = 0; i < superItem.count; i++) {
           shots.push({
-            angle: same ? sameAngle : Math.random() * 180,
+            angle: same ? sameAngle : Math.random() * 360,
             power: same ? samePower : 20 + Math.random() * 80
           });
         }
@@ -1611,13 +1666,13 @@
     async function executeSuperShot(superItem) {
       if (isShooting) return;
       const actualCost = getSuperCost(superItem.cost);
-      if (myLives <= actualCost) return;
+      if ((myLives - actualCost) < 1) return;
       const shots = generateSuperShots(superItem);
       vibrate([60, 30, 60, 30, 100]);
       playSuper();
 
       try {
-        const newLives = Math.max(1, myLives - actualCost);
+        const newLives = myLives - actualCost;
         await update(playerRef, { lives: newLives });
         myLives = newLives;
         await doShot(shots, true, superItem.id);
@@ -1794,12 +1849,7 @@
       const inPlayers = data.players?.[team]?.[playerId];
       const inRoom = data.room?.[team]?.[playerId];
 
-      if (!hasJoined && (inPlayers || inRoom)) {
-        hasJoined = true;
-        localStorage.setItem(joinedKey, '1');
-        document.getElementById('join-screen').classList.add('hidden');
-      }
-
+      // Если мы уже вошли (hasJoined), но пропали из базы — вернуть экран входа
       if (hasJoined && !inPlayers && !inRoom) {
         showJoinScreen();
         hasJoined = false;
@@ -1890,7 +1940,8 @@
           btn.classList.add('animate-shake');
           setTimeout(() => btn.classList.remove('animate-shake'), 500);
           startTurnTimer();
-          currentAngle = 45;
+          // Стартовое положение — 0° (вперёд для красных, назад для синих — но 0° у синих влево, ок)
+          currentAngle = 0;
           currentPower = 30;
           updateAngleDisplay();
           updatePowerDisplay();
@@ -2047,9 +2098,8 @@
     updateAngleDisplay();
     updatePowerDisplay();
 
-    if (!hasJoined) {
-      document.getElementById('join-screen').classList.remove('hidden');
-    }
+    // Всегда показываем экран входа (hasJoined = false по умолчанию)
+    document.getElementById('join-screen').classList.remove('hidden');
   </script>
 </body>
 </html>
