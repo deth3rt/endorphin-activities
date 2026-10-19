@@ -125,6 +125,78 @@
         }
 
         /* ============================================================
+           ПРЕЛОУДИНГ (НОВЫЙ ЭКРАН)
+           ============================================================ */
+        #preload-view {
+            position: absolute;
+            inset: 0;
+            z-index: 35;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg-gradient);
+            transition: opacity 0.5s;
+        }
+
+        #preload-view.active {
+            display: flex;
+        }
+
+        .preload-title {
+            font-size: 4rem;
+            font-weight: 900;
+            text-align: center;
+            line-height: 1.2;
+            margin-bottom: 2rem;
+            animation: preloadPulse 2s ease-in-out infinite;
+        }
+
+        @keyframes preloadPulse {
+            0%, 100% { transform: scale(1); text-shadow: 0 0 30px rgba(34, 211, 238, 0.4); }
+            50% { transform: scale(1.02); text-shadow: 0 0 60px rgba(34, 211, 238, 0.8); }
+        }
+
+        .preload-vs {
+            font-size: 2rem;
+            font-weight: 900;
+            color: var(--cyan-glow);
+            margin: 0.5rem 0;
+            animation: vsGlow 1.5s ease-in-out infinite;
+        }
+
+        @keyframes vsGlow {
+            0%, 100% { opacity: 0.6; text-shadow: 0 0 20px rgba(34, 211, 238, 0.3); }
+            50% { opacity: 1; text-shadow: 0 0 40px rgba(34, 211, 238, 0.9); }
+        }
+
+        .preload-timer {
+            font-size: 8rem;
+            font-weight: 900;
+            color: #fff;
+            text-shadow: 0 0 40px rgba(34, 211, 238, 0.6);
+            margin: 1rem 0;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .preload-ad {
+            width: 100%;
+            max-width: 600px;
+            height: 120px;
+            background: rgba(10, 37, 64, 0.6);
+            border: 2px dashed rgba(127, 227, 255, 0.4);
+            border-radius: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 2rem;
+            color: rgba(168, 230, 255, 0.4);
+            font-size: 1.2rem;
+            font-weight: 700;
+            letter-spacing: 0.2em;
+        }
+
+        /* ============================================================
            ТЕКСТ МЕГАБРОСОК
            ============================================================ */
         @keyframes megaZoom {
@@ -190,7 +262,7 @@
         .hp-blue { bottom: 80px; right: 20px; color: var(--blue-team); }
 
         /* ============================================================
-           ВЫБОР КОМАНДЫ (для модератора)
+           ВЫБОР КОМАНДЫ
            ============================================================ */
         .team-select {
             display: flex;
@@ -268,13 +340,22 @@
             </div>
         </div>
         
-        <!-- Выбор первой команды (управляется с модератора) -->
         <div class="team-select hidden" id="team-select">
             <button class="team-btn red" onclick="selectFirstTeam('red')" id="btn-red-start">КРАСНЫЕ</button>
             <button class="team-btn blue" onclick="selectFirstTeam('blue')" id="btn-blue-start">СИНИЕ</button>
         </div>
 
         <div id="tv-status" class="text-4xl font-black text-white tracking-widest hidden">ОЖИДАНИЕ ИГРОКОВ...</div>
+    </div>
+
+    <!-- Экран Прелоудинга -->
+    <div id="preload-view">
+        <h1 class="preload-title" id="preload-title">ИГРОК 1 VS ИГРОК 2</h1>
+        <div class="preload-timer" id="preload-timer">10</div>
+        <div class="preload-ad" id="preload-ad">
+            <!-- Место под рекламу -->
+            РЕКЛАМА
+        </div>
     </div>
 
     <!-- Экран Победы -->
@@ -327,7 +408,9 @@
         let players = []; 
         let snowballs = []; 
         let particles = []; 
-        let iceCrystals = []; // Для визуализации
+
+        let preloadInterval = null;
+        let isPreloading = false;
 
         function getBaseUrl() {
             const url = new URL(window.location.href);
@@ -345,16 +428,13 @@
                 this.alive = data.alive !== undefined ? data.alive : true;
                 this.team = team;
                 
-                if (data.posX !== undefined) {
+                if (data.posX !== undefined && data.posY !== undefined) {
                     this.x = (data.posX / 100) * width;
                     this.y = (data.posY / 100) * height;
                 } else {
-                    if (team === 'red') {
-                        this.x = width * (0.05 + Math.random() * 0.15);
-                    } else {
-                        this.x = width * (0.80 + Math.random() * 0.15);
-                    }
-                    this.y = height * (0.2 + Math.random() * 0.6);
+                    // Временное положение (будет перезаписано после генерации)
+                    this.x = team === 'red' ? width * 0.1 : width * 0.9;
+                    this.y = height * 0.5;
                 }
                 
                 this.width = 60;
@@ -414,7 +494,7 @@
         }
 
         // ============================================================
-        // СНЕЖОК (ФИЗИКА С ГРАВИТАЦИЕЙ)
+        // СНЕЖОК
         // ============================================================
         class Snowball {
             constructor(shooter, power, angle) {
@@ -463,6 +543,47 @@
                         size: Math.random() * 4 + 2
                     });
                 }
+            }
+        }
+
+        // ============================================================
+        // ГЕНЕРАЦИЯ КООРДИНАТ (ЕСЛИ ИХ НЕТ В БАЗЕ)
+        // ============================================================
+        function ensurePlayerPositions(data) {
+            const redPlayers = data.players?.red || {};
+            const bluePlayers = data.players?.blue || {};
+            
+            const redNeedsPositions = Object.values(redPlayers).some(p => p.posX === undefined || p.posY === undefined);
+            const blueNeedsPositions = Object.values(bluePlayers).some(p => p.posX === undefined || p.posY === undefined);
+            
+            if (redNeedsPositions) {
+                const keys = Object.keys(redPlayers);
+                const usedY = [];
+                keys.forEach((id) => {
+                    let posX, posY, attempts = 0;
+                    do {
+                        posX = 5 + Math.random() * 15; // 5-20%
+                        posY = 20 + Math.random() * 60; // 20-80%
+                        attempts++;
+                    } while (usedY.some(y => Math.abs(y - posY) < 10) && attempts < 50);
+                    usedY.push(posY);
+                    update(ref(db, `games/${gameId}/players/red/${id}`), { posX, posY });
+                });
+            }
+            
+            if (blueNeedsPositions) {
+                const keys = Object.keys(bluePlayers);
+                const usedY = [];
+                keys.forEach((id) => {
+                    let posX, posY, attempts = 0;
+                    do {
+                        posX = 80 + Math.random() * 15; // 80-95%
+                        posY = 20 + Math.random() * 60;
+                        attempts++;
+                    } while (usedY.some(y => Math.abs(y - posY) < 10) && attempts < 50);
+                    usedY.push(posY);
+                    update(ref(db, `games/${gameId}/players/blue/${id}`), { posX, posY });
+                });
             }
         }
 
@@ -578,19 +699,58 @@
         };
 
         // ============================================================
+        // ПРЕЛОУДИНГ
+        // ============================================================
+        function startPreload(data) {
+            if (isPreloading) return;
+            isPreloading = true;
+
+            const preloadView = document.getElementById('preload-view');
+            const preloadTitle = document.getElementById('preload-title');
+            const preloadTimer = document.getElementById('preload-timer');
+
+            // Определяем название
+            const redPlayers = Object.values(data.players?.red || {});
+            const bluePlayers = Object.values(data.players?.blue || {});
+            
+            if (redPlayers.length === 1 && bluePlayers.length === 1) {
+                preloadTitle.innerText = `${redPlayers[0].name.toUpperCase()} VS ${bluePlayers[0].name.toUpperCase()}`;
+            } else {
+                preloadTitle.innerText = `КОМАНДА КРАСНЫХ VS КОМАНДА СИНИХ`;
+            }
+
+            preloadView.classList.add('active');
+            preloadTimer.innerText = '10';
+
+            let seconds = 10;
+            if (preloadInterval) clearInterval(preloadInterval);
+            preloadInterval = setInterval(() => {
+                seconds--;
+                preloadTimer.innerText = seconds;
+
+                if (seconds <= 0) {
+                    clearInterval(preloadInterval);
+                    preloadView.classList.remove('active');
+                    isPreloading = false;
+                    // После прелоудинга начинаем игру
+                    update(gameRef, { status: 'playing', timer: null });
+                }
+            }, 1000);
+        }
+
+        // ============================================================
         // FIREBASE СЛУШАТЕЛИ
         // ============================================================
         onValue(ref(db, `games/${gameId}/ticker_messages`), (snap) => {
-    const messages = snap.val() || {};
-    const keys = Object.keys(messages).sort((a, b) => messages[a].time - messages[b].time);
-    if (keys.length > 0) {
-        // Склеиваем ВСЕ сообщения через разделитель
-        const allTexts = keys.map(key => messages[key].text).join('  •  ');
-        document.getElementById('ticker-text').innerText = allTexts;
-    } else {
-        document.getElementById('ticker-text').innerText = 'ДОБРО ПОЖАЛОВАТЬ НА ВЕЧЕРИНКУ ENDORPHIN!';
-    }
-});
+            const messages = snap.val() || {};
+            const keys = Object.keys(messages).sort((a, b) => messages[a].time - messages[b].time);
+            if (keys.length > 0) {
+                const allTexts = keys.map(key => messages[key].text).join('  •  ');
+                document.getElementById('ticker-text').innerText = allTexts;
+            } else {
+                document.getElementById('ticker-text').innerText = 'ДОБРО ПОЖАЛОВАТЬ НА ВЕЧЕРИНКУ ENDORPHIN!';
+            }
+        });
 
         onValue(gameRef, (snapshot) => {
             const data = snapshot.val();
@@ -599,6 +759,11 @@
             if (data.mode) {
                 document.getElementById('tv-mode').innerText = `РЕЖИМ: ${data.mode.toUpperCase()}`;
                 if (data.status === 'lobby') generateQRs();
+            }
+
+            // Генерируем координаты, если игра началась, а их нет
+            if (data.status === 'playing') {
+                ensurePlayerPositions(data);
             }
 
             const redPlayers = Object.entries(data.players?.red || {}).map(([id, p]) => new Player(id, p, 'red'));
@@ -612,6 +777,10 @@
                     if (updated) {
                         p.lives = updated.lives;
                         p.alive = updated.alive;
+                        if (updated.x && updated.y) {
+                            p.x = updated.x;
+                            p.y = updated.y;
+                        }
                     }
                 });
             }
@@ -622,11 +791,18 @@
             const maxP = parseInt(data.mode?.charAt(0) || 1);
             const isReady = redPlayers.length >= maxP && bluePlayers.length >= maxP;
 
+            // ПРЕЛОУДИНГ: если статус playing и ещё не было прелоудинга
+            if (data.status === 'playing' && !isPreloading && !data.preloadDone) {
+                startPreload(data);
+                update(gameRef, { preloadDone: true });
+            }
+
             if (data.status === 'lobby') {
                 document.getElementById('lobby-view').style.opacity = '1';
                 document.getElementById('lobby-view').style.pointerEvents = 'auto';
                 document.getElementById('win-view').classList.add('hidden');
                 document.getElementById('win-view').classList.remove('flex');
+                document.getElementById('preload-view').classList.remove('active');
                 
                 if (data.mode) {
                     document.getElementById('qr-container').classList.remove('hidden');
