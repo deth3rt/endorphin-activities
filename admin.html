@@ -5,34 +5,99 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta name="theme-color" content="#03080f">
   <title>ENDORPHIN | АДМИН-ПАНЕЛЬ</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&family=JetBrains+Mono:wght@700;900&display=swap" rel="stylesheet">
+
   <script src="https://cdn.tailwindcss.com"></script>
+
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap');
-    
-    body { 
-      background: radial-gradient(circle at 50% 0%, #0a2540 0%, #03080f 100%);
-      font-family: 'Montserrat', sans-serif; 
-      color: #fff; 
+    :root {
+      --bg-deep: #03080f;
+      --bg-mid: #0a2540;
+      --ice: #7fe3ff;
+      --ice-bright: #22d3ee;
+      --amber: #fbbf24;
+      --red-team: #ff3b5c;
+      --blue-team: #3d8bff;
+      --glass-bg: rgba(10, 37, 64, 0.6);
+      --glass-border: rgba(127, 227, 255, 0.28);
+      --text-dim: rgba(168, 230, 255, 0.7);
+      --text-dimmer: rgba(168, 230, 255, 0.45);
+    }
+
+    * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
+
+    body {
+      background: radial-gradient(circle at 50% 0%, var(--bg-mid) 0%, var(--bg-deep) 70%);
+      font-family: 'Montserrat', sans-serif;
+      color: #fff;
       min-height: 100dvh;
-      -webkit-tap-highlight-color: transparent;
+      position: relative;
+      margin: 0;
     }
-    
-    .glass { 
-      background: rgba(10, 37, 64, 0.8); 
-      border: 1px solid rgba(127, 227, 255, 0.3); 
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.035;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      mix-blend-mode: overlay;
+    }
+
+    .mono { font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums; }
+
+    .glass {
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
       border-radius: 1.5rem;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.05);
+      position: relative;
+      z-index: 1;
     }
+
+    .page-title {
+      background: linear-gradient(180deg, #fff 0%, #a8e6ff 55%, #22d3ee 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      text-shadow: 0 0 30px rgba(34, 211, 238, 0.3);
+    }
+
+    .back-btn {
+      padding: 0.5rem 0.9rem;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 0.7rem;
+      font-weight: 700;
+      font-size: 0.72rem;
+      color: var(--text-dim);
+      text-decoration: none;
+      transition: all 0.2s;
+      letter-spacing: 0.08em;
+    }
+    .back-btn:hover { background: rgba(34,211,238,0.12); color: var(--ice-bright); border-color: rgba(34,211,238,0.4); }
 
     .tab-btn {
       transition: all 0.2s;
+      border: 2px solid rgba(255,255,255,0.08);
+      background: rgba(0,0,0,0.25);
+      color: var(--text-dim);
+    }
+    .tab-btn:hover:not(.active) {
+      border-color: rgba(127, 227, 255, 0.35);
+      color: var(--ice);
+      background: rgba(34, 211, 238, 0.06);
     }
     .tab-btn.active {
-      background: rgba(34, 211, 238, 0.2);
-      color: #22d3ee;
-      border-color: #22d3ee;
-      box-shadow: 0 0 15px rgba(34, 211, 238, 0.3);
+      background: rgba(34, 211, 238, 0.15);
+      color: var(--ice-bright);
+      border-color: var(--ice-bright);
+      box-shadow: 0 0 18px rgba(34, 211, 238, 0.3), inset 0 0 15px rgba(34, 211, 238, 0.08);
     }
 
     .msg-item {
@@ -42,96 +107,82 @@
       background: rgba(239, 68, 68, 0.08);
       border-color: rgba(239, 68, 68, 0.5);
     }
-    .msg-item:hover .delete-btn {
-      opacity: 1;
-    }
+    .msg-item:hover .delete-btn { opacity: 1; }
     .delete-btn {
       opacity: 0.5;
-      transition: opacity 0.2s;
+      transition: opacity 0.2s, transform 0.2s;
     }
+    .delete-btn:hover { transform: scale(1.15); }
 
     .admin-input {
       width: 100%;
       background: rgba(0, 0, 0, 0.5);
-      border: 1px solid rgba(127, 227, 255, 0.2);
+      border: 1.5px solid rgba(127, 227, 255, 0.2);
       border-radius: 12px;
       padding: 10px 14px;
-      font-size: 0.875rem;
+      font-size: 0.85rem;
       color: #fff;
       outline: none;
       transition: all 0.2s;
     }
     .admin-input:focus {
-      border-color: #22d3ee;
-      box-shadow: 0 0 15px rgba(34, 211, 238, 0.2);
+      border-color: var(--ice-bright);
+      box-shadow: 0 0 15px rgba(34, 211, 238, 0.25);
     }
-    .admin-input::placeholder {
-      color: rgba(255, 255, 255, 0.25);
-    }
+    .admin-input::placeholder { color: rgba(255, 255, 255, 0.25); }
     .admin-input.error {
-      border-color: #ef4444;
-      box-shadow: 0 0 15px rgba(239, 68, 68, 0.3);
+      border-color: var(--red-team);
+      box-shadow: 0 0 15px rgba(255, 59, 92, 0.3);
     }
 
     .admin-label {
       display: block;
-      font-size: 0.7rem;
+      font-size: 0.68rem;
       font-weight: 700;
-      color: rgba(168, 230, 255, 0.6);
+      color: rgba(168, 230, 255, 0.65);
       margin-bottom: 6px;
-      letter-spacing: 0.05em;
+      letter-spacing: 0.08em;
       text-transform: uppercase;
     }
 
     .toast-container {
       position: fixed;
-      top: 20px;
-      right: 20px;
-      z-index: 1000;
+      top: 16px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 1100;
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      gap: 8px;
       pointer-events: none;
+      max-width: 92vw;
     }
     .toast {
-      padding: 12px 20px;
+      padding: 11px 18px;
       border-radius: 12px;
-      font-size: 0.875rem;
+      font-size: 0.82rem;
       font-weight: 700;
       color: #fff;
-      backdrop-filter: blur(16px);
       animation: toastIn 0.3s ease-out;
       pointer-events: auto;
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 8px;
       box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+      white-space: nowrap;
+      max-width: 92vw;
     }
-    .toast.success {
-      background: rgba(34, 197, 94, 0.2);
-      border: 1px solid rgba(34, 197, 94, 0.5);
-    }
-    .toast.error {
-      background: rgba(239, 68, 68, 0.2);
-      border: 1px solid rgba(239, 68, 68, 0.5);
-    }
-    .toast.info {
-      background: rgba(34, 211, 238, 0.2);
-      border: 1px solid rgba(34, 211, 238, 0.5);
-    }
+    .toast.success { background: rgba(34, 197, 94, 0.25); border: 1px solid rgba(34, 197, 94, 0.5); }
+    .toast.error { background: rgba(239, 68, 68, 0.25); border: 1px solid rgba(239, 68, 68, 0.5); }
+    .toast.info { background: rgba(34, 211, 238, 0.25); border: 1px solid rgba(34, 211, 238, 0.5); }
     @keyframes toastIn {
-      from { transform: translateX(120%); opacity: 0; }
-      to { transform: translateX(0); opacity: 1; }
+      from { transform: translateY(-20px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
     }
-    @keyframes toastOut {
-      from { transform: translateX(0); opacity: 1; }
-      to { transform: translateX(120%); opacity: 0; }
-    }
-    .toast.out { animation: toastOut 0.3s ease-in forwards; }
 
     .ad-preview {
       width: 100%;
-      height: 100px;
+      height: 110px;
       background: rgba(0, 0, 0, 0.5);
       border: 2px dashed rgba(127, 227, 255, 0.25);
       border-radius: 12px;
@@ -148,14 +199,16 @@
     }
     .ad-preview .placeholder {
       color: rgba(168, 230, 255, 0.3);
-      font-size: 0.75rem;
+      font-size: 0.72rem;
       font-weight: 700;
       letter-spacing: 0.1em;
+      text-align: center;
+      padding: 0 12px;
     }
 
     .ticker-preview {
-      height: 44px;
-      background: rgba(0, 0, 0, 0.9);
+      height: 48px;
+      background: rgba(0, 0, 0, 0.92);
       border: 1px solid rgba(34, 211, 238, 0.3);
       border-radius: 10px;
       overflow: hidden;
@@ -168,19 +221,20 @@
       position: absolute;
       top: 0; left: 0;
       width: 2px; height: 100%;
-      background: #22d3ee;
-      box-shadow: 0 0 10px #22d3ee;
+      background: var(--ice-bright);
+      box-shadow: 0 0 10px var(--ice-bright);
       z-index: 2;
     }
     .ticker-preview-inner {
       display: inline-block;
       white-space: nowrap;
       padding-left: 100%;
-      animation: tickerPreview 12s linear infinite;
-      font-size: 14px;
+      animation: tickerPreview 14s linear infinite;
+      font-size: 15px;
       font-weight: 700;
-      color: #22d3ee;
+      color: var(--ice-bright);
       text-transform: uppercase;
+      letter-spacing: 0.04em;
     }
     @keyframes tickerPreview {
       0% { transform: translate3d(0, 0, 0); }
@@ -195,6 +249,7 @@
       border-top-color: #fff;
       border-radius: 50%;
       animation: spin 0.8s linear infinite;
+      vertical-align: middle;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
 
@@ -203,9 +258,129 @@
       color: rgba(255,255,255,0.4);
       text-align: right;
       margin-top: 4px;
+      font-family: 'JetBrains Mono', monospace;
     }
-    .char-counter.warn { color: #fbbf24; }
-    .char-counter.danger { color: #ef4444; }
+    .char-counter.warn { color: var(--amber); }
+    .char-counter.danger { color: var(--red-team); }
+
+    .save-btn {
+      background: linear-gradient(135deg, var(--ice-bright), var(--blue-team));
+      color: #000;
+      font-weight: 900;
+      letter-spacing: 0.05em;
+      box-shadow: 0 0 30px rgba(34, 211, 238, 0.35), inset 0 1px 0 rgba(255,255,255,0.3);
+      transition: all 0.2s;
+    }
+    .save-btn:hover:not(:disabled) {
+      box-shadow: 0 0 50px rgba(34, 211, 238, 0.6), inset 0 1px 0 rgba(255,255,255,0.3);
+      transform: translateY(-1px);
+    }
+    .save-btn:active:not(:disabled) { transform: scale(0.98); }
+    .save-btn:disabled { opacity: 0.4; cursor: not-allowed; box-shadow: none; }
+
+    .send-btn {
+      background: linear-gradient(135deg, var(--ice-bright), var(--blue-team));
+      color: #000;
+      font-weight: 900;
+      letter-spacing: 0.05em;
+      transition: all 0.2s;
+    }
+    .send-btn:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(34,211,238,0.4); }
+    .send-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .reset-btn {
+      background: rgba(239, 68, 68, 0.15);
+      border: 2px solid rgba(239, 68, 68, 0.5);
+      color: #fca5a5;
+      font-weight: 900;
+      letter-spacing: 0.04em;
+      transition: all 0.2s;
+    }
+    .reset-btn:hover:not(:disabled) {
+      background: rgba(239, 68, 68, 0.3);
+      color: #fff;
+      box-shadow: 0 0 30px rgba(239, 68, 68, 0.3);
+    }
+    .reset-btn:active:not(:disabled) { transform: scale(0.98); }
+    .reset-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+    .clear-btn {
+      color: #fca5a5;
+      transition: all 0.2s;
+    }
+    .clear-btn:hover {
+      color: #fff;
+      background: rgba(239, 68, 68, 0.15);
+    }
+
+    .empty-state {
+      text-align: center;
+      color: rgba(168, 230, 255, 0.3);
+      padding: 40px 20px;
+      font-style: italic;
+      font-size: 0.85rem;
+    }
+    .empty-state .icon {
+      font-size: 2.5rem;
+      margin-bottom: 10px;
+      opacity: 0.5;
+    }
+
+    /* МОДАЛКА */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.8);
+      backdrop-filter: blur(8px);
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+      animation: fadeIn 0.2s ease-out;
+    }
+    .modal-backdrop.hidden { display: none; }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes modalIn {
+      from { transform: translateY(20px) scale(0.95); opacity: 0; }
+      to { transform: translateY(0) scale(1); opacity: 1; }
+    }
+    .modal-card {
+      background: rgba(10, 37, 64, 0.98);
+      border: 1px solid rgba(127, 227, 255, 0.35);
+      border-radius: 1.5rem;
+      padding: 1.6rem;
+      max-width: 400px;
+      width: 100%;
+      animation: modalIn 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.06);
+    }
+    .modal-icon { font-size: 2.5rem; text-align: center; margin-bottom: 0.6rem; }
+    .modal-title { font-size: 1.15rem; font-weight: 900; text-align: center; margin-bottom: 0.5rem; letter-spacing: 0.03em; }
+    .modal-text { font-size: 0.85rem; text-align: center; color: var(--text-dim); line-height: 1.5; margin-bottom: 1.2rem; }
+    .modal-actions { display: flex; gap: 0.6rem; }
+    .modal-btn {
+      flex: 1;
+      padding: 0.8rem 1rem;
+      border-radius: 0.85rem;
+      font-weight: 900;
+      font-size: 0.82rem;
+      border: 2px solid transparent;
+      cursor: pointer;
+      transition: all 0.15s;
+      letter-spacing: 0.05em;
+    }
+    .modal-btn.cancel {
+      background: rgba(255,255,255,0.06);
+      border-color: rgba(255,255,255,0.15);
+      color: var(--text-dim);
+    }
+    .modal-btn.cancel:hover { background: rgba(255,255,255,0.12); color: #fff; }
+    .modal-btn.danger {
+      background: linear-gradient(135deg, #ef4444, #dc2626);
+      color: #fff;
+    }
+    .modal-btn.danger:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(239,68,68,0.5); }
 
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after {
@@ -216,25 +391,25 @@
     }
   </style>
 </head>
-<body class="p-4 flex items-center justify-center">
+<body class="p-4 flex items-start justify-center">
 
   <div class="toast-container" id="toast-container"></div>
 
-  <div class="glass max-w-2xl w-full p-6 rounded-3xl">
-    <div class="flex justify-between items-center mb-6">
-      <h1 class="text-2xl font-black text-cyan-400 tracking-widest">АДМИН-ПАНЕЛЬ</h1>
-      <a href="index.html" class="text-xs font-bold text-cyan-300/60 hover:text-cyan-300 transition">← НАЗАД</a>
+  <div class="glass max-w-2xl w-full p-6 my-4">
+    <div class="flex justify-between items-center mb-6 flex-wrap gap-3">
+      <h1 class="page-title text-2xl font-black tracking-widest">АДМИН-ПАНЕЛЬ</h1>
+      <a href="index.html" class="back-btn">← НАЗАД</a>
     </div>
-    
+
     <!-- Табы -->
     <div class="flex gap-2 mb-6 flex-wrap">
-      <button onclick="switchTab('ad')" id="tab-btn-ad" class="tab-btn active flex-1 py-3 rounded-xl border-2 border-gray-700 font-bold text-sm min-w-[100px]">
+      <button onclick="switchTab('ad')" id="tab-btn-ad" class="tab-btn active flex-1 py-3 rounded-xl font-bold text-sm min-w-[100px]">
         📢 РЕКЛАМА
       </button>
-      <button onclick="switchTab('ticker')" id="tab-btn-ticker" class="tab-btn flex-1 py-3 rounded-xl border-2 border-gray-700 font-bold text-sm min-w-[100px]">
+      <button onclick="switchTab('ticker')" id="tab-btn-ticker" class="tab-btn flex-1 py-3 rounded-xl font-bold text-sm min-w-[100px]">
         📜 СТРОКА
       </button>
-      <button onclick="switchTab('reset')" id="tab-btn-reset" class="tab-btn flex-1 py-3 rounded-xl border-2 border-gray-700 font-bold text-sm min-w-[100px]">
+      <button onclick="switchTab('reset')" id="tab-btn-reset" class="tab-btn flex-1 py-3 rounded-xl font-bold text-sm min-w-[100px]">
         🗑️ СБРОС
       </button>
     </div>
@@ -243,26 +418,20 @@
     <!-- ВКЛАДКА: РЕКЛАМА -->
     <!-- ============================================================ -->
     <div id="tab-ad">
-      
-      <!-- Прелоудинг -->
       <div class="mb-6">
-        <h2 class="text-base font-bold mb-3 text-cyan-300">🎬 Реклама в прелоудинге</h2>
-        
+        <h2 class="text-sm font-black mb-3 text-cyan-300 tracking-wider">🎬 РЕКЛАМА В ПРЕЛОУДИНГЕ</h2>
         <div class="space-y-3">
           <div>
             <label class="admin-label">URL картинки (JPG/PNG/GIF)</label>
             <input type="url" id="preload-img" class="admin-input" placeholder="https://example.com/banner.jpg" oninput="updateAdPreview('preload')">
           </div>
-          
           <div class="ad-preview" id="preload-preview">
             <span class="placeholder">ПРЕВЬЮ</span>
           </div>
-
           <div>
             <label class="admin-label">Ссылка (куда ведёт)</label>
             <input type="url" id="preload-link" class="admin-input" placeholder="https://t.me/yourchannel">
           </div>
-
           <div>
             <label class="admin-label">Текст-заглушка (если картинки нет)</label>
             <input type="text" id="preload-text" class="admin-input" maxlength="40" placeholder="РЕКЛАМА">
@@ -272,25 +441,20 @@
 
       <hr class="border-gray-700/50 my-6">
 
-      <!-- Лобби / Заставка -->
       <div class="mb-6">
-        <h2 class="text-base font-bold mb-3 text-cyan-300">🏠 Реклама на заставке (TV)</h2>
-        
+        <h2 class="text-sm font-black mb-3 text-cyan-300 tracking-wider">🏠 РЕКЛАМА НА ЗАСТАВКЕ (TV)</h2>
         <div class="space-y-3">
           <div>
             <label class="admin-label">URL картинки</label>
             <input type="url" id="lobby-img" class="admin-input" placeholder="https://example.com/banner.jpg" oninput="updateAdPreview('lobby')">
           </div>
-          
           <div class="ad-preview" id="lobby-preview">
             <span class="placeholder">ПРЕВЬЮ</span>
           </div>
-
           <div>
             <label class="admin-label">Ссылка</label>
             <input type="url" id="lobby-link" class="admin-input" placeholder="https://t.me/yourchannel">
           </div>
-
           <div>
             <label class="admin-label">Текст-заглушка</label>
             <input type="text" id="lobby-text" class="admin-input" maxlength="40" placeholder="РЕКЛАМА">
@@ -298,7 +462,7 @@
         </div>
       </div>
 
-      <button onclick="saveAdSettings()" id="save-ad-btn" class="w-full py-4 bg-cyan-600 rounded-xl font-black text-lg hover:bg-cyan-500 transition active:scale-95">
+      <button onclick="saveAdSettings()" id="save-ad-btn" class="save-btn w-full py-4 rounded-xl text-base">
         💾 СОХРАНИТЬ РЕКЛАМУ
       </button>
     </div>
@@ -307,8 +471,6 @@
     <!-- ВКЛАДКА: БЕГУЩАЯ СТРОКА -->
     <!-- ============================================================ -->
     <div id="tab-ticker" class="hidden">
-      
-      <!-- Превью -->
       <div class="mb-6">
         <label class="admin-label">Предпросмотр</label>
         <div class="ticker-preview">
@@ -318,24 +480,23 @@
         </div>
       </div>
 
-      <!-- Форма -->
       <div class="mb-6">
         <label class="admin-label">Новое сообщение</label>
         <div class="flex gap-2">
-          <input 
-            type="text" 
-            id="ticker-input" 
+          <input
+            type="text"
+            id="ticker-input"
             class="admin-input flex-1"
             placeholder="Введите текст..."
             maxlength="100"
             oninput="updateCharCounter()"
             onkeydown="if(event.key === 'Enter') addMessage()"
           >
-          <button onclick="addMessage()" id="add-msg-btn" class="px-6 py-3 bg-cyan-600 rounded-xl font-bold hover:bg-cyan-500 transition active:scale-95 whitespace-nowrap">
+          <button onclick="addMessage()" id="add-msg-btn" class="send-btn px-5 py-3 rounded-xl whitespace-nowrap">
             ОТПРАВИТЬ
           </button>
         </div>
-        <div class="flex justify-between mt-1">
+        <div class="flex justify-between mt-1 flex-wrap gap-2">
           <p class="text-[10px] text-gray-500">Максимум 10 сообщений. Старое удаляется автоматически.</p>
           <p class="char-counter" id="char-counter">0/100</p>
         </div>
@@ -343,19 +504,14 @@
 
       <hr class="border-gray-700/50 mb-6">
 
-      <!-- История -->
       <div>
         <div class="flex justify-between items-center mb-4">
-          <h2 class="text-lg font-bold text-cyan-300">ИСТОРИЯ</h2>
-          <button onclick="clearAllMessages()" id="clear-all-btn" class="text-xs font-bold text-red-400 hover:text-red-300 transition px-3 py-1 rounded-lg hover:bg-red-900/20">
+          <h2 class="text-base font-black text-cyan-300 tracking-wider">ИСТОРИЯ</h2>
+          <button onclick="clearAllMessages()" id="clear-all-btn" class="clear-btn text-xs font-bold px-3 py-1.5 rounded-lg">
             ОЧИСТИТЬ ВСЁ
           </button>
         </div>
-        <div id="messages-list" class="space-y-3 max-h-96 overflow-y-auto pr-2">
-          <div class="text-center text-gray-500 py-8 italic" id="empty-history">
-            Пока нет отправленных сообщений
-          </div>
-        </div>
+        <div id="messages-list" class="space-y-3 max-h-96 overflow-y-auto pr-2"></div>
       </div>
     </div>
 
@@ -363,32 +519,33 @@
     <!-- ВКЛАДКА: СБРОС -->
     <!-- ============================================================ -->
     <div id="tab-reset" class="hidden">
-      <div class="text-center py-6">
+      <div class="text-center py-4">
         <div class="text-6xl mb-4">⚠️</div>
-        <h2 class="text-2xl font-black text-red-400 mb-2">ОПАСНАЯ ЗОНА</h2>
-        <p class="text-gray-400 mb-6 text-sm max-w-md mx-auto">
-          Сброс очистит игроков, комнату ожидания, выстрелы, прицелы и 
-          вернёт TV на заставку. 
+        <h2 class="text-2xl font-black text-red-400 mb-2 tracking-wider">ОПАСНАЯ ЗОНА</h2>
+        <p class="text-gray-400 mb-6 text-sm max-w-md mx-auto leading-relaxed">
+          Сброс очистит игроков, комнату ожидания, выстрелы, прицелы и
+          вернёт TV на заставку.
           Реклама и бегущая строка <span class="text-cyan-300 font-bold">не будут затронуты</span>.
         </p>
-        
+
         <div class="bg-red-900/10 border border-red-500/30 rounded-xl p-4 max-w-md mx-auto mb-6 text-left">
           <label class="admin-label text-red-300/80">Для подтверждения введите:</label>
-          <p class="text-red-400 font-black text-lg mb-2 select-all">СБРОС</p>
-          <input 
-            type="text" 
-            id="reset-confirm" 
-            class="admin-input" 
+          <p class="text-red-400 font-black text-lg mb-2 select-all mono">СБРОС</p>
+          <input
+            type="text"
+            id="reset-confirm"
+            class="admin-input"
             placeholder="Введите слово"
+            autocomplete="off"
             oninput="validateResetInput()"
           >
         </div>
 
-        <button 
-          onclick="clearGame()" 
+        <button
+          onclick="clearGame()"
           id="reset-btn"
           disabled
-          class="w-full py-4 bg-red-600/30 border-2 border-red-500/50 text-red-300 rounded-xl font-black text-lg hover:bg-red-600/50 transition active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed"
+          class="reset-btn w-full py-4 rounded-xl text-base"
         >
           🗑️ ПОЛНЫЙ СБРОС ИГРЫ
         </button>
@@ -397,22 +554,96 @@
 
   </div>
 
+  <!-- МОДАЛКА -->
+  <div class="modal-backdrop hidden" id="modal">
+    <div class="modal-card">
+      <div class="modal-icon" id="modal-icon">⚠️</div>
+      <div class="modal-title" id="modal-title">Подтверждение</div>
+      <div class="modal-text" id="modal-text"></div>
+      <div class="modal-actions">
+        <button class="modal-btn cancel" id="modal-cancel">ОТМЕНА</button>
+        <button class="modal-btn danger" id="modal-confirm">ОК</button>
+      </div>
+    </div>
+  </div>
+
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getDatabase, ref, set, onValue, push, remove, update, get } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-    const firebaseConfig = { apiKey: "AIzaSyCXIR5Tv8lB6ivcGRC3yt1SC66MM6T5b_M", authDomain: "endorphin-battle.firebaseapp.com", databaseURL: "https://endorphin-battle-default-rtdb.europe-west1.firebasedatabase.app", projectId: "endorphin-battle", storageBucket: "endorphin-battle.firebasestorage.app", messagingSenderId: "185259733030", appId: "1:185259733030:web:d72a89a436880973e636e7" };
+    const firebaseConfig = {
+      apiKey: "AIzaSyCXIR5Tv8lB6ivcGRC3yt1SC66MM6T5b_M",
+      authDomain: "endorphin-battle.firebaseapp.com",
+      databaseURL: "https://endorphin-battle-default-rtdb.europe-west1.firebasedatabase.app",
+      projectId: "endorphin-battle",
+      storageBucket: "endorphin-battle.firebasestorage.app",
+      messagingSenderId: "185259733030",
+      appId: "1:185259733030:web:d72a89a436880973e636e7"
+    };
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
     const tickerRef = ref(db, 'games/battle_1/ticker_messages');
     const adRef = ref(db, 'games/battle_1/ad_settings');
 
     // ============================================================
-    // ФЛАГИ
+    // СОСТОЯНИЕ
     // ============================================================
     let adFieldsDirty = false;
     let isAdLoading = false;
-    let lastMessagesData = null;
+    let lastMessagesHash = '';
+
+    // ============================================================
+    // ЗВУК
+    // ============================================================
+    let audioCtx = null;
+    function getAudioCtx() {
+      if (!audioCtx) {
+        try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch { return null; }
+      }
+      if (audioCtx.state === 'suspended') audioCtx.resume().catch(() => {});
+      return audioCtx;
+    }
+    function beep(freq = 800, duration = 0.08, type = 'sine', volume = 0.12) {
+      const ctx = getAudioCtx();
+      if (!ctx) return;
+      try {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = type;
+        osc.frequency.value = freq;
+        gain.gain.setValueAtTime(volume, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
+        osc.connect(gain).connect(ctx.destination);
+        osc.start();
+        osc.stop(ctx.currentTime + duration);
+      } catch {}
+    }
+    const playClick = () => beep(600, 0.04, 'square', 0.06);
+    const playSuccess = () => { beep(880, 0.08, 'sine', 0.14); setTimeout(() => beep(1320, 0.12, 'sine', 0.14), 80); };
+    const playError = () => beep(200, 0.12, 'sawtooth', 0.1);
+
+    document.addEventListener('click', () => { getAudioCtx(); }, { once: true });
+    document.addEventListener('touchstart', () => { getAudioCtx(); }, { once: true });
+
+    // ============================================================
+    // УТИЛИТЫ
+    // ============================================================
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    }
+
+    function isValidUrl(str) {
+      if (!str) return true;
+      try {
+        const url = new URL(str);
+        return ['http:', 'https:'].includes(url.protocol);
+      } catch {
+        return false;
+      }
+    }
 
     // ============================================================
     // TOAST
@@ -421,22 +652,45 @@
       const container = document.getElementById('toast-container');
       const toast = document.createElement('div');
       toast.className = `toast ${type}`;
-      
       const icons = { success: '✅', error: '❌', info: 'ℹ️' };
       toast.innerHTML = `<span>${icons[type] || ''}</span><span>${escapeHtml(message)}</span>`;
-      
       container.appendChild(toast);
-      
       setTimeout(() => {
-        toast.classList.add('out');
+        toast.style.animation = 'toastIn 0.3s ease-in reverse';
         setTimeout(() => toast.remove(), 300);
-      }, 3000);
+      }, 2800);
     }
+
+    // ============================================================
+    // МОДАЛКА (замена confirm)
+    // ============================================================
+    let modalResolver = null;
+    function showModal({ icon = '⚠️', title = '', text = '', confirmText = 'ОК', cancelText = 'ОТМЕНА' }) {
+      return new Promise(resolve => {
+        modalResolver = resolve;
+        document.getElementById('modal-icon').innerText = icon;
+        document.getElementById('modal-title').innerText = title;
+        document.getElementById('modal-text').innerText = text;
+        document.getElementById('modal-confirm').innerText = confirmText;
+        document.getElementById('modal-cancel').innerText = cancelText;
+        document.getElementById('modal').classList.remove('hidden');
+      });
+    }
+    function closeModal(result) {
+      document.getElementById('modal').classList.add('hidden');
+      if (modalResolver) { modalResolver(result); modalResolver = null; }
+    }
+    document.getElementById('modal-confirm').onclick = () => { playClick(); closeModal(true); };
+    document.getElementById('modal-cancel').onclick = () => { playClick(); closeModal(false); };
+    document.getElementById('modal').addEventListener('click', (e) => {
+      if (e.target.id === 'modal') { playClick(); closeModal(false); }
+    });
 
     // ============================================================
     // ТАБЫ
     // ============================================================
     window.switchTab = (tab) => {
+      playClick();
       ['ad', 'ticker', 'reset'].forEach(t => {
         document.getElementById(`tab-${t}`).classList.add('hidden');
         document.getElementById(`tab-btn-${t}`).classList.remove('active');
@@ -448,19 +702,6 @@
 
     const savedTab = localStorage.getItem('endorphin_admin_tab') || 'ad';
     switchTab(savedTab);
-
-    // ============================================================
-    // ВАЛИДАЦИЯ URL
-    // ============================================================
-    function isValidUrl(str) {
-      if (!str) return true;
-      try {
-        const url = new URL(str);
-        return ['http:', 'https:'].includes(url.protocol);
-      } catch {
-        return false;
-      }
-    }
 
     // ============================================================
     // ПРЕВЬЮ РЕКЛАМЫ
@@ -480,12 +721,19 @@
 
       if (!isValidUrl(url)) {
         imgInput.classList.add('error');
-        preview.innerHTML = '<span class="placeholder" style="color:#ef4444">❌ НЕВЕРНЫЙ URL</span>';
+        preview.innerHTML = '<span class="placeholder" style="color:#ff3b5c">❌ НЕВЕРНЫЙ URL</span>';
         return;
       }
 
       imgInput.classList.remove('error');
-      preview.innerHTML = `<img src="${escapeHtml(url)}" alt="preview" onerror="this.parentElement.innerHTML='<span class=\\'placeholder\\' style=\\'color:#ef4444\\'>❌ НЕ ЗАГРУЖАЕТСЯ</span>'">`;
+      const img = document.createElement('img');
+      img.src = url;
+      img.alt = 'preview';
+      img.onerror = () => {
+        preview.innerHTML = '<span class="placeholder" style="color:#ff3b5c">❌ НЕ ЗАГРУЖАЕТСЯ</span>';
+      };
+      preview.innerHTML = '';
+      preview.appendChild(img);
     };
 
     // ============================================================
@@ -493,17 +741,19 @@
     // ============================================================
     window.saveAdSettings = async () => {
       const btn = document.getElementById('save-ad-btn');
-      
+
       const preloadImg = document.getElementById('preload-img').value.trim();
       const preloadLink = document.getElementById('preload-link').value.trim();
       const lobbyImg = document.getElementById('lobby-img').value.trim();
       const lobbyLink = document.getElementById('lobby-link').value.trim();
 
       if (!isValidUrl(preloadImg) || !isValidUrl(lobbyImg)) {
+        playError();
         showToast('Неверный URL картинки', 'error');
         return;
       }
       if (!isValidUrl(preloadLink) || !isValidUrl(lobbyLink)) {
+        playError();
         showToast('Неверный URL ссылки', 'error');
         return;
       }
@@ -527,8 +777,10 @@
       try {
         await set(adRef, settings);
         adFieldsDirty = false;
+        playSuccess();
         showToast('Реклама сохранена', 'success');
       } catch (e) {
+        playError();
         showToast('Ошибка сохранения: ' + e.message, 'error');
       } finally {
         btn.disabled = false;
@@ -574,7 +826,7 @@
       const counter = document.getElementById('char-counter');
       const len = input.value.length;
       const max = 100;
-      
+
       counter.innerText = `${len}/${max}`;
       counter.className = 'char-counter';
       if (len > max * 0.9) counter.classList.add('danger');
@@ -587,6 +839,7 @@
       const text = input.value.trim();
 
       if (!text) {
+        playError();
         showToast('Введите текст', 'error');
         return;
       }
@@ -599,6 +852,7 @@
         const messages = snap.val() || {};
         const keys = Object.keys(messages).sort((a, b) => messages[a].time - messages[b].time);
 
+        // Оставляем 9 старых, добавляем 10-е
         const toDelete = keys.slice(0, Math.max(0, keys.length - 9));
         await Promise.all(toDelete.map(k => remove(ref(db, `games/battle_1/ticker_messages/${k}`))));
 
@@ -607,8 +861,10 @@
 
         input.value = '';
         updateCharCounter();
+        playSuccess();
         showToast('Сообщение добавлено', 'success');
       } catch (e) {
+        playError();
         showToast('Ошибка: ' + e.message, 'error');
       } finally {
         btn.disabled = false;
@@ -617,80 +873,82 @@
     };
 
     window.deleteMessage = async (key) => {
+      playClick();
       try {
         await remove(ref(db, `games/battle_1/ticker_messages/${key}`));
         showToast('Сообщение удалено', 'info');
       } catch (e) {
+        playError();
         showToast('Ошибка удаления', 'error');
       }
     };
 
     window.clearAllMessages = async () => {
-      if (!confirm('Удалить все сообщения бегущей строки?')) return;
-      
+      const ok = await showModal({
+        icon: '🗑️',
+        title: 'Очистить всё?',
+        text: 'Все сообщения бегущей строки будут удалены.',
+        confirmText: 'ОЧИСТИТЬ'
+      });
+      if (!ok) return;
+
       try {
         await remove(tickerRef);
+        playSuccess();
         showToast('Все сообщения удалены', 'success');
       } catch (e) {
+        playError();
         showToast('Ошибка: ' + e.message, 'error');
       }
     };
 
+    // ЕДИНЫЙ слушатель — и обновляет список, и обновляет превью
     onValue(tickerRef, (snap) => {
       const messages = snap.val() || {};
       const keys = Object.keys(messages).sort((a, b) => messages[a].time - messages[b].time);
-      
-      const dataHash = keys.map(k => `${k}:${messages[k].time}`).join('|');
-      if (dataHash === lastMessagesData) return;
-      lastMessagesData = dataHash;
 
+      // Хэш для отсечения лишних перерисовок
+      const hash = keys.map(k => `${k}:${messages[k].time}`).join('|');
+      if (hash === lastMessagesHash) return;
+      lastMessagesHash = hash;
+
+      // Список
       const list = document.getElementById('messages-list');
-
       if (keys.length === 0) {
-        list.innerHTML = '';
-        const emptyDiv = document.createElement('div');
-        emptyDiv.className = 'text-center text-gray-500 py-8 italic';
-        emptyDiv.innerText = 'Пока нет отправленных сообщений';
-        list.appendChild(emptyDiv);
-        updateTickerPreview();
-        return;
-      }
-
-      list.innerHTML = keys.map(key => {
-        const msg = messages[key];
-        return `
-          <div class="msg-item flex justify-between items-center bg-gray-900/60 border border-gray-700 rounded-xl p-4">
-            <div class="flex-1 min-w-0">
-              <p class="text-sm text-gray-200 break-words">${escapeHtml(msg.text)}</p>
-              <p class="text-[10px] text-gray-500 mt-1">${new Date(msg.time).toLocaleString('ru-RU')}</p>
-            </div>
-            <button onclick="deleteMessage('${key}')" class="delete-btn ml-4 text-red-400 hover:text-red-300 font-black text-xl px-2" aria-label="Удалить">✖</button>
+        list.innerHTML = `
+          <div class="empty-state">
+            <div class="icon">📜</div>
+            Пока нет отправленных сообщений
           </div>
         `;
-      }).join('');
+      } else {
+        list.innerHTML = keys.map(key => {
+          const msg = messages[key];
+          const date = new Date(msg.time).toLocaleString('ru-RU', {
+            day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit'
+          });
+          return `
+            <div class="msg-item flex justify-between items-center bg-gray-900/60 border border-gray-700 rounded-xl p-3">
+              <div class="flex-1 min-w-0">
+                <p class="text-sm text-gray-200 break-words">${escapeHtml(msg.text)}</p>
+                <p class="text-[10px] text-gray-500 mt-1 mono">${date}</p>
+              </div>
+              <button onclick="deleteMessage('${key}')" class="delete-btn ml-3 text-red-400 hover:text-red-300 font-black text-lg px-2" aria-label="Удалить">✖</button>
+            </div>
+          `;
+        }).join('');
+      }
 
-      updateTickerPreview();
-    });
-
-    function updateTickerPreview() {
+      // Превью
       const previewEl = document.getElementById('ticker-preview-text');
-      const msgs = window.__lastMessages || {};
-      const keys = Object.keys(msgs).sort((a, b) => msgs[a].time - msgs[b].time);
-      
       if (keys.length === 0) {
         previewEl.innerText = 'ДОБРО ПОЖАЛОВАТЬ НА ВЕЧЕРИНКУ ENDORPHIN!';
       } else {
-        previewEl.innerText = keys.map(k => msgs[k].text).join('  •  ');
+        previewEl.innerText = keys.map(k => messages[k].text).join('  •  ');
       }
-      
       previewEl.style.animation = 'none';
       void previewEl.offsetWidth;
       previewEl.style.animation = '';
-    }
-
-    onValue(tickerRef, (snap) => {
-      window.__lastMessages = snap.val() || {};
-      updateTickerPreview();
     });
 
     // ============================================================
@@ -705,12 +963,21 @@
     };
 
     window.clearGame = async () => {
+      if (document.getElementById('reset-confirm').value.trim().toUpperCase() !== 'СБРОС') return;
+
+      const ok = await showModal({
+        icon: '🚨',
+        title: 'Полный сброс?',
+        text: 'Будут очищены все игроки, комнаты, выстрелы и прицелы. Реклама и строка не тронуты.',
+        confirmText: 'СБРОСИТЬ'
+      });
+      if (!ok) return;
+
       const btn = document.getElementById('reset-btn');
       btn.disabled = true;
       btn.innerHTML = '<span class="spinner"></span> СБРОС...';
 
       try {
-        // Полный сброс игрового состояния
         await update(ref(db, 'games/battle_1'), {
           screen: 'attract',
           status: 'lobby',
@@ -727,7 +994,6 @@
           lives: { red: 3, blue: 3 }
         });
 
-        // Удаляем выстрелы, прицел, last_shot
         try {
           await remove(ref(db, 'games/battle_1/shots'));
           await remove(ref(db, 'games/battle_1/last_shot'));
@@ -736,9 +1002,11 @@
 
         document.getElementById('reset-confirm').value = '';
         validateResetInput();
-        
+
+        playSuccess();
         showToast('Игра сброшена. TV на заставке.', 'success');
       } catch (e) {
+        playError();
         showToast('Ошибка сброса: ' + e.message, 'error');
         btn.disabled = false;
         btn.innerHTML = '🗑️ ПОЛНЫЙ СБРОС ИГРЫ';
@@ -746,18 +1014,8 @@
     };
 
     // ============================================================
-    // УТИЛИТЫ
+    // INIT
     // ============================================================
-    function escapeHtml(str) {
-      if (!str) return '';
-      return String(str)
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#39;');
-    }
-
     updateCharCounter();
   </script>
 </body>
