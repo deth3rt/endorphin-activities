@@ -4,14 +4,13 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta name="theme-color" content="#03080f">
-  <title>ENDORPHIN | ИГРАЙ ЕЩЁ</title>
+  <title>ENDORPHIN | ХОЧЕШЬ ЕЩЁ?</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&family=JetBrains+Mono:wght@700;900&display=swap" rel="stylesheet">
 
   <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://unpkg.com/qrcode-generator@1.4.4/qrcode.js"></script>
 
   <style>
     :root {
@@ -20,14 +19,13 @@
       --ice: #7fe3ff;
       --ice-bright: #22d3ee;
       --amber: #fbbf24;
-      --red-team: #ff3b5c;
-      --blue-team: #3d8bff;
       --text-dim: rgba(168, 230, 255, 0.7);
-      --text-dimmer: rgba(168, 230, 255, 0.45);
+      --text-dimmer: rgba(168, 230, 255, 0.4);
     }
 
     * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
     html, body { margin: 0; padding: 0; }
+
     body {
       background: radial-gradient(circle at 50% 0%, var(--bg-mid) 0%, var(--bg-deep) 70%);
       font-family: 'Montserrat', sans-serif;
@@ -36,9 +34,9 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 1.5rem;
+      padding: 2rem 1.5rem;
       position: relative;
-      overflow-x: hidden;
+      overflow: hidden;
     }
 
     body::before {
@@ -52,389 +50,80 @@
       mix-blend-mode: overlay;
     }
 
-    /* Снежинки */
-    .snowflake {
-      position: fixed;
-      top: -10vh;
-      color: rgba(255, 255, 255, 0.6);
-      pointer-events: none;
-      z-index: 2;
-      filter: drop-shadow(0 0 8px #fff);
-      animation: fall linear infinite;
-      will-change: transform;
-    }
-    @keyframes fall {
-      0% { transform: translateY(-10vh) rotate(0deg); opacity: 0; }
-      10% { opacity: 1; }
-      90% { opacity: 1; }
-      100% { transform: translateY(110vh) rotate(360deg); opacity: 0; }
-    }
-
-    .container-inner {
+    .inner {
       position: relative;
       z-index: 5;
-      width: 100%;
-      max-width: 960px;
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 1.5rem;
+      text-align: center;
+      gap: 1.4rem;
+      max-width: 640px;
+      width: 100%;
     }
 
+    /* Логотип */
+    .logo-wrap {
+      width: clamp(200px, 50vw, 360px);
+      filter: drop-shadow(0 0 30px rgba(34, 211, 238, 0.35));
+    }
+    .logo-wrap svg { width: 100%; height: auto; display: block; }
+
     /* Заголовок */
-    .end-title {
-      font-size: clamp(2.5rem, 9vw, 5.5rem);
+    .title {
+      font-size: clamp(2.6rem, 10vw, 5rem);
       font-weight: 900;
       line-height: 1;
-      letter-spacing: -0.03em;
-      text-align: center;
+      letter-spacing: -0.02em;
       background: linear-gradient(180deg, #ffffff 0%, #a8e6ff 55%, #22d3ee 100%);
       -webkit-background-clip: text;
       background-clip: text;
       color: transparent;
       text-shadow:
         0 0 40px rgba(34, 211, 238, 0.4),
-        0 0 80px rgba(34, 211, 238, 0.2);
-      animation: titleFloat 4s ease-in-out infinite;
-      transition: opacity 0.3s;
-    }
-    @keyframes titleFloat {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-6px); }
+        0 0 80px rgba(34, 211, 238, 0.15);
     }
 
-    .end-subtitle {
-      font-size: clamp(0.9rem, 2vw, 1.3rem);
+    /* Подзаголовок */
+    .subtitle {
+      font-size: clamp(0.7rem, 1.6vw, 0.9rem);
       font-weight: 700;
       letter-spacing: 0.42em;
       text-transform: uppercase;
-      color: var(--text-dim);
-      text-align: center;
+      color: var(--text-dimmer);
       padding-left: 0.42em;
-      margin-top: -0.5rem;
     }
 
-    .end-hint {
-      font-size: clamp(0.85rem, 1.8vw, 1.1rem);
+    /* Текст-инструкция */
+    .hint {
+      font-size: clamp(0.95rem, 2vw, 1.15rem);
       font-weight: 700;
       color: var(--ice);
-      text-align: center;
-      letter-spacing: 0.05em;
-      line-height: 1.5;
-      max-width: 480px;
-      min-height: 3.5rem;
+      letter-spacing: 0.03em;
+      line-height: 1.6;
+      margin-top: 0.6rem;
+      max-width: 420px;
     }
-    .end-hint .big {
+    .hint .big {
       display: block;
-      font-size: clamp(1.1rem, 2.4vw, 1.5rem);
+      font-size: clamp(1.1rem, 2.4vw, 1.4rem);
       font-weight: 900;
       color: #fff;
-      margin-bottom: 0.4rem;
-      letter-spacing: 0.08em;
-    }
-
-    /* Эмодзи-гирлянда */
-    .emoji-row {
-      display: flex;
-      gap: 0.8rem;
-      font-size: clamp(1.5rem, 3vw, 2.2rem);
-      justify-content: center;
-      flex-wrap: wrap;
-      filter: drop-shadow(0 0 15px rgba(127, 227, 255, 0.4));
-    }
-    .emoji-row span {
-      animation: emojiBob 2s ease-in-out infinite;
-    }
-    .emoji-row span:nth-child(2) { animation-delay: 0.15s; }
-    .emoji-row span:nth-child(3) { animation-delay: 0.3s; }
-    .emoji-row span:nth-child(4) { animation-delay: 0.45s; }
-    .emoji-row span:nth-child(5) { animation-delay: 0.6s; }
-    .emoji-row span:nth-child(6) { animation-delay: 0.75s; }
-    @keyframes emojiBob {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-8px); }
-    }
-
-    /* QR-контейнер */
-    .qr-wrap {
-      display: flex;
-      align-items: stretch;
-      justify-content: center;
-      gap: clamp(1rem, 4vw, 3rem);
-      flex-wrap: wrap;
-      width: 100%;
-    }
-
-    .qr-card {
-      position: relative;
-      flex: 1 1 260px;
-      max-width: 340px;
-      min-width: 240px;
-      background: rgba(10, 37, 64, 0.75);
-      border: 2px solid;
-      border-radius: 1.5rem;
-      padding: 1.5rem 1.2rem;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 0.9rem;
-      box-shadow: 0 12px 40px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.06);
-      animation: cardIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
-      transition: opacity 0.3s, border-color 0.3s;
-    }
-    .qr-card:nth-child(1) { animation-delay: 0.05s; }
-    .qr-card:nth-child(3) { animation-delay: 0.15s; }
-    @keyframes cardIn {
-      from { opacity: 0; transform: translateY(20px) scale(0.95); }
-      to { opacity: 1; transform: translateY(0) scale(1); }
-    }
-
-    .qr-card.red {
-      border-color: rgba(255, 59, 92, 0.5);
-      box-shadow: 0 12px 40px rgba(255, 59, 92, 0.15), inset 0 1px 0 rgba(255,255,255,0.06);
-    }
-    .qr-card.blue {
-      border-color: rgba(61, 139, 255, 0.5);
-      box-shadow: 0 12px 40px rgba(61, 139, 255, 0.15), inset 0 1px 0 rgba(255,255,255,0.06);
-    }
-
-    /* Заполнена команда */
-    .qr-card.full {
-      opacity: 0.55;
-      filter: saturate(0.6);
-    }
-    .qr-card.full::after {
-      content: 'ПОЛНА';
-      position: absolute;
-      top: 14px;
-      right: 14px;
-      background: rgba(0,0,0,0.8);
-      color: var(--amber);
-      font-size: 0.62rem;
-      font-weight: 900;
-      letter-spacing: 0.15em;
-      padding: 4px 10px;
-      border-radius: 999px;
-      border: 1px solid rgba(251, 191, 36, 0.5);
-    }
-
-    .qr-card-badge {
-      padding: 0.5rem 1.4rem;
-      border-radius: 999px;
-      font-weight: 900;
-      font-size: 0.9rem;
-      letter-spacing: 0.15em;
-      color: #fff;
-    }
-    .qr-card-badge.red {
-      background: var(--red-team);
-      box-shadow: 0 4px 20px rgba(255, 59, 92, 0.5);
-    }
-    .qr-card-badge.blue {
-      background: var(--blue-team);
-      box-shadow: 0 4px 20px rgba(61, 139, 255, 0.5);
-    }
-
-    .qr-box {
-      background: #fff;
-      padding: 12px;
-      border-radius: 16px;
-      box-shadow: 0 6px 25px rgba(0,0,0,0.4);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .qr-box img { display: block; width: 100%; max-width: 220px; height: auto; }
-
-    .qr-card-label {
-      font-size: 0.75rem;
-      font-weight: 900;
-      letter-spacing: 0.15em;
-      color: rgba(255,255,255,0.6);
-      text-transform: uppercase;
-      text-align: center;
-    }
-
-    /* Счётчик команды */
-    .qr-counter {
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 0.75rem;
-      font-weight: 900;
-      padding: 3px 10px;
-      border-radius: 999px;
-      background: rgba(0,0,0,0.4);
-    }
-    .qr-counter.red { color: var(--red-team); border: 1px solid rgba(255, 59, 92, 0.3); }
-    .qr-counter.blue { color: var(--blue-team); border: 1px solid rgba(61, 139, 255, 0.3); }
-
-    .vs {
-      align-self: center;
-      font-size: clamp(2rem, 4vw, 3.5rem);
-      font-weight: 900;
-      font-style: italic;
-      color: rgba(255,255,255,0.15);
-      flex-shrink: 0;
-    }
-
-    /* Кнопки */
-    .actions {
-      display: flex;
-      gap: 0.75rem;
-      flex-wrap: wrap;
-      justify-content: center;
-      margin-top: 0.5rem;
-    }
-
-    .home-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.6rem;
-      padding: 1rem 2.4rem;
-      border-radius: 1rem;
-      background: linear-gradient(135deg, var(--blue-team), var(--ice-bright));
-      color: #000;
-      font-weight: 900;
-      font-size: clamp(1rem, 2vw, 1.15rem);
+      margin-bottom: 0.6rem;
       letter-spacing: 0.06em;
-      text-decoration: none;
-      text-transform: uppercase;
-      box-shadow: 0 0 40px rgba(34, 211, 238, 0.5), inset 0 1px 0 rgba(255,255,255,0.3);
-      transition: all 0.25s;
-      border: none;
-      cursor: pointer;
     }
-    .home-btn:hover {
-      box-shadow: 0 0 60px rgba(34, 211, 238, 0.8), inset 0 1px 0 rgba(255,255,255,0.3);
-      transform: translateY(-2px);
-    }
-    .home-btn:active { transform: scale(0.98); }
-
-    .secondary-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-      padding: 1rem 1.6rem;
-      border-radius: 1rem;
-      background: rgba(255,255,255,0.06);
-      border: 1.5px solid rgba(255,255,255,0.15);
-      color: var(--text-dim);
-      font-weight: 900;
-      font-size: clamp(0.85rem, 1.6vw, 0.95rem);
-      letter-spacing: 0.06em;
-      text-decoration: none;
-      text-transform: uppercase;
-      transition: all 0.2s;
-      cursor: pointer;
-    }
-    .secondary-btn:hover {
-      background: rgba(251, 191, 36, 0.12);
-      border-color: rgba(251, 191, 36, 0.5);
+    .hint .amber {
       color: var(--amber);
     }
-    .secondary-btn:active { transform: scale(0.98); }
 
-    /* REFRESH */
-    .refresh-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 8px 16px;
-      border-radius: 999px;
-      background: rgba(34, 211, 238, 0.08);
-      border: 1px solid rgba(34, 211, 238, 0.3);
-      color: var(--ice);
-      font-weight: 900;
-      font-size: 0.72rem;
-      letter-spacing: 0.1em;
+    /* Футер */
+    .footer {
+      font-size: 0.65rem;
+      color: var(--text-dimmer);
+      letter-spacing: 0.18em;
       text-transform: uppercase;
-      cursor: pointer;
-      transition: all 0.2s;
-      margin-top: 0.5rem;
-    }
-    .refresh-btn:hover {
-      background: rgba(34, 211, 238, 0.18);
-      color: var(--ice-bright);
-      border-color: var(--ice-bright);
-    }
-    .refresh-btn:active { transform: scale(0.96); }
-    .refresh-btn .spin-icon {
-      display: inline-block;
-      transition: transform 0.5s;
-    }
-    .refresh-btn.spinning .spin-icon {
-      animation: spinOnce 0.6s linear;
-    }
-    @keyframes spinOnce {
-      from { transform: rotate(0); }
-      to { transform: rotate(360deg); }
-    }
-
-    .end-footer {
-      font-size: 0.7rem;
-      color: var(--text-dimmer);
-      letter-spacing: 0.15em;
-      text-transform: uppercase;
-      text-align: center;
-      margin-top: 0.5rem;
-    }
-
-    /* СТАТУС */
-    .status-indicator {
-      position: fixed;
-      bottom: 12px;
-      right: 12px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 0.6rem;
-      font-family: 'JetBrains Mono', monospace;
-      font-weight: 700;
-      color: var(--text-dimmer);
-      letter-spacing: 0.1em;
-      z-index: 20;
-      padding: 6px 12px;
-      background: rgba(0,0,0,0.55);
-      border-radius: 999px;
-      border: 1px solid rgba(127, 227, 255, 0.15);
-      max-width: calc(100vw - 24px);
-      white-space: nowrap;
-      overflow: hidden;
-    }
-    .status-dot {
-      width: 6px; height: 6px;
-      border-radius: 50%;
-      background: var(--ice-bright);
-      box-shadow: 0 0 8px var(--ice-bright);
-      animation: pulseDot 2s ease-in-out infinite;
-      flex-shrink: 0;
-    }
-    .status-dot.error {
-      background: #ef4444;
-      box-shadow: 0 0 8px #ef4444;
-      animation: none;
-    }
-    @keyframes pulseDot {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.4; }
-    }
-    .status-meta {
-      color: var(--text-dimmer);
-      font-weight: 900;
-      margin-left: 4px;
-    }
-
-    @media (max-width: 640px) {
-      body { padding: 1rem; }
-      .qr-wrap { flex-direction: column; align-items: center; gap: 1rem; }
-      .vs { display: none; }
-      .qr-card { max-width: 100%; width: 100%; }
-      .qr-box img { max-width: 180px; }
-      .status-indicator { font-size: 0.55rem; padding: 5px 10px; }
-      .actions { flex-direction: column; width: 100%; }
-      .home-btn, .secondary-btn { width: 100%; justify-content: center; }
+      margin-top: 2rem;
+      opacity: 0.7;
     }
 
     @media (prefers-reduced-motion: reduce) {
@@ -448,250 +137,49 @@
 </head>
 <body>
 
-  <div id="snow-container"></div>
+  <div class="inner">
 
-  <div class="container-inner">
-
-    <div class="emoji-row">
-      <span>😎</span>
-      <span>🥳</span>
-      <span>🤠</span>
-      <span>😺</span>
-      <span>🦊</span>
-      <span>🐼</span>
+    <div class="logo-wrap" aria-label="ENDORPHIN">
+      <svg viewBox="0 0 600 120" xmlns="http://www.w3.org/2000/svg" role="img">
+        <defs>
+          <linearGradient id="logoGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#ffffff"/>
+            <stop offset="55%" stop-color="#a8e6ff"/>
+            <stop offset="100%" stop-color="#22d3ee"/>
+          </linearGradient>
+          <filter id="logoGlow" x="-20%" y="-50%" width="140%" height="200%">
+            <feGaussianBlur stdDeviation="5" result="blur"/>
+            <feMerge>
+              <feMergeNode in="blur"/>
+              <feMergeNode in="SourceGraphic"/>
+            </feMerge>
+          </filter>
+        </defs>
+        <text x="300" y="88"
+              text-anchor="middle"
+              font-family="Montserrat, sans-serif"
+              font-weight="900"
+              font-size="96"
+              letter-spacing="-3"
+              fill="url(#logoGrad)"
+              stroke="rgba(127,227,255,0.35)"
+              stroke-width="0.7"
+              filter="url(#logoGlow)">ENDORPHIN</text>
+      </svg>
     </div>
 
-    <h1 class="end-title" id="end-title">ХОЧЕШЬ ЕЩЁ?</h1>
-    <p class="end-subtitle">Снежный Баттл</p>
+    <h1 class="title">ХОЧЕШЬ ЕЩЁ?</h1>
+    <p class="subtitle">Снежный Баттл</p>
 
-    <div class="end-hint" id="end-hint">
-      <span class="big">ПОДОЙДИ К ВЕДУЩЕМУ</span>
-      Сканируй свой QR — и возвращайся в бой!
+    <div class="hint">
+      <span class="big">ОПЯТЬ ХОЧЕШЬ В БОЙ?</span>
+      Попроси ведущего — он покажет <span class="amber">QR-код</span>.<br>
+      Сканируй его и возвращайся играть!
     </div>
 
-    <div class="qr-wrap">
-      <div class="qr-card red" id="qr-card-red">
-        <div class="qr-card-badge red">🔴 КРАСНЫЕ</div>
-        <div class="qr-box" id="qr-red"></div>
-        <div class="qr-counter red" id="qr-counter-red">0 / 1</div>
-        <div class="qr-card-label">Сканируй за красных</div>
-      </div>
-
-      <div class="vs">VS</div>
-
-      <div class="qr-card blue" id="qr-card-blue">
-        <div class="qr-card-badge blue">🔵 СИНИЕ</div>
-        <div class="qr-box" id="qr-blue"></div>
-        <div class="qr-counter blue" id="qr-counter-blue">0 / 1</div>
-        <div class="qr-card-label">Сканируй за синих</div>
-      </div>
-    </div>
-
-    <button class="refresh-btn" id="refresh-btn" onclick="refreshQRs()">
-      <span class="spin-icon">🔄</span>
-      ОБНОВИТЬ QR
-    </button>
-
-    <div class="actions">
-      <a href="index.html" class="home-btn">
-        🏠 НА ГЛАВНУЮ
-      </a>
-      <a href="admin.html" class="secondary-btn">
-        ⚙️ АДМИНКА
-      </a>
-    </div>
-
-    <div class="end-footer">ENDORPHIN · СНЕЖНЫЙ БАТТЛ</div>
+    <div class="footer">ENDORPHIN · СНЕЖНЫЙ БАТТЛ</div>
 
   </div>
-
-  <div class="status-indicator" id="status-indicator" role="status" aria-live="polite">
-    <div class="status-dot" id="status-dot"></div>
-    <span id="status-text">CONNECTING...</span>
-    <span class="status-meta" id="status-meta"></span>
-  </div>
-
-  <script>
-    // ============================================================
-    // СНЕГОПАД
-    // ============================================================
-    (function initSnow() {
-      const container = document.getElementById('snow-container');
-      const count = 40;
-      for (let i = 0; i < count; i++) {
-        const s = document.createElement('div');
-        s.className = 'snowflake';
-        s.innerText = '❄';
-        s.style.left = Math.random() * 100 + 'vw';
-        s.style.fontSize = (10 + Math.random() * 20) + 'px';
-        s.style.animationDuration = (5 + Math.random() * 8) + 's';
-        s.style.animationDelay = (-Math.random() * 12) + 's';
-        s.style.opacity = (0.3 + Math.random() * 0.6).toFixed(2);
-        container.appendChild(s);
-      }
-    })();
-
-    // ============================================================
-    // QR-КОДЫ
-    // ============================================================
-    function getBaseUrl() {
-      const url = new URL(window.location.href);
-      return url.origin + url.pathname.substring(0, url.pathname.lastIndexOf('/') + 1);
-    }
-
-    function generateQRs() {
-      const base = getBaseUrl();
-      const redUrl = `${base}play.html?team=red`;
-      const blueUrl = `${base}play.html?team=blue`;
-
-      try {
-        const qrRed = qrcode(0, 'M');
-        qrRed.addData(redUrl);
-        qrRed.make();
-        document.getElementById('qr-red').innerHTML = qrRed.createImgTag(5, 10);
-
-        const qrBlue = qrcode(0, 'M');
-        qrBlue.addData(blueUrl);
-        qrBlue.make();
-        document.getElementById('qr-blue').innerHTML = qrBlue.createImgTag(5, 10);
-      } catch (e) {
-        console.error('QR generation failed:', e);
-        document.getElementById('qr-red').innerHTML = '<span style="color:#ff3b5c;font-size:0.8rem;">QR не создан</span>';
-        document.getElementById('qr-blue').innerHTML = '<span style="color:#ff3b5c;font-size:0.8rem;">QR не создан</span>';
-      }
-    }
-
-    // Кнопка «Обновить QR» — пересоздаёт коды с анимацией
-    window.refreshQRs = function() {
-      const btn = document.getElementById('refresh-btn');
-      btn.classList.add('spinning');
-      setTimeout(() => btn.classList.remove('spinning'), 600);
-      generateQRs();
-      updateUIFromData(lastData);
-    };
-
-    // ============================================================
-    // СТАТУС + СЧЁТЧИКИ (fetch напрямую из Firebase REST)
-    // ============================================================
-    const DB_URL = 'https://endorphin-battle-default-rtdb.europe-west1.firebasedatabase.app/games/battle_1.json';
-    let lastData = null;
-
-    function parseMode(mode) {
-      if (!mode || typeof mode !== 'string') return { redMax: 1, blueMax: 1 };
-      if (mode.includes('v')) {
-        const parts = mode.split('v').slice(0, 2);
-        return {
-          redMax: Math.max(1, Math.min(4, parseInt(parts[0]) || 1)),
-          blueMax: Math.max(1, Math.min(4, parseInt(parts[1]) || 1))
-        };
-      }
-      const n = Math.max(1, Math.min(4, parseInt(mode.charAt(0)) || 1));
-      return { redMax: n, blueMax: n };
-    }
-
-    function updateUIFromData(data) {
-      if (!data) return;
-
-      const status = data.status || 'lobby';
-      const { redMax, blueMax } = parseMode(data.mode);
-
-      const redPlayers = Object.keys(data.players?.red || {}).length;
-      const bluePlayers = Object.keys(data.players?.blue || {}).length;
-      const redRoom = Object.keys(data.room?.red || {}).length;
-      const blueRoom = Object.keys(data.room?.blue || {}).length;
-      const redTotal = redPlayers + redRoom;
-      const blueTotal = bluePlayers + blueRoom;
-
-      // Заголовок
-      const titleEl = document.getElementById('end-title');
-      const hintEl = document.getElementById('end-hint');
-
-      if (status === 'finished') {
-        titleEl.innerText = 'ХОЧЕШЬ ЕЩЁ?';
-        hintEl.innerHTML = `<span class="big">ПОДОЙДИ К ВЕДУЩЕМУ</span>Сканируй свой QR — и возвращайся в бой!`;
-      } else if (status === 'lobby') {
-        titleEl.innerText = 'ЖДЁМ ВЕДУЩЕГО';
-        hintEl.innerHTML = `<span class="big">ВЕДУЩИЙ ГОТОВИТ НОВУЮ ИГРУ</span>Сканируй QR и занимай место в команде!`;
-      } else if (status === 'playing') {
-        titleEl.innerText = 'ИГРА ИДЁТ';
-        hintEl.innerHTML = `<span class="big">СЕЙЧАС ИДЁТ БОЙ</span>Дождись конца, потом сканируй QR для новой игры.`;
-      } else {
-        titleEl.innerText = 'ХОЧЕШЬ ЕЩЁ?';
-        hintEl.innerHTML = `<span class="big">ПОДОЙДИ К ВЕДУЩЕМУ</span>Сканируй свой QR — и возвращайся в бой!`;
-      }
-
-      // Счётчики
-      document.getElementById('qr-counter-red').innerText = `${redTotal} / ${redMax}`;
-      document.getElementById('qr-counter-blue').innerText = `${blueTotal} / ${blueMax}`;
-
-      // «Полна» ли команда
-      const cardRed = document.getElementById('qr-card-red');
-      const cardBlue = document.getElementById('qr-card-blue');
-      cardRed.classList.toggle('full', redTotal >= redMax);
-      cardBlue.classList.toggle('full', blueTotal >= blueMax);
-    }
-
-    async function checkStatus() {
-      const dot = document.getElementById('status-dot');
-      const text = document.getElementById('status-text');
-      const meta = document.getElementById('status-meta');
-
-      const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 5000);
-      const t0 = performance.now();
-
-      try {
-        const res = await fetch(DB_URL, { signal: controller.signal, cache: 'no-store' });
-        clearTimeout(timeout);
-        const latency = Math.round(performance.now() - t0);
-
-        if (!res.ok) throw new Error('HTTP ' + res.status);
-
-        const data = await res.json() || {};
-        lastData = data;
-
-        const status = data.status || 'lobby';
-        const redP = Object.keys(data.players?.red || {}).length;
-        const blueP = Object.keys(data.players?.blue || {}).length;
-        const redR = Object.keys(data.room?.red || {}).length;
-        const blueR = Object.keys(data.room?.blue || {}).length;
-
-        dot.classList.remove('error');
-        text.innerText = `ONLINE · ${String(status).toUpperCase()} · ${latency}ms`;
-        meta.innerText = `👥 ${redP + blueP} · 🚪 ${redR + blueR}`;
-
-        updateUIFromData(data);
-      } catch (e) {
-        clearTimeout(timeout);
-        dot.classList.add('error');
-        text.innerText = 'OFFLINE';
-        meta.innerText = '';
-
-        const titleEl = document.getElementById('end-title');
-        const hintEl = document.getElementById('end-hint');
-        titleEl.innerText = 'НЕТ СВЯЗИ';
-        hintEl.innerHTML = `<span class="big">ПРОВЕРЬ ИНТЕРНЕТ</span>Если не проходит — позови ведущего.`;
-      }
-    }
-
-    // ============================================================
-    // INIT
-    // ============================================================
-    if (typeof qrcode !== 'undefined') {
-      generateQRs();
-    } else {
-      window.addEventListener('load', () => {
-        if (typeof qrcode !== 'undefined') generateQRs();
-      });
-    }
-
-    checkStatus();
-    setInterval(checkStatus, 5000);
-
-    document.addEventListener('visibilitychange', () => {
-      if (!document.hidden) checkStatus();
-    });
-  </script>
 
 </body>
 </html>
