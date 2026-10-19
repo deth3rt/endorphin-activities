@@ -188,6 +188,57 @@
         }
         .hp-red { top: 20px; left: 20px; color: var(--red-team); }
         .hp-blue { bottom: 80px; right: 20px; color: var(--blue-team); }
+
+        /* ============================================================
+           КНОПКА БРОСОК (в play.html)
+           ============================================================ */
+        .shoot-btn { 
+            width: 180px; height: 180px; border-radius: 50%; 
+            font-size: 2rem; font-weight: 900; 
+            display: flex; align-items: center; justify-content: center; 
+            background: linear-gradient(135deg, #ef4444, #7f1d1d); 
+            border: 8px solid rgba(255,255,255,0.2); 
+            color: #fff;
+            transition: all 0.2s;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        .shoot-btn:disabled { filter: grayscale(1); opacity: 0.3; transform: scale(0.9); }
+
+        /* ============================================================
+           ШКАЛА СИЛЫ (в play.html)
+           ============================================================ */
+        .power-track {
+            position: relative; width: 100%; height: 30px;
+            background: linear-gradient(90deg, #22c55e 0%, #fbbf24 50%, #ef4444 100%);
+            border-radius: 15px; 
+            border: 3px solid rgba(255,255,255,0.3); /* Обводка */
+            overflow: hidden; cursor: pointer;
+        }
+        .power-thumb {
+            position: absolute; top: 50%; left: 10%;
+            width: 40px; height: 40px;
+            background: #ffffff; border-radius: 50%;
+            transform: translate(-50%, -50%);
+            box-shadow: 0 0 20px rgba(255,255,255,0.8);
+            transition: left 0.05s linear; pointer-events: none;
+        }
+
+        /* ============================================================
+           СТРЕЛКА УГЛА (в play.html)
+           ============================================================ */
+        .aim-container { position: relative; width: 260px; height: 260px; margin: 0 auto; }
+        .aim-bg { position: absolute; inset: 0; border-radius: 50%; border: 2px dashed rgba(255,255,255,0.2); }
+        .aim-arrow { 
+            position: absolute; top: 50%; left: 50%; width: 4px; height: 110px; 
+            background: linear-gradient(to top, transparent, #22d3ee); 
+            transform-origin: bottom center; transition: transform 0.1s; 
+        }
+        .aim-arrow::before { 
+            content: ''; position: absolute; top: -10px; left: -8px; 
+            border-left: 10px solid transparent; border-right: 10px solid transparent; 
+            border-bottom: 20px solid #22d3ee; 
+        }
     </style>
 </head>
 <body class="h-screen w-screen relative overflow-hidden" id="main-body">
