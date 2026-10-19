@@ -540,9 +540,6 @@
         const gameId = 'battle_1';
         const gameRef = ref(db, `games/${gameId}`);
 
-        // ============================================================
-        // CANVAS
-        // ============================================================
         const canvas = document.getElementById('game-canvas');
         const ctx = canvas.getContext('2d');
         let width, height;
@@ -554,16 +551,10 @@
         window.addEventListener('resize', resizeCanvas);
         resizeCanvas();
 
-        // ============================================================
-        // КОНСТАНТЫ
-        // ============================================================
         const TURN_TIME = 15;
         const FORM_TIME = 1500;
         const WINNER_AUTO_HIDE = 30;
 
-        // ============================================================
-        // СОСТОЯНИЕ
-        // ============================================================
         let currentData = null;
         let currentBaseUrl = getBaseUrl();
         
@@ -578,24 +569,20 @@
         let lastTickerText = '';
         let lastScreen = 'attract';
         let lastMode = null;
+        let winnerShown = false;
 
-        // Таймер хода
         let turnTimerStart = 0;
         let turnTimerPlayerId = null;
         let turnTimerActive = false;
 
-        // Формирование снежков
         let formingShots = [];
 
-        // Live-прицел
         let currentAim = null;
         let displayedAimAngle = null;
         let displayedAimPower = null;
 
-        // Winner таймер
         let winnerCountdownInterval = null;
 
-        // Супер
         let superTextTimeout = null;
 
         function getBaseUrl() {
@@ -603,9 +590,6 @@
             return url.origin + url.pathname.substring(0, url.pathname.lastIndexOf('/') + 1);
         }
 
-        // ============================================================
-        // УТИЛИТЫ
-        // ============================================================
         function escapeHtml(str) {
             if (!str) return '';
             return String(str)
@@ -638,9 +622,12 @@
             el.className = `avatar avatar-${size}`;
         }
 
-        // ============================================================
-        // PLAYER (круглый, с аватаром)
-        // ============================================================
+        function renderHeartsCompact(lives) {
+            if (lives <= 0) return '💀';
+            if (lives <= 5) return '❤️'.repeat(lives);
+            return `❤️×${lives}`;
+        }
+
         class Player {
             constructor(id, data, team) {
                 this.id = id;
@@ -695,7 +682,6 @@
                     ctx.restore();
                 }
 
-                // Круг с градиентом
                 ctx.save();
                 ctx.shadowColor = teamColor;
                 ctx.shadowBlur = 25;
@@ -721,7 +707,6 @@
                 ctx.stroke();
                 ctx.restore();
 
-                // Инициал
                 ctx.save();
                 ctx.font = 'bold 36px Montserrat';
                 ctx.fillStyle = '#ffffff';
@@ -732,7 +717,6 @@
                 ctx.fillText(getInitial(this.name), this.x, this.y);
                 ctx.restore();
 
-                // Имя под
                 ctx.save();
                 ctx.font = 'bold 18px Montserrat';
                 ctx.fillStyle = '#ffffff';
@@ -742,18 +726,14 @@
                 ctx.fillText(this.name, this.x, this.y + this.radius + 26);
                 ctx.restore();
 
-                // Сердечки над
                 ctx.save();
                 ctx.font = '20px Montserrat';
                 ctx.textAlign = 'center';
-                ctx.fillText('❤️'.repeat(Math.max(0, this.lives)), this.x, this.y - this.radius - 15);
+                ctx.fillText(renderHeartsCompact(this.lives), this.x, this.y - this.radius - 15);
                 ctx.restore();
             }
         }
 
-        // ============================================================
-        // ЧАСТИЦЫ
-        // ============================================================
         function spawnParticles(x, y, color, count = 30) {
             for (let i = 0; i < count; i++) {
                 particles.push({
@@ -767,9 +747,6 @@
             }
         }
 
-        // ============================================================
-        // СНЕЖОК
-        // ============================================================
         class Snowball {
             constructor(shooter, power, angle, damage = 1, isSuper = false) {
                 this.x = shooter.x;
@@ -842,9 +819,6 @@
             }
         }
 
-        // ============================================================
-        // LIVE-ПРИЦЕЛ (короче)
-        // ============================================================
         function drawLiveAim(aimer, angle, power) {
             const direction = aimer.team === 'red' ? 1 : -1;
             const rad = angle * Math.PI / 180;
@@ -935,9 +909,6 @@
             ctx.restore();
         }
 
-        // ============================================================
-        // ФОРМИРОВАНИЕ СНЕЖКОВ
-        // ============================================================
         function drawFormingShots(now) {
             formingShots.forEach(fs => {
                 const elapsed = now - fs.startTime;
@@ -975,9 +946,6 @@
             });
         }
 
-        // ============================================================
-        // ИГРОВОЙ ЦИКЛ
-        // ============================================================
         function gameLoop() {
             const now = performance.now();
 
@@ -1071,9 +1039,6 @@
             requestAnimationFrame(gameLoop);
         }
 
-        // ============================================================
-        // ТАЙМЕР ХОДА
-        // ============================================================
         function updateTurnTimerPosition(now) {
             const timerEl = document.getElementById('tv-turn-timer');
             
@@ -1115,9 +1080,6 @@
             }
         }
 
-        // ============================================================
-        // ПОПАДАНИЕ
-        // ============================================================
         async function handleHit(ball, p) {
             const damage = ball.damage || 1;
             const newLives = Math.max(0, p.lives - damage);
@@ -1172,8 +1134,8 @@
                 const redLives = teamLives('red');
                 const blueLives = teamLives('blue');
 
-                document.getElementById('heart-red').innerText = redLives > 0 ? '❤️'.repeat(redLives) : '💀';
-                document.getElementById('heart-blue').innerText = blueLives > 0 ? '❤️'.repeat(blueLives) : '💀';
+                document.getElementById('heart-red').innerText = renderHeartsCompact(redLives);
+                document.getElementById('heart-blue').innerText = renderHeartsCompact(blueLives);
 
                 if (redLives <= 0 && blueLives <= 0) {
                     await update(gameRef, { status: 'finished', screen: 'winner', winner: 'none' });
@@ -1187,9 +1149,6 @@
             }
         }
 
-        // ============================================================
-        // QR
-        // ============================================================
         function generateQRs() {
             document.getElementById('qr-red').innerHTML = '';
             document.getElementById('qr-blue').innerHTML = '';
@@ -1209,13 +1168,13 @@
         function updateQRPlayersList(data) {
             const renderList = (containerId, team) => {
                 const container = document.getElementById(containerId);
-                const players = Object.entries(data.room?.[team] || {})
+                const roomPlayers = Object.entries(data.room?.[team] || {})
                     .sort((a, b) => (a[1].joinedAt || 0) - (b[1].joinedAt || 0));
                 const activePlayers = Object.values(data.players?.[team] || {});
                 
                 const all = [
                     ...activePlayers.map(p => ({ ...p, _status: 'playing' })),
-                    ...players.map(([id, p]) => ({ ...p, _status: 'waiting' }))
+                    ...roomPlayers.map(([id, p]) => ({ ...p, _status: 'waiting' }))
                 ];
                 
                 if (all.length === 0) {
@@ -1239,7 +1198,6 @@
             renderList('qr-players-red', 'red');
             renderList('qr-players-blue', 'blue');
             
-            // Статус
             const redMax = parseInt((data.mode || '1v1').split('v')[0]) || 1;
             const blueMax = parseInt((data.mode || '1v1').split('v')[1]) || 1;
             const redCount = Object.keys(data.room?.red || {}).length + Object.keys(data.players?.red || {}).length;
@@ -1256,9 +1214,6 @@
             }
         }
 
-        // ============================================================
-        // ЭКРАНЫ
-        // ============================================================
         function showAttract() {
             document.getElementById('attract-view').classList.remove('hidden');
             document.getElementById('qr-view').classList.add('hidden');
@@ -1305,6 +1260,9 @@
             document.getElementById('tv-turn-timer').classList.remove('active');
             document.getElementById('heart-red').style.display = 'none';
             document.getElementById('heart-blue').style.display = 'none';
+
+            if (winnerShown) return;
+            winnerShown = true;
 
             const winText = document.getElementById('win-text');
             const winEmoji = document.getElementById('win-emoji');
@@ -1361,9 +1319,6 @@
             if (countdownEl) countdownEl.innerText = '';
         }
 
-        // ============================================================
-        // БЕГУЩАЯ СТРОКА
-        // ============================================================
         onValue(ref(db, `games/${gameId}/ticker_messages`), (snap) => {
             const messages = snap.val() || {};
             const keys = Object.keys(messages).sort((a, b) => messages[a].time - messages[b].time);
@@ -1381,9 +1336,6 @@
             }
         });
 
-        // ============================================================
-        // РЕКЛАМА
-        // ============================================================
         onValue(ref(db, `games/${gameId}/ad_settings`), (snap) => {
             const data = snap.val();
             if (!data) return;
@@ -1406,9 +1358,6 @@
             }
         });
 
-        // ============================================================
-        // LIVE-ПРИЦЕЛ
-        // ============================================================
         onValue(ref(db, `games/${gameId}/aim`), (snap) => {
             const aimData = snap.val();
             
@@ -1426,9 +1375,6 @@
             }
         });
 
-        // ============================================================
-        // ВЫСТРЕЛ
-        // ============================================================
         onValue(ref(db, `games/${gameId}/last_shot`), (snap) => {
             const shot = snap.val();
             if (!shot || !shot.time) return;
@@ -1510,9 +1456,6 @@
             }, 1800);
         }
 
-        // ============================================================
-        // ТАЙМЕР (глобальный)
-        // ============================================================
         onValue(ref(db, `games/${gameId}/timer`), (snap) => {
             const val = snap.val();
             const tvTimer = document.getElementById('tv-timer');
@@ -1527,9 +1470,6 @@
             }
         });
 
-        // ============================================================
-        // ОСНОВНОЙ СЛУШАТЕЛЬ
-        // ============================================================
         onValue(gameRef, (snapshot) => {
             const data = snapshot.val();
             if (!data) return;
@@ -1547,20 +1487,24 @@
             syncPlayers(data);
             updateHeartsUI();
 
-            // Обработка экранов
+            // Смена экрана
             if (screen !== prevScreen) {
                 lastScreen = screen;
                 
-                // Сброс таймеров победителя при смене экрана
                 if (screen !== 'winner') {
                     clearWinnerTimers();
+                    winnerShown = false;
+                }
+                
+                // Сброс isPreloading при выходе из game
+                if (screen !== 'game') {
+                    isPreloading = false;
                 }
             }
 
             switch (screen) {
                 case 'attract':
                     showAttract();
-                    // Сброс игрового состояния
                     formingShots = [];
                     snowballs = [];
                     particles = [];
@@ -1574,18 +1518,15 @@
                 
                 case 'game':
                     if (data.status === 'playing' && !data.preloadDone) {
-                        // Прелоадинг
-                        if (isPreloading) {
-                            // Уже идёт
-                        } else {
+                        if (!isPreloading) {
                             startPreload(data);
                         }
                     } else {
+                        // Прелоадинг завершён или игра идёт
                         isPreloading = false;
                         document.getElementById('preload-view').classList.add('hidden');
                         showGame();
                         
-                        // Обновить индикаторы
                         const turnIndicator = document.getElementById('turn-indicator');
                         if (data.turn && data.preloadDone) {
                             turnIndicator.style.display = 'block';
@@ -1595,7 +1536,6 @@
                             turnIndicator.style.display = 'none';
                         }
 
-                        // Таймер хода
                         if (data.preloadDone && data.activePlayerId && !data.timer) {
                             if (turnTimerPlayerId !== data.activePlayerId) {
                                 turnTimerPlayerId = data.activePlayerId;
@@ -1615,9 +1555,6 @@
             }
         });
 
-        // ============================================================
-        // ПРЕЛОУДИНГ
-        // ============================================================
         function startPreload(data) {
             if (isPreloading) return;
             isPreloading = true;
@@ -1641,12 +1578,9 @@
             }
 
             preloadView.classList.remove('hidden');
-            preloadTimer.innerText = data.timer || '10';
+            preloadTimer.innerText = (data.timer !== null && data.timer !== undefined) ? data.timer : '10';
         }
 
-        // ============================================================
-        // СИНХРОНИЗАЦИЯ ИГРОКОВ
-        // ============================================================
         function syncPlayers(data) {
             const redPlayers = data.players?.red || {};
             const bluePlayers = data.players?.blue || {};
@@ -1669,9 +1603,6 @@
             });
         }
 
-        // ============================================================
-        // СЕРДЕЧКИ
-        // ============================================================
         function updateHeartsUI() {
             let red = 0, blue = 0;
             players.forEach(p => {
@@ -1680,13 +1611,10 @@
                     else blue += p.lives;
                 }
             });
-            document.getElementById('heart-red').innerText = red > 0 ? '❤️'.repeat(red) : '💀';
-            document.getElementById('heart-blue').innerText = blue > 0 ? '❤️'.repeat(blue) : '💀';
+            document.getElementById('heart-red').innerText = renderHeartsCompact(red);
+            document.getElementById('heart-blue').innerText = renderHeartsCompact(blue);
         }
 
-        // ============================================================
-        // КОНФЕТТИ
-        // ============================================================
         function launchConfetti(colors) {
             const container = document.getElementById('confetti-container');
             const defaultColors = ['#fbbf24', '#f59e0b', '#22d3ee', '#3b82f6', '#ef4444', '#a855f7', '#22c55e'];
@@ -1712,9 +1640,6 @@
             }, 6000);
         }
 
-        // ============================================================
-        // СНЕЖИНКИ
-        // ============================================================
         const snowContainer = document.getElementById('snow-container');
         for (let i = 0; i < 40; i++) {
             const s = document.createElement('div');
@@ -1728,9 +1653,6 @@
             snowContainer.appendChild(s);
         }
 
-        // ============================================================
-        // СТАРТ
-        // ============================================================
         gameLoop();
     </script>
 </body>
