@@ -63,7 +63,6 @@
     <div>
       <h2 class="text-xl font-bold mb-4 text-cyan-300">ИСТОРИЯ СООБЩЕНИЙ</h2>
       <div id="messages-list" class="space-y-3 max-h-96 overflow-y-auto pr-2">
-        <!-- Сюда будут загружаться сообщения -->
         <div class="text-center text-gray-500 py-8 italic" id="empty-history">
           Пока нет отправленных сообщений
         </div>
@@ -89,20 +88,17 @@
     const db = getDatabase(app);
     const tickerRef = ref(db, 'games/battle_1/ticker_messages');
 
-    // ============================================================
     // ДОБАВЛЕНИЕ СООБЩЕНИЯ
-    // ============================================================
     window.addMessage = () => {
       const input = document.getElementById('ticker-input');
       const text = input.value.trim();
       if (!text) return;
 
-      // Получаем текущий список сообщений
       onValue(tickerRef, (snap) => {
         const messages = snap.val() || {};
         const keys = Object.keys(messages).sort((a, b) => messages[a].time - messages[b].time);
         
-        // Если сообщений больше 10, удаляем самое старое
+        // Если сообщений >= 10, удаляем самое старое
         if (keys.length >= 10) {
           remove(ref(db, `games/battle_1/ticker_messages/${keys[0]}`));
         }
@@ -118,18 +114,14 @@
       }, { onlyOnce: true });
     };
 
-    // ============================================================
     // УДАЛЕНИЕ СООБЩЕНИЯ
-    // ============================================================
     window.deleteMessage = (key) => {
       if (confirm('Удалить это сообщение?')) {
         remove(ref(db, `games/battle_1/ticker_messages/${key}`));
       }
     };
 
-    // ============================================================
     // ОТОБРАЖЕНИЕ ИСТОРИИ
-    // ============================================================
     onValue(tickerRef, (snap) => {
       const messages = snap.val() || {};
       const keys = Object.keys(messages).sort((a, b) => messages[a].time - messages[b].time);
@@ -161,9 +153,7 @@
       }).join('');
     });
 
-    // ============================================================
     // СБРОС
-    // ============================================================
     window.clearGame = () => {
       if (confirm('Сбросить ВСЮ игру? Все игроки отключатся.')) {
         set(ref(db, 'games/battle_1'), {
