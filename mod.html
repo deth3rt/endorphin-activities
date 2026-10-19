@@ -2,71 +2,160 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#03080f">
   <title>ENDORPHIN | ПУЛЬТ ВЕДУЩЕГО</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&family=JetBrains+Mono:wght@700;900&display=swap" rel="stylesheet">
+
   <script src="https://cdn.tailwindcss.com"></script>
+
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap');
-    body { 
-      background: radial-gradient(circle at 50% 0%, #0a2540 0%, #03080f 100%); 
-      color: #fff; 
-      font-family: 'Montserrat', sans-serif; 
-      min-height: 100vh; 
-      display: flex; 
-      flex-direction: column; 
-      align-items: center; 
-      padding: 2rem; 
+    :root {
+      --bg-deep: #03080f;
+      --bg-mid: #0a2540;
+      --ice: #7fe3ff;
+      --ice-bright: #22d3ee;
+      --amber: #fbbf24;
+      --red-team: #ff3b5c;
+      --blue-team: #3d8bff;
+      --glass-bg: rgba(10, 37, 64, 0.6);
+      --glass-border: rgba(127, 227, 255, 0.28);
+      --text-dim: rgba(168, 230, 255, 0.7);
+      --text-dimmer: rgba(168, 230, 255, 0.45);
     }
-    .glass { 
-      background: rgba(10, 37, 64, 0.8); 
-      border: 1px solid rgba(127, 227, 255, 0.3); 
-      border-radius: 1.5rem; 
-      backdrop-filter: blur(16px); 
+
+    * { -webkit-tap-highlight-color: transparent; }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      overflow-x: hidden;
     }
-    .mode-btn { transition: all 0.3s ease; }
-    .mode-btn.active { 
-      border-color: #22d3ee; 
-      background: rgba(34, 211, 238, 0.2); 
-      color: #22d3ee; 
-      box-shadow: 0 0 20px rgba(34, 211, 238, 0.5); 
+
+    body {
+      background: radial-gradient(circle at 50% 0%, var(--bg-mid) 0%, var(--bg-deep) 70%);
+      color: #fff;
+      font-family: 'Montserrat', sans-serif;
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 1.5rem 1rem 3rem;
+      position: relative;
     }
-    .mode-btn:disabled {
-      opacity: 0.4;
-      cursor: not-allowed;
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.035;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      mix-blend-mode: overlay;
     }
-    .team-btn { transition: all 0.3s ease; }
-    .team-btn.active-red { 
-      border-color: #ef4444; 
-      background: rgba(239, 68, 68, 0.2); 
-      color: #ef4444; 
-      box-shadow: 0 0 20px rgba(239, 68, 68, 0.5); 
+
+    .container-inner {
+      width: 100%;
+      max-width: 1024px;
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
     }
-    .team-btn.active-blue { 
-      border-color: #3b82f6; 
-      background: rgba(59, 130, 246, 0.2); 
-      color: #3b82f6; 
-      box-shadow: 0 0 20px rgba(59, 130, 246, 0.5); 
+
+    .glass {
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      border-radius: 1.5rem;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.05);
     }
-    .team-btn:disabled {
-      opacity: 0.4;
-      cursor: not-allowed;
+
+    .page-title {
+      font-size: clamp(1.5rem, 4vw, 2rem);
+      font-weight: 900;
+      letter-spacing: 0.06em;
+      background: linear-gradient(180deg, #fff 0%, #a8e6ff 55%, #22d3ee 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      text-shadow: 0 0 30px rgba(34, 211, 238, 0.3);
     }
-    .hp-bar {
-      height: 8px;
-      background: rgba(0,0,0,0.5);
-      border-radius: 4px;
+
+    .back-btn {
+      padding: 0.6rem 1rem;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 0.75rem;
+      font-weight: 700;
+      font-size: 0.8rem;
+      color: var(--text-dim);
+      text-decoration: none;
+      transition: all 0.2s;
+      letter-spacing: 0.08em;
+    }
+    .back-btn:hover { background: rgba(34,211,238,0.12); color: var(--ice-bright); border-color: rgba(34,211,238,0.4); }
+
+    .mode-btn {
+      transition: all 0.25s ease;
+      border: 2px solid rgba(127, 227, 255, 0.2);
+      background: rgba(0,0,0,0.3);
+      color: var(--text-dim);
+      position: relative;
       overflow: hidden;
+    }
+    .mode-btn:hover:not(:disabled) {
+      border-color: rgba(127, 227, 255, 0.5);
+      color: var(--ice);
+    }
+    .mode-btn.active {
+      border-color: var(--ice-bright);
+      background: rgba(34, 211, 238, 0.15);
+      color: var(--ice-bright);
+      box-shadow: 0 0 20px rgba(34, 211, 238, 0.35), inset 0 0 15px rgba(34, 211, 238, 0.08);
+    }
+    .mode-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+    .team-btn {
+      transition: all 0.25s ease;
+      border: 2px solid rgba(255,255,255,0.15);
+      background: rgba(0,0,0,0.3);
+      color: var(--text-dim);
+    }
+    .team-btn:hover:not(:disabled) { color: #fff; }
+    .team-btn.active-red {
+      border-color: var(--red-team);
+      background: rgba(255, 59, 92, 0.15);
+      color: var(--red-team);
+      box-shadow: 0 0 25px rgba(255, 59, 92, 0.4);
+    }
+    .team-btn.active-blue {
+      border-color: var(--blue-team);
+      background: rgba(61, 139, 255, 0.15);
+      color: var(--blue-team);
+      box-shadow: 0 0 25px rgba(61, 139, 255, 0.4);
+    }
+    .team-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+    .hp-bar {
+      height: 10px;
+      background: rgba(0,0,0,0.5);
+      border-radius: 5px;
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,0.08);
     }
     .hp-fill {
       height: 100%;
-      transition: width 0.4s ease;
-      border-radius: 4px;
+      transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+      border-radius: 5px;
     }
-    @keyframes pulseStatus {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.5; }
-    }
-    .pulse-status { animation: pulseStatus 1.5s ease-in-out infinite; }
+
+    @keyframes pulseStatus { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+    .pulse-status { animation: pulseStatus 1.6s ease-in-out infinite; }
 
     @keyframes shake {
       0%, 100% { transform: translate(0,0); }
@@ -87,65 +176,66 @@
       flex-shrink: 0;
       border: 2px solid rgba(255,255,255,0.3);
       box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+      font-variant-numeric: tabular-nums;
     }
-    .avatar-xs { width: 24px; height: 24px; font-size: 0.7rem; }
-    .avatar-sm { width: 32px; height: 32px; font-size: 0.9rem; }
-    .avatar-md { width: 40px; height: 40px; font-size: 1.1rem; }
+    .avatar-sm { width: 34px; height: 34px; font-size: 0.95rem; }
 
     .num-selector {
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 8px;
+      gap: 10px;
     }
     .num-btn {
-      width: 40px;
-      height: 40px;
-      border-radius: 10px;
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
       background: rgba(0,0,0,0.4);
-      border: 2px solid rgba(127, 227, 255, 0.3);
+      border: 2px solid rgba(127, 227, 255, 0.25);
       color: #fff;
       font-weight: 900;
-      font-size: 1.2rem;
+      font-size: 1.3rem;
       transition: all 0.15s;
+      cursor: pointer;
     }
-    .num-btn:active:not(:disabled) {
-      transform: scale(0.9);
-    }
-    .num-btn:disabled {
-      opacity: 0.3;
-    }
+    .num-btn:hover:not(:disabled) { border-color: var(--ice-bright); background: rgba(34,211,238,0.15); }
+    .num-btn:active:not(:disabled) { transform: scale(0.9); }
+    .num-btn:disabled { opacity: 0.25; cursor: not-allowed; }
+
     .num-value {
-      width: 60px;
-      height: 50px;
+      width: 66px;
+      height: 54px;
       display: flex;
       align-items: center;
       justify-content: center;
-      border-radius: 12px;
-      font-size: 1.8rem;
+      border-radius: 14px;
+      font-size: 1.9rem;
       font-weight: 900;
       border: 2px solid;
+      font-family: 'JetBrains Mono', monospace;
+      font-variant-numeric: tabular-nums;
     }
     .num-value.red {
-      color: #ef4444;
-      border-color: rgba(239, 68, 68, 0.5);
-      background: rgba(239, 68, 68, 0.1);
+      color: var(--red-team);
+      border-color: rgba(255, 59, 92, 0.5);
+      background: rgba(255, 59, 92, 0.1);
     }
     .num-value.blue {
-      color: #3b82f6;
-      border-color: rgba(59, 130, 246, 0.5);
-      background: rgba(59, 130, 246, 0.1);
+      color: var(--blue-team);
+      border-color: rgba(61, 139, 255, 0.5);
+      background: rgba(61, 139, 255, 0.1);
     }
 
     .unfair-badge {
-      background: linear-gradient(90deg, #fbbf24, #f59e0b);
+      background: linear-gradient(90deg, var(--amber), #f59e0b);
       color: #000;
       padding: 4px 14px;
       border-radius: 999px;
-      font-size: 0.7rem;
+      font-size: 0.68rem;
       font-weight: 900;
       letter-spacing: 0.1em;
       animation: pulseStatus 2s ease-in-out infinite;
+      text-transform: uppercase;
     }
 
     .player-row {
@@ -159,15 +249,14 @@
       margin-bottom: 6px;
       transition: all 0.15s;
     }
-    .player-row.clickable {
-      cursor: pointer;
-    }
+    .player-row.clickable { cursor: pointer; }
     .player-row.clickable:hover {
-      background: rgba(34, 211, 238, 0.12);
+      background: rgba(34, 211, 238, 0.1);
       border-color: rgba(34, 211, 238, 0.5);
+      transform: translateX(2px);
     }
     .player-row.active {
-      background: rgba(251, 191, 36, 0.12);
+      background: rgba(251, 191, 36, 0.1);
       border-color: rgba(251, 191, 36, 0.5);
     }
     .player-row .name {
@@ -178,234 +267,447 @@
       overflow: hidden;
       text-overflow: ellipsis;
     }
-    .player-row .hearts {
-      font-size: 0.8rem;
-      letter-spacing: -1px;
-    }
-    .player-row .action-icon {
-      font-size: 1.1rem;
-      opacity: 0.6;
-    }
     .player-row .kick-btn {
       background: none;
       border: none;
-      color: #ef4444;
+      color: var(--red-team);
       font-weight: 900;
       font-size: 1rem;
       padding: 2px 6px;
       cursor: pointer;
       opacity: 0.6;
-      transition: opacity 0.15s;
+      transition: opacity 0.15s, transform 0.15s;
+      line-height: 1;
     }
-    .player-row .kick-btn:hover {
-      opacity: 1;
+    .player-row .kick-btn:hover { opacity: 1; transform: scale(1.15); }
+
+    .start-btn {
+      background: linear-gradient(135deg, var(--blue-team), var(--ice-bright));
+      color: #000;
+      font-weight: 900;
+      letter-spacing: 0.05em;
+      box-shadow: 0 0 40px rgba(34, 211, 238, 0.5), inset 0 1px 0 rgba(255,255,255,0.3);
+      transition: all 0.25s;
+      text-transform: uppercase;
+    }
+    .start-btn:hover:not(:disabled) {
+      box-shadow: 0 0 60px rgba(34, 211, 238, 0.8), inset 0 1px 0 rgba(255,255,255,0.3);
+      transform: translateY(-2px);
+    }
+    .start-btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+
+    /* ============================================================
+       МОДАЛКИ (вместо alert/confirm)
+       ============================================================ */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.75);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+      animation: fadeIn 0.2s ease-out;
+    }
+    .modal-backdrop.hidden { display: none; }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes modalIn {
+      from { transform: translateY(20px) scale(0.95); opacity: 0; }
+      to { transform: translateY(0) scale(1); opacity: 1; }
+    }
+    .modal-card {
+      background: rgba(10, 37, 64, 0.98);
+      border: 1px solid rgba(127, 227, 255, 0.35);
+      border-radius: 1.5rem;
+      padding: 1.75rem;
+      max-width: 420px;
+      width: 100%;
+      animation: modalIn 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.06);
+    }
+    .modal-icon { font-size: 2.5rem; text-align: center; margin-bottom: 0.75rem; }
+    .modal-title {
+      font-size: 1.15rem;
+      font-weight: 900;
+      text-align: center;
+      margin-bottom: 0.5rem;
+      letter-spacing: 0.05em;
+    }
+    .modal-text {
+      font-size: 0.85rem;
+      text-align: center;
+      color: var(--text-dim);
+      line-height: 1.5;
+      margin-bottom: 1.25rem;
+    }
+    .modal-actions {
+      display: flex;
+      gap: 0.6rem;
+    }
+    .modal-btn {
+      flex: 1;
+      padding: 0.85rem 1rem;
+      border-radius: 0.85rem;
+      font-weight: 900;
+      font-size: 0.85rem;
+      border: 2px solid transparent;
+      cursor: pointer;
+      transition: all 0.15s;
+      letter-spacing: 0.05em;
+    }
+    .modal-btn.cancel {
+      background: rgba(255,255,255,0.06);
+      border-color: rgba(255,255,255,0.15);
+      color: var(--text-dim);
+    }
+    .modal-btn.cancel:hover { background: rgba(255,255,255,0.12); color: #fff; }
+    .modal-btn.confirm {
+      background: linear-gradient(135deg, var(--ice-bright), var(--blue-team));
+      color: #000;
+    }
+    .modal-btn.confirm:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(34,211,238,0.4); }
+    .modal-btn.danger {
+      background: linear-gradient(135deg, #ef4444, #dc2626);
+      color: #fff;
+    }
+    .modal-btn.danger:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(239,68,68,0.5); }
+
+    /* ============================================================
+       TOAST
+       ============================================================ */
+    .toast-container {
+      position: fixed;
+      top: 16px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 1100;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      pointer-events: none;
+      max-width: 90vw;
+    }
+    .toast {
+      padding: 10px 18px;
+      border-radius: 12px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: #fff;
+      backdrop-filter: blur(12px);
+      animation: toastIn 0.3s ease-out;
+      pointer-events: auto;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+      white-space: nowrap;
+    }
+    .toast.success { background: rgba(34, 197, 94, 0.25); border: 1px solid rgba(34, 197, 94, 0.5); }
+    .toast.error { background: rgba(239, 68, 68, 0.25); border: 1px solid rgba(239, 68, 68, 0.5); }
+    .toast.info { background: rgba(34, 211, 238, 0.25); border: 1px solid rgba(34, 211, 238, 0.5); }
+    @keyframes toastIn { from { transform: translateY(-20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+    /* ============================================================
+       АДАПТИВ
+       ============================================================ */
+    @media (max-width: 640px) {
+      body { padding: 1rem 0.75rem 2rem; }
+      .glass { border-radius: 1.25rem; }
+      .num-btn { width: 38px; height: 38px; font-size: 1.1rem; }
+      .num-value { width: 56px; height: 46px; font-size: 1.5rem; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
     }
   </style>
 </head>
 <body>
-  <div class="w-full max-w-4xl flex justify-between items-center mb-8">
-    <h1 class="text-3xl font-black text-cyan-300 tracking-wider">ПУЛЬТ ВЕДУЩЕГО</h1>
-    <a href="index.html" class="px-4 py-2 bg-gray-800 rounded-lg font-bold text-sm hover:bg-gray-700 transition">В МЕНЮ</a>
-  </div>
 
-  <div id="lobby-controls" class="w-full flex flex-col items-center">
-    
-    <div class="glass w-full max-w-4xl p-4 mb-4 flex justify-between items-center">
+  <div class="container-inner">
+
+    <!-- HEADER -->
+    <div class="w-full flex justify-between items-center mb-6">
+      <h1 class="page-title">ПУЛЬТ ВЕДУЩЕГО</h1>
+      <a href="index.html" class="back-btn">← В МЕНЮ</a>
+    </div>
+
+    <!-- ============================================================
+         ЭКРАН ТВ
+         ============================================================ -->
+    <div class="glass w-full p-4 mb-4 flex justify-between items-center flex-wrap gap-3">
       <div>
-        <div class="text-xs font-bold text-cyan-300/60 tracking-wider mb-1">ЭКРАН ТВ</div>
-        <div id="screen-status" class="text-lg font-black text-white">ЗАСТАВКА</div>
+        <div class="text-[0.65rem] font-bold text-cyan-300/60 tracking-widest mb-1">ЭКРАН ТВ</div>
+        <div id="screen-status" class="text-lg font-black text-white tracking-wide">ЗАСТАВКА</div>
       </div>
-      <button onclick="showQR()" id="btn-show-qr" class="px-6 py-3 bg-cyan-600 hover:bg-cyan-500 rounded-xl font-black text-white transition active:scale-95">
+      <button onclick="showQR()" id="btn-show-qr" class="px-5 py-3 bg-cyan-600 hover:bg-cyan-500 rounded-xl font-black text-white transition active:scale-95 text-sm tracking-wider disabled:opacity-40 disabled:cursor-not-allowed">
         📱 ПОКАЗАТЬ QR
       </button>
     </div>
 
-    <div class="glass w-full max-w-4xl p-6 mb-4 flex flex-col items-center">
-      <h2 class="text-lg font-bold mb-3 text-cyan-100">БЫСТРЫЙ ВЫБОР</h2>
-      <div class="flex gap-3 flex-wrap justify-center">
-        <button onclick="setMode('1v1')" class="mode-btn px-6 py-3 rounded-xl border-2 font-bold text-base" id="btn-1v1">1 на 1</button>
-        <button onclick="setMode('2v2')" class="mode-btn px-6 py-3 rounded-xl border-2 font-bold text-base" id="btn-2v2">2 на 2</button>
-        <button onclick="setMode('3v3')" class="mode-btn px-6 py-3 rounded-xl border-2 font-bold text-base" id="btn-3v3">3 на 3</button>
-        <button onclick="setMode('4v4')" class="mode-btn px-6 py-3 rounded-xl border-2 font-bold text-base" id="btn-4v4">4 на 4</button>
+    <!-- ============================================================
+         ЛОББИ
+         ============================================================ -->
+    <div id="lobby-controls" class="w-full flex flex-col items-center">
+
+      <!-- РЕЖИМ -->
+      <div class="glass w-full p-5 mb-4">
+        <h2 class="text-sm font-black mb-3 text-cyan-300 tracking-widest">БЫСТРЫЙ ВЫБОР</h2>
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+          <button onclick="setMode('1v1')" class="mode-btn py-3 rounded-xl font-black text-base" id="btn-1v1">1 на 1</button>
+          <button onclick="setMode('2v2')" class="mode-btn py-3 rounded-xl font-black text-base" id="btn-2v2">2 на 2</button>
+          <button onclick="setMode('3v3')" class="mode-btn py-3 rounded-xl font-black text-base" id="btn-3v3">3 на 3</button>
+          <button onclick="setMode('4v4')" class="mode-btn py-3 rounded-xl font-black text-base" id="btn-4v4">4 на 4</button>
+        </div>
+      </div>
+
+      <!-- НЕЧЕСТНЫЙ БОЙ (сворачиваемый) -->
+      <details class="glass w-full mb-4 overflow-hidden" id="unfair-details">
+        <summary class="p-5 cursor-pointer flex items-center justify-between list-none hover:bg-white/[0.02] transition">
+          <div class="flex items-center gap-2 flex-wrap">
+            <h2 class="text-sm font-black text-cyan-300 tracking-widest">⚔️ НЕЧЕСТНЫЙ БОЙ</h2>
+            <span class="unfair-badge" id="unfair-badge" style="display: none;">БОНУС МЕНЬШЕЙ КОМАНДЕ</span>
+          </div>
+          <span class="text-cyan-300/60 text-xl transition-transform" id="unfair-arrow">▾</span>
+        </summary>
+        <div class="px-5 pb-5">
+          <div class="grid grid-cols-2 gap-4 w-full max-w-lg mx-auto mb-4">
+            <div class="text-center">
+              <div class="text-red-400 font-bold mb-2 text-xs tracking-wider">🔴 КРАСНЫЕ</div>
+              <div class="num-selector">
+                <button class="num-btn" onclick="changeUnfair('red', -1)" id="unfair-red-minus">−</button>
+                <div class="num-value red" id="unfair-red">1</div>
+                <button class="num-btn" onclick="changeUnfair('red', +1)" id="unfair-red-plus">+</button>
+              </div>
+            </div>
+            <div class="text-center">
+              <div class="text-blue-400 font-bold mb-2 text-xs tracking-wider">🔵 СИНИЕ</div>
+              <div class="num-selector">
+                <button class="num-btn" onclick="changeUnfair('blue', -1)" id="unfair-blue-minus">−</button>
+                <div class="num-value blue" id="unfair-blue">1</div>
+                <button class="num-btn" onclick="changeUnfair('blue', +1)" id="unfair-blue-plus">+</button>
+              </div>
+            </div>
+          </div>
+          <button onclick="applyUnfair(event)" id="unfair-apply-btn" class="w-full py-3 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-xl font-black text-black hover:shadow-lg transition text-sm tracking-wider">
+            ПРИМЕНИТЬ НЕЧЕСТНЫЙ РЕЖИМ
+          </button>
+          <p class="text-[0.7rem] text-white/40 mt-2 text-center">Меньшая команда получит <b class="text-amber-300">больше жизней</b> и <b class="text-amber-300">суперспособности</b></p>
+        </div>
+      </details>
+
+      <!-- ПЕРВЫЙ ХОД -->
+      <div class="glass w-full p-5 mb-4">
+        <h2 class="text-sm font-black mb-3 text-cyan-300 tracking-widest text-center">КАКАЯ КОМАНДА НАЧИНАЕТ?</h2>
+        <div class="grid grid-cols-2 gap-3 max-w-md mx-auto">
+          <button onclick="setFirstTeam('red')" class="team-btn py-3 rounded-xl font-black text-base tracking-wider" id="btn-first-red">КРАСНЫЕ</button>
+          <button onclick="setFirstTeam('blue')" class="team-btn py-3 rounded-xl font-black text-base tracking-wider" id="btn-first-blue">СИНИЕ</button>
+        </div>
+      </div>
+
+      <!-- В ИГРЕ -->
+      <div class="glass w-full p-5 mb-4">
+        <div class="flex justify-between items-center mb-3 flex-wrap gap-2">
+          <h2 class="text-sm font-black text-cyan-300 tracking-widest">🎮 В ИГРЕ</h2>
+          <div id="mode-display" class="text-xs font-black text-cyan-400 tracking-wider">РЕЖИМ: 1 vs 1</div>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div class="bg-red-900/15 p-3 rounded-xl border border-red-500/30">
+            <div class="flex justify-between items-center mb-2">
+              <h3 class="font-bold text-red-400 text-sm tracking-wider">🔴 КРАСНЫЕ</h3>
+              <span class="text-red-300/70 text-xs font-bold font-mono" id="count-red">0/1</span>
+            </div>
+            <div id="active-red" class="min-h-[40px]"></div>
+          </div>
+          <div class="bg-blue-900/15 p-3 rounded-xl border border-blue-500/30">
+            <div class="flex justify-between items-center mb-2">
+              <h3 class="font-bold text-blue-400 text-sm tracking-wider">🔵 СИНИЕ</h3>
+              <span class="text-blue-300/70 text-xs font-bold font-mono" id="count-blue">0/1</span>
+            </div>
+            <div id="active-blue" class="min-h-[40px]"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- КОМНАТА -->
+      <div class="glass w-full p-5 mb-4">
+        <div class="flex justify-between items-center mb-2 flex-wrap gap-2">
+          <h2 class="text-sm font-black text-cyan-300 tracking-widest">⏳ КОМНАТА ОЖИДАНИЯ</h2>
+          <div id="room-count" class="text-xs font-black text-amber-400 font-mono tracking-wider">0 игроков</div>
+        </div>
+        <p class="text-[0.7rem] text-white/40 mb-3">Кликни на игрока — добавить в игру. Кликни на активного — вернуть в комнату.</p>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div class="bg-red-900/10 p-3 rounded-xl border border-red-500/20">
+            <div class="flex justify-between items-center mb-2">
+              <h3 class="font-bold text-red-400/80 text-xs tracking-wider">🔴 КРАСНЫЕ</h3>
+              <span class="text-red-300/50 text-xs font-bold font-mono" id="room-count-red">0</span>
+            </div>
+            <div id="room-red" class="min-h-[40px]"></div>
+          </div>
+          <div class="bg-blue-900/10 p-3 rounded-xl border border-blue-500/20">
+            <div class="flex justify-between items-center mb-2">
+              <h3 class="font-bold text-blue-400/80 text-xs tracking-wider">🔵 СИНИЕ</h3>
+              <span class="text-blue-300/50 text-xs font-bold font-mono" id="room-count-blue">0</span>
+            </div>
+            <div id="room-blue" class="min-h-[40px]"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- СТАРТ (sticky на мобиле) -->
+      <div class="w-full sticky bottom-3 z-10">
+        <button id="btn-start" disabled class="start-btn w-full py-5 rounded-2xl text-xl">
+          ОЖИДАНИЕ ИГРОКОВ...
+        </button>
       </div>
     </div>
 
-    <div class="glass w-full max-w-4xl p-6 mb-6 flex flex-col items-center">
-      <div class="flex items-center gap-3 mb-4 flex-wrap justify-center">
-        <h2 class="text-lg font-bold text-cyan-100">НЕЧЕСТНЫЙ БОЙ</h2>
-        <span class="unfair-badge" id="unfair-badge" style="display: none;">⚔️ МЕНЬШАЯ КОМАНДА ПОЛУЧИТ БОНУС</span>
-      </div>
-      
-      <div class="grid grid-cols-2 gap-8 w-full max-w-lg">
-        <div class="text-center">
-          <div class="text-red-400 font-bold mb-2 text-sm">🔴 КРАСНЫЕ</div>
-          <div class="num-selector">
-            <button class="num-btn" onclick="changeUnfair('red', -1)" id="unfair-red-minus">−</button>
-            <div class="num-value red" id="unfair-red">1</div>
-            <button class="num-btn" onclick="changeUnfair('red', +1)" id="unfair-red-plus">+</button>
+    <!-- ============================================================
+         В ИГРЕ
+         ============================================================ -->
+    <div id="game-controls" class="hidden w-full flex-col items-center">
+      <div class="glass w-full p-6 mb-4 text-center border-green-500/40">
+        <h2 class="text-3xl font-black text-green-400 mb-3" id="game-status-title">ИГРА ИДЕТ</h2>
+        <div class="text-xl font-bold mb-6" id="mod-turn-info">ХОД: ...</div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
+          <div class="bg-red-900/20 p-4 rounded-xl border border-red-500/30">
+            <div class="text-red-400 font-bold text-base mb-2 tracking-wider">🔴 КРАСНЫЕ</div>
+            <div class="text-2xl font-black text-red-300 mb-2 font-mono" id="mod-hp-red">❤️ 0</div>
+            <div class="hp-bar mb-3"><div class="hp-fill bg-red-500" id="hp-fill-red" style="width: 100%"></div></div>
+            <ul id="game-list-red" class="space-y-1 text-sm text-left"></ul>
+          </div>
+          <div class="bg-blue-900/20 p-4 rounded-xl border border-blue-500/30">
+            <div class="text-blue-400 font-bold text-base mb-2 tracking-wider">🔵 СИНИЕ</div>
+            <div class="text-2xl font-black text-blue-300 mb-2 font-mono" id="mod-hp-blue">❤️ 0</div>
+            <div class="hp-bar mb-3"><div class="hp-fill bg-blue-500" id="hp-fill-blue" style="width: 100%"></div></div>
+            <ul id="game-list-blue" class="space-y-1 text-sm text-left"></ul>
           </div>
         </div>
-        
-        <div class="text-center flex items-center justify-center">
-          <div class="text-3xl font-black text-white/30 italic">VS</div>
-        </div>
-        
-        <div class="text-center">
-          <div class="text-blue-400 font-bold mb-2 text-sm">🔵 СИНИЕ</div>
-          <div class="num-selector">
-            <button class="num-btn" onclick="changeUnfair('blue', -1)" id="unfair-blue-minus">−</button>
-            <div class="num-value blue" id="unfair-blue">1</div>
-            <button class="num-btn" onclick="changeUnfair('blue', +1)" id="unfair-blue-plus">+</button>
-          </div>
-        </div>
-        
-        <div></div>
+
+        <div class="text-sm text-white/50 font-mono" id="mod-timer-info"></div>
       </div>
-      
-      <button onclick="applyUnfair(event)" id="unfair-apply-btn" class="mt-4 px-8 py-3 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-xl font-black text-black hover:shadow-lg transition">
-        ⚔️ ПРИМЕНИТЬ НЕЧЕСТНЫЙ РЕЖИМ
+
+      <div class="w-full grid grid-cols-1 md:grid-cols-2 gap-3">
+        <button onclick="endGame()" class="w-full py-5 bg-red-600/20 border-2 border-red-500/50 text-red-300 rounded-xl font-black text-lg hover:bg-red-600/40 transition">
+          ⏹️ ЗАКОНЧИТЬ БОЙ
+        </button>
+        <button onclick="returnToLobby()" class="w-full py-5 bg-gray-700/30 border-2 border-gray-500/50 text-gray-300 rounded-xl font-black text-lg hover:bg-gray-600/40 transition">
+          🔄 В ЛОББИ
+        </button>
+      </div>
+    </div>
+
+    <!-- ============================================================
+         ФИНИШ
+         ============================================================ -->
+    <div id="finished-controls" class="hidden w-full flex-col items-center">
+      <div class="glass w-full p-10 mb-6 text-center border-yellow-500/40">
+        <div class="text-6xl mb-3" id="finish-emoji">🏆</div>
+        <h2 class="text-4xl font-black mb-3" id="finish-title">ИГРА ОКОНЧЕНА</h2>
+        <p class="text-lg text-white/60" id="finish-subtitle"></p>
+      </div>
+      <button onclick="newGame()" class="start-btn w-full py-6 rounded-2xl text-2xl">
+        🔄 НОВАЯ ИГРА
       </button>
-      
-      <p class="text-xs text-white/40 mt-2 text-center">
-        Меньшая команда получит <b>больше жизней</b> и <b>суперспособности</b>
-      </p>
     </div>
 
-    <div class="glass w-full max-w-4xl p-6 mb-6">
-      <h2 class="text-xl font-bold mb-4 text-cyan-100 text-center">КАКАЯ КОМАНДА НАЧИНАЕТ?</h2>
-      <div class="flex justify-center gap-6">
-        <button onclick="setFirstTeam('red')" class="team-btn px-12 py-4 rounded-xl border-2 font-bold text-xl" id="btn-first-red">КРАСНЫЕ</button>
-        <button onclick="setFirstTeam('blue')" class="team-btn px-12 py-4 rounded-xl border-2 font-bold text-xl" id="btn-first-blue">СИНИЕ</button>
-      </div>
-    </div>
-
-    <div class="glass w-full max-w-4xl p-6 mb-4">
-      <div class="flex justify-between items-center mb-3">
-        <h2 class="text-xl font-bold text-cyan-100">🎮 В ИГРЕ</h2>
-        <div id="mode-display" class="text-sm font-black text-cyan-400">РЕЖИМ: 1 vs 1</div>
-      </div>
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div class="bg-red-900/20 p-4 rounded-xl border border-red-500/30">
-          <div class="flex justify-between items-center mb-3">
-            <h3 class="font-bold text-red-400 text-base">🔴 КРАСНЫЕ</h3>
-            <span class="text-red-300/70 text-sm font-bold" id="count-red">0/1</span>
-          </div>
-          <div id="active-red"></div>
-        </div>
-        <div class="bg-blue-900/20 p-4 rounded-xl border border-blue-500/30">
-          <div class="flex justify-between items-center mb-3">
-            <h3 class="font-bold text-blue-400 text-base">🔵 СИНИЕ</h3>
-            <span class="text-blue-300/70 text-sm font-bold" id="count-blue">0/1</span>
-          </div>
-          <div id="active-blue"></div>
-        </div>
-      </div>
-    </div>
-
-    <div class="glass w-full max-w-4xl p-6 mb-6">
-      <div class="flex justify-between items-center mb-3">
-        <h2 class="text-xl font-bold text-cyan-100">⏳ КОМНАТА ОЖИДАНИЯ</h2>
-        <div id="room-count" class="text-sm font-black text-yellow-400">0 игроков</div>
-      </div>
-      <p class="text-xs text-white/40 mb-3">Кликни на игрока — чтобы добавить в игру. Кликни на активного — чтобы вернуть в комнату.</p>
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div class="bg-red-900/10 p-4 rounded-xl border border-red-500/20">
-          <div class="flex justify-between items-center mb-3">
-            <h3 class="font-bold text-red-400/80 text-sm">🔴 КРАСНЫЕ</h3>
-            <span class="text-red-300/50 text-xs font-bold" id="room-count-red">0</span>
-          </div>
-          <div id="room-red"></div>
-        </div>
-        <div class="bg-blue-900/10 p-4 rounded-xl border border-blue-500/20">
-          <div class="flex justify-between items-center mb-3">
-            <h3 class="font-bold text-blue-400/80 text-sm">🔵 СИНИЕ</h3>
-            <span class="text-blue-300/50 text-xs font-bold" id="room-count-blue">0</span>
-          </div>
-          <div id="room-blue"></div>
-        </div>
-      </div>
-    </div>
-
-    <button id="btn-start" disabled class="w-full max-w-4xl py-8 bg-gradient-to-r from-blue-600 to-cyan-500 rounded-2xl text-3xl font-black text-black shadow-[0_0_40px_rgba(6,182,212,0.6)] disabled:opacity-50 disabled:cursor-not-allowed transition-all">
-      ОЖИДАНИЕ ИГРОКОВ...
-    </button>
   </div>
 
-  <div id="game-controls" class="hidden w-full max-w-4xl flex-col items-center">
-    <div class="glass w-full p-8 mb-8 text-center border-green-500/50">
-      <h2 class="text-4xl font-black text-green-400 mb-4" id="game-status-title">ИГРА ИДЕТ</h2>
-      <div class="text-2xl font-bold mb-8" id="mod-turn-info">ХОД: ...</div>
-      
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-        <div class="bg-red-900/20 p-6 rounded-xl border border-red-500/30">
-          <div class="text-red-400 font-bold text-xl mb-3">🔴 КРАСНЫЕ</div>
-          <div class="text-3xl font-black text-red-300 mb-2" id="mod-hp-red">❤️ 0</div>
-          <div class="hp-bar mb-4"><div class="hp-fill bg-red-500" id="hp-fill-red" style="width: 100%"></div></div>
-          <ul id="game-list-red" class="space-y-1 text-sm text-left"></ul>
-        </div>
-        <div class="bg-blue-900/20 p-6 rounded-xl border border-blue-500/30">
-          <div class="text-blue-400 font-bold text-xl mb-3">🔵 СИНИЕ</div>
-          <div class="text-3xl font-black text-blue-300 mb-2" id="mod-hp-blue">❤️ 0</div>
-          <div class="hp-bar mb-4"><div class="hp-fill bg-blue-500" id="hp-fill-blue" style="width: 100%"></div></div>
-          <ul id="game-list-blue" class="space-y-1 text-sm text-left"></ul>
-        </div>
+  <!-- TOAST -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <!-- МОДАЛКА -->
+  <div class="modal-backdrop hidden" id="modal">
+    <div class="modal-card">
+      <div class="modal-icon" id="modal-icon">⚠️</div>
+      <div class="modal-title" id="modal-title">Подтверждение</div>
+      <div class="modal-text" id="modal-text"></div>
+      <div class="modal-actions">
+        <button class="modal-btn cancel" id="modal-cancel">ОТМЕНА</button>
+        <button class="modal-btn confirm" id="modal-confirm">ОК</button>
       </div>
-
-      <div class="text-sm text-white/50" id="mod-timer-info"></div>
     </div>
-
-    <div class="w-full grid grid-cols-1 md:grid-cols-2 gap-4">
-      <button onclick="endGame()" class="w-full py-6 bg-red-600/30 border-2 border-red-500/50 text-red-300 rounded-xl font-black text-xl hover:bg-red-600/50 transition">
-        ⏹️ ЗАКОНЧИТЬ БОЙ
-      </button>
-      <button onclick="returnToLobby()" class="w-full py-6 bg-gray-700/50 border-2 border-gray-500/50 text-gray-300 rounded-xl font-black text-xl hover:bg-gray-600/50 transition">
-        🔄 В ЛОББИ
-      </button>
-    </div>
-  </div>
-
-  <div id="finished-controls" class="hidden w-full max-w-4xl flex-col items-center">
-    <div class="glass w-full p-12 mb-8 text-center border-yellow-500/50">
-      <div class="text-6xl mb-4" id="finish-emoji">🏆</div>
-      <h2 class="text-5xl font-black mb-4" id="finish-title">ИГРА ОКОНЧЕНА</h2>
-      <p class="text-xl text-white/60" id="finish-subtitle"></p>
-    </div>
-    <button onclick="newGame()" class="w-full py-8 bg-gradient-to-r from-cyan-500 to-blue-600 rounded-2xl text-3xl font-black text-white shadow-[0_0_40px_rgba(6,182,212,0.6)] hover:shadow-[0_0_60px_rgba(6,182,212,0.9)] transition-all">
-      🔄 НОВАЯ ИГРА
-    </button>
   </div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getDatabase, ref, set, onValue, update, remove, get } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
-    
-    const firebaseConfig = { 
-      apiKey: "AIzaSyCXIR5Tv8lB6ivcGRC3yt1SC66MM6T5b_M", 
-      authDomain: "endorphin-battle.firebaseapp.com", 
-      databaseURL: "https://endorphin-battle-default-rtdb.europe-west1.firebasedatabase.app", 
-      projectId: "endorphin-battle", 
-      storageBucket: "endorphin-battle.firebasestorage.app", 
-      messagingSenderId: "185259733030", 
-      appId: "1:185259733030:web:d72a89a436880973e636e7" 
+    import { getDatabase, ref, set, onValue, update, remove, get, onDisconnect } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCXIR5Tv8lB6ivcGRC3yt1SC66MM6T5b_M",
+      authDomain: "endorphin-battle.firebaseapp.com",
+      databaseURL: "https://endorphin-battle-default-rtdb.europe-west1.firebasedatabase.app",
+      projectId: "endorphin-battle",
+      storageBucket: "endorphin-battle.firebasestorage.app",
+      messagingSenderId: "185259733030",
+      appId: "1:185259733030:web:d72a89a436880973e636e7"
     };
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
     const gameRef = ref(db, 'games/battle_1');
 
+    // ============================================================
+    // СОСТОЯНИЕ
+    // ============================================================
     let currentData = null;
     let firstTeam = 'red';
     let isStarting = false;
     let unfairRed = 1;
     let unfairBlue = 1;
+    let countdownInterval = null;
+    let lastUIHash = '';
 
+    // ============================================================
+    // АУДИО (Web Audio синтез, без файлов)
+    // ============================================================
+    let audioCtx = null;
+    function getAudioCtx() {
+      if (!audioCtx) {
+        try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch { return null; }
+      }
+      if (audioCtx.state === 'suspended') audioCtx.resume().catch(() => {});
+      return audioCtx;
+    }
+    function beep(freq = 800, duration = 0.08, type = 'sine', volume = 0.15) {
+      const ctx = getAudioCtx();
+      if (!ctx) return;
+      try {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = type;
+        osc.frequency.value = freq;
+        gain.gain.setValueAtTime(volume, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
+        osc.connect(gain).connect(ctx.destination);
+        osc.start();
+        osc.stop(ctx.currentTime + duration);
+      } catch {}
+    }
+    function playStart() { beep(660, 0.1, 'sine', 0.2); setTimeout(() => beep(880, 0.15, 'sine', 0.2), 100); setTimeout(() => beep(1100, 0.2, 'sine', 0.2), 220); }
+    function playClick() { beep(600, 0.04, 'square', 0.08); }
+    function playSuccess() { beep(880, 0.08, 'sine', 0.15); setTimeout(() => beep(1320, 0.12, 'sine', 0.15), 80); }
+    function playError() { beep(220, 0.15, 'sawtooth', 0.12); }
+
+    // ============================================================
+    // УТИЛИТЫ
+    // ============================================================
     function escapeHtml(str) {
       if (!str) return '';
       return String(str)
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#39;');
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
     }
 
     function getNameGradient(name) {
@@ -427,175 +729,161 @@
 
     function parseMode(mode) {
       if (!mode || typeof mode !== 'string') return { redMax: 1, blueMax: 1, isUnfair: false };
-      
       if (mode.includes('v')) {
         const parts = mode.split('v').slice(0, 2);
         const redMax = Math.max(1, Math.min(4, parseInt(parts[0]) || 1));
         const blueMax = Math.max(1, Math.min(4, parseInt(parts[1]) || 1));
         return { redMax, blueMax, isUnfair: redMax !== blueMax };
       }
-      
       const n = Math.max(1, Math.min(4, parseInt(mode.charAt(0)) || 1));
       return { redMax: n, blueMax: n, isUnfair: false };
     }
 
     function calculateLives(mode) {
       const { redMax, blueMax, isUnfair } = parseMode(mode);
-      
-      if (!isUnfair) {
-        return { redLives: 3, blueLives: 3 };
-      }
-      
+      if (!isUnfair) return { redLives: 3, blueLives: 3 };
       const diff = Math.abs(redMax - blueMax);
       const baseLives = 3;
-      
-      if (redMax < blueMax) {
-        return { redLives: baseLives + diff, blueLives: baseLives };
-      } else {
-        return { redLives: baseLives, blueLives: baseLives + diff };
-      }
+      if (redMax < blueMax) return { redLives: baseLives + diff, blueLives: baseLives };
+      return { redLives: baseLives, blueLives: baseLives + diff };
     }
+
+    // ============================================================
+    // TOAST
+    // ============================================================
+    function showToast(message, type = 'info') {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+      const icons = { success: '✅', error: '❌', info: 'ℹ️' };
+      toast.innerHTML = `<span>${icons[type] || ''}</span><span>${escapeHtml(message)}</span>`;
+      container.appendChild(toast);
+      setTimeout(() => {
+        toast.style.animation = 'toastIn 0.3s ease-in reverse';
+        setTimeout(() => toast.remove(), 300);
+      }, 2800);
+    }
+
+    // ============================================================
+    // КАСТОМНАЯ МОДАЛКА (замена confirm/alert)
+    // ============================================================
+    let modalResolver = null;
+    function showModal({ icon = '⚠️', title = 'Подтверждение', text = '', confirmText = 'ОК', cancelText = 'ОТМЕНА', danger = false, onlyOk = false }) {
+      return new Promise(resolve => {
+        modalResolver = resolve;
+        document.getElementById('modal-icon').innerText = icon;
+        document.getElementById('modal-title').innerText = title;
+        document.getElementById('modal-text').innerText = text;
+        const confirmBtn = document.getElementById('modal-confirm');
+        const cancelBtn = document.getElementById('modal-cancel');
+        confirmBtn.innerText = confirmText;
+        confirmBtn.className = `modal-btn ${danger ? 'danger' : 'confirm'}`;
+        cancelBtn.innerText = cancelText;
+        cancelBtn.style.display = onlyOk ? 'none' : 'block';
+        document.getElementById('modal').classList.remove('hidden');
+      });
+    }
+    function closeModal(result) {
+      document.getElementById('modal').classList.add('hidden');
+      if (modalResolver) { modalResolver(result); modalResolver = null; }
+    }
+    document.getElementById('modal-confirm').onclick = () => { playClick(); closeModal(true); };
+    document.getElementById('modal-cancel').onclick = () => { playClick(); closeModal(false); };
+    document.getElementById('modal').addEventListener('click', (e) => {
+      if (e.target.id === 'modal') { playClick(); closeModal(false); }
+    });
 
     // ============================================================
     // ИНИЦИАЛИЗАЦИЯ
     // ============================================================
     async function initGame() {
-      const snap = await get(gameRef);
-      const existing = snap.val();
+      try {
+        const snap = await get(gameRef);
+        const existing = snap.val();
 
-      if (!existing || !existing.status) {
-        // Первый запуск
-        await set(gameRef, {
-          screen: 'attract',
-          status: 'lobby',
-          mode: '1v1',
-          lives: { red: 3, blue: 3 },
-          players: { red: {}, blue: {} },
-          room: { red: {}, blue: {} },
-          firstTeam: 'red',
-          turn: { team: 'red', name: '...' },
-          activePlayerId: null,
-          timer: null,
-          preloadDone: false
-        });
-      } else if (existing.status === 'finished') {
-        // Была финиш-фаза — принудительно возвращаем в лобби
-        // (не через newGame, чтобы не зависеть от currentData)
-        firstTeam = existing.firstTeam || 'red';
-        
-        const players = existing.players || {};
-        const roomUpdates = [];
-        
-        ['red', 'blue'].forEach(team => {
-          Object.entries(players[team] || {}).forEach(([id, p]) => {
-            roomUpdates.push(set(ref(db, `games/battle_1/room/${team}/${id}`), {
-              name: p.name,
-              joinedAt: Date.now()
-            }));
+        if (!existing || !existing.status) {
+          await set(gameRef, {
+            screen: 'attract', status: 'lobby', mode: '1v1',
+            lives: { red: 3, blue: 3 },
+            players: { red: {}, blue: {} },
+            room: { red: {}, blue: {} },
+            firstTeam: 'red',
+            turn: { team: 'red', name: '...' },
+            activePlayerId: null, timer: null, preloadDone: false
           });
-        });
-        
-        await Promise.all(roomUpdates);
-        
-        await update(gameRef, {
-          screen: 'attract',
-          status: 'lobby',
-          players: { red: {}, blue: {} },
-          activePlayerId: null,
-          timer: null,
-          preloadDone: false,
-          winner: null,
-          last_shot: null,
-          shots: null,
-          turn: { team: firstTeam, name: '...' }
-        });
-        
-        try { await remove(ref(db, 'games/battle_1/aim')); } catch {}
-        
-      } else if (existing.status === 'playing') {
-        // Игра уже идёт
-        firstTeam = existing.firstTeam || 'red';
-        
-        if (!confirm('Игра уже идёт. Сбросить её и вернуться в лобби?')) {
           return;
         }
-        await moveAllPlayersToRoom(existing);
-      } else {
-        // Лобби
+
         firstTeam = existing.firstTeam || 'red';
-        
-        if (existing.screen !== 'attract') {
-          await update(gameRef, { screen: 'attract' });
+
+        if (existing.status === 'finished') {
+          await moveAllPlayersToRoom(existing);
+        } else if (existing.status === 'playing') {
+          const ok = await showModal({
+            icon: '⚠️', title: 'Игра уже идёт',
+            text: 'Сбросить текущую игру и вернуться в лобби?',
+            confirmText: 'СБРОСИТЬ', danger: true
+          });
+          if (ok) await moveAllPlayersToRoom(existing);
+        } else {
+          if (existing.screen !== 'attract') await update(gameRef, { screen: 'attract' });
+          if (!existing.room) await update(gameRef, { room: { red: {}, blue: {} } });
         }
-        if (!existing.room) {
-          await update(gameRef, { room: { red: {}, blue: {} } });
-        }
+      } catch (e) {
+        showToast('Ошибка подключения: ' + e.message, 'error');
       }
     }
 
     async function moveAllPlayersToRoom(data) {
       const players = data.players || {};
       const roomUpdates = [];
-      
       ['red', 'blue'].forEach(team => {
         Object.entries(players[team] || {}).forEach(([id, p]) => {
           roomUpdates.push(set(ref(db, `games/battle_1/room/${team}/${id}`), {
-            name: p.name,
-            joinedAt: Date.now()
+            name: p.name, joinedAt: Date.now()
           }));
         });
       });
-      
       await Promise.all(roomUpdates);
-      
+
       await update(gameRef, {
-        screen: 'attract',
-        status: 'lobby',
+        screen: 'attract', status: 'lobby',
         players: { red: {}, blue: {} },
-        activePlayerId: null,
-        timer: null,
-        preloadDone: false,
-        winner: null,
-        last_shot: null,
-        shots: null,
+        activePlayerId: null, timer: null, preloadDone: false,
+        winner: null, last_shot: null, shots: null,
         turn: { team: firstTeam, name: '...' }
       });
-      
+
       try { await remove(ref(db, 'games/battle_1/aim')); } catch {}
     }
 
     initGame();
 
     // ============================================================
-    // РЕЖИМ
+    // ДЕЙСТВИЯ
     // ============================================================
-    window.setMode = (mode) => { 
+    window.setMode = (mode) => {
       if (currentData?.status === 'playing' || currentData?.status === 'finished') return;
-      
+      playClick();
       const parts = mode.split('v');
       const n = Math.max(1, Math.min(4, parseInt(parts[0]) || 1));
-      unfairRed = n;
-      unfairBlue = n;
+      unfairRed = n; unfairBlue = n;
       updateUnfairSelectorUI();
-      
-      update(gameRef, { mode });
+      update(gameRef, { mode }).catch(e => showToast(e.message, 'error'));
     };
 
     window.setFirstTeam = (team) => {
       if (currentData?.status === 'playing' || currentData?.status === 'finished') return;
+      playClick();
       firstTeam = team;
-      update(gameRef, { firstTeam: team });
+      update(gameRef, { firstTeam: team }).catch(e => showToast(e.message, 'error'));
     };
 
     window.changeUnfair = (team, delta) => {
       if (currentData?.status === 'playing' || currentData?.status === 'finished') return;
-      
-      if (team === 'red') {
-        unfairRed = Math.max(1, Math.min(4, unfairRed + delta));
-      } else {
-        unfairBlue = Math.max(1, Math.min(4, unfairBlue + delta));
-      }
-      
+      playClick();
+      if (team === 'red') unfairRed = Math.max(1, Math.min(4, unfairRed + delta));
+      else unfairBlue = Math.max(1, Math.min(4, unfairBlue + delta));
       updateUnfairSelectorUI();
     };
 
@@ -606,81 +894,88 @@
       document.getElementById('unfair-red-plus').disabled = unfairRed >= 4;
       document.getElementById('unfair-blue-minus').disabled = unfairBlue <= 1;
       document.getElementById('unfair-blue-plus').disabled = unfairBlue >= 4;
-      
-      const isUnfair = unfairRed !== unfairBlue;
-      document.getElementById('unfair-badge').style.display = isUnfair ? 'inline-block' : 'none';
+      document.getElementById('unfair-badge').style.display = unfairRed !== unfairBlue ? 'inline-block' : 'none';
     }
 
     window.applyUnfair = (event) => {
       if (currentData?.status === 'playing' || currentData?.status === 'finished') return;
-      
       if (unfairRed === unfairBlue) {
+        playError();
         const btn = event?.target || document.getElementById('unfair-apply-btn');
         btn.classList.add('animate-shake');
-        const originalText = btn.innerText;
-        const originalBg = btn.style.background;
-        btn.style.background = 'linear-gradient(90deg, #ef4444, #dc2626)';
+        const orig = btn.innerText;
         btn.innerText = '⚠️ НУЖНЫ РАЗНЫЕ КОМАНДЫ';
-        setTimeout(() => {
-          btn.classList.remove('animate-shake');
-          btn.style.background = originalBg;
-          btn.innerText = originalText;
-        }, 1500);
+        setTimeout(() => { btn.classList.remove('animate-shake'); btn.innerText = orig; }, 1500);
         return;
       }
-      
-      update(gameRef, { mode: `${unfairRed}v${unfairBlue}` });
+      playSuccess();
+      update(gameRef, { mode: `${unfairRed}v${unfairBlue}` }).catch(e => showToast(e.message, 'error'));
     };
 
     window.showQR = async () => {
       if (currentData?.status !== 'lobby') return;
-      await update(gameRef, { screen: 'qr' });
+      playClick();
+      await update(gameRef, { screen: 'qr' }).catch(e => showToast(e.message, 'error'));
     };
 
     // ============================================================
-    // РУЧНОЙ ВЫБОР
+    // РУЧНОЙ ВЫБОР ИГРОКОВ
     // ============================================================
     window.addToGame = async (team, id) => {
       if (currentData?.status !== 'lobby') return;
-      
       const { redMax, blueMax } = parseMode(currentData.mode);
       const max = team === 'red' ? redMax : blueMax;
       const activeCount = Object.keys(currentData.players?.[team] || {}).length;
-      
+
       if (activeCount >= max) {
-        alert(`В команде ${team === 'red' ? 'красных' : 'синих'} уже ${max} игрок(ов)`);
+        playError();
+        showToast(`В команде ${team === 'red' ? 'красных' : 'синих'} уже ${max} игрок(ов)`, 'error');
         return;
       }
-      
+
       const roomPlayer = currentData.room?.[team]?.[id];
       if (!roomPlayer) return;
-      
-      await set(ref(db, `games/battle_1/players/${team}/${id}`), {
-        name: roomPlayer.name,
-        lives: 3,
-        alive: true,
-        connected: true
-      });
-      await remove(ref(db, `games/battle_1/room/${team}/${id}`));
+
+      playClick();
+      try {
+        await set(ref(db, `games/battle_1/players/${team}/${id}`), {
+          name: roomPlayer.name, lives: 3, alive: true, connected: true
+        });
+        await remove(ref(db, `games/battle_1/room/${team}/${id}`));
+      } catch (e) {
+        showToast(e.message, 'error');
+      }
     };
 
     window.removeFromGame = async (team, id) => {
       if (currentData?.status !== 'lobby') return;
-      
       const player = currentData.players?.[team]?.[id];
       if (!player) return;
-      
-      await set(ref(db, `games/battle_1/room/${team}/${id}`), {
-        name: player.name,
-        joinedAt: Date.now()
-      });
-      await remove(ref(db, `games/battle_1/players/${team}/${id}`));
+      playClick();
+      try {
+        await set(ref(db, `games/battle_1/room/${team}/${id}`), {
+          name: player.name, joinedAt: Date.now()
+        });
+        await remove(ref(db, `games/battle_1/players/${team}/${id}`));
+      } catch (e) {
+        showToast(e.message, 'error');
+      }
     };
 
     window.kickFromRoom = async (team, id) => {
       if (currentData?.status !== 'lobby') return;
-      if (!confirm('Кикнуть игрока?')) return;
-      await remove(ref(db, `games/battle_1/room/${team}/${id}`));
+      const ok = await showModal({
+        icon: '👋', title: 'Кикнуть игрока?',
+        text: 'Игрок будет удалён из комнаты ожидания.',
+        confirmText: 'КИКНУТЬ', danger: true
+      });
+      if (!ok) return;
+      try {
+        await remove(ref(db, `games/battle_1/room/${team}/${id}`));
+        showToast('Игрок кикнут', 'info');
+      } catch (e) {
+        showToast(e.message, 'error');
+      }
     };
 
     // ============================================================
@@ -699,19 +994,14 @@
       document.getElementById('lobby-controls').classList.toggle('hidden', status !== 'lobby');
       document.getElementById('game-controls').classList.toggle('hidden', status !== 'playing');
       document.getElementById('finished-controls').classList.toggle('hidden', status !== 'finished');
-      
       document.getElementById('game-controls').classList.toggle('flex', status === 'playing');
       document.getElementById('finished-controls').classList.toggle('flex', status === 'finished');
 
+      const screenLabels = { attract: 'ЗАСТАВКА', qr: 'QR-КОДЫ', game: 'ИГРА', winner: 'ПОБЕДИТЕЛЬ' };
+      const screenColors = { attract: '#fff', qr: '#22d3ee', game: '#22c55e', winner: '#fbbf24' };
       const screenEl = document.getElementById('screen-status');
-      const screenLabels = {
-        attract: 'ЗАСТАВКА',
-        qr: 'QR-КОДЫ',
-        game: 'ИГРА',
-        winner: 'ПОБЕДИТЕЛЬ'
-      };
       screenEl.innerText = screenLabels[screen] || 'ЗАСТАВКА';
-      screenEl.style.color = screen === 'qr' ? '#22d3ee' : screen === 'game' ? '#22c55e' : screen === 'winner' ? '#fbbf24' : '#fff';
+      screenEl.style.color = screenColors[screen] || '#fff';
 
       if (data.firstTeam) {
         firstTeam = data.firstTeam;
@@ -722,36 +1012,24 @@
       if (data.mode) {
         document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
         document.getElementById(`btn-${data.mode}`)?.classList.add('active');
-        
         if (isUnfair) {
-          unfairRed = redMax;
-          unfairBlue = blueMax;
+          unfairRed = redMax; unfairBlue = blueMax;
           updateUnfairSelectorUI();
-        } else {
-          document.getElementById('unfair-badge').style.display = 'none';
         }
-        
         document.getElementById('mode-display').innerText = `РЕЖИМ: ${redMax} vs ${blueMax}${isUnfair ? ' ⚔️' : ''}`;
         document.getElementById('mode-display').style.color = isUnfair ? '#fbbf24' : '#22d3ee';
       }
 
       const inGame = status === 'playing' || status === 'finished';
-      document.querySelectorAll('.mode-btn, .team-btn, .num-btn, #unfair-apply-btn').forEach(b => {
-        b.disabled = inGame;
-      });
+      document.querySelectorAll('.mode-btn, .team-btn, .num-btn, #unfair-apply-btn').forEach(b => b.disabled = inGame);
       document.getElementById('btn-show-qr').disabled = inGame || screen === 'qr';
 
       renderActivePlayers(data, redMax, blueMax);
       renderRoomPlayers(data);
       updateStartButton(data, redMax, blueMax);
 
-      if (status === 'playing') {
-        updateGameView(data, mode);
-      }
-
-      if (status === 'finished') {
-        updateFinishedView(data);
-      }
+      if (status === 'playing') updateGameView(data, mode);
+      if (status === 'finished') updateFinishedView(data);
     });
 
     // ============================================================
@@ -761,15 +1039,12 @@
       const render = (team, containerId, countId, max) => {
         const players = Object.entries(data.players?.[team] || {});
         const container = document.getElementById(containerId);
-        const count = document.getElementById(countId);
-        
-        count.innerText = `${players.length}/${max}`;
-        
+        document.getElementById(countId).innerText = `${players.length}/${max}`;
+
         if (players.length === 0) {
-          container.innerHTML = `<div class="text-center text-white/30 italic py-4 text-sm">Пусто</div>`;
+          container.innerHTML = `<div class="text-center text-white/25 italic py-3 text-xs">Пусто</div>`;
           return;
         }
-        
         container.innerHTML = players.map(([id, p]) => `
           <div class="player-row active">
             <div class="avatar avatar-sm" data-name="${escapeHtml(p.name)}"></div>
@@ -777,12 +1052,8 @@
             <button class="kick-btn" onclick="removeFromGame('${team}', '${id}')" title="Вернуть в комнату">↩</button>
           </div>
         `).join('');
-        
-        container.querySelectorAll('.avatar[data-name]').forEach(el => {
-          applyAvatar(el, el.dataset.name);
-        });
+        container.querySelectorAll('.avatar[data-name]').forEach(el => applyAvatar(el, el.dataset.name));
       };
-      
       render('red', 'active-red', 'count-red', redMax);
       render('blue', 'active-blue', 'count-blue', blueMax);
     }
@@ -792,32 +1063,24 @@
         const players = Object.entries(data.room?.[team] || {})
           .sort((a, b) => (a[1].joinedAt || 0) - (b[1].joinedAt || 0));
         const container = document.getElementById(containerId);
-        const count = document.getElementById(countId);
-        
-        count.innerText = players.length;
-        
+        document.getElementById(countId).innerText = players.length;
+
         if (players.length === 0) {
-          container.innerHTML = `<div class="text-center text-white/30 italic py-4 text-sm">Пусто</div>`;
+          container.innerHTML = `<div class="text-center text-white/25 italic py-3 text-xs">Пусто</div>`;
           return;
         }
-        
         container.innerHTML = players.map(([id, p]) => `
           <div class="player-row clickable" onclick="addToGame('${team}', '${id}')">
             <div class="avatar avatar-sm" data-name="${escapeHtml(p.name)}"></div>
             <div class="name">${escapeHtml(p.name)}</div>
-            <span class="action-icon">➕</span>
+            <span class="text-cyan-400/60 text-sm">➕</span>
             <button class="kick-btn" onclick="event.stopPropagation(); kickFromRoom('${team}', '${id}')" title="Кикнуть">✖</button>
           </div>
         `).join('');
-        
-        container.querySelectorAll('.avatar[data-name]').forEach(el => {
-          applyAvatar(el, el.dataset.name);
-        });
+        container.querySelectorAll('.avatar[data-name]').forEach(el => applyAvatar(el, el.dataset.name));
       };
-      
       render('red', 'room-red', 'room-count-red');
       render('blue', 'room-blue', 'room-count-blue');
-      
       const total = Object.keys(data.room?.red || {}).length + Object.keys(data.room?.blue || {}).length;
       document.getElementById('room-count').innerText = `${total} игроков`;
     }
@@ -829,52 +1092,51 @@
       const roomRed = Object.keys(data.room?.red || {}).length;
       const roomBlue = Object.keys(data.room?.blue || {}).length;
 
-      if (data.status === 'lobby') {
-        const activeReady = redCount >= redMax && blueCount >= blueMax;
-        const canAutoFill = (redCount + roomRed) >= redMax && (blueCount + roomBlue) >= blueMax;
-        
-        if (activeReady || canAutoFill) {
-          btn.disabled = false;
-          btn.innerText = canAutoFill && !activeReady
-            ? `🚀 НАЧАТЬ БОЙ (автовыбор: ${redCount + roomRed}/${redMax} vs ${blueCount + roomBlue}/${blueMax})`
-            : '🚀 НАЧАТЬ БОЙ';
-          btn.classList.add('pulse-status');
-        } else {
-          btn.disabled = true;
-          btn.innerText = `ОЖИДАНИЕ (${redCount + roomRed}/${redMax} vs ${blueCount + roomBlue}/${blueMax})`;
-          btn.classList.remove('pulse-status');
-        }
+      if (data.status !== 'lobby') return;
+
+      const activeReady = redCount >= redMax && blueCount >= blueMax;
+      const canAutoFill = (redCount + roomRed) >= redMax && (blueCount + roomBlue) >= blueMax;
+
+      if (activeReady || canAutoFill) {
+        btn.disabled = false;
+        btn.innerText = canAutoFill && !activeReady
+          ? `🚀 НАЧАТЬ БОЙ (${redCount + roomRed}/${redMax} vs ${blueCount + roomBlue}/${blueMax})`
+          : '🚀 НАЧАТЬ БОЙ';
+        btn.classList.add('pulse-status');
+      } else {
+        btn.disabled = true;
+        btn.innerText = `ОЖИДАНИЕ (${redCount + roomRed}/${redMax} vs ${blueCount + roomBlue}/${blueMax})`;
+        btn.classList.remove('pulse-status');
       }
     }
 
     function updateGameView(data, mode) {
       const isPreloading = !data.preloadDone;
-      const { redMax, blueMax, isUnfair } = parseMode(mode);
+      const { isUnfair } = parseMode(mode);
       const { redLives, blueLives } = calculateLives(mode);
 
       const title = document.getElementById('game-status-title');
       if (isPreloading) {
         title.innerText = 'ПРЕЛОУДИНГ...';
-        title.className = 'text-4xl font-black text-yellow-400 mb-4 pulse-status';
+        title.className = 'text-3xl font-black text-yellow-400 mb-3 pulse-status';
       } else {
         title.innerText = isUnfair ? '⚔️ НЕЧЕСТНЫЙ БОЙ' : 'ИГРА ИДЕТ';
-        title.className = isUnfair 
-          ? 'text-4xl font-black text-yellow-400 mb-4' 
-          : 'text-4xl font-black text-green-400 mb-4';
+        title.className = isUnfair
+          ? 'text-3xl font-black text-yellow-400 mb-3'
+          : 'text-3xl font-black text-green-400 mb-3';
       }
 
       const turnInfo = document.getElementById('mod-turn-info');
       if (data.turn && data.preloadDone) {
-        turnInfo.innerText = `ХОД: ${data.turn.name.toUpperCase()}`;
-        turnInfo.style.color = data.turn.team === 'red' ? '#ef4444' : '#3b82f6';
+        turnInfo.innerText = `ХОД: ${(data.turn.name || '').toUpperCase()}`;
+        turnInfo.style.color = data.turn.team === 'red' ? '#ff3b5c' : '#3d8bff';
       } else {
         turnInfo.innerText = 'ПОДГОТОВКА...';
         turnInfo.style.color = '#fbbf24';
       }
 
-      const redTotal = Object.values(data.players?.red || {}).reduce((sum, p) => sum + (p.alive ? p.lives : 0), 0);
-      const blueTotal = Object.values(data.players?.blue || {}).reduce((sum, p) => sum + (p.alive ? p.lives : 0), 0);
-      
+      const redTotal = Object.values(data.players?.red || {}).reduce((s, p) => s + (p.alive ? p.lives : 0), 0);
+      const blueTotal = Object.values(data.players?.blue || {}).reduce((s, p) => s + (p.alive ? p.lives : 0), 0);
       const maxRed = redLives * Math.max(1, Object.keys(data.players?.red || {}).length);
       const maxBlue = blueLives * Math.max(1, Object.keys(data.players?.blue || {}).length);
 
@@ -886,19 +1148,17 @@
       const renderGameList = (team, listId) => {
         const players = Object.entries(data.players?.[team] || {});
         const list = document.getElementById(listId);
-        
         if (players.length === 0) {
-          list.innerHTML = `<li class="text-white/30 italic text-center py-2">—</li>`;
+          list.innerHTML = `<li class="text-white/25 italic text-center py-2 text-xs">—</li>`;
           return;
         }
-        
         list.innerHTML = players.map(([id, p]) => {
           const isDead = !p.alive || p.lives <= 0;
           const isActive = data.activePlayerId === id;
           const hearts = isDead ? '💀' : (p.lives <= 5 ? '❤️'.repeat(p.lives) : `❤️×${p.lives}`);
           return `
-            <li class="flex justify-between items-center p-2 rounded-lg ${isActive ? 'bg-yellow-500/20 border border-yellow-500/50' : 'bg-black/30'} ${isDead ? 'opacity-50' : ''}">
-              <span class="font-bold truncate">${isActive ? '▶ ' : ''}${escapeHtml(p.name)}</span>
+            <li class="flex justify-between items-center p-2 rounded-lg ${isActive ? 'bg-yellow-500/15 border border-yellow-500/40' : 'bg-black/25'} ${isDead ? 'opacity-40' : ''}">
+              <span class="font-bold truncate text-sm">${isActive ? '▶ ' : ''}${escapeHtml(p.name)}</span>
               <span class="ml-2 text-xs">${hearts}</span>
             </li>
           `;
@@ -908,11 +1168,7 @@
       renderGameList('blue', 'game-list-blue');
 
       const timerInfo = document.getElementById('mod-timer-info');
-      if (data.timer !== null && data.timer !== undefined) {
-        timerInfo.innerText = `⏱️ Прелоадинг: ${data.timer} сек`;
-      } else {
-        timerInfo.innerText = '';
-      }
+      timerInfo.innerText = (data.timer !== null && data.timer !== undefined) ? `⏱️ Прелоадинг: ${data.timer} сек` : '';
     }
 
     function updateFinishedView(data) {
@@ -922,17 +1178,17 @@
 
       if (data.winner === 'red') {
         title.innerText = 'КРАСНЫЕ ПОБЕДИЛИ!';
-        title.className = 'text-5xl font-black mb-4 text-red-500';
+        title.className = 'text-4xl font-black mb-3 text-red-500';
         emoji.innerText = '🔴';
         subtitle.innerText = 'ТАКТИКА, СИЛА, ПОБЕДА';
       } else if (data.winner === 'blue') {
         title.innerText = 'СИНИЕ ПОБЕДИЛИ!';
-        title.className = 'text-5xl font-black mb-4 text-blue-500';
+        title.className = 'text-4xl font-black mb-3 text-blue-500';
         emoji.innerText = '🔵';
         subtitle.innerText = 'ЛЁД, СКОРОСТЬ, ТОЧНОСТЬ';
       } else {
         title.innerText = 'ИГРА ОКОНЧЕНА';
-        title.className = 'text-5xl font-black mb-4 text-white';
+        title.className = 'text-4xl font-black mb-3 text-white';
         emoji.innerText = '🏁';
         subtitle.innerText = 'Ведущий завершил бой';
       }
@@ -943,37 +1199,59 @@
     // ============================================================
     window.endGame = async () => {
       if (currentData?.status !== 'playing') return;
-      if (!confirm('Завершить бой? Игра будет окончена.')) return;
-      
-      await update(gameRef, { 
-        status: 'finished', 
-        screen: 'winner',
-        winner: 'none',
-        activePlayerId: null,
-        timer: null
+      const ok = await showModal({
+        icon: '⏹️', title: 'Завершить бой?',
+        text: 'Игра будет окончена, победитель не определён.',
+        confirmText: 'ЗАВЕРШИТЬ', danger: true
       });
-      
-      try { await remove(ref(db, 'games/battle_1/aim')); } catch {}
+      if (!ok) return;
+      try {
+        await update(gameRef, {
+          status: 'finished', screen: 'winner', winner: 'none',
+          activePlayerId: null, timer: null
+        });
+        try { await remove(ref(db, 'games/battle_1/aim')); } catch {}
+        playSuccess();
+      } catch (e) { showToast(e.message, 'error'); }
     };
 
     window.returnToLobby = async () => {
       if (currentData?.status !== 'playing') return;
-      if (!confirm('Вернуться в лобби? Все игроки перейдут в комнату.')) return;
-      
-      await moveAllPlayersToRoom(currentData);
+      const ok = await showModal({
+        icon: '🔄', title: 'Вернуться в лобби?',
+        text: 'Все игроки перейдут в комнату ожидания.',
+        confirmText: 'В ЛОББИ', danger: true
+      });
+      if (!ok) return;
+      try {
+        await moveAllPlayersToRoom(currentData);
+        playSuccess();
+      } catch (e) { showToast(e.message, 'error'); }
     };
 
     window.newGame = async () => {
       if (currentData?.status !== 'finished') return;
-      await moveAllPlayersToRoom(currentData);
+      playClick();
+      try {
+        await moveAllPlayersToRoom(currentData);
+      } catch (e) { showToast(e.message, 'error'); }
     };
 
     // ============================================================
-    // СТАРТ ИГРЫ
+    // СТАРТ ИГРЫ (с защитой от гонок и «зависших» прелоадингов)
     // ============================================================
     document.getElementById('btn-start').onclick = async () => {
       if (isStarting) return;
       isStarting = true;
+      playClick();
+
+      const btn = document.getElementById('btn-start');
+      const originalText = btn.innerText;
+      btn.disabled = true;
+      btn.innerText = '⏳ ЗАПУСК...';
+
+      // Останавливаем предыдущий countdown, если был (защита от двойного клика)
+      if (countdownInterval) { clearInterval(countdownInterval); countdownInterval = null; }
 
       try {
         const snap = await get(gameRef);
@@ -981,37 +1259,29 @@
         if (!data || data.status !== 'lobby') return;
 
         const mode = data.mode || '1v1';
-        const { redMax, blueMax, isUnfair } = parseMode(mode);
+        const { redMax, blueMax } = parseMode(mode);
         const { redLives, blueLives } = calculateLives(mode);
 
-        let playersRed = { ...data.players?.red || {} };
-        let playersBlue = { ...data.players?.blue || {} };
+        let playersRed = { ...(data.players?.red || {}) };
+        let playersBlue = { ...(data.players?.blue || {}) };
         const roomRed = data.room?.red || {};
         const roomBlue = data.room?.blue || {};
 
-        // ---------- ОБРЕЗКА ЛИШНИХ ----------
-        // Если в players больше, чем redMax/blueMax — вернуть лишних в room
+        // Обрезка лишних
         const extraRed = Object.keys(playersRed).slice(redMax);
         const extraBlue = Object.keys(playersBlue).slice(blueMax);
-        
         for (const id of extraRed) {
-          await set(ref(db, `games/battle_1/room/red/${id}`), {
-            name: playersRed[id].name,
-            joinedAt: Date.now()
-          });
+          await set(ref(db, `games/battle_1/room/red/${id}`), { name: playersRed[id].name, joinedAt: Date.now() });
           await remove(ref(db, `games/battle_1/players/red/${id}`));
           delete playersRed[id];
         }
         for (const id of extraBlue) {
-          await set(ref(db, `games/battle_1/room/blue/${id}`), {
-            name: playersBlue[id].name,
-            joinedAt: Date.now()
-          });
+          await set(ref(db, `games/battle_1/room/blue/${id}`), { name: playersBlue[id].name, joinedAt: Date.now() });
           await remove(ref(db, `games/battle_1/players/blue/${id}`));
           delete playersBlue[id];
         }
 
-        // ---------- АВТОВЫБОР ----------
+        // Автовыбор
         if (Object.keys(playersRed).length < redMax) {
           const sorted = Object.entries(roomRed).sort((a, b) => (a[1].joinedAt || 0) - (b[1].joinedAt || 0));
           for (const [id, p] of sorted) {
@@ -1021,7 +1291,6 @@
             await remove(ref(db, `games/battle_1/room/red/${id}`));
           }
         }
-        
         if (Object.keys(playersBlue).length < blueMax) {
           const sorted = Object.entries(roomBlue).sort((a, b) => (a[1].joinedAt || 0) - (b[1].joinedAt || 0));
           for (const [id, p] of sorted) {
@@ -1033,16 +1302,17 @@
         }
 
         if (Object.keys(playersRed).length < redMax || Object.keys(playersBlue).length < blueMax) {
-          alert(`Недостаточно игроков (нужно: ${redMax} vs ${blueMax})`);
+          playError();
+          showToast(`Недостаточно игроков (нужно: ${redMax} vs ${blueMax})`, 'error');
+          btn.disabled = false;
+          btn.innerText = originalText;
           isStarting = false;
           return;
         }
 
-        // ---------- КООРДИНАТЫ ----------
-        const usedYRed = [];
-        const usedYBlue = [];
+        // Координаты
+        const usedYRed = [], usedYBlue = [];
         const coordUpdates = [];
-
         Object.entries(playersRed).forEach(([id, p]) => {
           if (p.posX == null || p.posY == null) {
             let posX, posY, attempts = 0;
@@ -1053,11 +1323,8 @@
             } while (usedYRed.some(y => Math.abs(y - posY) < 8) && attempts < 100);
             usedYRed.push(posY);
             coordUpdates.push(update(ref(db, `games/battle_1/players/red/${id}`), { posX, posY }));
-          } else {
-            usedYRed.push(p.posY);
-          }
+          } else usedYRed.push(p.posY);
         });
-
         Object.entries(playersBlue).forEach(([id, p]) => {
           if (p.posX == null || p.posY == null) {
             let posX, posY, attempts = 0;
@@ -1068,70 +1335,72 @@
             } while (usedYBlue.some(y => Math.abs(y - posY) < 8) && attempts < 100);
             usedYBlue.push(posY);
             coordUpdates.push(update(ref(db, `games/battle_1/players/blue/${id}`), { posX, posY }));
-          } else {
-            usedYBlue.push(p.posY);
-          }
+          } else usedYBlue.push(p.posY);
         });
+        if (coordUpdates.length > 0) await Promise.all(coordUpdates);
 
-        if (coordUpdates.length > 0) {
-          await Promise.all(coordUpdates);
-        }
-
-        // ---------- ЖИЗНИ ----------
+        // Жизни
         const livesUpdates = [];
-        Object.keys(playersRed).forEach(id => {
-          livesUpdates.push(update(ref(db, `games/battle_1/players/red/${id}`), { 
-            lives: redLives, 
-            alive: true 
-          }));
-        });
-        Object.keys(playersBlue).forEach(id => {
-          livesUpdates.push(update(ref(db, `games/battle_1/players/blue/${id}`), { 
-            lives: blueLives, 
-            alive: true 
-          }));
-        });
+        Object.keys(playersRed).forEach(id => livesUpdates.push(update(ref(db, `games/battle_1/players/red/${id}`), { lives: redLives, alive: true })));
+        Object.keys(playersBlue).forEach(id => livesUpdates.push(update(ref(db, `games/battle_1/players/blue/${id}`), { lives: blueLives, alive: true })));
         await Promise.all(livesUpdates);
+        await update(gameRef, { lives: { red: redLives, blue: blueLives } });
 
-        await update(gameRef, {
-          lives: { red: redLives, blue: blueLives }
-        });
-
-        // ---------- ПЕРВЫЙ ИГРОК ----------
+        // Первый игрок
         const firstTeamPlayers = firstTeam === 'red' ? playersRed : playersBlue;
-        const firstPlayerEntry = Object.entries(firstTeamPlayers)[0];
-        if (!firstPlayerEntry) {
-          alert('Нет игроков в выбранной команде!');
+        const firstEntry = Object.entries(firstTeamPlayers)[0];
+        if (!firstEntry) {
+          playError();
+          showToast('Нет игроков в выбранной команде!', 'error');
+          btn.disabled = false;
+          btn.innerText = originalText;
           isStarting = false;
           return;
         }
 
-        // ---------- СТАРТ ----------
-        await update(gameRef, { 
-          screen: 'game',
-          status: 'playing', 
-          turn: { team: firstTeam, name: firstPlayerEntry[1].name }, 
-          activePlayerId: firstPlayerEntry[0],
-          timer: 10,
-          preloadDone: false,
-          winner: null
+        // Старт
+        await update(gameRef, {
+          screen: 'game', status: 'playing',
+          turn: { team: firstTeam, name: firstEntry[1].name },
+          activePlayerId: firstEntry[0],
+          timer: 10, preloadDone: false, winner: null
         });
 
+        playStart();
+
         let countdown = 10;
-        const tick = setInterval(async () => {
+        countdownInterval = setInterval(async () => {
           countdown--;
           if (countdown > 0) {
-            await update(gameRef, { timer: countdown });
+            await update(gameRef, { timer: countdown }).catch(() => {});
           } else {
-            clearInterval(tick);
-            await update(gameRef, { timer: null, preloadDone: true });
+            clearInterval(countdownInterval);
+            countdownInterval = null;
+            await update(gameRef, { timer: null, preloadDone: true }).catch(() => {});
           }
         }, 1000);
 
+      } catch (e) {
+        showToast('Ошибка старта: ' + e.message, 'error');
+        btn.disabled = false;
+        btn.innerText = originalText;
       } finally {
         isStarting = false;
       }
     };
+
+    // ============================================================
+    // ВОЗВРАТ ЗВУКА (AudioContext требует жеста)
+    // ============================================================
+    document.addEventListener('click', () => { getAudioCtx(); }, { once: true });
+    document.addEventListener('touchstart', () => { getAudioCtx(); }, { once: true });
+
+    // Стрелка в details
+    const unfairDetails = document.getElementById('unfair-details');
+    const unfairArrow = document.getElementById('unfair-arrow');
+    unfairDetails.addEventListener('toggle', () => {
+      unfairArrow.style.transform = unfairDetails.open ? 'rotate(180deg)' : 'rotate(0)';
+    });
 
     updateUnfairSelectorUI();
   </script>
