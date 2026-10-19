@@ -70,10 +70,92 @@
       50% { transform: translate(4px, -2px); }
       75% { transform: translate(-2px, 1px); }
     }
+    @keyframes timerPulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.08); }
+    }
+    @keyframes timerDanger {
+      0%, 100% { color: #ef4444; text-shadow: 0 0 30px #ef4444; }
+      50% { color: #fff; text-shadow: 0 0 50px #ef4444; }
+    }
     .animate-shake { animation: shake 0.4s ease-in-out; }
 
     /* ============================================================
-       ПРИЦЕЛ (СТРЕЛОЧНЫЙ ДЖОЙСТИК)
+       ТАЙМЕР ХОДА
+       ============================================================ */
+    .turn-timer {
+      position: fixed;
+      top: calc(var(--safe-top) + 10px);
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 60;
+      text-align: center;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    .turn-timer.active { opacity: 1; }
+
+    .turn-timer-ring {
+      position: relative;
+      width: 70px;
+      height: 70px;
+      margin: 0 auto;
+    }
+
+    .turn-timer-ring svg {
+      transform: rotate(-90deg);
+      width: 100%;
+      height: 100%;
+    }
+
+    .turn-timer-ring .bg {
+      fill: none;
+      stroke: rgba(255,255,255,0.1);
+      stroke-width: 6;
+    }
+
+    .turn-timer-ring .progress {
+      fill: none;
+      stroke: var(--team-color);
+      stroke-width: 6;
+      stroke-linecap: round;
+      transition: stroke-dashoffset 0.1s linear, stroke 0.3s;
+      filter: drop-shadow(0 0 8px var(--team-color));
+    }
+
+    .turn-timer-ring.danger .progress {
+      stroke: #ef4444;
+      filter: drop-shadow(0 0 12px #ef4444);
+    }
+
+    .turn-timer-value {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 1.8rem;
+      font-weight: 900;
+      color: #fff;
+      font-variant-numeric: tabular-nums;
+      text-shadow: 0 0 20px var(--team-color);
+    }
+
+    .turn-timer-ring.danger .turn-timer-value {
+      color: #ef4444;
+      text-shadow: 0 0 30px #ef4444;
+      animation: timerPulse 0.5s ease-in-out infinite;
+    }
+
+    .turn-timer-label {
+      font-size: 0.6rem;
+      font-weight: 900;
+      letter-spacing: 0.2em;
+      color: rgba(168, 230, 255, 0.6);
+      margin-top: 4px;
+    }
+
+    /* ============================================================
+       ПРИЦЕЛ (ПОЛУСФЕРА)
        ============================================================ */
     .aim-wrapper {
       position: relative;
@@ -95,6 +177,11 @@
     .aim-wrapper.my-turn .aim-circle {
       animation: pulseGlow 1.5s ease-in-out infinite;
       border-color: rgba(34, 211, 238, 0.8);
+    }
+
+    .aim-wrapper.disabled .aim-circle {
+      opacity: 0.4;
+      filter: grayscale(0.5);
     }
 
     /* Деления градусов */
@@ -124,12 +211,10 @@
     .aim-tick-label {
       position: absolute;
       left: 50%;
-      top: -4px;
+      top: 50%;
       font-size: 9px;
       font-weight: 900;
       color: rgba(168, 230, 255, 0.45);
-      transform: translateX(-50%);
-      transform-origin: 0 calc(min(78vw, 300px) * 0.45);
       pointer-events: none;
       letter-spacing: 0.05em;
     }
@@ -147,7 +232,7 @@
       pointer-events: none;
     }
 
-    /* Стрелка направления */
+    /* Стрелка */
     .aim-arrow {
       position: absolute;
       top: 50%; left: 50%;
@@ -191,7 +276,7 @@
       filter: blur(2px);
     }
 
-    /* Ручка для перетаскивания (невидимая зона) */
+    /* Зона касания */
     .aim-touch-area {
       position: absolute;
       inset: 0;
@@ -233,7 +318,6 @@
       letter-spacing: 0.2em;
     }
 
-    /* Направление-подсказка */
     .aim-direction-label {
       position: absolute;
       bottom: -30px;
@@ -254,7 +338,7 @@
     }
 
     /* ============================================================
-       МИНИ-КАРТА ТРАЕКТОРИЙ
+       МИНИ-КАРТА
        ============================================================ */
     .trajectory-map {
       position: relative;
@@ -477,7 +561,7 @@
     }
 
     .game-screen-inner {
-      padding-top: calc(var(--safe-top) + 70px);
+      padding-top: calc(var(--safe-top) + 12px);
       padding-bottom: calc(var(--safe-bottom) + 16px);
     }
 
@@ -499,13 +583,12 @@
     }
 
     /* ============================================================
-       КОМПАКТНЫЙ ЛЭЙАУТ ДЛЯ ТЕЛЕФОНА
+       КОМПАКТНЫЙ ЛЭЙАУТ
        ============================================================ */
     @media (max-height: 720px) {
-      .aim-wrapper { width: min(70vw, 260px); height: min(70vw, 260px); }
-      .trajectory-map { height: 56px; }
-      .shoot-btn { width: min(46vw, 170px); height: min(46vw, 170px); font-size: 1.3rem; }
-      .game-screen-inner { padding-top: calc(var(--safe-top) + 60px); }
+      .aim-wrapper { width: min(70vw, 240px); height: min(70vw, 240px); }
+      .trajectory-map { height: 50px; }
+      .shoot-btn { width: min(44vw, 150px); height: min(44vw, 150px); font-size: 1.1rem; }
     }
   </style>
 </head>
@@ -550,6 +633,18 @@
 
     <div class="tv-timer hidden" id="tv-timer"></div>
 
+    <!-- Таймер хода -->
+    <div class="turn-timer" id="turn-timer">
+      <div class="turn-timer-ring" id="turn-timer-ring">
+        <svg viewBox="0 0 70 70">
+          <circle class="bg" cx="35" cy="35" r="30"></circle>
+          <circle class="progress" cx="35" cy="35" r="30" id="turn-timer-progress"></circle>
+        </svg>
+        <div class="turn-timer-value" id="turn-timer-value">10</div>
+      </div>
+      <div class="turn-timer-label">СЕК</div>
+    </div>
+
     <div class="player-info hidden" id="player-info">
       <div class="name" id="info-name">Игрок</div>
       <div class="lives" id="info-lives">❤️❤️❤️</div>
@@ -557,66 +652,44 @@
 
     <div id="game-team-badge" class="mb-3 px-5 py-2 rounded-full font-black text-xs tracking-widest"></div>
 
-    <!-- ========================================================
-         ПРИЦЕЛ
-         ======================================================== -->
+    <!-- Прицел -->
     <div class="text-center mb-4 w-full">
       <p class="text-cyan-300/70 mb-2 font-bold tracking-[0.25em] text-xs">ПРИЦЕЛ</p>
       
       <div class="aim-wrapper" id="aim-wrapper">
         <div class="aim-circle"></div>
-        
-        <!-- Деления -->
         <div class="aim-ticks" id="aim-ticks"></div>
-        
-        <!-- Центр -->
         <div class="aim-center"></div>
-        
-        <!-- Стрелка -->
         <div class="aim-arrow" id="aim-arrow">
           <div class="aim-arrow-shaft"></div>
           <div class="aim-arrow-head"></div>
         </div>
-        
-        <!-- Индикатор угла -->
         <div class="angle-display">
           <div class="angle-value" id="angle-value">45°</div>
           <div class="angle-unit" id="angle-unit">ВПЕРЁД</div>
         </div>
-        
-        <!-- Подсказка направления -->
         <div class="aim-direction-label" id="aim-direction-label">Тяни вправо</div>
-        
-        <!-- Зона касания -->
         <div class="aim-touch-area" id="aim-touch-area"></div>
       </div>
     </div>
 
-    <!-- ========================================================
-         МИНИ-КАРТА ТРАЕКТОРИЙ
-         ======================================================== -->
+    <!-- Мини-карта -->
     <div class="trajectory-map" id="trajectory-map">
       <div class="trajectory-map-label">ТРАЕКТОРИИ</div>
       <svg id="trajectory-svg" viewBox="0 0 340 70" preserveAspectRatio="none"></svg>
     </div>
 
-    <!-- ========================================================
-         ШКАЛА СИЛЫ
-         ======================================================== -->
-    <div class="w-[85%] max-w-sm mt-4 mb-5 glass-panel p-5 rounded-2xl">
-      <div class="flex justify-between text-xs font-bold text-white/60 mb-3">
+    <!-- Сила -->
+    <div class="w-[85%] max-w-sm mt-3 mb-4 glass-panel p-4 rounded-2xl">
+      <div class="flex justify-between text-xs font-bold text-white/60 mb-2">
         <span>СИЛА БРОСКА</span>
         <span id="power-display" class="text-white text-lg">10%</span>
       </div>
       <div class="power-track" id="power-track">
         <div class="power-thumb" id="power-thumb"></div>
       </div>
-      <p class="text-center text-[10px] text-cyan-300/50 mt-2 tracking-wider">ЖМИ БРОСОК, ЧТОБЫ ЗАФИКСИРОВАТЬ СИЛУ</p>
     </div>
 
-    <!-- ========================================================
-         КНОПКА БРОСОК
-         ======================================================== -->
     <button id="shoot-btn" class="shoot-btn" disabled>БРОСОК</button>
   </div>
 
@@ -626,7 +699,7 @@
   <div id="wait-overlay" class="overlay wait-overlay hidden">
     <div class="text-6xl mb-6">⏳</div>
     <h1 class="text-3xl font-black text-white mb-3 text-center">ХОД СОПЕРНИКА</h1>
-    <p class="text-base text-gray-400 text-center px-8">ЖДИ СВОЕГО ЧАСА...</p>
+    <p class="text-base text-gray-400 text-center px-8">СМОТРИ НА ЭКРАН!</p>
     <div class="flex mt-6">
       <div class="pulse-dot"></div>
       <div class="pulse-dot" style="animation-delay:0.2s"></div>
@@ -660,7 +733,7 @@
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getDatabase, ref, set, push, onDisconnect, onValue, update, get } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+    import { getDatabase, ref, set, push, onDisconnect, onValue, update, get, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
     const firebaseConfig = { apiKey: "AIzaSyCXIR5Tv8lB6ivcGRC3yt1SC66MM6T5b_M", authDomain: "endorphin-battle.firebaseapp.com", databaseURL: "https://endorphin-battle-default-rtdb.europe-west1.firebasedatabase.app", projectId: "endorphin-battle", storageBucket: "endorphin-battle.firebasestorage.app", messagingSenderId: "185259733030", appId: "1:185259733030:web:d72a89a436880973e636e7" };
     const app = initializeApp(firebaseConfig);
@@ -681,12 +754,19 @@
     localStorage.setItem(storageKey, playerId);
 
     const playerRef = ref(db, `games/battle_1/players/${team}/${playerId}`);
+    const aimRef = ref(db, `games/battle_1/aim/${playerId}`);
+
+    // ============================================================
+    // КОНСТАНТЫ
+    // ============================================================
+    const TURN_TIME = 10;           // секунд на ход
+    const FORM_TIME = 1500;         // мс на формирование снежка (визуально на TV)
 
     // ============================================================
     // СОСТОЯНИЕ
     // ============================================================
     let isMyTurn = false;
-    let currentAngle = 45;       // 0..180 (внутренний угол полёта)
+    let currentAngle = 45;
     let currentPower = 10;
     let powerDirection = 1;
     let powerInterval = null;
@@ -695,7 +775,12 @@
     let gameStatus = 'lobby';
     let lastPreloadValue = null;
 
-    // История траекторий (для мини-карты)
+    // Таймер хода
+    let turnTimerInterval = null;
+    let turnTimeLeft = TURN_TIME;
+    let turnDeadline = 0;
+
+    // История траекторий
     let trajectoryHistory = [];
 
     // ============================================================
@@ -708,30 +793,23 @@
     const hideOverlay = (id) => document.getElementById(id).classList.add('hidden');
 
     // ============================================================
-    // ИНИЦИАЛИЗАЦИЯ ДЕЛЕНИЙ
+    // ДЕЛЕНИЯ
     // ============================================================
     (function initTicks() {
       const ticksContainer = document.getElementById('aim-ticks');
       const size = Math.min(window.innerWidth * 0.78, 300);
       const radius = size * 0.42;
       
-      // Деления каждые 15° по верхней полуокружности
-      // Для красных: 0° = вправо, 180° = влево (углы по часовой от «вправо»)
-      // Для синих: 0° = влево, 180° = вправо
       for (let deg = 0; deg <= 180; deg += 15) {
         const isMajor = deg % 45 === 0;
         
-        // Позиция: для красных 0° = 0° экрана (вправо), 90° = -90° (вверх), 180° = 180° (влево)
-        // Для синих зеркалим: 0° = 180° экрана (влево), 90° = -90° (вверх), 180° = 0° (вправо)
         let screenAngle;
         if (isRed) {
-          screenAngle = deg; // 0 = вправо, 90 = вверх, 180 = влево
+          screenAngle = deg;
         } else {
-          screenAngle = 180 - deg; // 0 = влево, 90 = вверх, 180 = вправо
+          screenAngle = 180 - deg;
         }
         
-        // CSS transform rotate: 0 = вверх (12 часов). 
-        // Нам нужно: screenAngle=0 (вправо) → rotate(90deg), 90 (вверх) → rotate(0), 180 (влево) → rotate(-90)
         const rotate = 90 - screenAngle;
         
         const tick = document.createElement('div');
@@ -743,21 +821,11 @@
           const label = document.createElement('div');
           label.className = 'aim-tick-label';
           label.innerText = deg + '°';
-          label.style.setProperty('--angle', `${rotate}deg`);
-          label.style.transform = `translateX(-50%) rotate(${rotate}deg) translateY(-${radius + 18}px)`;
-          // Проще: пересчитаем позицию вручную
-          label.style.transform = 'none';
-          label.style.left = '50%';
-          label.style.top = '50%';
           
-          // Позиция на окружности
-          const rad = (screenAngle - 90) * Math.PI / 180; // -90 чтобы 0° был вправо
+          const rad = (screenAngle - 90) * Math.PI / 180;
           const lx = Math.cos(rad) * (radius + 16);
           const ly = Math.sin(rad) * (radius + 16);
           label.style.transform = `translate(calc(-50% + ${lx}px), calc(-50% + ${ly}px))`;
-          
-          // Убираем вращение для читаемости
-          label.style.transform += ' rotate(0deg)';
           
           ticksContainer.appendChild(label);
         }
@@ -790,6 +858,7 @@
       }
 
       onDisconnect(playerRef).remove();
+      onDisconnect(aimRef).remove();
 
       hasJoined = true;
       vibrate(50);
@@ -824,7 +893,7 @@
     updateTeamBadges();
 
     // ============================================================
-    // АНИМАЦИЯ СИЛЫ
+    // СИЛА
     // ============================================================
     function startPowerAnimation() {
       if (powerInterval) clearInterval(powerInterval);
@@ -851,7 +920,84 @@
     }
 
     // ============================================================
-    // ПРИЦЕЛ — ОБНОВЛЕНИЕ ВИЗУАЛА
+    // ТАЙМЕР ХОДА (10 сек)
+    // ============================================================
+    function startTurnTimer() {
+      stopTurnTimer();
+      turnTimeLeft = TURN_TIME;
+      turnDeadline = Date.now() + TURN_TIME * 1000;
+      
+      const timerEl = document.getElementById('turn-timer');
+      const progressEl = document.getElementById('turn-timer-progress');
+      const valueEl = document.getElementById('turn-timer-value');
+      const ringEl = document.getElementById('turn-timer-ring');
+      
+      timerEl.classList.add('active');
+      
+      const CIRCUMFERENCE = 2 * Math.PI * 30; // r=30
+      progressEl.style.strokeDasharray = CIRCUMFERENCE;
+      progressEl.style.strokeDashoffset = 0;
+      
+      let lastSec = -1;
+      
+      turnTimerInterval = setInterval(() => {
+        const remaining = Math.max(0, turnDeadline - Date.now());
+        const sec = Math.ceil(remaining / 1000);
+        const ratio = remaining / (TURN_TIME * 1000);
+        
+        progressEl.style.strokeDashoffset = CIRCUMFERENCE * (1 - ratio);
+        
+        if (sec !== lastSec) {
+          valueEl.innerText = sec;
+          lastSec = sec;
+          
+          if (sec <= 3) {
+            ringEl.classList.add('danger');
+            if (sec > 0 && sec <= 3) vibrate(30);
+          } else {
+            ringEl.classList.remove('danger');
+          }
+        }
+        
+        if (remaining <= 0) {
+          stopTurnTimer();
+          if (isMyTurn && !isShooting) {
+            // АВТО-БРОСОК
+            autoShoot();
+          }
+        }
+      }, 100);
+    }
+
+    function stopTurnTimer() {
+      if (turnTimerInterval) {
+        clearInterval(turnTimerInterval);
+        turnTimerInterval = null;
+      }
+      document.getElementById('turn-timer').classList.remove('active');
+      document.getElementById('turn-timer-ring').classList.remove('danger');
+    }
+
+    // ============================================================
+    // АВТО-БРОСОК (по истечении 10 сек)
+    // ============================================================
+    async function autoShoot() {
+      if (!isMyTurn || isShooting) return;
+      
+      vibrate([100, 50, 100]);
+      
+      // Показываем уведомление
+      const notif = document.createElement('div');
+      notif.className = 'fixed top-1/3 left-1/2 -translate-x-1/2 bg-red-500/90 text-white px-6 py-3 rounded-xl font-black text-lg z-[150] animate-shake';
+      notif.innerText = '⏰ ВРЕМЯ ВЫШЛО!';
+      document.body.appendChild(notif);
+      setTimeout(() => notif.remove(), 1500);
+      
+      await executeShot();
+    }
+
+    // ============================================================
+    // ПРИЦЕЛ — КОНВЕРТАЦИЯ УГЛОВ
     // ============================================================
     const aimWrapper = document.getElementById('aim-wrapper');
     const aimArrow = document.getElementById('aim-arrow');
@@ -860,64 +1006,25 @@
     const angleUnit = document.getElementById('angle-unit');
     const aimDirectionLabel = document.getElementById('aim-direction-label');
 
-    // Внутренний угол 0..180 → экранный угол для стрелки
-    // Для красных: 0 = вправо (0° экрана), 90 = вверх (-90°), 180 = влево (180°)
-    // Для синих: 0 = влево (180°), 90 = вверх (-90°), 180 = вправо (0°)
     function fireAngleToScreenAngle(fireAngle) {
       if (isRed) {
-        return -fireAngle; // 0 → 0, 90 → -90, 180 → -180 (= 180)
+        return -fireAngle;
       } else {
-        return -(180 - fireAngle); // 0 → -180 (= 180), 90 → -90, 180 → 0
+        return -(180 - fireAngle);
       }
     }
 
-    // Экранный угол → внутренний fire angle (0..180)
     function screenAngleToFireAngle(screenAngle) {
-      // screenAngle: -180..180 от оси X (вправо = 0)
-      // Для красных: 0 → 0, -90 → 90, 180 → 180
-      // Для синих: 180 → 0, -90 → 90, 0 → 180
-      
       let deg = screenAngle;
       
       if (isRed) {
-        // Красные смотрят вправо: 
-        // Если тянут вправо-вверх (screenAngle = -45) → fireAngle = 45
-        // Если тянут влево-вверх (screenAngle = -135) → fireAngle = 135
-        if (deg < 0) {
-          // верхняя половина
-          deg = -deg; // -45 → 45, -135 → 135
-        } else {
-          // нижняя половина (screenAngle > 0)
-          // screenAngle = 45 (вправо-вниз) → fireAngle = 45 (тоже вниз-вперёд)
-          // screenAngle = 135 (влево-вниз) → fireAngle = 135
-          // Оставляем как есть
-        }
+        if (deg < 0) deg = -deg;
         return Math.max(0, Math.min(180, deg));
       } else {
-        // Синие смотрят влево:
-        // Тянут влево-вверх (screenAngle = -135) → fireAngle = 45
-        // Тянут вправо-вверх (screenAngle = -45) → fireAngle = 135
-        // Тянут влево-вниз (screenAngle = 135) → fireAngle = 45
-        // Тянут вправо-вниз (screenAngle = 45) → fireAngle = 135
-        
-        // Нормализуем в 0..360
         let a = deg < 0 ? deg + 360 : deg;
-        // a: 0 = вправо, 90 = вниз, 180 = влево, 270 = вверх
-        
-        // fireAngle 0 = влево (180), 90 = вверх (270), 180 = вправо (0)
-        // Формула: fireAngle = (270 - a + 360) % 360, но ограничим 0..180
-        // Проще: если a в верхней половине (180..360), отражаем
         if (a >= 180 && a <= 360) {
-          // верхняя половина
-          // a = 270 (вверх) → fireAngle = 90
-          // a = 180 (влево) → fireAngle = 0
-          // a = 360 (вправо) → fireAngle = 180
           return Math.max(0, Math.min(180, 270 - a + 180));
         } else {
-          // нижняя половина (0..180)
-          // a = 0 (вправо) → fireAngle = 180
-          // a = 90 (вниз) → fireAngle = 90
-          // a = 180 (влево) → fireAngle = 0
           return Math.max(0, Math.min(180, 180 - a));
         }
       }
@@ -926,13 +1033,9 @@
     function updateAimVisual(fireAngle) {
       const screenAngle = fireAngleToScreenAngle(fireAngle);
       
-      // Стрелка
       aimArrow.style.transform = `rotate(${screenAngle}deg)`;
-      
-      // Угол
       angleValue.innerText = Math.round(fireAngle) + '°';
       
-      // Подпись
       let label;
       if (fireAngle < 22) label = isRed ? '→ ПРЯМО' : '← ПРЯМО';
       else if (fireAngle < 67) label = isRed ? '↗ ВВЕРХ' : '↖ ВВЕРХ';
@@ -942,10 +1045,47 @@
       
       angleUnit.innerText = label;
       
-      // Подсказка внизу
       aimDirectionLabel.innerText = isRed 
         ? 'Тяни вправо → вперёд' 
         : 'Тяни влево → вперёд';
+      
+      // Отправляем прицел в Firebase (для TV)
+      syncAimToFirebase();
+    }
+
+    // ============================================================
+    // СИНХРОНИЗАЦИЯ ПРИЦЕЛА НА TV
+    // ============================================================
+    let aimSyncTimeout = null;
+    let lastSyncedAim = null;
+
+    function syncAimToFirebase() {
+      if (!isMyTurn) return;
+      
+      // Throttle: не чаще 10 раз/сек
+      if (aimSyncTimeout) return;
+      
+      aimSyncTimeout = setTimeout(() => {
+        aimSyncTimeout = null;
+        
+        const aimData = {
+          angle: currentAngle,
+          power: currentPower,
+          team,
+          name: document.getElementById('info-name').innerText || 'Игрок',
+          time: Date.now()
+        };
+        
+        // Не шлём, если не изменилось
+        if (lastSyncedAim && 
+            Math.abs(lastSyncedAim.angle - aimData.angle) < 1 && 
+            Math.abs(lastSyncedAim.power - aimData.power) < 2) {
+          return;
+        }
+        lastSyncedAim = aimData;
+        
+        update(aimRef, aimData).catch(() => {});
+      }, 80);
     }
 
     // ============================================================
@@ -967,10 +1107,7 @@
       const dx = clientX - centerX;
       const dy = clientY - centerY;
 
-      // Экранный угол
       const screenAngle = Math.atan2(dy, dx) * 180 / Math.PI;
-      
-      // В fireAngle
       const fireAngle = screenAngleToFireAngle(screenAngle);
       currentAngle = fireAngle;
       
@@ -986,17 +1123,14 @@
     aimTouchArea.addEventListener('touchend', () => { isDragging = false; });
 
     // ============================================================
-    // МИНИ-КАРТА ТРАЕКТОРИЙ
+    // МИНИ-КАРТА
     // ============================================================
     const trajectorySvg = document.getElementById('trajectory-svg');
     const MAP_W = 340;
     const MAP_H = 70;
-
-    // Стартовая позиция игрока на мини-карте (слева для красных, справа для синих)
     const START_X = isRed ? 20 : MAP_W - 20;
     const START_Y = MAP_H - 10;
 
-    // Симуляция полёта для отрисовки
     function simulateTrajectory(power, angle) {
       const points = [];
       const direction = isRed ? 1 : -1;
@@ -1009,7 +1143,7 @@
       
       let x = START_X;
       let y = START_Y;
-      const scale = 0.4; // масштаб скорости для мини-карты
+      const scale = 0.4;
       
       points.push({ x, y });
       
@@ -1028,14 +1162,9 @@
 
     function addTrajectoryToMap(power, angle) {
       const points = simulateTrajectory(power, angle);
-      
-      // Уникальный id
       const id = 'traj_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5);
-      
-      // Цвет: свой — яркий, история — тусклая
       const color = isRed ? '#ef4444' : '#3b82f6';
       
-      // Строим path
       const pathData = points.map((p, i) => 
         (i === 0 ? 'M' : 'L') + p.x.toFixed(1) + ' ' + p.y.toFixed(1)
       ).join(' ');
@@ -1047,9 +1176,7 @@
       path.setAttribute('stroke-width', '2');
       path.setAttribute('stroke-linecap', 'round');
       path.setAttribute('opacity', '0.85');
-      path.setAttribute('id', id);
       
-      // Точка старта
       const startDot = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
       startDot.setAttribute('cx', START_X);
       startDot.setAttribute('cy', START_Y);
@@ -1059,10 +1186,8 @@
       trajectorySvg.appendChild(path);
       trajectorySvg.appendChild(startDot);
       
-      // Добавляем в историю
-      trajectoryHistory.push({ id, path, startDot, power, angle });
+      trajectoryHistory.push({ path, startDot });
       
-      // Анимация появления
       const length = path.getTotalLength();
       path.style.strokeDasharray = length;
       path.style.strokeDashoffset = length;
@@ -1071,14 +1196,12 @@
         path.style.strokeDashoffset = '0';
       });
       
-      // Ограничиваем историю 5 траекториями
       while (trajectoryHistory.length > 5) {
         const old = trajectoryHistory.shift();
         old.path.remove();
         old.startDot.remove();
       }
       
-      // Приглушаем старые
       trajectoryHistory.forEach((t, idx) => {
         const age = trajectoryHistory.length - idx;
         t.path.setAttribute('opacity', String(0.2 + age * 0.1));
@@ -1090,10 +1213,11 @@
     // ============================================================
     // БРОСОК
     // ============================================================
-    document.getElementById('shoot-btn').onclick = async () => {
-      if (!isMyTurn || isShooting || gameStatus !== 'playing') return;
-
+    async function executeShot() {
+      if (isShooting) return;
+      
       isShooting = true;
+      stopTurnTimer();
       vibrate([30, 30, 60]);
 
       const btn = document.getElementById('shoot-btn');
@@ -1104,41 +1228,60 @@
         shooterId: playerId,
         power: currentPower,
         angle: currentAngle,
-        time: Date.now()
+        time: Date.now(),
+        state: 'forming',        // ← фаза формирования
+        formTime: Date.now()
       };
 
-      // Добавляем траекторию в мини-карту
       addTrajectoryToMap(currentPower, currentAngle);
+
+      // Убираем прицел с TV
+      remove(aimRef).catch(() => {});
 
       await push(ref(db, 'games/battle_1/shots'), shotData);
       await set(ref(db, 'games/battle_1/last_shot'), shotData);
 
-      // Передача хода
-      const playersSnap = await get(ref(db, 'games/battle_1/players'));
-      const players = playersSnap.val() || {};
+      // Через FORM_TIME снежок начинает лететь
+      setTimeout(async () => {
+        try {
+          await update(ref(db, 'games/battle_1/last_shot'), {
+            state: 'flying',
+            flyTime: Date.now()
+          });
+        } catch {}
+      }, FORM_TIME);
 
-      const myTeamPlayers = Object.entries(players[team] || {}).filter(([id, p]) => p.alive && p.lives > 0);
-      const myIdx = myTeamPlayers.findIndex(([id]) => id === playerId);
+      // Передача хода (через FORM_TIME + небольшая пауза)
+      setTimeout(async () => {
+        const playersSnap = await get(ref(db, 'games/battle_1/players'));
+        const players = playersSnap.val() || {};
 
-      let nextPlayer = null;
-      if (myIdx !== -1 && myIdx < myTeamPlayers.length - 1) {
-        nextPlayer = myTeamPlayers[myIdx + 1];
-      } else {
-        const enemyTeam = Object.entries(players[isRed ? 'blue' : 'red'] || {}).filter(([id, p]) => p.alive && p.lives > 0);
-        if (enemyTeam.length > 0) nextPlayer = enemyTeam[0];
-      }
+        const myTeamPlayers = Object.entries(players[team] || {}).filter(([id, p]) => p.alive && p.lives > 0);
+        const myIdx = myTeamPlayers.findIndex(([id]) => id === playerId);
 
-      if (nextPlayer) {
-        await update(gameRef, {
-          activePlayerId: nextPlayer[0],
-          turn: { team: isRed ? 'blue' : 'red', name: nextPlayer[1].name }
-        });
-      }
+        let nextPlayer = null;
+        if (myIdx !== -1 && myIdx < myTeamPlayers.length - 1) {
+          nextPlayer = myTeamPlayers[myIdx + 1];
+        } else {
+          const enemyTeam = Object.entries(players[isRed ? 'blue' : 'red'] || {}).filter(([id, p]) => p.alive && p.lives > 0);
+          if (enemyTeam.length > 0) nextPlayer = enemyTeam[0];
+        }
 
-      setTimeout(() => {
+        if (nextPlayer) {
+          await update(gameRef, {
+            activePlayerId: nextPlayer[0],
+            turn: { team: isRed ? 'blue' : 'red', name: nextPlayer[1].name }
+          });
+        }
+
         isShooting = false;
         if (isMyTurn) btn.disabled = false;
-      }, 1500);
+      }, FORM_TIME + 500);
+    }
+
+    document.getElementById('shoot-btn').onclick = async () => {
+      if (!isMyTurn || isShooting || gameStatus !== 'playing') return;
+      await executeShot();
     };
 
     // ============================================================
@@ -1151,7 +1294,6 @@
       const prevStatus = gameStatus;
       gameStatus = data.status || 'lobby';
 
-      // ---------- РЕЗУЛЬТАТ ----------
       if (gameStatus === 'finished') {
         handleFinished(data);
         return;
@@ -1160,12 +1302,13 @@
         document.getElementById('result-emoji').innerText = '';
       }
 
-      // ---------- ЛОББИ ----------
       if (gameStatus === 'lobby') {
         hideOverlay('wait-overlay');
         hideOverlay('preload-overlay');
         hideOverlay('result-overlay');
         document.getElementById('tv-timer').classList.add('hidden');
+        stopTurnTimer();
+        remove(aimRef).catch(() => {});
         
         const me = data.players?.[team]?.[playerId];
         if (me) {
@@ -1174,7 +1317,7 @@
         return;
       }
 
-      // ---------- ПРЕЛОУДИНГ ----------
+      // ПРЕЛОУДИНГ
       if (gameStatus === 'playing' && data.timer !== null && data.timer !== undefined) {
         showOverlay('preload-overlay');
         hideOverlay('wait-overlay');
@@ -1187,7 +1330,7 @@
         hideOverlay('preload-overlay');
       }
 
-      // ---------- ИГРА ----------
+      // ИГРА
       if (gameStatus === 'playing' && !data.timer) {
         const tvTimer = document.getElementById('tv-timer');
         if (data.timer) {
@@ -1204,16 +1347,32 @@
         
         if (isMyTurn) {
           if (!wasMyTurn) {
+            // Мой ход только начался
             vibrate([40, 20, 40]);
             btn.classList.add('animate-shake');
             setTimeout(() => btn.classList.remove('animate-shake'), 500);
+            
+            // Запускаем таймер 10 сек
+            startTurnTimer();
+            
+            // Сбрасываем прицел
+            currentAngle = 45;
+            updateAimVisual(currentAngle);
           }
           btn.disabled = false;
           aimWrapper.classList.add('my-turn');
+          aimWrapper.classList.remove('disabled');
           hideOverlay('wait-overlay');
         } else {
+          // Чужой ход
+          if (wasMyTurn) {
+            // Мой ход закончился
+            stopTurnTimer();
+            remove(aimRef).catch(() => {});
+          }
           btn.disabled = true;
           aimWrapper.classList.remove('my-turn');
+          aimWrapper.classList.add('disabled');
           if (hasJoined && !isShooting) showOverlay('wait-overlay');
         }
 
@@ -1232,6 +1391,8 @@
       hideOverlay('wait-overlay');
       hideOverlay('preload-overlay');
       document.getElementById('tv-timer').classList.add('hidden');
+      stopTurnTimer();
+      remove(aimRef).catch(() => {});
 
       const resultOverlay = document.getElementById('result-overlay');
       const titleEl = document.getElementById('result-title');
