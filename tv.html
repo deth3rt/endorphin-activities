@@ -740,6 +740,38 @@
         const gameId = 'battle_1';
         const gameRef = ref(db, `games/${gameId}`);
 
+    
+        // ============================================================
+        // СОСТОЯНИЕ (объявлено до resizeCanvas — иначе TDZ)
+        // ============================================================
+        let currentData = null;
+        let currentBaseUrl = '';   // вычислим ниже, после getBaseUrl()
+        const players = new Map();
+        let snowballs = [];
+        let particles = [];
+        let lastShotTime = 0;
+        let lastShotState = null;
+
+        let isPreloading = false;
+        let hasGeneratedQR = false;
+        let lastTickerText = '';
+        let lastScreen = 'attract';
+        let lastMode = null;
+        let winnerShown = false;
+
+        let turnTimerStart = 0;
+        let turnTimerPlayerId = null;
+        let turnTimerActive = false;
+
+        let formingShots = [];
+
+        let currentAim = null;
+        let displayedAimAngle = null;
+        let displayedAimPower = null;
+
+        let winnerCountdownInterval = null;
+        let superTextTimeout = null;
+
         // ============================================================
         // CANVAS + DPR
         // ============================================================
@@ -768,44 +800,17 @@
                 });
             }
         }
-        window.addEventListener('resize', resizeCanvas);
-        resizeCanvas();
 
         const TURN_TIME = 15;
         const FORM_TIME = 1500;
         const WINNER_AUTO_HIDE = 30;
 
-        // ============================================================
-        // СОСТОЯНИЕ
-        // ============================================================
-        let currentData = null;
-        let currentBaseUrl = getBaseUrl();
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
 
-        const players = new Map();
-        let snowballs = [];
-        let particles = [];
-        let lastShotTime = 0;
-        let lastShotState = null;
-
-        let isPreloading = false;
-        let hasGeneratedQR = false;
-        let lastTickerText = '';
-        let lastScreen = 'attract';
-        let lastMode = null;
-        let winnerShown = false;
-
-        let turnTimerStart = 0;
-        let turnTimerPlayerId = null;
-        let turnTimerActive = false;
-
-        let formingShots = [];
-
-        let currentAim = null;
-        let displayedAimAngle = null;
-        let displayedAimPower = null;
-
-        let winnerCountdownInterval = null;
-        let superTextTimeout = null;
+        // currentBaseUrl считаем после того, как определена getBaseUrl()
+        // (функции hoisted, поэтому можно и здесь)
+        currentBaseUrl = getBaseUrl();
 
         // ============================================================
         // ATTRACT DEMO
