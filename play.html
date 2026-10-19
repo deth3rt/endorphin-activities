@@ -107,9 +107,7 @@
     .avatar-sm { width: 32px; height: 32px; font-size: 0.9rem; }
     .avatar-md { width: 46px; height: 46px; font-size: 1.3rem; }
 
-    /* ============================================================
-       ТАЙМЕР ХОДА
-       ============================================================ */
+    /* ТАЙМЕР ХОДА */
     .turn-timer {
       position: fixed;
       top: calc(var(--safe-top) + 6px);
@@ -149,9 +147,7 @@
       animation: timerPulse 0.5s ease-in-out infinite;
     }
 
-    /* ============================================================
-       ИНФО ИГРОКА
-       ============================================================ */
+    /* ИНФО ИГРОКА */
     .player-info {
       position: fixed;
       top: calc(var(--safe-top) + 6px);
@@ -181,9 +177,7 @@
       letter-spacing: 1px;
     }
 
-    /* ============================================================
-       ИГРОВОЙ ЭКРАН
-       ============================================================ */
+    /* ИГРОВОЙ ЭКРАН */
     .game-screen {
       display: flex;
       flex-direction: column;
@@ -202,14 +196,14 @@
       display: flex;
       flex-direction: column;
       justify-content: center;
-      gap: 10px;
+      gap: 12px;
       min-height: 0;
       overflow-y: auto;
     }
 
     .control-card {
       width: 100%;
-      max-width: 380px;
+      max-width: 400px;
       margin: 0 auto;
       display: flex;
       flex-direction: column;
@@ -226,14 +220,12 @@
       text-transform: uppercase;
     }
 
-    /* ============================================================
-       УГОЛ — SVG-полукруг с drag
-       ============================================================ */
+    /* УГОЛ — SVG-полукруг с drag */
     .angle-control {
       position: relative;
       width: 100%;
-      max-width: 320px;
-      height: 130px;
+      max-width: 340px;
+      height: 140px;
       margin: 0 auto;
       touch-action: none;
       cursor: grab;
@@ -293,109 +285,89 @@
       color: rgba(168, 230, 255, 0.5);
     }
 
-    /* ============================================================
-       СИЛА — вертикальный слайдер
-       ============================================================ */
-    .power-control {
+    /* СИЛА — drag-слайдер без кнопок */
+    .power-drag {
       width: 100%;
-      max-width: 380px;
+      max-width: 400px;
       margin: 0 auto;
-      display: flex;
-      gap: 12px;
-      align-items: stretch;
-      height: 84px;
-    }
-
-    .power-btn {
-      width: 54px;
-      height: 54px;
-      align-self: center;
+      height: 70px;
       border-radius: 16px;
-      background: rgba(10, 37, 64, 0.85);
-      border: 2px solid rgba(251, 191, 36, 0.35);
-      color: var(--amber);
-      font-size: 1.5rem;
-      font-weight: 900;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      transition: all 0.12s;
-      flex-shrink: 0;
-      touch-action: manipulation;
-    }
-    .power-btn:active:not(:disabled) {
-      transform: scale(0.9);
-      background: rgba(251, 191, 36, 0.2);
-      border-color: var(--amber);
-      box-shadow: 0 0 25px var(--amber);
-    }
-    .power-btn:disabled { opacity: 0.3; cursor: not-allowed; }
-
-    .power-bar-wrap {
-      flex: 1;
+      background: rgba(0,0,0,0.55);
+      border: 2px solid rgba(127, 227, 255, 0.3);
       position: relative;
-      border-radius: 14px;
-      background: rgba(0,0,0,0.5);
-      border: 2px solid rgba(127, 227, 255, 0.25);
       overflow: hidden;
-      min-width: 0;
+      touch-action: none;
+      cursor: pointer;
     }
-    .power-bar-fill {
+    .power-drag-fill {
       position: absolute;
       left: 0; top: 0; bottom: 0;
       background: linear-gradient(90deg, #22c55e 0%, #fbbf24 55%, #ef4444 100%);
-      transition: width 0.12s ease;
-      border-radius: 10px;
-      box-shadow: 0 0 15px rgba(251, 191, 36, 0.4);
+      border-radius: 14px;
+      transition: width 0.08s linear;
+      box-shadow: inset 0 0 15px rgba(255,255,255,0.15);
     }
-    .power-bar-markers {
+    .power-drag-marks {
       position: absolute;
       inset: 0;
       display: flex;
       justify-content: space-between;
-      padding: 0 4px;
       align-items: center;
+      padding: 0 10px;
       pointer-events: none;
     }
-    .power-bar-markers span {
-      font-size: 0.55rem;
+    .power-drag-marks span {
+      font-size: 0.6rem;
       font-weight: 900;
-      color: rgba(255,255,255,0.35);
+      color: rgba(255,255,255,0.4);
       font-family: 'JetBrains Mono', monospace;
-      text-shadow: 0 1px 3px rgba(0,0,0,0.8);
+      text-shadow: 0 1px 3px rgba(0,0,0,0.9);
     }
-    .power-value {
+    .power-drag-hint {
       position: absolute;
       top: 50%;
-      right: 10px;
+      left: 14px;
       transform: translateY(-50%);
-      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.7rem;
       font-weight: 900;
-      font-size: 1.1rem;
+      letter-spacing: 0.12em;
       color: #fff;
-      text-shadow: 0 0 10px rgba(0,0,0,0.9), 0 0 20px var(--amber);
+      text-shadow: 0 2px 6px rgba(0,0,0,0.95);
       z-index: 2;
+      pointer-events: none;
     }
-    .power-hint {
+    .power-drag-value {
       position: absolute;
       top: 50%;
-      left: 12px;
+      right: 12px;
       transform: translateY(-50%);
-      font-size: 0.62rem;
+      font-family: 'JetBrains Mono', monospace;
       font-weight: 900;
-      letter-spacing: 0.15em;
-      color: rgba(255,255,255,0.75);
-      text-shadow: 0 1px 4px rgba(0,0,0,0.9);
+      font-size: 1.2rem;
+      color: #fff;
+      text-shadow: 0 0 10px rgba(0,0,0,0.95), 0 0 20px var(--amber);
       z-index: 2;
+      pointer-events: none;
+    }
+    .power-drag-knob {
+      position: absolute;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      width: 18px;
+      height: 46px;
+      border-radius: 9px;
+      background: #fff;
+      box-shadow: 0 0 20px var(--team-color), 0 0 40px var(--team-color);
+      border: 2px solid var(--team-color);
+      pointer-events: none;
+      z-index: 3;
+      transition: left 0.08s linear;
     }
 
-    /* ============================================================
-       СУПЕР-ПАНЕЛЬ
-       ============================================================ */
+    /* СУПЕР-ПАНЕЛЬ */
     .super-panel {
       width: 100%;
-      max-width: 380px;
+      max-width: 400px;
       margin: 0 auto;
     }
     .super-header {
@@ -453,12 +425,10 @@
     .super-btn:disabled { opacity: 0.3; cursor: not-allowed; }
     .super-btn.can-use { animation: superPulse 2s ease-in-out infinite; }
 
-    /* ============================================================
-       КНОПКА БРОСКА
-       ============================================================ */
+    /* КНОПКА БРОСКА */
     .shoot-btn {
       width: 100%;
-      max-width: 380px;
+      max-width: 400px;
       margin: 0 auto;
       height: clamp(58px, 13vh, 76px);
       border-radius: 20px;
@@ -487,9 +457,7 @@
       box-shadow: none;
     }
 
-    /* ============================================================
-       МОДАЛКИ / ОВЕРЛЕИ
-       ============================================================ */
+    /* МОДАЛКИ / ОВЕРЛЕИ */
     .super-modal, .overlay, .modal-backdrop {
       position: fixed;
       inset: 0;
@@ -557,7 +525,7 @@
       filter: drop-shadow(0 0 40px rgba(251, 191, 36, 0.6));
     }
 
-    /* Модалка подтверждения */
+    /* МОДАЛКА ПОДТВЕРЖДЕНИЯ */
     .modal-backdrop { background: rgba(0,0,0,0.8); z-index: 300; backdrop-filter: blur(8px); }
     @keyframes modalIn {
       from { transform: translateY(20px) scale(0.95); opacity: 0; }
@@ -601,9 +569,7 @@
       animation: confettiFall linear forwards;
     }
 
-    /* ============================================================
-       JOIN SCREEN
-       ============================================================ */
+    /* JOIN */
     .join-card { animation: slideUp 0.5s ease-out; }
     .join-input {
       background: rgba(0,0,0,0.5);
@@ -616,9 +582,7 @@
       outline: none;
     }
 
-    /* ============================================================
-       ROOM SCREEN
-       ============================================================ */
+    /* ROOM */
     .room-screen {
       position: fixed;
       inset: 0;
@@ -695,9 +659,7 @@
       border: 1px solid rgba(251, 191, 36, 0.4);
     }
 
-    /* ============================================================
-       TOAST
-       ============================================================ */
+    /* TOAST */
     .toast-container {
       position: fixed;
       top: calc(var(--safe-top) + 80px);
@@ -724,23 +686,19 @@
     .toast.error { background: rgba(239, 68, 68, 0.25); border: 1px solid rgba(239, 68, 68, 0.5); }
     .toast.info { background: rgba(34, 211, 238, 0.25); border: 1px solid rgba(34, 211, 238, 0.5); }
 
-    /* ============================================================
-       АДАПТИВ
-       ============================================================ */
+    /* АДАПТИВ */
     @media (max-height: 700px) {
-      .angle-control { height: 110px; }
-      .power-control { height: 74px; }
-      .power-btn { width: 48px; height: 48px; font-size: 1.3rem; }
-      .game-content { gap: 7px; }
+      .angle-control { height: 118px; }
+      .power-drag { height: 62px; }
+      .game-content { gap: 9px; }
       .super-btn .super-emoji { font-size: 1rem; }
       .super-btn { padding: 5px 2px; }
     }
     @media (max-height: 600px) {
-      .angle-control { height: 96px; }
-      .power-control { height: 68px; }
-      .power-btn { width: 44px; height: 44px; font-size: 1.2rem; }
+      .angle-control { height: 100px; }
+      .power-drag { height: 56px; }
       .shoot-btn { height: 52px; font-size: 1.05rem; letter-spacing: 2px; }
-      .game-content { gap: 5px; }
+      .game-content { gap: 6px; }
       .super-btn .super-emoji { font-size: 0.9rem; }
       .super-btn { padding: 4px 2px; }
       .super-btn .super-cost { font-size: 0.5rem; }
@@ -756,9 +714,6 @@
 </head>
 <body class="relative" id="main-body">
 
-  <!-- ============================================================
-       JOIN
-       ============================================================ -->
   <div id="join-screen" class="fixed inset-0 flex flex-col items-center justify-center p-6 z-10">
     <div class="glass-panel join-card p-7 rounded-3xl w-full max-w-sm flex flex-col items-center">
       <div class="text-4xl mb-3">❄️</div>
@@ -789,9 +744,6 @@
     </div>
   </div>
 
-  <!-- ============================================================
-       ROOM
-       ============================================================ -->
   <div id="room-screen" class="room-screen hidden">
     <div class="room-status" id="room-status">⏳ ОЖИДАНИЕ</div>
     <div class="room-title">ВЫ В КОМНАТЕ</div>
@@ -815,9 +767,6 @@
     </button>
   </div>
 
-  <!-- ============================================================
-       GAME
-       ============================================================ -->
   <div id="game-screen" class="hidden game-screen">
 
     <div class="turn-timer" id="turn-timer">
@@ -844,36 +793,30 @@
 
       <!-- УГОЛ -->
       <div class="control-card">
-        <div class="section-label">Угол</div>
+        <div class="section-label">Угол <span id="angle-hint-inline" style="opacity: 0.5;">· вверх</span></div>
         <div class="angle-control" id="angle-control">
           <div class="angle-hint" id="angle-hint">ВВЕРХ</div>
           <svg viewBox="0 0 320 130" preserveAspectRatio="xMidYMax meet" id="angle-svg">
-            <!-- Дуга -->
             <path class="angle-arc" id="angle-arc-bg" d="M 40 120 A 120 120 0 0 1 280 120" />
             <path class="angle-arc-fill" id="angle-arc-fill" d="M 40 120 A 120 120 0 0 1 280 120" />
-            <!-- Деления -->
             <g id="angle-ticks"></g>
-            <!-- Указатель -->
             <circle class="angle-pointer" id="angle-pointer" cx="40" cy="120" r="9" />
           </svg>
           <div class="angle-value-badge" id="angle-value-badge">45°</div>
         </div>
       </div>
 
-      <!-- СИЛА -->
+      <!-- СИЛА — DRAG -->
       <div class="control-card">
         <div class="section-label">Сила</div>
-        <div class="power-control">
-          <button class="power-btn" id="power-down" disabled aria-label="Уменьшить силу">−</button>
-          <div class="power-bar-wrap">
-            <div class="power-bar-fill" id="power-bar-fill" style="width: 30%"></div>
-            <div class="power-bar-markers">
-              <span>0</span><span>50</span><span>100</span>
-            </div>
-            <div class="power-hint" id="power-hint">СРЕДНЕ</div>
-            <div class="power-value" id="power-value">30%</div>
+        <div class="power-drag" id="power-drag">
+          <div class="power-drag-fill" id="power-drag-fill" style="width: 30%"></div>
+          <div class="power-drag-knob" id="power-drag-knob" style="left: 30%"></div>
+          <div class="power-drag-marks">
+            <span>0</span><span>50</span><span>100</span>
           </div>
-          <button class="power-btn" id="power-up" disabled aria-label="Увеличить силу">+</button>
+          <div class="power-drag-hint" id="power-hint">СРЕДНЕ</div>
+          <div class="power-drag-value" id="power-value">30%</div>
         </div>
       </div>
 
@@ -891,9 +834,6 @@
     <button id="shoot-btn" class="shoot-btn self-center" disabled>БРОСОК</button>
   </div>
 
-  <!-- ============================================================
-       SUPER MODAL
-       ============================================================ -->
   <div id="super-modal" class="super-modal hidden">
     <div class="glass-panel p-5 rounded-3xl w-full max-w-sm">
       <h2 class="text-lg font-black text-center mb-3 text-yellow-400 tracking-widest">ВЫБЕРИ СУПЕРБРОСОК</h2>
@@ -902,9 +842,6 @@
     </div>
   </div>
 
-  <!-- ============================================================
-       ОВЕРЛЕИ
-       ============================================================ -->
   <div id="wait-overlay" class="overlay wait-overlay hidden">
     <div class="text-5xl mb-4">⏳</div>
     <h1 class="text-2xl font-black text-white mb-2 text-center">ХОД СОПЕРНИКА</h1>
@@ -952,9 +889,6 @@
     </div>
   </div>
 
-  <!-- ============================================================
-       MODAL ПОДТВЕРЖДЕНИЯ
-       ============================================================ -->
   <div class="modal-backdrop hidden" id="modal">
     <div class="modal-card">
       <div class="modal-icon" id="modal-icon">⚠️</div>
@@ -967,9 +901,7 @@
     </div>
   </div>
 
-  <!-- TOAST -->
   <div class="toast-container" id="toast-container"></div>
-
   <div id="confetti-container"></div>
 
   <script type="module">
@@ -1009,8 +941,6 @@
 
     const TURN_TIME = 15;
     const FORM_TIME = 1500;
-    const ANGLE_STEP = 5;
-    const POWER_STEP = 10;
     const NAME_MAX = 16;
 
     const SUPERS = {
@@ -1107,9 +1037,6 @@
       if (size) el.className = `avatar avatar-${size}`;
     }
 
-    // ============================================================
-    // TOAST
-    // ============================================================
     function showToast(message, type = 'info') {
       const container = document.getElementById('toast-container');
       const toast = document.createElement('div');
@@ -1120,9 +1047,6 @@
       setTimeout(() => toast.remove(), 2800);
     }
 
-    // ============================================================
-    // MODAL
-    // ============================================================
     let modalResolver = null;
     function showModal({ icon = '⚠️', title = '', text = '', confirmText = 'ОК', cancelText = 'ОТМЕНА', danger = false }) {
       return new Promise(resolve => {
@@ -1147,9 +1071,6 @@
       if (e.target.id === 'modal') { playClick(); closeModal(false); }
     });
 
-    // ============================================================
-    // ПОЗИЦИЯ
-    // ============================================================
     async function ensureMyPosition() {
       if (isEnsuringPosition) return;
       isEnsuringPosition = true;
@@ -1177,9 +1098,6 @@
       }
     }
 
-    // ============================================================
-    // JOIN
-    // ============================================================
     async function joinGame() {
       const nameInput = document.getElementById('input-name');
       let name = nameInput.value.trim() || 'Игрок';
@@ -1235,11 +1153,9 @@
       if (e.key === 'Enter') joinGame();
     });
 
-    // Авто-подстановка имени
     const savedName = localStorage.getItem(nameStorageKey);
     if (savedName) document.getElementById('input-name').value = savedName;
 
-    // Звук после первого жеста
     document.addEventListener('click', () => { getAudioCtx(); }, { once: true });
     document.addEventListener('touchstart', () => { getAudioCtx(); }, { once: true });
 
@@ -1260,26 +1176,26 @@
     updateTeamBadges();
 
     // ============================================================
-    // УГОЛ (SVG drag)
+    // УГОЛ (SVG drag, с направлением)
     // ============================================================
     const angleSvg = document.getElementById('angle-svg');
     const anglePointer = document.getElementById('angle-pointer');
     const angleArcFill = document.getElementById('angle-arc-fill');
+    const angleArcBg = document.getElementById('angle-arc-bg');
     const angleValueBadge = document.getElementById('angle-value-badge');
     const angleHint = document.getElementById('angle-hint');
     const angleControl = document.getElementById('angle-control');
 
-    // Дуга: центр (160, 120), радиус 120, от левого края до правого (180°..0°)
-    // Точка на дуге: x = 160 - cos(angleRad) * 120, y = 120 - sin(angleRad) * 120
-    // где angleRad = currentAngle * PI / 180, но currentAngle 0° = вправо, 180° = влево
-    // Для нашей игры: 0° = вправо (низко), 180° = влево (высоко над головой)
-    // На полукруге: угол 0° → точка (280, 120), угол 180° → точка (40, 120)
-
+    // У красных угол 0° = вправо, 180° = влево (в сторону синих)
+    // У синих угол 0° = влево, 180° = вправо (зеркально)
     function angleToPoint(angleDeg) {
       const rad = (angleDeg * Math.PI) / 180;
       const cx = 160, cy = 120, r = 120;
-      const x = cx + Math.cos(rad) * r;
-      const y = cy - Math.sin(rad) * r;
+      // Красные: 0° → (280,120), 90° → (160,0), 180° → (40,120)
+      // Синие: 0° → (40,120), 90° → (160,0), 180° → (280,120)
+      const visual = isRed ? (Math.PI - rad) : rad;
+      const x = cx + Math.cos(visual) * r;
+      const y = cy - Math.sin(visual) * r;
       return { x, y };
     }
 
@@ -1287,19 +1203,18 @@
       const cx = 160, cy = 120;
       let rad = Math.atan2(cy - py, px - cx);
       let deg = (rad * 180) / Math.PI;
+      if (!isRed) deg = 180 - deg;
       if (deg < 0) deg = 0;
       if (deg > 180) deg = 180;
       return deg;
     }
 
     function buildArcPath(angleDeg) {
-      // Дуга от 0 до angleDeg (по часовой от правого края к левому)
       const start = angleToPoint(0);
       const end = angleToPoint(angleDeg);
-      const largeArc = angleDeg > 180 ? 1 : 0;
-      // SVG arc: M startX startY A r r 0 largeArc 1 endX endY
-      // sweep=0 (против часовой), потому что у нас угол растёт вверх-влево
-      return `M ${start.x} ${start.y} A 120 120 0 ${largeArc} 0 ${end.x} ${end.y}`;
+      // направление дуги: у красных sweep=0 (по часовой от 0 к 180), у синих тоже sweep=0
+      // но так как angleToPoint уже отзеркален — sweep всегда 0
+      return `M ${start.x} ${start.y} A 120 120 0 0 0 ${end.x} ${end.y}`;
     }
 
     function drawAngleTicks() {
@@ -1308,10 +1223,11 @@
       for (let a = 0; a <= 180; a += 30) {
         const p1 = angleToPoint(a);
         const rad = (a * Math.PI) / 180;
+        const visual = isRed ? (Math.PI - rad) : rad;
         const innerR = 108;
         const p2 = {
-          x: 160 + Math.cos(rad) * innerR,
-          y: 120 - Math.sin(rad) * innerR
+          x: 160 + Math.cos(visual) * innerR,
+          y: 120 - Math.sin(visual) * innerR
         };
         const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
         line.setAttribute('class', 'angle-tick');
@@ -1322,7 +1238,6 @@
         group.appendChild(line);
       }
     }
-    drawAngleTicks();
 
     function updateAngleDisplay() {
       const a = Math.round(currentAngle);
@@ -1337,7 +1252,7 @@
       else if (a < 67) hint = 'ВВЕРХ';
       else if (a < 112) hint = 'ВЫСОКО';
       else if (a < 157) hint = 'ВНИЗ';
-      else hint = 'НАЗАД';
+      else hint = 'НАВЕСОМ';
       angleHint.innerText = hint;
     }
 
@@ -1346,15 +1261,15 @@
     function handleAnglePointer(clientX, clientY) {
       if (!isMyTurn || isShooting) return;
       const rect = angleSvg.getBoundingClientRect();
-      // Переводим clientX/Y в координаты viewBox (320x130)
       const sx = ((clientX - rect.left) / rect.width) * 320;
       const sy = ((clientY - rect.top) / rect.height) * 130;
       const deg = pointToAngle(sx, sy);
-      const newAngle = Math.round(deg / 1) * 1;
+      const newAngle = Math.round(deg);
       if (newAngle !== currentAngle) {
         currentAngle = newAngle;
         updateAngleDisplay();
         syncAimToFirebase();
+        vibrate(5);
       }
     }
 
@@ -1378,58 +1293,61 @@
     angleControl.addEventListener('pointercancel', () => { isDraggingAngle = false; });
 
     // ============================================================
-    // СИЛА
+    // СИЛА — DRAG-СЛАЙДЕР (без стрелочек)
     // ============================================================
-    function powerUp() {
+    const powerDrag = document.getElementById('power-drag');
+    const powerDragFill = document.getElementById('power-drag-fill');
+    const powerDragKnob = document.getElementById('power-drag-knob');
+    const powerValue = document.getElementById('power-value');
+    const powerHint = document.getElementById('power-hint');
+
+    let isDraggingPower = false;
+
+    function setPowerFromClientX(clientX) {
       if (!isMyTurn || isShooting) return;
-      currentPower = clamp(currentPower + POWER_STEP, 10, 100);
-      updatePowerDisplay();
-      syncAimToFirebase();
-      vibrate(10);
-    }
-    function powerDown() {
-      if (!isMyTurn || isShooting) return;
-      currentPower = clamp(currentPower - POWER_STEP, 10, 100);
-      updatePowerDisplay();
-      syncAimToFirebase();
-      vibrate(10);
+      const rect = powerDrag.getBoundingClientRect();
+      let ratio = (clientX - rect.left) / rect.width;
+      ratio = clamp(ratio, 0.1, 1);
+      const newPower = Math.round(ratio * 100);
+      if (newPower !== currentPower) {
+        currentPower = newPower;
+        updatePowerDisplay();
+        syncAimToFirebase();
+        vibrate(5);
+      }
     }
 
     function updatePowerDisplay() {
-      document.getElementById('power-value').innerText = currentPower + '%';
-      document.getElementById('power-bar-fill').style.width = currentPower + '%';
+      powerValue.innerText = currentPower + '%';
+      powerDragFill.style.width = currentPower + '%';
+      powerDragKnob.style.left = currentPower + '%';
       let hint;
       if (currentPower < 30) hint = 'СЛАБО';
       else if (currentPower < 60) hint = 'СРЕДНЕ';
       else if (currentPower < 85) hint = 'СИЛЬНО';
       else hint = 'МАКС';
-      document.getElementById('power-hint').innerText = hint;
+      powerHint.innerText = hint;
     }
 
-    function addHoldSupport(btnId, action) {
-      const btn = document.getElementById(btnId);
-      let holdInterval = null;
-      const start = (e) => {
-        e.preventDefault();
-        action();
-        holdInterval = setInterval(action, 70);
-      };
-      const stop = () => {
-        if (holdInterval) { clearInterval(holdInterval); holdInterval = null; }
-      };
-      btn.addEventListener('mousedown', start);
-      btn.addEventListener('mouseup', stop);
-      btn.addEventListener('mouseleave', stop);
-      btn.addEventListener('touchstart', start, { passive: false });
-      btn.addEventListener('touchend', stop);
-      btn.addEventListener('touchcancel', stop);
-    }
-    addHoldSupport('power-up', powerUp);
-    addHoldSupport('power-down', powerDown);
+    powerDrag.addEventListener('pointerdown', (e) => {
+      if (!isMyTurn || isShooting) return;
+      isDraggingPower = true;
+      powerDrag.setPointerCapture(e.pointerId);
+      setPowerFromClientX(e.clientX);
+      vibrate(10);
+      e.preventDefault();
+    });
+    powerDrag.addEventListener('pointermove', (e) => {
+      if (!isDraggingPower) return;
+      setPowerFromClientX(e.clientX);
+      e.preventDefault();
+    });
+    powerDrag.addEventListener('pointerup', (e) => {
+      isDraggingPower = false;
+      try { powerDrag.releasePointerCapture(e.pointerId); } catch {}
+    });
+    powerDrag.addEventListener('pointercancel', () => { isDraggingPower = false; });
 
-    // ============================================================
-    // SYNC AIM
-    // ============================================================
     function syncAimToFirebase() {
       if (!isMyTurn) return;
       if (aimSyncTimeout) return;
@@ -1450,9 +1368,6 @@
       }, 60);
     }
 
-    // ============================================================
-    // ТАЙМЕР ХОДА
-    // ============================================================
     function startTurnTimer() {
       stopTurnTimer();
       turnDeadline = Date.now() + TURN_TIME * 1000;
@@ -1510,9 +1425,6 @@
       await executeShot();
     }
 
-    // ============================================================
-    // СУПЕРЫ
-    // ============================================================
     function getSuperCost(baseCost) { return baseCost * costMultiplier; }
 
     function updateSuperPanel() {
@@ -1608,9 +1520,6 @@
       return shots;
     }
 
-    // ============================================================
-    // БРОСОК
-    // ============================================================
     async function executeShot() {
       if (isShooting) return;
       playShoot();
@@ -1714,9 +1623,6 @@
       await executeShot();
     };
 
-    // ============================================================
-    // ROOM RENDER
-    // ============================================================
     function renderRoom(data) {
       const room = data.room || {};
       const players = data.players || {};
@@ -1768,9 +1674,6 @@
       else statusEl.innerText = '⏳ ОЖИДАНИЕ';
     }
 
-    // ============================================================
-    // SCREENS
-    // ============================================================
     function showJoinScreen() {
       document.getElementById('join-screen').classList.remove('hidden');
       document.getElementById('room-screen').classList.add('hidden');
@@ -1800,9 +1703,6 @@
       }
     }
 
-    // ============================================================
-    // MAIN LISTENER
-    // ============================================================
     onValue(gameRef, (snapshot) => {
       const data = snapshot.val();
       if (!data) return;
@@ -1900,7 +1800,6 @@
       isMyTurn = (data.activePlayerId === playerId);
 
       const btn = document.getElementById('shoot-btn');
-      const powerBtns = ['power-up', 'power-down'].map(id => document.getElementById(id));
 
       if (isMyTurn) {
         if (!wasMyTurn) {
@@ -1916,7 +1815,6 @@
           syncAimToFirebase();
         }
         btn.disabled = false;
-        powerBtns.forEach(b => b.disabled = false);
         hideOverlay('wait-overlay');
       } else {
         if (wasMyTurn) {
@@ -1925,7 +1823,6 @@
           lastAimSent = null;
         }
         btn.disabled = true;
-        powerBtns.forEach(b => b.disabled = true);
         if (!isShooting && meAlive) showOverlay('wait-overlay');
       }
 
@@ -1956,9 +1853,6 @@
       updateSuperPanel();
     }
 
-    // ============================================================
-    // FINISHED
-    // ============================================================
     function handleFinished(data) {
       hideOverlay('wait-overlay');
       hideOverlay('preload-overlay');
@@ -2062,9 +1956,8 @@
       setTimeout(() => { container.innerHTML = ''; }, 5000);
     }
 
-    // ============================================================
     // INIT
-    // ============================================================
+    drawAngleTicks();
     updateAngleDisplay();
     updatePowerDisplay();
 
