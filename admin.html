@@ -50,9 +50,6 @@
       transition: opacity 0.2s;
     }
 
-    /* ============================================================
-       INPUT
-       ============================================================ */
     .admin-input {
       width: 100%;
       background: rgba(0, 0, 0, 0.5);
@@ -86,9 +83,6 @@
       text-transform: uppercase;
     }
 
-    /* ============================================================
-       TOAST
-       ============================================================ */
     .toast-container {
       position: fixed;
       top: 20px;
@@ -135,9 +129,6 @@
     }
     .toast.out { animation: toastOut 0.3s ease-in forwards; }
 
-    /* ============================================================
-       ПРЕВЬЮ
-       ============================================================ */
     .ad-preview {
       width: 100%;
       height: 100px;
@@ -162,9 +153,6 @@
       letter-spacing: 0.1em;
     }
 
-    /* ============================================================
-       TICKER PREVIEW
-       ============================================================ */
     .ticker-preview {
       height: 44px;
       background: rgba(0, 0, 0, 0.9);
@@ -199,9 +187,6 @@
       100% { transform: translate3d(-100%, 0, 0); }
     }
 
-    /* ============================================================
-       SPINNER
-       ============================================================ */
     .spinner {
       display: inline-block;
       width: 16px;
@@ -213,9 +198,6 @@
     }
     @keyframes spin { to { transform: rotate(360deg); } }
 
-    /* ============================================================
-       CHAR COUNTER
-       ============================================================ */
     .char-counter {
       font-size: 0.7rem;
       color: rgba(255,255,255,0.4);
@@ -225,9 +207,6 @@
     .char-counter.warn { color: #fbbf24; }
     .char-counter.danger { color: #ef4444; }
 
-    /* ============================================================
-       REDUCED MOTION
-       ============================================================ */
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after {
         animation-duration: 0.01ms !important;
@@ -293,9 +272,9 @@
 
       <hr class="border-gray-700/50 my-6">
 
-      <!-- Лобби -->
+      <!-- Лобби / Заставка -->
       <div class="mb-6">
-        <h2 class="text-base font-bold mb-3 text-cyan-300">🏠 Реклама в лобби</h2>
+        <h2 class="text-base font-bold mb-3 text-cyan-300">🏠 Реклама на заставке (TV)</h2>
         
         <div class="space-y-3">
           <div>
@@ -388,7 +367,8 @@
         <div class="text-6xl mb-4">⚠️</div>
         <h2 class="text-2xl font-black text-red-400 mb-2">ОПАСНАЯ ЗОНА</h2>
         <p class="text-gray-400 mb-6 text-sm max-w-md mx-auto">
-          Сброс очистит всех игроков, выстрелы, таймер и вернёт игру в лобби. 
+          Сброс очистит игроков, комнату ожидания, выстрелы, прицелы и 
+          вернёт TV на заставку. 
           Реклама и бегущая строка <span class="text-cyan-300 font-bold">не будут затронуты</span>.
         </p>
         
@@ -454,7 +434,7 @@
     }
 
     // ============================================================
-    // ТАБЫ (с сохранением в localStorage)
+    // ТАБЫ
     // ============================================================
     window.switchTab = (tab) => {
       ['ad', 'ticker', 'reset'].forEach(t => {
@@ -466,7 +446,6 @@
       localStorage.setItem('endorphin_admin_tab', tab);
     };
 
-    // Восстанавливаем вкладку
     const savedTab = localStorage.getItem('endorphin_admin_tab') || 'ad';
     switchTab(savedTab);
 
@@ -474,7 +453,7 @@
     // ВАЛИДАЦИЯ URL
     // ============================================================
     function isValidUrl(str) {
-      if (!str) return true; // пусто — ок
+      if (!str) return true;
       try {
         const url = new URL(str);
         return ['http:', 'https:'].includes(url.protocol);
@@ -515,7 +494,6 @@
     window.saveAdSettings = async () => {
       const btn = document.getElementById('save-ad-btn');
       
-      // Валидация
       const preloadImg = document.getElementById('preload-img').value.trim();
       const preloadLink = document.getElementById('preload-link').value.trim();
       const lobbyImg = document.getElementById('lobby-img').value.trim();
@@ -558,12 +536,10 @@
       }
     };
 
-    // Загрузка рекламы (НЕ перезаписываем, если пользователь печатает)
+    // Загрузка рекламы
     onValue(adRef, (snap) => {
       const data = snap.val();
       if (!data) return;
-
-      // Если пользователь уже что-то менял — не перезаписываем
       if (adFieldsDirty) return;
 
       isAdLoading = true;
@@ -584,7 +560,6 @@
       isAdLoading = false;
     });
 
-    // Отслеживаем изменения вручную (без oninput на каждом поле)
     ['preload-img', 'preload-link', 'preload-text', 'lobby-img', 'lobby-link', 'lobby-text'].forEach(id => {
       document.getElementById(id).addEventListener('input', () => {
         if (!isAdLoading) adFieldsDirty = true;
@@ -620,16 +595,13 @@
       btn.innerHTML = '<span class="spinner"></span>';
 
       try {
-        // Читаем свежие данные
         const snap = await get(tickerRef);
         const messages = snap.val() || {};
         const keys = Object.keys(messages).sort((a, b) => messages[a].time - messages[b].time);
 
-        // Удаляем старые, если >= 10
         const toDelete = keys.slice(0, Math.max(0, keys.length - 9));
         await Promise.all(toDelete.map(k => remove(ref(db, `games/battle_1/ticker_messages/${k}`))));
 
-        // Добавляем новое
         const newRef = push(tickerRef);
         await set(newRef, { text, time: Date.now() });
 
@@ -664,18 +636,15 @@
       }
     };
 
-    // Рендер сообщений (только если данные реально изменились)
     onValue(tickerRef, (snap) => {
       const messages = snap.val() || {};
       const keys = Object.keys(messages).sort((a, b) => messages[a].time - messages[b].time);
       
-      // Хэш для проверки изменений
       const dataHash = keys.map(k => `${k}:${messages[k].time}`).join('|');
       if (dataHash === lastMessagesData) return;
       lastMessagesData = dataHash;
 
       const list = document.getElementById('messages-list');
-      const empty = document.getElementById('empty-history');
 
       if (keys.length === 0) {
         list.innerHTML = '';
@@ -687,7 +656,6 @@
         return;
       }
 
-      // Ограничиваем список последними 10 (по факту их не больше)
       list.innerHTML = keys.map(key => {
         const msg = messages[key];
         return `
@@ -705,15 +673,7 @@
     });
 
     function updateTickerPreview() {
-      const messages = lastMessagesData 
-        ? lastMessagesData.split('|').filter(Boolean)
-        : [];
-      
-      // Берём данные из lastMessagesData, но нам нужны тексты. Читаем из БД-снапшота заново
-      // Проще: держим глобальную переменную с последними сообщениями
       const previewEl = document.getElementById('ticker-preview-text');
-      
-      // Если нет сообщений — показываем дефолт
       const msgs = window.__lastMessages || {};
       const keys = Object.keys(msgs).sort((a, b) => msgs[a].time - msgs[b].time);
       
@@ -723,13 +683,11 @@
         previewEl.innerText = keys.map(k => msgs[k].text).join('  •  ');
       }
       
-      // Перезапуск анимации
       previewEl.style.animation = 'none';
       void previewEl.offsetWidth;
       previewEl.style.animation = '';
     }
 
-    // Сохраняем последние сообщения глобально для превью
     onValue(tickerRef, (snap) => {
       window.__lastMessages = snap.val() || {};
       updateTickerPreview();
@@ -752,29 +710,34 @@
       btn.innerHTML = '<span class="spinner"></span> СБРОС...';
 
       try {
-        // Сбрасываем игровое состояние, НЕ трогая ad_settings и ticker_messages
+        // Полный сброс игрового состояния
         await update(ref(db, 'games/battle_1'), {
+          screen: 'attract',
           status: 'lobby',
           mode: '1v1',
           players: { red: {}, blue: {} },
+          room: { red: {}, blue: {} },
           turn: { team: 'red', name: '...' },
           activePlayerId: null,
           timer: null,
           preloadDone: false,
           winner: null,
-          last_shot: null
+          last_shot: null,
+          shots: null,
+          lives: { red: 3, blue: 3 }
         });
 
-        // Удаляем выстрелы
+        // Удаляем выстрелы, прицел, last_shot
         try {
           await remove(ref(db, 'games/battle_1/shots'));
           await remove(ref(db, 'games/battle_1/last_shot'));
+          await remove(ref(db, 'games/battle_1/aim'));
         } catch {}
 
         document.getElementById('reset-confirm').value = '';
         validateResetInput();
         
-        showToast('Игра сброшена в лобби', 'success');
+        showToast('Игра сброшена. TV на заставке.', 'success');
       } catch (e) {
         showToast('Ошибка сброса: ' + e.message, 'error');
         btn.disabled = false;
@@ -795,7 +758,6 @@
         .replace(/'/g, '&#39;');
     }
 
-    // Инициализация счётчика
     updateCharCounter();
   </script>
 </body>
