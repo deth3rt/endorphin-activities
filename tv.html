@@ -178,7 +178,7 @@
             pointer-events: none;
         }
 
-        /* СУПЕРБРОСОК — заголовок */
+        /* СУПЕРБРОСОК */
         @keyframes superZoom {
             0% { transform: translate(-50%, -50%) scale(0.1) rotate(-10deg); opacity: 0; }
             50% { transform: translate(-50%, -50%) scale(1.3) rotate(3deg); opacity: 1; }
@@ -244,7 +244,7 @@
         .hp-red { top: 20px; left: 20px; color: var(--red-team); }
         .hp-blue { bottom: 80px; right: 20px; color: var(--blue-team); }
 
-        /* ВЫБОР КОМАНДЫ (ТОЛЬКО ДЛЯ ОТОБРАЖЕНИЯ) */
+        /* ВЫБОР КОМАНДЫ */
         .team-select {
             display: flex;
             gap: 20px;
@@ -375,7 +375,7 @@
             text-shadow: 0 0 10px currentColor;
         }
 
-        /* ФОРМИРОВАНИЕ СНЕЖКА */
+        /* ФОРМИРОВАНИЕ */
         @keyframes formingPulse {
             0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.7; }
             50% { transform: translate(-50%, -50%) scale(1.4); opacity: 1; }
@@ -414,7 +414,7 @@
                     <circle class="bg" cx="45" cy="45" r="38"></circle>
                     <circle class="progress" cx="45" cy="45" r="38" id="tv-turn-timer-progress"></circle>
                 </svg>
-                <div class="tv-turn-timer-value" id="tv-turn-timer-value">10</div>
+                <div class="tv-turn-timer-value" id="tv-turn-timer-value">15</div>
             </div>
             <div class="tv-turn-timer-name" id="tv-turn-timer-name"></div>
         </div>
@@ -447,7 +447,6 @@
             <span id="lobby-ad-text">РЕКЛАМА</span>
         </a>
         
-        <!-- Отображение выбора первой команды (только read-only) -->
         <div class="team-select hidden" id="team-select">
             <button class="team-btn red" id="btn-red-start" disabled>КРАСНЫЕ НАЧИНАЮТ</button>
             <button class="team-btn blue" id="btn-blue-start" disabled>СИНИЕ НАЧИНАЮТ</button>
@@ -505,7 +504,7 @@
         // ============================================================
         // КОНСТАНТЫ
         // ============================================================
-        const TURN_TIME = 10;
+        const TURN_TIME = 15;
         const FORM_TIME = 1500;
 
         // ============================================================
@@ -525,14 +524,20 @@
         let hasGeneratedQR = false;
         let lastTickerText = '';
         let finishedHandled = false;
+        let lastMode = null;
 
         // Таймер хода
         let turnTimerStart = 0;
         let turnTimerPlayerId = null;
         let turnTimerActive = false;
 
-        // Формирование снежков (массив)
-        let formingShots = [];          // [{ angle, power, damage, x, y, team, startTime }]
+        // Формирование снежков
+        let formingShots = [];
+
+        // Live-прицел
+        let currentAim = null;            // { angle, power, team, name, playerId }
+        let displayedAimAngle = null;     // для интерполяции
+        let displayedAimPower = null;
 
         // Отображение суперброска
         let superTextTimeout = null;
@@ -704,7 +709,6 @@
                 ctx.arc(this.x, this.y, radius, 0, Math.PI * 2);
                 ctx.fill();
 
-                // Аура для суперснежка
                 if (this.isSuper) {
                     ctx.strokeStyle = '#fbbf24';
                     ctx.lineWidth = 2;
@@ -720,7 +724,125 @@
         }
 
         // ============================================================
-        // ФОРМИРОВАНИЕ СНЕЖКОВ (визуал)
+        // LIVE-ПРИЦЕЛ
+        // ============================================================
+        function drawLiveAim(aimer, angle, power) {
+            // Экранный угол: для красных 0 = вправо, для синих 0 = влево
+            const direction = aimer.team === 'red' ? 1 : -1;
+            const rad = angle * Math.PI / 180;
+            
+            // Реальный вектор полёта (как у снежка)
+            const speed = power * 0.4;
+            const vx = Math.cos(rad) * speed * direction;
+            const vy = -Math.sin(rad) * speed;
+            const gravity = 0.3;
+
+            const teamColor = aimer.team === 'red' ? '#ef4444' : '#3b82f6';
+
+            // Стартовая точка — от игрока
+            let x = aimer.x;
+            let y = aimer.y;
+
+            // Пунктирная линия (короткая, направление)
+            const lineLength = 100 + power * 1.2;
+            const lineEndX = x + Math.cos(rad) * lineLength * direction;
+            const lineEndY = y - Math.sin(rad) * lineLength;
+
+            ctx.save();
+            ctx.setLineDash([14, 10]);
+            ctx.lineDashOffset = -(Date.now() / 50) % 24;
+            ctx.strokeStyle = teamColor;
+            ctx.lineWidth = 5;
+            ctx.globalAlpha = 0.85;
+            ctx.shadowColor = teamColor;
+            ctx.shadowBlur = 25;
+            ctx.beginPath();
+            ctx.moveTo(x, y);
+            ctx.lineTo(lineEndX, lineEndY);
+            ctx.stroke();
+            ctx.restore();
+
+            // Параболическая дуга (симуляция полёта)
+            let sx = x;
+            let sy = y;
+            let svx = vx;
+            let svy = vy;
+
+            ctx.save();
+            ctx.setLineDash([10, 10]);
+            ctx.strokeStyle = teamColor;
+            ctx.lineWidth = 3;
+            ctx.globalAlpha = 0.45;
+            ctx.shadowColor = teamColor;
+            ctx.shadowBlur = 15;
+            ctx.beginPath();
+            ctx.moveTo(sx, sy);
+            for (let i = 0; i < 60; i++) {
+                sx += svx;
+                sy += svy;
+                svy += gravity;
+                ctx.lineTo(sx, sy);
+                if (sx < -50 || sx > width + 50 || sy > height + 50) break;
+            }
+            ctx.stroke();
+            ctx.restore();
+
+            // Наконечник стрелки
+            const headAngle = Math.atan2(lineEndY - y, lineEndX - x);
+            ctx.save();
+            ctx.translate(lineEndX, lineEndY);
+            ctx.rotate(headAngle);
+            ctx.fillStyle = teamColor;
+            ctx.shadowColor = teamColor;
+            ctx.shadowBlur = 30;
+            ctx.beginPath();
+            ctx.moveTo(0, 0);
+            ctx.lineTo(-22, -10);
+            ctx.lineTo(-22, 10);
+            ctx.closePath();
+            ctx.fill();
+            ctx.restore();
+
+            // Кружок с силой у наконечника
+            ctx.save();
+            ctx.fillStyle = 'rgba(0,0,0,0.7)';
+            ctx.strokeStyle = teamColor;
+            ctx.lineWidth = 2;
+            ctx.shadowColor = teamColor;
+            ctx.shadowBlur = 20;
+            ctx.beginPath();
+            ctx.arc(lineEndX, lineEndY, 28, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+
+            ctx.font = 'bold 18px Montserrat';
+            ctx.fillStyle = teamColor;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(Math.round(power) + '%', lineEndX, lineEndY);
+            ctx.restore();
+
+            // Угол дугой у игрока
+            ctx.save();
+            ctx.strokeStyle = teamColor;
+            ctx.lineWidth = 3;
+            ctx.globalAlpha = 0.7;
+            ctx.beginPath();
+            const baseAngle = aimer.team === 'red' ? 0 : Math.PI;
+            ctx.arc(x, y, 40, baseAngle, baseAngle - rad * direction, direction > 0);
+            ctx.stroke();
+
+            ctx.font = 'bold 14px Montserrat';
+            ctx.fillStyle = teamColor;
+            ctx.textAlign = 'center';
+            const angleLabelX = x + Math.cos(rad * 0.5) * 55 * direction;
+            const angleLabelY = y - Math.sin(rad * 0.5) * 55;
+            ctx.fillText(Math.round(angle) + '°', angleLabelX, angleLabelY);
+            ctx.restore();
+        }
+
+        // ============================================================
+        // ФОРМИРОВАНИЕ СНЕЖКОВ
         // ============================================================
         function drawFormingShots(now) {
             formingShots.forEach(fs => {
@@ -732,7 +854,6 @@
                 const bx = fs.x;
                 const by = fs.y + 20;
 
-                // Основной шар
                 ctx.save();
                 ctx.shadowColor = fs.isSuper ? '#fbbf24' : '#7fe3ff';
                 ctx.shadowBlur = (fs.isSuper ? 50 : 30) * progress;
@@ -747,7 +868,6 @@
                 ctx.fill();
                 ctx.restore();
 
-                // Частицы
                 const particleCount = Math.floor(progress * (fs.isSuper ? 12 : 8));
                 for (let i = 0; i < particleCount; i++) {
                     const angle = (now / 200 + i * Math.PI * 2 / particleCount) % (Math.PI * 2);
@@ -766,7 +886,6 @@
                     ctx.restore();
                 }
 
-                // Кольцо прогресса
                 ctx.save();
                 ctx.strokeStyle = fs.isSuper ? '#fbbf24' : teamColor;
                 ctx.lineWidth = 4;
@@ -781,7 +900,7 @@
         }
 
         // ============================================================
-        // ПРЕДПРОСМОТР ТРАЕКТОРИИ (пунктир при формировании)
+        // ПРЕДПРОСМОТР ТРАЕКТОРИИ (при формировании)
         // ============================================================
         function drawTrajectoryPreview(fs, now) {
             const elapsed = now - fs.startTime;
@@ -829,7 +948,6 @@
 
             ctx.clearRect(0, 0, width, height);
 
-            // Фон
             ctx.fillStyle = 'rgba(10, 37, 64, 0.2)';
             ctx.fillRect(0, 0, width, height);
             ctx.fillStyle = 'rgba(239, 68, 68, 0.05)';
@@ -837,7 +955,6 @@
             ctx.fillStyle = 'rgba(59, 130, 246, 0.05)';
             ctx.fillRect(width * 0.75, 0, width * 0.25, height);
 
-            // Сетка
             ctx.strokeStyle = 'rgba(127, 227, 255, 0.05)';
             ctx.lineWidth = 1;
             for (let x = 0; x < width; x += 50) {
@@ -852,11 +969,28 @@
             // Игроки
             players.forEach(p => p.draw(ctx, p.id === activeId));
 
-            // Формирование снежков
+            // LIVE-ПРИЦЕЛ (если играем и не формируется снежок)
+            if (currentAim && currentData?.status === 'playing' && currentData?.preloadDone && formingShots.length === 0) {
+                const aimer = players.get(currentAim.playerId);
+                if (aimer && aimer.alive) {
+                    // Интерполяция
+                    if (displayedAimAngle === null) {
+                        displayedAimAngle = currentAim.angle;
+                        displayedAimPower = currentAim.power;
+                    } else {
+                        displayedAimAngle += (currentAim.angle - displayedAimAngle) * 0.25;
+                        displayedAimPower += (currentAim.power - displayedAimPower) * 0.25;
+                    }
+                    drawLiveAim(aimer, displayedAimAngle, displayedAimPower);
+                }
+            } else if (!currentAim) {
+                displayedAimAngle = null;
+                displayedAimPower = null;
+            }
+
+            // Формирование
             if (formingShots.length > 0) {
-                // Сначала предпросмотр траекторий (под снежками)
                 formingShots.forEach(fs => drawTrajectoryPreview(fs, now));
-                // Потом сами снежки
                 drawFormingShots(now);
             }
 
@@ -953,7 +1087,7 @@
         }
 
         // ============================================================
-        // ПОПАДАНИЕ (с учётом damage)
+        // ПОПАДАНИЕ
         // ============================================================
         async function handleHit(ball, p) {
             const damage = ball.damage || 1;
@@ -1045,6 +1179,12 @@
             document.getElementById('qr-blue').innerHTML = qrBlue.createImgTag(4, 8);
         }
 
+        function resetQRs() {
+            hasGeneratedQR = false;
+            document.getElementById('qr-container').classList.add('hidden');
+            document.getElementById('tv-status').classList.add('hidden');
+        }
+
         // ============================================================
         // ПРЕЛОУДИНГ
         // ============================================================
@@ -1062,10 +1202,12 @@
             if (redPlayers.length === 1 && bluePlayers.length === 1) {
                 preloadTitle.innerText = `${redPlayers[0].name.toUpperCase()} VS ${bluePlayers[0].name.toUpperCase()}`;
             } else {
-                const modeStr = data.mode || 'VS';
                 const redCount = redPlayers.length;
                 const blueCount = bluePlayers.length;
-                preloadTitle.innerText = `${redCount} vs ${blueCount}`;
+                const isUnfair = redCount !== blueCount;
+                preloadTitle.innerText = isUnfair 
+                    ? `⚔️ ${redCount} vs ${blueCount}` 
+                    : `${redCount} vs ${blueCount}`;
             }
 
             preloadView.classList.add('active');
@@ -1148,7 +1290,28 @@
         });
 
         // ============================================================
-        // ВЫСТРЕЛ (МНОЖЕСТВЕННЫЙ)
+        // LIVE-ПРИЦЕЛ — СЛУШАТЕЛЬ
+        // ============================================================
+        onValue(ref(db, `games/${gameId}/aim`), (snap) => {
+            const aimData = snap.val();
+            
+            if (!aimData || Object.keys(aimData).length === 0) {
+                currentAim = null;
+                return;
+            }
+
+            // Берём первый (только один активный)
+            const [playerId, data] = Object.entries(aimData)[0];
+            
+            if (currentData?.activePlayerId === playerId && currentData?.status === 'playing' && currentData?.preloadDone) {
+                currentAim = { ...data, playerId };
+            } else {
+                currentAim = null;
+            }
+        });
+
+        // ============================================================
+        // ВЫСТРЕЛ
         // ============================================================
         onValue(ref(db, `games/${gameId}/last_shot`), (snap) => {
             const shot = snap.val();
@@ -1160,17 +1323,14 @@
             lastShotTime = shot.time;
             lastShotState = shot.state;
 
-            // Получаем массив выстрелов (обратная совместимость)
             let shotsArray = shot.shots;
             if (!shotsArray) {
-                // Старый формат: один выстрел
                 shotsArray = [{ angle: shot.angle, power: shot.power, damage: 1 }];
             }
 
             if (isNewShot) {
                 const shooter = players.get(shot.shooterId);
                 if (shooter && shooter.alive) {
-                    // Создаём снежки для формирования
                     formingShots = shotsArray.map(s => ({
                         shooterId: shot.shooterId,
                         x: shooter.x + (Math.random() - 0.5) * 30,
@@ -1183,14 +1343,17 @@
                         startTime: performance.now()
                     }));
 
-                    // Показываем название суперброска
+                    // Убираем live-прицел
+                    currentAim = null;
+                    displayedAimAngle = null;
+                    displayedAimPower = null;
+
                     if (shot.isSuper && shot.superType) {
                         showSuperTitle(shot.superType);
                     }
                 }
             }
 
-            // Переход к полёту
             if (shot.state === 'flying' && formingShots.length > 0) {
                 const shooter = players.get(shot.shooterId);
                 if (shooter) {
@@ -1204,7 +1367,6 @@
                         );
                         snowballs.push(ball);
                     });
-                    // Вспышка при запуске
                     if (shot.isSuper) {
                         formingShots.forEach(fs => {
                             spawnParticles(fs.x, fs.y + 20, '#fbbf24', 15);
@@ -1268,11 +1430,17 @@
             if (data.mode) {
                 document.getElementById('tv-mode').innerText = `РЕЖИМ: ${data.mode.toUpperCase()}`;
                 
-                // Нечестный режим?
+                // Нечестный?
                 if (typeof data.mode === 'string' && data.mode.includes('v')) {
                     const parts = data.mode.split('v');
                     const isUnfair = parseInt(parts[0]) !== parseInt(parts[1]);
                     document.getElementById('tv-unfair-badge').classList.toggle('hidden', !isUnfair);
+                }
+
+                // Смена режима → пересоздать QR
+                if (lastMode !== data.mode) {
+                    lastMode = data.mode;
+                    resetQRs();
                 }
             }
 
@@ -1362,11 +1530,13 @@
             formingShots = [];
             snowballs = [];
             turnTimerActive = false;
+            currentAim = null;
+            displayedAimAngle = null;
+            displayedAimPower = null;
 
             if (data.mode) {
                 generateQRs();
                 
-                // Парсим режим
                 let redMax = 1, blueMax = 1;
                 if (typeof data.mode === 'string' && data.mode.includes('v')) {
                     const parts = data.mode.split('v');
@@ -1400,7 +1570,6 @@
                     document.getElementById('tv-status').classList.remove('text-green-400');
                 }
 
-                // Отображение выбора первой команды (read-only)
                 if (data.firstTeam) {
                     document.getElementById('btn-red-start').classList.toggle('active', data.firstTeam === 'red');
                     document.getElementById('btn-blue-start').classList.toggle('active', data.firstTeam === 'blue');
@@ -1464,6 +1633,7 @@
 
             turnTimerActive = false;
             formingShots = [];
+            currentAim = null;
 
             const winView = document.getElementById('win-view');
             winView.classList.remove('hidden');
