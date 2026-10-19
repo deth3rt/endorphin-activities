@@ -45,7 +45,6 @@
     /* ============================================================
        АНИМАЦИИ
        ============================================================ */
-    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     @keyframes slideUp { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
     @keyframes pulseGlow {
       0%, 100% { box-shadow: 0 0 20px rgba(34, 211, 238, 0.3); }
@@ -74,9 +73,9 @@
       0%, 100% { transform: scale(1); }
       50% { transform: scale(1.08); }
     }
-    @keyframes timerDanger {
-      0%, 100% { color: #ef4444; text-shadow: 0 0 30px #ef4444; }
-      50% { color: #fff; text-shadow: 0 0 50px #ef4444; }
+    @keyframes superPulse {
+      0%, 100% { transform: scale(1); box-shadow: 0 0 20px #fbbf24; }
+      50% { transform: scale(1.05); box-shadow: 0 0 50px #fbbf24, 0 0 80px #f59e0b; }
     }
     .animate-shake { animation: shake 0.4s ease-in-out; }
 
@@ -155,254 +154,159 @@
     }
 
     /* ============================================================
-       ПРИЦЕЛ (ПОЛУСФЕРА)
+       ИНФО-ПАНЕЛЬ
        ============================================================ */
-    .aim-wrapper {
-      position: relative;
-      width: min(78vw, 300px);
-      height: min(78vw, 300px);
-      margin: 0 auto;
-    }
-
-    .aim-circle {
-      position: absolute;
-      inset: 0;
-      border-radius: 50%;
-      background: radial-gradient(circle at 50% 50%, rgba(34, 211, 238, 0.08) 0%, transparent 70%);
-      border: 2px solid rgba(127, 227, 255, 0.25);
-      box-shadow: inset 0 0 40px rgba(34, 211, 238, 0.08), 0 0 30px rgba(34, 211, 238, 0.15);
-      transition: box-shadow 0.3s, border-color 0.3s;
-    }
-
-    .aim-wrapper.my-turn .aim-circle {
-      animation: pulseGlow 1.5s ease-in-out infinite;
-      border-color: rgba(34, 211, 238, 0.8);
-    }
-
-    .aim-wrapper.disabled .aim-circle {
-      opacity: 0.4;
-      filter: grayscale(0.5);
-    }
-
-    /* Деления градусов */
-    .aim-ticks {
-      position: absolute;
-      inset: 8%;
-      border-radius: 50%;
-      pointer-events: none;
-    }
-
-    .aim-tick {
-      position: absolute;
+    .player-info {
+      position: fixed;
+      top: calc(var(--safe-top) + 12px);
       left: 50%;
-      top: 0;
-      width: 2px;
-      height: 8px;
-      background: rgba(127, 227, 255, 0.25);
-      transform-origin: 0 calc(min(78vw, 300px) * 0.42);
-      transform: translateX(-50%) rotate(var(--angle));
-    }
-
-    .aim-tick.major {
-      height: 14px;
-      background: rgba(127, 227, 255, 0.5);
-    }
-
-    .aim-tick-label {
-      position: absolute;
-      left: 50%;
-      top: 50%;
-      font-size: 9px;
-      font-weight: 900;
-      color: rgba(168, 230, 255, 0.45);
-      pointer-events: none;
-      letter-spacing: 0.05em;
-    }
-
-    /* Центр */
-    .aim-center {
-      position: absolute;
-      top: 50%; left: 50%;
-      width: 20px; height: 20px;
-      border-radius: 50%;
-      background: radial-gradient(circle at 35% 35%, #ffffff, #a8e6ff);
-      transform: translate(-50%, -50%);
-      box-shadow: 0 0 20px rgba(34, 211, 238, 0.9);
-      z-index: 4;
-      pointer-events: none;
-    }
-
-    /* Стрелка */
-    .aim-arrow {
-      position: absolute;
-      top: 50%; left: 50%;
-      width: 0; height: 0;
-      transform-origin: 0 0;
-      pointer-events: none;
-      z-index: 5;
-      transition: transform 0.05s linear;
-    }
-
-    .aim-arrow-shaft {
-      position: absolute;
-      top: -3px;
-      left: 0;
-      width: calc(min(78vw, 300px) * 0.42);
-      height: 6px;
-      background: linear-gradient(90deg, transparent 0%, var(--team-color) 30%, var(--team-color) 100%);
-      border-radius: 3px;
-      box-shadow: 0 0 15px var(--team-color), 0 0 30px var(--team-color);
-    }
-
-    .aim-arrow-head {
-      position: absolute;
-      top: -12px;
-      left: calc(min(78vw, 300px) * 0.42 - 4px);
-      width: 0; height: 0;
-      border-left: 18px solid var(--team-color);
-      border-top: 12px solid transparent;
-      border-bottom: 12px solid transparent;
-      filter: drop-shadow(0 0 10px var(--team-color));
-    }
-
-    .aim-arrow-shaft::after {
-      content: '';
-      position: absolute;
-      top: 50%; left: 30%;
-      width: 70%; height: 100%;
-      background: rgba(255, 255, 255, 0.4);
-      transform: translateY(-50%);
-      border-radius: 3px;
-      filter: blur(2px);
-    }
-
-    /* Зона касания */
-    .aim-touch-area {
-      position: absolute;
-      inset: 0;
-      border-radius: 50%;
-      touch-action: none;
-      cursor: crosshair;
-      z-index: 6;
-    }
-
-    /* Индикатор угла */
-    .angle-display {
-      position: absolute;
-      top: 50%; left: 50%;
-      transform: translate(-50%, -50%);
-      z-index: 7;
+      transform: translateX(-50%);
+      background: rgba(0,0,0,0.65);
+      padding: 8px 20px;
+      border-radius: 20px;
+      border: 1px solid rgba(127, 227, 255, 0.35);
       text-align: center;
-      pointer-events: none;
-      opacity: 0;
-      transition: opacity 0.2s;
+      z-index: 50;
+      backdrop-filter: blur(12px);
+      min-width: 150px;
+    }
+    .player-info .name {
+      font-size: 1rem;
+      font-weight: 900;
+      color: #fff;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 220px;
+    }
+    .player-info .lives {
+      font-size: 1.3rem;
+      margin-top: 2px;
+      letter-spacing: 3px;
     }
 
-    .aim-wrapper.my-turn .angle-display {
-      opacity: 1;
+    .game-screen-inner {
+      padding-top: calc(var(--safe-top) + 12px);
+      padding-bottom: calc(var(--safe-bottom) + 16px);
     }
 
-    .angle-value {
-      font-size: 2.4rem;
+    /* ============================================================
+       КНОПКИ УПРАВЛЕНИЯ (НОВЫЙ UI)
+       ============================================================ */
+    .control-panel {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      width: 100%;
+      padding: 0 12px;
+    }
+
+    .control-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      width: 100%;
+      max-width: 360px;
+    }
+
+    .control-btn {
+      flex: 1;
+      aspect-ratio: 1;
+      max-width: 90px;
+      border-radius: 20px;
+      background: rgba(10, 37, 64, 0.85);
+      border: 2px solid rgba(127, 227, 255, 0.35);
+      color: #fff;
+      font-size: 2.2rem;
+      font-weight: 900;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.12s;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+      cursor: pointer;
+      touch-action: manipulation;
+    }
+    .control-btn:active:not(:disabled) {
+      transform: scale(0.92);
+      background: rgba(34, 211, 238, 0.25);
+      border-color: var(--team-color);
+      box-shadow: 0 0 25px var(--team-color);
+    }
+    .control-btn:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+    }
+
+    .control-btn.up { color: #22d3ee; }
+    .control-btn.down { color: #22d3ee; }
+    .control-btn.left { color: #fbbf24; }
+    .control-btn.right { color: #fbbf24; }
+
+    /* Центральный дисплей */
+    .control-display {
+      flex: 1.2;
+      aspect-ratio: 1;
+      max-width: 110px;
+      border-radius: 24px;
+      background: radial-gradient(circle at 50% 30%, rgba(34, 211, 238, 0.15), rgba(10, 37, 64, 0.95));
+      border: 2px solid rgba(127, 227, 255, 0.4);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 4px;
+    }
+
+    .display-label {
+      font-size: 0.55rem;
+      font-weight: 900;
+      letter-spacing: 0.15em;
+      color: rgba(168, 230, 255, 0.6);
+      margin-bottom: 2px;
+    }
+
+    .display-value {
+      font-size: 2rem;
       font-weight: 900;
       color: var(--team-color);
-      text-shadow: 0 0 20px var(--team-color);
+      text-shadow: 0 0 15px var(--team-color);
       line-height: 1;
       font-variant-numeric: tabular-nums;
     }
 
-    .angle-unit {
+    .display-unit {
       font-size: 0.8rem;
+      color: rgba(168, 230, 255, 0.5);
       font-weight: 700;
-      color: rgba(168, 230, 255, 0.6);
-      letter-spacing: 0.2em;
     }
 
-    .aim-direction-label {
-      position: absolute;
-      bottom: -30px;
-      left: 50%;
-      transform: translateX(-50%);
-      font-size: 0.7rem;
-      font-weight: 900;
-      letter-spacing: 0.15em;
-      color: var(--team-color);
-      white-space: nowrap;
-      opacity: 0;
-      transition: opacity 0.2s;
-      text-shadow: 0 0 10px var(--team-color);
-    }
-
-    .aim-wrapper.my-turn .aim-direction-label {
-      opacity: 1;
-    }
-
-    /* ============================================================
-       МИНИ-КАРТА
-       ============================================================ */
-    .trajectory-map {
-      position: relative;
+    /* Индикатор мощности */
+    .power-bar {
       width: 100%;
-      max-width: 340px;
-      height: 70px;
-      margin: 0 auto;
-      background: rgba(0, 0, 0, 0.35);
-      border: 1px solid rgba(127, 227, 255, 0.15);
-      border-radius: 12px;
+      max-width: 360px;
+      height: 14px;
+      background: rgba(0,0,0,0.6);
+      border-radius: 7px;
       overflow: hidden;
-      margin-top: 8px;
+      border: 2px solid rgba(127, 227, 255, 0.2);
+      position: relative;
     }
-
-    .trajectory-map svg {
-      width: 100%;
+    .power-bar-fill {
       height: 100%;
-      display: block;
+      background: linear-gradient(90deg, #22c55e, #fbbf24, #ef4444);
+      transition: width 0.15s ease;
+      border-radius: 5px;
     }
 
-    .trajectory-map-label {
-      position: absolute;
-      top: 4px; left: 8px;
-      font-size: 8px;
-      font-weight: 900;
-      letter-spacing: 0.15em;
-      color: rgba(168, 230, 255, 0.4);
-      pointer-events: none;
-    }
-
-    /* ============================================================
-       ШКАЛА СИЛЫ
-       ============================================================ */
-    .power-track {
-      position: relative;
-      width: 100%;
-      height: 36px;
-      background: linear-gradient(90deg, #22c55e 0%, #fbbf24 50%, #ef4444 100%);
-      border-radius: 18px;
-      border: 3px solid rgba(255, 255, 255, 0.35);
-      box-shadow: inset 0 0 12px rgba(0,0,0,0.6), 0 0 20px rgba(34, 211, 238, 0.3);
-      overflow: hidden;
-    }
-    .power-thumb {
-      position: absolute;
-      top: 50%; left: 10%;
-      width: 48px; height: 48px;
-      background: radial-gradient(circle at 35% 35%, #ffffff, #e0f7ff 70%);
-      border-radius: 50%;
-      transform: translate(-50%, -50%);
-      box-shadow: 0 0 25px rgba(255,255,255,0.9), inset 0 0 10px rgba(0,0,0,0.2);
-      border: 2px solid #22d3ee;
-      transition: left 0.05s linear;
-      pointer-events: none;
-    }
-
-    /* ============================================================
-       КНОПКА БРОСОК
-       ============================================================ */
+    /* Кнопка БРОСОК */
     .shoot-btn {
-      width: min(52vw, 200px);
-      height: min(52vw, 200px);
+      width: min(52vw, 180px);
+      height: min(52vw, 180px);
       border-radius: 50%;
-      font-size: 1.6rem;
+      font-size: 1.5rem;
       font-weight: 900;
       text-transform: uppercase;
       letter-spacing: 2px;
@@ -411,7 +315,7 @@
       align-items: center;
       justify-content: center;
       background: radial-gradient(circle at 35% 35%, var(--team-color), rgba(0,0,0,0.6) 120%);
-      border: 8px solid rgba(255,255,255,0.2);
+      border: 6px solid rgba(255,255,255,0.2);
       color: #fff;
       box-shadow: 0 0 40px var(--team-color), inset 0 0 20px rgba(0,0,0,0.3);
       position: relative;
@@ -437,6 +341,109 @@
     }
 
     /* ============================================================
+       СУПЕРСПОСОБНОСТИ
+       ============================================================ */
+    .super-panel {
+      width: 100%;
+      max-width: 360px;
+      margin-top: 10px;
+    }
+
+    .super-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 12px;
+      background: rgba(251, 191, 36, 0.15);
+      border: 1px solid rgba(251, 191, 36, 0.4);
+      border-radius: 12px;
+      margin-bottom: 8px;
+    }
+
+    .super-title {
+      font-size: 0.7rem;
+      font-weight: 900;
+      letter-spacing: 0.15em;
+      color: #fbbf24;
+      text-shadow: 0 0 10px #fbbf24;
+    }
+
+    .super-hearts {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: rgba(251, 191, 36, 0.8);
+    }
+
+    .super-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+    }
+
+    .super-btn {
+      padding: 12px 8px;
+      border-radius: 14px;
+      background: rgba(10, 37, 64, 0.85);
+      border: 2px solid rgba(251, 191, 36, 0.4);
+      color: #fff;
+      font-weight: 900;
+      font-size: 0.75rem;
+      text-align: center;
+      transition: all 0.15s;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .super-btn .super-emoji {
+      font-size: 1.6rem;
+      display: block;
+      margin-bottom: 2px;
+    }
+
+    .super-btn .super-name {
+      font-size: 0.7rem;
+      letter-spacing: 0.08em;
+    }
+
+    .super-btn .super-cost {
+      font-size: 0.6rem;
+      color: rgba(251, 191, 36, 0.8);
+      margin-top: 2px;
+    }
+
+    .super-btn:active:not(:disabled) {
+      transform: scale(0.95);
+      background: rgba(251, 191, 36, 0.2);
+      border-color: #fbbf24;
+      box-shadow: 0 0 25px #fbbf24;
+    }
+
+    .super-btn:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+    }
+
+    .super-btn.can-use {
+      animation: superPulse 2s ease-in-out infinite;
+    }
+
+    /* Модалка суперброска */
+    .super-modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.9);
+      z-index: 150;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      padding: 20px;
+      backdrop-filter: blur(10px);
+    }
+    .super-modal.hidden { display: none; }
+
+    /* ============================================================
        ОВЕРЛЕИ
        ============================================================ */
     .overlay {
@@ -449,7 +456,6 @@
       flex-direction: column;
       backdrop-filter: blur(12px);
       -webkit-backdrop-filter: blur(12px);
-      transition: opacity 0.4s ease;
     }
     .overlay.hidden { display: none; }
 
@@ -495,7 +501,6 @@
       font-size: 1.1rem;
       color: rgba(168, 230, 255, 0.7);
       margin-top: 1rem;
-      animation: slideUp 0.6s 0.3s both;
     }
     .result-emoji {
       font-size: 5rem;
@@ -508,61 +513,9 @@
       position: fixed;
       top: 0;
       width: 10px; height: 10px;
-      z-index: 150;
+      z-index: 250;
       pointer-events: none;
       animation: confettiFall linear forwards;
-    }
-
-    /* ============================================================
-       ИНФО-ПАНЕЛЬ
-       ============================================================ */
-    .player-info {
-      position: fixed;
-      top: calc(var(--safe-top) + 12px);
-      left: 50%;
-      transform: translateX(-50%);
-      background: rgba(0,0,0,0.65);
-      padding: 10px 22px;
-      border-radius: 20px;
-      border: 1px solid rgba(127, 227, 255, 0.35);
-      text-align: center;
-      z-index: 50;
-      backdrop-filter: blur(12px);
-      min-width: 160px;
-    }
-    .player-info .name {
-      font-size: 1.1rem;
-      font-weight: 900;
-      color: #fff;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      max-width: 220px;
-    }
-    .player-info .lives {
-      font-size: 1.4rem;
-      margin-top: 4px;
-      letter-spacing: 4px;
-    }
-    .heart { display: inline-block; animation: floatHeart 2s ease-in-out infinite; }
-    .heart:nth-child(2) { animation-delay: 0.3s; }
-    .heart:nth-child(3) { animation-delay: 0.6s; }
-
-    .tv-timer {
-      position: fixed;
-      top: calc(var(--safe-top) + 12px);
-      right: 16px;
-      font-size: 3rem;
-      font-weight: 900;
-      color: #fff;
-      text-shadow: 0 0 30px rgba(34, 211, 238, 0.8);
-      z-index: 50;
-      font-variant-numeric: tabular-nums;
-    }
-
-    .game-screen-inner {
-      padding-top: calc(var(--safe-top) + 12px);
-      padding-bottom: calc(var(--safe-bottom) + 16px);
     }
 
     /* ============================================================
@@ -586,9 +539,10 @@
        КОМПАКТНЫЙ ЛЭЙАУТ
        ============================================================ */
     @media (max-height: 720px) {
-      .aim-wrapper { width: min(70vw, 240px); height: min(70vw, 240px); }
-      .trajectory-map { height: 50px; }
-      .shoot-btn { width: min(44vw, 150px); height: min(44vw, 150px); font-size: 1.1rem; }
+      .shoot-btn { width: min(42vw, 140px); height: min(42vw, 140px); font-size: 1.2rem; }
+      .control-btn { font-size: 1.8rem; }
+      .display-value { font-size: 1.6rem; }
+      .game-screen-inner { padding-top: calc(var(--safe-top) + 8px); }
     }
   </style>
 </head>
@@ -650,47 +604,70 @@
       <div class="lives" id="info-lives">❤️❤️❤️</div>
     </div>
 
-    <div id="game-team-badge" class="mb-3 px-5 py-2 rounded-full font-black text-xs tracking-widest"></div>
+    <div id="game-team-badge" class="mb-2 px-5 py-1.5 rounded-full font-black text-xs tracking-widest"></div>
 
-    <!-- Прицел -->
-    <div class="text-center mb-4 w-full">
-      <p class="text-cyan-300/70 mb-2 font-bold tracking-[0.25em] text-xs">ПРИЦЕЛ</p>
-      
-      <div class="aim-wrapper" id="aim-wrapper">
-        <div class="aim-circle"></div>
-        <div class="aim-ticks" id="aim-ticks"></div>
-        <div class="aim-center"></div>
-        <div class="aim-arrow" id="aim-arrow">
-          <div class="aim-arrow-shaft"></div>
-          <div class="aim-arrow-head"></div>
+    <!-- ========================================================
+         ПАНЕЛЬ УПРАВЛЕНИЯ
+         ======================================================== -->
+    <div class="control-panel flex-1 justify-center">
+
+      <!-- УГОЛ: верхний ряд -->
+      <div class="control-row">
+        <button class="control-btn up" id="angle-up" disabled>▲</button>
+      </div>
+
+      <!-- ЦЕНТР: дисплей + боковые кнопки -->
+      <div class="control-row">
+        <button class="control-btn left" id="power-down" disabled>◀</button>
+        
+        <div class="control-display">
+          <div class="display-label">УГОЛ</div>
+          <div class="display-value" id="angle-display">45°</div>
+          <div class="display-unit" id="angle-hint">ВПЕРЁД</div>
         </div>
-        <div class="angle-display">
-          <div class="angle-value" id="angle-value">45°</div>
-          <div class="angle-unit" id="angle-unit">ВПЕРЁД</div>
+
+        <button class="control-btn right" id="power-up" disabled>▶</button>
+      </div>
+
+      <!-- УГОЛ: нижний ряд -->
+      <div class="control-row">
+        <button class="control-btn down" id="angle-down" disabled>▼</button>
+      </div>
+
+      <!-- Мощность: бар -->
+      <div class="w-full flex flex-col items-center gap-1 mt-2">
+        <div class="flex justify-between text-xs font-bold text-white/60 w-full max-w-[360px] px-1">
+          <span>МОЩНОСТЬ</span>
+          <span id="power-value" class="text-white">10%</span>
         </div>
-        <div class="aim-direction-label" id="aim-direction-label">Тяни вправо</div>
-        <div class="aim-touch-area" id="aim-touch-area"></div>
+        <div class="power-bar">
+          <div class="power-bar-fill" id="power-bar-fill" style="width: 10%"></div>
+        </div>
       </div>
-    </div>
 
-    <!-- Мини-карта -->
-    <div class="trajectory-map" id="trajectory-map">
-      <div class="trajectory-map-label">ТРАЕКТОРИИ</div>
-      <svg id="trajectory-svg" viewBox="0 0 340 70" preserveAspectRatio="none"></svg>
-    </div>
-
-    <!-- Сила -->
-    <div class="w-[85%] max-w-sm mt-3 mb-4 glass-panel p-4 rounded-2xl">
-      <div class="flex justify-between text-xs font-bold text-white/60 mb-2">
-        <span>СИЛА БРОСКА</span>
-        <span id="power-display" class="text-white text-lg">10%</span>
+      <!-- Суперспособности -->
+      <div class="super-panel hidden" id="super-panel">
+        <div class="super-header">
+          <div class="super-title">⚡ СУПЕРСПОСОБНОСТИ</div>
+          <div class="super-hearts" id="super-hearts-info">-1❤️ за приём</div>
+        </div>
+        <div class="super-grid" id="super-grid"></div>
       </div>
-      <div class="power-track" id="power-track">
-        <div class="power-thumb" id="power-thumb"></div>
-      </div>
-    </div>
 
-    <button id="shoot-btn" class="shoot-btn" disabled>БРОСОК</button>
+      <!-- Кнопка БРОСОК -->
+      <button id="shoot-btn" class="shoot-btn mt-3" disabled>БРОСОК</button>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       МОДАЛКА ВЫБОРА СУПЕРБРОСКА
+       ============================================================ -->
+  <div id="super-modal" class="super-modal hidden">
+    <div class="glass-panel p-6 rounded-3xl w-full max-w-sm">
+      <h2 class="text-xl font-black text-center mb-4 text-yellow-400 tracking-widest">ВЫБЕРИ СУПЕРБРОСОК</h2>
+      <div id="super-modal-list" class="space-y-3"></div>
+      <button id="super-cancel" class="w-full mt-4 py-3 rounded-xl bg-white/10 border border-white/20 font-bold text-white">ОТМЕНА</button>
+    </div>
   </div>
 
   <!-- ============================================================
@@ -754,34 +731,73 @@
     localStorage.setItem(storageKey, playerId);
 
     const playerRef = ref(db, `games/battle_1/players/${team}/${playerId}`);
-    const aimRef = ref(db, `games/battle_1/aim/${playerId}`);
 
     // ============================================================
     // КОНСТАНТЫ
     // ============================================================
-    const TURN_TIME = 10;           // секунд на ход
-    const FORM_TIME = 1500;         // мс на формирование снежка (визуально на TV)
+    const TURN_TIME = 10;
+    const FORM_TIME = 1500;
+    const ANGLE_STEP = 5;
+    const POWER_STEP = 10;
+
+    // ============================================================
+    // СУПЕРСПОСОБНОСТИ
+    // ============================================================
+    const SUPERS = {
+      fan: {
+        id: 'fan',
+        emoji: '🌪',
+        name: 'ВЕЕР',
+        desc: '6 снежков ±30°',
+        cost: 1,
+        count: 6
+      },
+      shotgun: {
+        id: 'shotgun',
+        emoji: '💥',
+        name: 'ДРОБОВИК',
+        desc: '8 снежков ±10°',
+        cost: 1,
+        count: 8
+      },
+      chaos: {
+        id: 'chaos',
+        emoji: '🎲',
+        name: 'ХАОС',
+        desc: '6 снежков рандом',
+        cost: 1,
+        count: 6
+      },
+      nuke: {
+        id: 'nuke',
+        emoji: '☄️',
+        name: 'ЯДЕРКА',
+        desc: '1 снежок, 3❤️ урона',
+        cost: 2,
+        count: 1
+      }
+    };
 
     // ============================================================
     // СОСТОЯНИЕ
     // ============================================================
     let isMyTurn = false;
     let currentAngle = 45;
-    let currentPower = 10;
-    let powerDirection = 1;
-    let powerInterval = null;
+    let currentPower = 30;
     let isShooting = false;
     let hasJoined = false;
     let gameStatus = 'lobby';
     let lastPreloadValue = null;
+    let myLives = 3;
+    let isUnfairMode = false;
+    let myTeamMax = 1;
+    let enemyTeamMax = 1;
+    let isSmallerTeam = false;
+    let superModalOpen = false;
 
     // Таймер хода
     let turnTimerInterval = null;
-    let turnTimeLeft = TURN_TIME;
     let turnDeadline = 0;
-
-    // История траекторий
-    let trajectoryHistory = [];
 
     // ============================================================
     // УТИЛИТЫ
@@ -791,46 +807,38 @@
     };
     const showOverlay = (id) => document.getElementById(id).classList.remove('hidden');
     const hideOverlay = (id) => document.getElementById(id).classList.add('hidden');
+    const clamp = (v, min, max) => Math.max(min, Math.min(max, v));
 
     // ============================================================
-    // ДЕЛЕНИЯ
+    // ГЕНЕРАЦИЯ КООРДИНАТ (идеальная расстановка)
     // ============================================================
-    (function initTicks() {
-      const ticksContainer = document.getElementById('aim-ticks');
-      const size = Math.min(window.innerWidth * 0.78, 300);
-      const radius = size * 0.42;
+    async function ensureMyPosition() {
+      const snap = await get(playerRef);
+      const me = snap.val();
       
-      for (let deg = 0; deg <= 180; deg += 15) {
-        const isMajor = deg % 45 === 0;
-        
-        let screenAngle;
-        if (isRed) {
-          screenAngle = deg;
-        } else {
-          screenAngle = 180 - deg;
-        }
-        
-        const rotate = 90 - screenAngle;
-        
-        const tick = document.createElement('div');
-        tick.className = 'aim-tick' + (isMajor ? ' major' : '');
-        tick.style.setProperty('--angle', `${rotate}deg`);
-        ticksContainer.appendChild(tick);
-        
-        if (isMajor) {
-          const label = document.createElement('div');
-          label.className = 'aim-tick-label';
-          label.innerText = deg + '°';
-          
-          const rad = (screenAngle - 90) * Math.PI / 180;
-          const lx = Math.cos(rad) * (radius + 16);
-          const ly = Math.sin(rad) * (radius + 16);
-          label.style.transform = `translate(calc(-50% + ${lx}px), calc(-50% + ${ly}px))`;
-          
-          ticksContainer.appendChild(label);
-        }
-      }
-    })();
+      if (!me) return;
+      
+      // Уже есть координаты — не трогаем
+      if (me.posX !== undefined && me.posY !== undefined) return;
+
+      // Генерируем с учётом других игроков команды
+      const teamSnap = await get(ref(db, `games/battle_1/players/${team}`));
+      const teamPlayers = teamSnap.val() || {};
+      
+      const usedY = [];
+      Object.values(teamPlayers).forEach(p => {
+        if (p.posY !== undefined && p.id !== playerId) usedY.push(p.posY);
+      });
+
+      let posX, posY, attempts = 0;
+      do {
+        posX = isRed ? (5 + Math.random() * 15) : (80 + Math.random() * 15);
+        posY = 20 + Math.random() * 60;
+        attempts++;
+      } while (usedY.some(y => Math.abs(y - posY) < 10) && attempts < 50);
+
+      await update(playerRef, { posX, posY });
+    }
 
     // ============================================================
     // ВХОД
@@ -857,8 +865,10 @@
         });
       }
 
+      // ГАРАНТИРОВАННАЯ РАССТАНОВКА
+      await ensureMyPosition();
+
       onDisconnect(playerRef).remove();
-      onDisconnect(aimRef).remove();
 
       hasJoined = true;
       vibrate(50);
@@ -869,8 +879,8 @@
       document.getElementById('info-name').innerText = name;
 
       updateTeamBadges();
-      startPowerAnimation();
-      updateAimVisual(currentAngle);
+      updateAngleDisplay();
+      updatePowerDisplay();
     }
 
     document.getElementById('join-btn').onclick = joinGame;
@@ -887,44 +897,121 @@
       joinBadge.innerText = label;
 
       const gameBadge = document.getElementById('game-team-badge');
-      gameBadge.className = `mb-3 px-5 py-2 rounded-full font-black text-xs tracking-widest border-2 ${color}`;
+      gameBadge.className = `mb-2 px-5 py-1.5 rounded-full font-black text-xs tracking-widest border-2 ${color}`;
       gameBadge.innerText = label;
     }
     updateTeamBadges();
 
     // ============================================================
-    // СИЛА
+    // УПРАВЛЕНИЕ: УГОЛ
     // ============================================================
-    function startPowerAnimation() {
-      if (powerInterval) clearInterval(powerInterval);
-      powerInterval = setInterval(() => {
-        if (!isMyTurn || isShooting || gameStatus !== 'playing') return;
-
-        currentPower += powerDirection * 2;
-        if (currentPower >= 100) { currentPower = 100; powerDirection = -1; }
-        if (currentPower <= 10) { currentPower = 10; powerDirection = 1; }
-
-        updatePowerUI();
-      }, 30);
-    }
-
-    function updatePowerUI() {
-      const thumb = document.getElementById('power-thumb');
-      const display = document.getElementById('power-display');
-      thumb.style.left = currentPower + '%';
-      display.innerText = currentPower + '%';
+    function angleUp() {
+      if (!isMyTurn || isShooting) return;
+      // Для красных: увеличение угла = вверх (к 180 → вверх-влево, но мы вправо смотрим)
+      // Реально: 0 = горизонтально вправо, 180 = горизонтально влево, 90 = вверх
+      // Кнопка ВВЕРХ должна увеличивать угол (к 90 = вверх)
+      // Но если > 90, то уже вниз-влево. Ограничим 0-90 для красных?
+      // Нет, оставим 0-180: 0 = вправо, 90 = вверх, 180 = влево
+      // ВВЕРХ: к 90. Если < 90 → +step, если > 90 → -step (возврат к 90)
+      // Проще: ВВЕРХ = +step, если <= 90, иначе -step (но это странно)
+      // 
+      // Альтернатива: ВВЕРХ = увеличить "высоту" = приблизить к 90
+      // ВНИЗ = отдалить от 90
       
-      if (currentPower > 80) display.style.color = '#ef4444';
-      else if (currentPower > 50) display.style.color = '#fbbf24';
-      else display.style.color = '#22c55e';
+      if (currentAngle < 90) {
+        currentAngle = Math.min(180, currentAngle + ANGLE_STEP);
+      } else {
+        currentAngle = Math.max(0, currentAngle - ANGLE_STEP);
+      }
+      currentAngle = clamp(currentAngle, 0, 180);
+      updateAngleDisplay();
+      vibrate(10);
+    }
+
+    function angleDown() {
+      if (!isMyTurn || isShooting) return;
+      // ВНИЗ = уменьшить угол (если < 90) или увеличить (если > 90)
+      if (currentAngle < 90) {
+        currentAngle = Math.max(0, currentAngle - ANGLE_STEP);
+      } else {
+        currentAngle = Math.min(180, currentAngle + ANGLE_STEP);
+      }
+      currentAngle = clamp(currentAngle, 0, 180);
+      updateAngleDisplay();
+      vibrate(10);
+    }
+
+    // Альтернативная логика: ВВЕРХ/ВНИЗ = просто +/-, 0 = вправо, 180 = влево
+    // Но это сбивает. Давайте попробуем так:
+    // ВВЕРХ = +step (0→180, вправо→влево через верх)
+    // ВНИЗ = -step
+    // И для синих: ВВЕРХ = -step (360→180, влево→вправо через верх)
+    // 
+    // Хм, но тогда "вверх" в смысле "поднять" работает только на 0-90.
+    // 
+    // Лучше: кнопки ▲▼ меняют угол от 0 до 180 (для красных) — это градусы наклона.
+    // 0° = прямо, 90° = вверх, 180° = назад-вверх? Нет, 180 = влево.
+    // 
+    // Оставим линейно: ▲ = +5°, ▼ = -5°. Игрок сам поймёт.
+
+    // Переопределим проще — линейно
+    function angleUpLinear() {
+      if (!isMyTurn || isShooting) return;
+      currentAngle = clamp(currentAngle + ANGLE_STEP, 0, 180);
+      updateAngleDisplay();
+      vibrate(10);
+    }
+
+    function angleDownLinear() {
+      if (!isMyTurn || isShooting) return;
+      currentAngle = clamp(currentAngle - ANGLE_STEP, 0, 180);
+      updateAngleDisplay();
+      vibrate(10);
     }
 
     // ============================================================
-    // ТАЙМЕР ХОДА (10 сек)
+    // УПРАВЛЕНИЕ: МОЩНОСТЬ
+    // ============================================================
+    function powerUp() {
+      if (!isMyTurn || isShooting) return;
+      currentPower = clamp(currentPower + POWER_STEP, 10, 100);
+      updatePowerDisplay();
+      vibrate(10);
+    }
+
+    function powerDown() {
+      if (!isMyTurn || isShooting) return;
+      currentPower = clamp(currentPower - POWER_STEP, 10, 100);
+      updatePowerDisplay();
+      vibrate(10);
+    }
+
+    // ============================================================
+    // ОТОБРАЖЕНИЕ
+    // ============================================================
+    function updateAngleDisplay() {
+      document.getElementById('angle-display').innerText = Math.round(currentAngle) + '°';
+      
+      let hint;
+      if (currentAngle < 22) hint = 'ПРЯМО';
+      else if (currentAngle < 67) hint = 'ВВЕРХ';
+      else if (currentAngle < 112) hint = 'ВЫСОКО';
+      else if (currentAngle < 157) hint = 'ВНИЗ';
+      else hint = 'НАЗАД';
+      
+      document.getElementById('angle-hint').innerText = hint;
+    }
+
+    function updatePowerDisplay() {
+      document.getElementById('power-value').innerText = currentPower + '%';
+      document.getElementById('power-bar-fill').style.width = currentPower + '%';
+    }
+
+    // ============================================================
+    // ТАЙМЕР ХОДА
     // ============================================================
     function startTurnTimer() {
       stopTurnTimer();
-      turnTimeLeft = TURN_TIME;
       turnDeadline = Date.now() + TURN_TIME * 1000;
       
       const timerEl = document.getElementById('turn-timer');
@@ -934,7 +1021,7 @@
       
       timerEl.classList.add('active');
       
-      const CIRCUMFERENCE = 2 * Math.PI * 30; // r=30
+      const CIRCUMFERENCE = 2 * Math.PI * 30;
       progressEl.style.strokeDasharray = CIRCUMFERENCE;
       progressEl.style.strokeDashoffset = 0;
       
@@ -951,9 +1038,9 @@
           valueEl.innerText = sec;
           lastSec = sec;
           
-          if (sec <= 3) {
+          if (sec <= 3 && sec > 0) {
             ringEl.classList.add('danger');
-            if (sec > 0 && sec <= 3) vibrate(30);
+            vibrate(30);
           } else {
             ringEl.classList.remove('danger');
           }
@@ -962,7 +1049,6 @@
         if (remaining <= 0) {
           stopTurnTimer();
           if (isMyTurn && !isShooting) {
-            // АВТО-БРОСОК
             autoShoot();
           }
         }
@@ -979,14 +1065,12 @@
     }
 
     // ============================================================
-    // АВТО-БРОСОК (по истечении 10 сек)
+    // АВТО-БРОСОК
     // ============================================================
     async function autoShoot() {
       if (!isMyTurn || isShooting) return;
-      
       vibrate([100, 50, 100]);
       
-      // Показываем уведомление
       const notif = document.createElement('div');
       notif.className = 'fixed top-1/3 left-1/2 -translate-x-1/2 bg-red-500/90 text-white px-6 py-3 rounded-xl font-black text-lg z-[150] animate-shake';
       notif.innerText = '⏰ ВРЕМЯ ВЫШЛО!';
@@ -997,217 +1081,111 @@
     }
 
     // ============================================================
-    // ПРИЦЕЛ — КОНВЕРТАЦИЯ УГЛОВ
+    // СУПЕРСПОСОБНОСТИ
     // ============================================================
-    const aimWrapper = document.getElementById('aim-wrapper');
-    const aimArrow = document.getElementById('aim-arrow');
-    const aimTouchArea = document.getElementById('aim-touch-area');
-    const angleValue = document.getElementById('angle-value');
-    const angleUnit = document.getElementById('angle-unit');
-    const aimDirectionLabel = document.getElementById('aim-direction-label');
-
-    function fireAngleToScreenAngle(fireAngle) {
-      if (isRed) {
-        return -fireAngle;
-      } else {
-        return -(180 - fireAngle);
+    function updateSuperPanel() {
+      const panel = document.getElementById('super-panel');
+      
+      if (!isUnfairMode || !isSmallerTeam) {
+        panel.classList.add('hidden');
+        return;
       }
-    }
-
-    function screenAngleToFireAngle(screenAngle) {
-      let deg = screenAngle;
       
-      if (isRed) {
-        if (deg < 0) deg = -deg;
-        return Math.max(0, Math.min(180, deg));
-      } else {
-        let a = deg < 0 ? deg + 360 : deg;
-        if (a >= 180 && a <= 360) {
-          return Math.max(0, Math.min(180, 270 - a + 180));
-        } else {
-          return Math.max(0, Math.min(180, 180 - a));
-        }
-      }
-    }
-
-    function updateAimVisual(fireAngle) {
-      const screenAngle = fireAngleToScreenAngle(fireAngle);
+      panel.classList.remove('hidden');
+      document.getElementById('super-hearts-info').innerText = `У тебя ${myLives}❤️`;
       
-      aimArrow.style.transform = `rotate(${screenAngle}deg)`;
-      angleValue.innerText = Math.round(fireAngle) + '°';
+      const grid = document.getElementById('super-grid');
+      grid.innerHTML = '';
       
-      let label;
-      if (fireAngle < 22) label = isRed ? '→ ПРЯМО' : '← ПРЯМО';
-      else if (fireAngle < 67) label = isRed ? '↗ ВВЕРХ' : '↖ ВВЕРХ';
-      else if (fireAngle < 112) label = '↑ ВЫСОКО';
-      else if (fireAngle < 157) label = isRed ? '↘ ВНИЗ' : '↙ ВНИЗ';
-      else label = isRed ? '→ НАЗАД' : '← НАЗАД';
-      
-      angleUnit.innerText = label;
-      
-      aimDirectionLabel.innerText = isRed 
-        ? 'Тяни вправо → вперёд' 
-        : 'Тяни влево → вперёд';
-      
-      // Отправляем прицел в Firebase (для TV)
-      syncAimToFirebase();
-    }
-
-    // ============================================================
-    // СИНХРОНИЗАЦИЯ ПРИЦЕЛА НА TV
-    // ============================================================
-    let aimSyncTimeout = null;
-    let lastSyncedAim = null;
-
-    function syncAimToFirebase() {
-      if (!isMyTurn) return;
-      
-      // Throttle: не чаще 10 раз/сек
-      if (aimSyncTimeout) return;
-      
-      aimSyncTimeout = setTimeout(() => {
-        aimSyncTimeout = null;
+      Object.values(SUPERS).forEach(superItem => {
+        const canUse = myLives > superItem.cost && isMyTurn && !isShooting;
         
-        const aimData = {
+        const btn = document.createElement('button');
+        btn.className = 'super-btn' + (canUse ? ' can-use' : '');
+        btn.disabled = !canUse;
+        btn.innerHTML = `
+          <span class="super-emoji">${superItem.emoji}</span>
+          <span class="super-name">${superItem.name}</span>
+          <span class="super-cost">-${superItem.cost}❤️</span>
+        `;
+        btn.onclick = () => openSuperModal(superItem);
+        grid.appendChild(btn);
+      });
+    }
+
+    function openSuperModal(superItem) {
+      if (!isMyTurn || isShooting) return;
+      if (myLives <= superItem.cost) return;
+      
+      superModalOpen = true;
+      document.getElementById('super-modal').classList.remove('hidden');
+      
+      const list = document.getElementById('super-modal-list');
+      list.innerHTML = `
+        <div class="text-center mb-4">
+          <div class="text-6xl mb-2">${superItem.emoji}</div>
+          <div class="text-2xl font-black text-yellow-400">${superItem.name}</div>
+          <div class="text-sm text-gray-300 mt-1">${superItem.desc}</div>
+          <div class="text-yellow-400 font-bold mt-2">Стоимость: ${superItem.cost} ❤️</div>
+        </div>
+        <button id="super-confirm" class="w-full py-4 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-xl font-black text-lg text-black">
+          ПРИМЕНИТЬ
+        </button>
+      `;
+      
+      document.getElementById('super-confirm').onclick = () => {
+        closeSuperModal();
+        executeSuperShot(superItem);
+      };
+    }
+
+    function closeSuperModal() {
+      superModalOpen = false;
+      document.getElementById('super-modal').classList.add('hidden');
+    }
+
+    document.getElementById('super-cancel').onclick = closeSuperModal;
+
+    // ============================================================
+    // ГЕНЕРАЦИЯ СУПЕРБРОСКА
+    // ============================================================
+    function generateSuperShots(superItem) {
+      const shots = [];
+      
+      if (superItem.id === 'fan') {
+        for (let i = 0; i < superItem.count; i++) {
+          shots.push({
+            angle: clamp(currentAngle + (Math.random() - 0.5) * 60, 0, 180),
+            power: clamp(currentPower + (Math.random() - 0.5) * 40, 20, 100)
+          });
+        }
+      } else if (superItem.id === 'shotgun') {
+        for (let i = 0; i < superItem.count; i++) {
+          shots.push({
+            angle: clamp(currentAngle + (Math.random() - 0.5) * 20, 0, 180),
+            power: clamp(currentPower + (Math.random() - 0.5) * 10, 20, 100)
+          });
+        }
+      } else if (superItem.id === 'chaos') {
+        const same = Math.random() < 0.1;
+        const sameAngle = Math.random() * 180;
+        const samePower = 20 + Math.random() * 80;
+        
+        for (let i = 0; i < superItem.count; i++) {
+          shots.push({
+            angle: same ? sameAngle : Math.random() * 180,
+            power: same ? samePower : 20 + Math.random() * 80
+          });
+        }
+      } else if (superItem.id === 'nuke') {
+        shots.push({
           angle: currentAngle,
           power: currentPower,
-          team,
-          name: document.getElementById('info-name').innerText || 'Игрок',
-          time: Date.now()
-        };
-        
-        // Не шлём, если не изменилось
-        if (lastSyncedAim && 
-            Math.abs(lastSyncedAim.angle - aimData.angle) < 1 && 
-            Math.abs(lastSyncedAim.power - aimData.power) < 2) {
-          return;
-        }
-        lastSyncedAim = aimData;
-        
-        update(aimRef, aimData).catch(() => {});
-      }, 80);
-    }
-
-    // ============================================================
-    // ПРИЦЕЛ — ПЕРЕТАСКИВАНИЕ
-    // ============================================================
-    let isDragging = false;
-
-    function handleAimMove(e) {
-      if (!isMyTurn || isShooting || !isDragging || gameStatus !== 'playing') return;
-      if (e.touches) e.preventDefault();
-
-      const rect = aimWrapper.getBoundingClientRect();
-      const clientX = e.clientX ?? e.touches[0].clientX;
-      const clientY = e.clientY ?? e.touches[0].clientY;
-
-      const centerX = rect.left + rect.width / 2;
-      const centerY = rect.top + rect.height / 2;
-
-      const dx = clientX - centerX;
-      const dy = clientY - centerY;
-
-      const screenAngle = Math.atan2(dy, dx) * 180 / Math.PI;
-      const fireAngle = screenAngleToFireAngle(screenAngle);
-      currentAngle = fireAngle;
-      
-      updateAimVisual(currentAngle);
-    }
-
-    aimTouchArea.addEventListener('mousedown', (e) => { isDragging = true; handleAimMove(e); });
-    aimTouchArea.addEventListener('mousemove', handleAimMove);
-    aimTouchArea.addEventListener('mouseup', () => { isDragging = false; });
-    aimTouchArea.addEventListener('mouseleave', () => { isDragging = false; });
-    aimTouchArea.addEventListener('touchstart', (e) => { isDragging = true; handleAimMove(e); }, { passive: false });
-    aimTouchArea.addEventListener('touchmove', handleAimMove, { passive: false });
-    aimTouchArea.addEventListener('touchend', () => { isDragging = false; });
-
-    // ============================================================
-    // МИНИ-КАРТА
-    // ============================================================
-    const trajectorySvg = document.getElementById('trajectory-svg');
-    const MAP_W = 340;
-    const MAP_H = 70;
-    const START_X = isRed ? 20 : MAP_W - 20;
-    const START_Y = MAP_H - 10;
-
-    function simulateTrajectory(power, angle) {
-      const points = [];
-      const direction = isRed ? 1 : -1;
-      const rad = angle * Math.PI / 180;
-      const speed = power * 0.4;
-      
-      let vx = Math.cos(rad) * speed * direction;
-      let vy = -Math.sin(rad) * speed;
-      const gravity = 0.3;
-      
-      let x = START_X;
-      let y = START_Y;
-      const scale = 0.4;
-      
-      points.push({ x, y });
-      
-      for (let i = 0; i < 60; i++) {
-        x += vx * scale * 0.15;
-        y += vy * scale * 0.15;
-        vy += gravity * 0.15;
-        
-        points.push({ x, y });
-        
-        if (y > MAP_H || x < 0 || x > MAP_W) break;
+          damage: 3
+        });
       }
       
-      return points;
-    }
-
-    function addTrajectoryToMap(power, angle) {
-      const points = simulateTrajectory(power, angle);
-      const id = 'traj_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5);
-      const color = isRed ? '#ef4444' : '#3b82f6';
-      
-      const pathData = points.map((p, i) => 
-        (i === 0 ? 'M' : 'L') + p.x.toFixed(1) + ' ' + p.y.toFixed(1)
-      ).join(' ');
-      
-      const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-      path.setAttribute('d', pathData);
-      path.setAttribute('fill', 'none');
-      path.setAttribute('stroke', color);
-      path.setAttribute('stroke-width', '2');
-      path.setAttribute('stroke-linecap', 'round');
-      path.setAttribute('opacity', '0.85');
-      
-      const startDot = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-      startDot.setAttribute('cx', START_X);
-      startDot.setAttribute('cy', START_Y);
-      startDot.setAttribute('r', '3');
-      startDot.setAttribute('fill', color);
-      
-      trajectorySvg.appendChild(path);
-      trajectorySvg.appendChild(startDot);
-      
-      trajectoryHistory.push({ path, startDot });
-      
-      const length = path.getTotalLength();
-      path.style.strokeDasharray = length;
-      path.style.strokeDashoffset = length;
-      path.style.transition = 'stroke-dashoffset 0.6s ease-out';
-      requestAnimationFrame(() => {
-        path.style.strokeDashoffset = '0';
-      });
-      
-      while (trajectoryHistory.length > 5) {
-        const old = trajectoryHistory.shift();
-        old.path.remove();
-        old.startDot.remove();
-      }
-      
-      trajectoryHistory.forEach((t, idx) => {
-        const age = trajectoryHistory.length - idx;
-        t.path.setAttribute('opacity', String(0.2 + age * 0.1));
-      });
-      
-      vibrate(20);
+      return shots;
     }
 
     // ============================================================
@@ -1215,7 +1193,26 @@
     // ============================================================
     async function executeShot() {
       if (isShooting) return;
+      await doShot([{ angle: currentAngle, power: currentPower }], false, null);
+    }
+
+    async function executeSuperShot(superItem) {
+      if (isShooting) return;
+      if (myLives <= superItem.cost) return;
       
+      const shots = generateSuperShots(superItem);
+      
+      vibrate([60, 30, 60, 30, 100]);
+      
+      // Списываем жизни
+      const newLives = Math.max(1, myLives - superItem.cost);
+      await update(playerRef, { lives: newLives });
+      myLives = newLives;
+      
+      await doShot(shots, true, superItem.id);
+    }
+
+    async function doShot(shots, isSuper, superType) {
       isShooting = true;
       stopTurnTimer();
       vibrate([30, 30, 60]);
@@ -1223,25 +1220,26 @@
       const btn = document.getElementById('shoot-btn');
       btn.disabled = true;
 
+      const now = Date.now();
       const shotData = {
         team,
         shooterId: playerId,
-        power: currentPower,
-        angle: currentAngle,
-        time: Date.now(),
-        state: 'forming',        // ← фаза формирования
-        formTime: Date.now()
+        shots: shots.map(s => ({
+          angle: s.angle,
+          power: s.power,
+          damage: s.damage || 1
+        })),
+        time: now,
+        state: 'forming',
+        formTime: now,
+        isSuper: isSuper || false,
+        superType: superType || null
       };
-
-      addTrajectoryToMap(currentPower, currentAngle);
-
-      // Убираем прицел с TV
-      remove(aimRef).catch(() => {});
 
       await push(ref(db, 'games/battle_1/shots'), shotData);
       await set(ref(db, 'games/battle_1/last_shot'), shotData);
 
-      // Через FORM_TIME снежок начинает лететь
+      // Формирование завершено → полёт
       setTimeout(async () => {
         try {
           await update(ref(db, 'games/battle_1/last_shot'), {
@@ -1251,7 +1249,7 @@
         } catch {}
       }, FORM_TIME);
 
-      // Передача хода (через FORM_TIME + небольшая пауза)
+      // Передача хода
       setTimeout(async () => {
         const playersSnap = await get(ref(db, 'games/battle_1/players'));
         const players = playersSnap.val() || {};
@@ -1294,6 +1292,11 @@
       const prevStatus = gameStatus;
       gameStatus = data.status || 'lobby';
 
+      // Нечестный режим
+      if (data.mode) {
+        updateModeInfo(data.mode, data);
+      }
+
       if (gameStatus === 'finished') {
         handleFinished(data);
         return;
@@ -1308,10 +1311,10 @@
         hideOverlay('result-overlay');
         document.getElementById('tv-timer').classList.add('hidden');
         stopTurnTimer();
-        remove(aimRef).catch(() => {});
         
         const me = data.players?.[team]?.[playerId];
         if (me) {
+          myLives = me.lives;
           document.getElementById('info-lives').innerHTML = renderHearts(me.lives, me.alive);
         }
         return;
@@ -1344,45 +1347,107 @@
         isMyTurn = (data.activePlayerId === playerId);
 
         const btn = document.getElementById('shoot-btn');
+        const angleUpBtn = document.getElementById('angle-up');
+        const angleDownBtn = document.getElementById('angle-down');
+        const powerUpBtn = document.getElementById('power-up');
+        const powerDownBtn = document.getElementById('power-down');
         
         if (isMyTurn) {
           if (!wasMyTurn) {
-            // Мой ход только начался
             vibrate([40, 20, 40]);
             btn.classList.add('animate-shake');
             setTimeout(() => btn.classList.remove('animate-shake'), 500);
             
-            // Запускаем таймер 10 сек
             startTurnTimer();
-            
-            // Сбрасываем прицел
             currentAngle = 45;
-            updateAimVisual(currentAngle);
+            currentPower = 30;
+            updateAngleDisplay();
+            updatePowerDisplay();
           }
           btn.disabled = false;
-          aimWrapper.classList.add('my-turn');
-          aimWrapper.classList.remove('disabled');
+          angleUpBtn.disabled = false;
+          angleDownBtn.disabled = false;
+          powerUpBtn.disabled = false;
+          powerDownBtn.disabled = false;
           hideOverlay('wait-overlay');
         } else {
-          // Чужой ход
           if (wasMyTurn) {
-            // Мой ход закончился
             stopTurnTimer();
-            remove(aimRef).catch(() => {});
           }
           btn.disabled = true;
-          aimWrapper.classList.remove('my-turn');
-          aimWrapper.classList.add('disabled');
+          angleUpBtn.disabled = true;
+          angleDownBtn.disabled = true;
+          powerUpBtn.disabled = true;
+          powerDownBtn.disabled = true;
           if (hasJoined && !isShooting) showOverlay('wait-overlay');
         }
 
         const me = data.players?.[team]?.[playerId];
         if (me) {
+          myLives = me.lives;
           document.getElementById('info-name').innerText = me.name;
           document.getElementById('info-lives').innerHTML = renderHearts(me.lives, me.alive);
+          updateSuperPanel();
         }
       }
     });
+
+    // ============================================================
+    // РЕЖИМ
+    // ============================================================
+    function updateModeInfo(mode, data) {
+      if (typeof mode === 'string' && mode.includes('v')) {
+        const parts = mode.split('v');
+        myTeamMax = isRed ? parseInt(parts[0]) : parseInt(parts[1]);
+        enemyTeamMax = isRed ? parseInt(parts[1]) : parseInt(parts[0]);
+      } else {
+        myTeamMax = 1;
+        enemyTeamMax = 1;
+      }
+      
+      isUnfairMode = myTeamMax !== enemyTeamMax;
+      isSmallerTeam = isUnfairMode && myTeamMax < enemyTeamMax;
+      
+      updateSuperPanel();
+    }
+
+    // ============================================================
+    // КНОПКИ УПРАВЛЕНИЯ (обработчики)
+    // ============================================================
+    document.getElementById('angle-up').onclick = angleUpLinear;
+    document.getElementById('angle-down').onclick = angleDownLinear;
+    document.getElementById('power-up').onclick = powerUp;
+    document.getElementById('power-down').onclick = powerDown;
+
+    // Долгое нажатие = ускорение
+    function addHoldSupport(btnId, action) {
+      const btn = document.getElementById(btnId);
+      let holdInterval = null;
+      
+      const start = (e) => {
+        e.preventDefault();
+        action();
+        holdInterval = setInterval(action, 80);
+      };
+      const stop = () => {
+        if (holdInterval) {
+          clearInterval(holdInterval);
+          holdInterval = null;
+        }
+      };
+      
+      btn.addEventListener('mousedown', start);
+      btn.addEventListener('mouseup', stop);
+      btn.addEventListener('mouseleave', stop);
+      btn.addEventListener('touchstart', start, { passive: false });
+      btn.addEventListener('touchend', stop);
+      btn.addEventListener('touchcancel', stop);
+    }
+
+    addHoldSupport('angle-up', angleUpLinear);
+    addHoldSupport('angle-down', angleDownLinear);
+    addHoldSupport('power-up', powerUp);
+    addHoldSupport('power-down', powerDown);
 
     // ============================================================
     // ФИНИШ
@@ -1392,14 +1457,14 @@
       hideOverlay('preload-overlay');
       document.getElementById('tv-timer').classList.add('hidden');
       stopTurnTimer();
-      remove(aimRef).catch(() => {});
 
       const resultOverlay = document.getElementById('result-overlay');
+      
+      if (!resultOverlay.classList.contains('hidden')) return;
+
       const titleEl = document.getElementById('result-title');
       const subtitleEl = document.getElementById('result-subtitle');
       const emojiEl = document.getElementById('result-emoji');
-
-      if (!resultOverlay.classList.contains('hidden')) return;
 
       const winner = data.winner;
       const isWinner = winner === team;
@@ -1408,7 +1473,7 @@
         titleEl.innerText = 'ПОБЕДА!';
         titleEl.className = 'result-title win';
         emojiEl.innerText = '🏆';
-        subtitleEl.innerText = 'Твоя команда победила! Отличная работа!';
+        subtitleEl.innerText = 'Твоя команда победила!';
         vibrate([100, 50, 100, 50, 200]);
         launchConfetti();
       } else if (winner === 'none' || !winner) {
@@ -1433,10 +1498,10 @@
     document.getElementById('result-close-btn').onclick = () => {
       hideOverlay('result-overlay');
       document.getElementById('confetti-container').innerHTML = '';
-      currentPower = 10;
-      updatePowerUI();
+      currentPower = 30;
       currentAngle = 45;
-      updateAimVisual(currentAngle);
+      updateAngleDisplay();
+      updatePowerDisplay();
       document.getElementById('shoot-btn').disabled = true;
     };
 
@@ -1476,8 +1541,8 @@
     // ============================================================
     // СТАРТ
     // ============================================================
-    startPowerAnimation();
-    updateAimVisual(currentAngle);
+    updateAngleDisplay();
+    updatePowerDisplay();
   </script>
 </body>
 </html>
