@@ -864,6 +864,9 @@
     let aimSyncTimeout = null;
     let lastAimSent = null;
 
+    // ✅ Флаг для предотвращения повторного показа результата
+    let resultShown = false;
+
     const vibrate = (p) => { if (navigator.vibrate) navigator.vibrate(p); };
     const showOverlay = (id) => document.getElementById(id).classList.remove('hidden');
     const hideOverlay = (id) => document.getElementById(id).classList.add('hidden');
@@ -1060,11 +1063,12 @@
       aimSyncTimeout = setTimeout(() => {
         aimSyncTimeout = null;
         
+        // ✅ ФИКС: fallback на 'Игрок', если имя пустое
         const aimData = {
           angle: currentAngle,
           power: currentPower,
           team,
-          name: myName,
+          name: myName || 'Игрок',
           time: Date.now()
         };
         
@@ -1448,10 +1452,12 @@
       const inPlayers = data.players?.[team]?.[playerId];
       const inRoom = data.room?.[team]?.[playerId];
 
+      // ✅ ФИКС: восстановление hasJoined + myName при перезагрузке
       if (!hasJoined && (inPlayers || inRoom)) {
         hasJoined = true;
         localStorage.setItem(joinedKey, '1');
         document.getElementById('join-screen').classList.add('hidden');
+        myName = inPlayers?.name || inRoom?.name || myName;
       }
 
       if (hasJoined && !inPlayers && !inRoom) {
@@ -1474,11 +1480,13 @@
 
         if (gameStatus === 'finished') {
           isMyTurn = false;
-          // ✅ ФИКС: показываем финиш только если ещё не показан
-          const resultOverlay = document.getElementById('result-overlay');
-          if (resultOverlay.classList.contains('hidden')) {
-            showGameScreen(data);
-            handleFinished(data);
+          // ✅ ФИКС: показываем финиш только если ещё не показан И это смена статуса
+          if (!resultShown || prevStatus !== 'finished') {
+            const resultOverlay = document.getElementById('result-overlay');
+            if (resultOverlay.classList.contains('hidden')) {
+              showGameScreen(data);
+              handleFinished(data);
+            }
           }
           return;
         }
@@ -1502,6 +1510,9 @@
       }
 
       if (inRoom) {
+        // ✅ ФИКС: восстановление myName из room
+        myName = inRoom.name || myName;
+        
         isMyTurn = false;
         isShooting = false;
         stopTurnTimer();
@@ -1513,6 +1524,9 @@
         hideOverlay('wait-overlay');
         hideOverlay('preload-overlay');
         hideOverlay('result-overlay');
+        
+        // ✅ Сброс флага результата при возврате в комнату
+        resultShown = false;
         
         showRoomScreen(data);
         return;
@@ -1571,6 +1585,7 @@
       const me = data.players?.[team]?.[playerId];
       if (me) {
         myLives = me.lives;
+        meAlive = me.alive;  // ✅ дублируем
         document.getElementById('info-name').innerText = me.name;
         document.getElementById('info-lives').innerHTML = renderHearts(me.lives, me.alive);
         updateSuperPanel();
@@ -1638,8 +1653,12 @@
       stopTurnTimer();
       remove(aimRef).catch(() => {});
 
+      if (resultShown) return;
+      
       const resultOverlay = document.getElementById('result-overlay');
       if (!resultOverlay.classList.contains('hidden')) return;
+
+      resultShown = true;  // ✅
 
       const titleEl = document.getElementById('result-title');
       const subtitleEl = document.getElementById('result-subtitle');
@@ -1695,6 +1714,7 @@
       localStorage.removeItem(joinedKey);
       
       hasJoined = false;
+      resultShown = false;
       showJoinScreen();
     };
 
