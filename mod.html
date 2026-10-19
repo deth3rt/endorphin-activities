@@ -30,6 +30,10 @@
       color: #22d3ee; 
       box-shadow: 0 0 20px rgba(34, 211, 238, 0.5); 
     }
+    .mode-btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
     .team-btn { transition: all 0.3s ease; }
     .team-btn.active-red { 
       border-color: #ef4444; 
@@ -43,6 +47,26 @@
       color: #3b82f6; 
       box-shadow: 0 0 20px rgba(59, 130, 246, 0.5); 
     }
+    .team-btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+    .hp-bar {
+      height: 8px;
+      background: rgba(0,0,0,0.5);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    .hp-fill {
+      height: 100%;
+      transition: width 0.4s ease;
+      border-radius: 4px;
+    }
+    @keyframes pulseStatus {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+    .pulse-status { animation: pulseStatus 1.5s ease-in-out infinite; }
   </style>
 </head>
 <body>
@@ -51,10 +75,13 @@
     <a href="index.html" class="px-4 py-2 bg-gray-800 rounded-lg font-bold text-sm hover:bg-gray-700 transition">В МЕНЮ</a>
   </div>
 
+  <!-- ============================================================
+       ЛОББИ
+       ============================================================ -->
   <div id="lobby-controls" class="w-full flex flex-col items-center">
     <div class="glass w-full max-w-4xl p-8 mb-8 flex flex-col items-center">
       <h2 class="text-xl font-bold mb-4 text-cyan-100">ВЫБЕРИ РЕЖИМ</h2>
-      <div class="flex gap-4">
+      <div class="flex gap-4 flex-wrap justify-center">
         <button onclick="setMode('1v1')" class="mode-btn px-8 py-4 rounded-xl border-2 font-bold text-lg" id="btn-1v1">1 на 1</button>
         <button onclick="setMode('2v2')" class="mode-btn px-8 py-4 rounded-xl border-2 font-bold text-lg" id="btn-2v2">2 на 2</button>
         <button onclick="setMode('3v3')" class="mode-btn px-8 py-4 rounded-xl border-2 font-bold text-lg" id="btn-3v3">3 на 3</button>
@@ -64,14 +91,16 @@
 
     <div class="glass w-full max-w-4xl p-8 mb-8">
       <h2 class="text-xl font-bold mb-4 text-cyan-100 text-center">КОМАНДЫ</h2>
-      <div class="grid grid-cols-2 gap-8">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
         <div class="bg-red-900/20 p-6 rounded-xl border border-red-500/30">
-          <h3 class="font-bold text-red-400 mb-4 text-center text-xl">КРАСНЫЕ</h3>
+          <h3 class="font-bold text-red-400 mb-4 text-center text-xl">🔴 КРАСНЫЕ</h3>
           <ul id="list-red" class="space-y-2 text-sm"></ul>
+          <p class="text-center text-red-300/50 text-xs mt-4" id="count-red">0 игроков</p>
         </div>
         <div class="bg-blue-900/20 p-6 rounded-xl border border-blue-500/30">
-          <h3 class="font-bold text-blue-400 mb-4 text-center text-xl">СИНИЕ</h3>
+          <h3 class="font-bold text-blue-400 mb-4 text-center text-xl">🔵 СИНИЕ</h3>
           <ul id="list-blue" class="space-y-2 text-sm"></ul>
+          <p class="text-center text-blue-300/50 text-xs mt-4" id="count-blue">0 игроков</p>
         </div>
       </div>
     </div>
@@ -85,25 +114,63 @@
     </div>
 
     <button id="btn-start" disabled class="w-full max-w-4xl py-8 bg-gradient-to-r from-blue-600 to-cyan-500 rounded-2xl text-3xl font-black text-black shadow-[0_0_40px_rgba(6,182,212,0.6)] disabled:opacity-50 disabled:cursor-not-allowed transition-all">
-      НАЧАТЬ БОЙ
+      ОЖИДАНИЕ ИГРОКОВ...
     </button>
   </div>
 
+  <!-- ============================================================
+       ИГРА
+       ============================================================ -->
   <div id="game-controls" class="hidden w-full max-w-4xl flex-col items-center">
     <div class="glass w-full p-8 mb-8 text-center border-green-500/50">
-      <h2 class="text-4xl font-black text-green-400 mb-4 animate-pulse">ИГРА ИДЕТ</h2>
+      <h2 class="text-4xl font-black text-green-400 mb-4" id="game-status-title">ИГРА ИДЕТ</h2>
       <div class="text-2xl font-bold mb-8" id="mod-turn-info">ХОД: ...</div>
-      <div class="grid grid-cols-2 gap-4">
-        <div class="bg-red-900/20 p-6 rounded-xl border border-red-500/30 text-red-400 font-bold text-2xl" id="mod-hp-red">КРАСНЫЕ: 3</div>
-        <div class="bg-blue-900/20 p-6 rounded-xl border border-blue-500/30 text-blue-400 font-bold text-2xl" id="mod-hp-blue">СИНИЕ: 3</div>
+      
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+        <div class="bg-red-900/20 p-6 rounded-xl border border-red-500/30">
+          <div class="text-red-400 font-bold text-xl mb-3">🔴 КРАСНЫЕ</div>
+          <div class="text-3xl font-black text-red-300 mb-2" id="mod-hp-red">❤️ 0</div>
+          <div class="hp-bar mb-4"><div class="hp-fill bg-red-500" id="hp-fill-red" style="width: 100%"></div></div>
+          <ul id="game-list-red" class="space-y-1 text-sm text-left"></ul>
+        </div>
+        <div class="bg-blue-900/20 p-6 rounded-xl border border-blue-500/30">
+          <div class="text-blue-400 font-bold text-xl mb-3">🔵 СИНИЕ</div>
+          <div class="text-3xl font-black text-blue-300 mb-2" id="mod-hp-blue">❤️ 0</div>
+          <div class="hp-bar mb-4"><div class="hp-fill bg-blue-500" id="hp-fill-blue" style="width: 100%"></div></div>
+          <ul id="game-list-blue" class="space-y-1 text-sm text-left"></ul>
+        </div>
       </div>
+
+      <div class="text-sm text-white/50" id="mod-timer-info"></div>
     </div>
-    <button onclick="endGame()" class="w-full py-6 bg-red-600 rounded-xl font-black text-xl hover:bg-red-500 transition">ЗАКОНЧИТЬ БОЙ</button>
+
+    <div class="w-full grid grid-cols-1 md:grid-cols-2 gap-4">
+      <button onclick="endGame()" class="w-full py-6 bg-red-600/30 border-2 border-red-500/50 text-red-300 rounded-xl font-black text-xl hover:bg-red-600/50 transition">
+        ⏹️ ЗАКОНЧИТЬ БОЙ
+      </button>
+      <button onclick="returnToLobby()" class="w-full py-6 bg-gray-700/50 border-2 border-gray-500/50 text-gray-300 rounded-xl font-black text-xl hover:bg-gray-600/50 transition">
+        🔄 В ЛОББИ
+      </button>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       ФИНИШ
+       ============================================================ -->
+  <div id="finished-controls" class="hidden w-full max-w-4xl flex-col items-center">
+    <div class="glass w-full p-12 mb-8 text-center border-yellow-500/50">
+      <div class="text-6xl mb-4" id="finish-emoji">🏆</div>
+      <h2 class="text-5xl font-black mb-4" id="finish-title">ИГРА ОКОНЧЕНА</h2>
+      <p class="text-xl text-white/60" id="finish-subtitle"></p>
+    </div>
+    <button onclick="returnToLobby()" class="w-full py-8 bg-gradient-to-r from-cyan-500 to-blue-600 rounded-2xl text-3xl font-black text-white shadow-[0_0_40px_rgba(6,182,212,0.6)] hover:shadow-[0_0_60px_rgba(6,182,212,0.9)] transition-all">
+      🔄 ВЕРНУТЬСЯ В ЛОББИ
+    </button>
   </div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getDatabase, ref, set, onValue, update, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+    import { getDatabase, ref, set, onValue, update, remove, get, push } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
     
     const firebaseConfig = { 
       apiKey: "AIzaSyCXIR5Tv8lB6ivcGRC3yt1SC66MM6T5b_M", 
@@ -119,162 +186,429 @@
     const gameRef = ref(db, 'games/battle_1');
 
     let currentData = null;
-    let timerInterval = null;
     let firstTeam = 'red';
+    let isStarting = false;
 
-    // Инициализация
-    set(gameRef, { 
-      status: 'lobby', 
-      mode: null, 
-      lives: { red: 3, blue: 3 }, 
-      players: { red: {}, blue: {} }, 
-      firstTeam: 'red' 
-    }).then(() => { setMode('1v1'); });
+    // ============================================================
+    // ИНИЦИАЛИЗАЦИЯ (НЕ перезаписываем ticker/ad_settings!)
+    // ============================================================
+    async function initGame() {
+      const snap = await get(gameRef);
+      const existing = snap.val();
 
+      if (!existing || !existing.status) {
+        // Первый запуск — создаём структуру
+        await set(gameRef, {
+          status: 'lobby',
+          mode: '1v1',
+          lives: { red: 3, blue: 3 },
+          players: { red: {}, blue: {} },
+          firstTeam: 'red',
+          turn: { team: 'red', name: '...' },
+          activePlayerId: null,
+          timer: null,
+          preloadDone: false
+        });
+      } else {
+        // Уже есть — только сбрасываем игровое состояние в лобби
+        // НЕ трогаем ticker_messages и ad_settings
+        await update(gameRef, {
+          status: 'lobby',
+          players: { red: {}, blue: {} },
+          turn: { team: existing.firstTeam || 'red', name: '...' },
+          activePlayerId: null,
+          timer: null,
+          preloadDone: false,
+          winner: null,
+          last_shot: null,
+          shots: null
+        });
+      }
+    }
+    initGame();
+
+    // ============================================================
+    // РЕЖИМ
+    // ============================================================
     window.setMode = (mode) => { 
-      if (currentData?.status === 'playing') return; 
+      if (currentData?.status === 'playing') return;
+      if (currentData?.status === 'finished') return;
       update(gameRef, { mode }); 
     };
 
+    // ============================================================
+    // ПЕРВАЯ КОМАНДА
+    // ============================================================
     window.setFirstTeam = (team) => {
+      if (currentData?.status === 'playing') return;
+      if (currentData?.status === 'finished') return;
       firstTeam = team;
       update(gameRef, { firstTeam: team });
-      
-      document.getElementById('btn-first-red').classList.toggle('active-red', team === 'red');
-      document.getElementById('btn-first-blue').classList.toggle('active-blue', team === 'blue');
     };
 
+    // ============================================================
+    // ОСНОВНОЙ СЛУШАТЕЛЬ
+    // ============================================================
     onValue(gameRef, (snapshot) => {
       const data = snapshot.val();
       if (!data) return;
       currentData = data;
 
+      const status = data.status || 'lobby';
+
+      // ---------- ВИДИМОСТЬ ПАНЕЛЕЙ ----------
+      document.getElementById('lobby-controls').classList.toggle('hidden', status !== 'lobby');
+      document.getElementById('game-controls').classList.toggle('hidden', status !== 'playing');
+      document.getElementById('finished-controls').classList.toggle('hidden', status !== 'finished');
+      
+      document.getElementById('game-controls').classList.toggle('flex', status === 'playing');
+      document.getElementById('finished-controls').classList.toggle('flex', status === 'finished');
+
+      // ---------- ПЕРВАЯ КОМАНДА ----------
       if (data.firstTeam) {
         firstTeam = data.firstTeam;
         document.getElementById('btn-first-red').classList.toggle('active-red', firstTeam === 'red');
         document.getElementById('btn-first-blue').classList.toggle('active-blue', firstTeam === 'blue');
       }
 
-      if (data.status === 'playing') {
-        document.getElementById('lobby-controls').classList.add('hidden');
-        document.getElementById('game-controls').classList.remove('hidden');
-        document.getElementById('game-controls').classList.add('flex');
-        if (data.turn) document.getElementById('mod-turn-info').innerText = `ХОД: ${data.turn.name.toUpperCase()}`;
-        document.getElementById('mod-hp-red').innerText = `КРАСНЫЕ: ${data.lives.red}`;
-        document.getElementById('mod-hp-blue').innerText = `СИНИЕ: ${data.lives.blue}`;
-      } else {
-        document.getElementById('lobby-controls').classList.remove('hidden');
-        document.getElementById('game-controls').classList.add('hidden');
-      }
-
+      // ---------- РЕЖИМ ----------
       if (data.mode) {
         document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
         document.getElementById(`btn-${data.mode}`)?.classList.add('active');
       }
 
-      const renderList = (team, listId) => {
-        const players = Object.entries(data.players[team] || {});
-        document.getElementById(listId).innerHTML = players.map(([id, p]) => `
-          <li class="flex justify-between items-center bg-black/40 p-3 rounded-lg border border-white/10">
-            <span class="font-bold">👤 ${p.name} (❤️${p.lives})</span>
-            ${data.status === 'lobby' ? `<button onclick="kickPlayer('${team}', '${id}')" class="text-red-400 hover:text-red-300 font-black px-2 text-lg">✖</button>` : ''}
-          </li>
-        `).join('');
-      };
-      renderList('red', 'list-red'); 
-      renderList('blue', 'list-blue');
+      // ---------- БЛОКИРОВКА КНОПОК ВО ВРЕМЯ ИГРЫ ----------
+      const inGame = status === 'playing' || status === 'finished';
+      document.querySelectorAll('.mode-btn, .team-btn').forEach(b => {
+        b.disabled = inGame;
+      });
 
-      const maxP = parseInt(data.mode?.charAt(0) || 1);
-      const redCount = Object.keys(data.players.red || {}).length;
-      const blueCount = Object.keys(data.players.blue || {}).length;
+      // ---------- СПИСКИ ИГРОКОВ ----------
+      renderLobbyLists(data);
+      renderGameLists(data);
 
-      const btn = document.getElementById('btn-start');
-      if (redCount >= maxP && blueCount >= maxP && data.status === 'lobby') { 
-        btn.disabled = false; 
-        btn.innerText = 'НАЧАТЬ БОЙ'; 
-      } else if (data.status === 'lobby') { 
-        btn.disabled = true; 
-        btn.innerText = `ОЖИДАНИЕ (${redCount}/${maxP} vs ${blueCount}/${maxP})`; 
+      // ---------- КНОПКА СТАРТ ----------
+      updateStartButton(data);
+
+      // ---------- ИГРА ----------
+      if (status === 'playing') {
+        updateGameView(data);
+      }
+
+      // ---------- ФИНИШ ----------
+      if (status === 'finished') {
+        updateFinishedView(data);
       }
     });
 
-    window.kickPlayer = (team, id) => { 
-      if (confirm('Кикнуть игрока?')) remove(ref(db, `games/battle_1/players/${team}/${id}`)); 
-    };
-
-    window.endGame = () => { 
-      update(gameRef, { status: 'finished', winner: 'none' }); 
-    };
-
     // ============================================================
-    // СТАРТ ИГРЫ (с генерацией координат)
+    // РЕНДЕР ЛОББИ-СПИСКОВ
     // ============================================================
-    document.getElementById('btn-start').onclick = () => {
-      if (!currentData) return;
-      
-      const playersRed = currentData.players.red || {};
-      const playersBlue = currentData.players.blue || {};
-      
-      // Функция генерации уникальных координат (без пересечений по Y)
-      function generateUniquePositions(keys, minX, maxX) {
-        const positions = [];
-        const usedY = [];
+    function renderLobbyLists(data) {
+      const render = (team, listId, countId) => {
+        const players = Object.entries(data.players?.[team] || {});
+        const list = document.getElementById(listId);
+        const count = document.getElementById(countId);
         
-        keys.forEach((id) => {
-          let posX, posY, attempts = 0;
-          
-          do {
-            posX = minX + Math.random() * (maxX - minX);
-            posY = 20 + Math.random() * 60; // 20-80%
-            attempts++;
-          } while (usedY.some(y => Math.abs(y - posY) < 10) && attempts < 50);
-          
-          usedY.push(posY);
-          positions.push({ id, posX, posY });
-        });
-        
-        return positions;
-      }
-      
-      // Красные (слева): X 5-20%
-      const redKeys = Object.keys(playersRed);
-      const redPositions = generateUniquePositions(redKeys, 5, 20);
-      redPositions.forEach(({ id, posX, posY }) => {
-        update(ref(db, `games/battle_1/players/red/${id}`), { posX, posY });
-      });
-      
-      // Синие (справа): X 80-95%
-      const blueKeys = Object.keys(playersBlue);
-      const bluePositions = generateUniquePositions(blueKeys, 80, 95);
-      bluePositions.forEach(({ id, posX, posY }) => {
-        update(ref(db, `games/battle_1/players/blue/${id}`), { posX, posY });
-      });
-
-      // Определяем первого игрока
-      const firstTeamPlayers = firstTeam === 'red' ? playersRed : playersBlue;
-      const firstPlayerEntry = Object.entries(firstTeamPlayers)[0];
-      if (!firstPlayerEntry) return alert('Нет игроков в выбранной команде!');
-
-      // Старт игры
-      update(gameRef, { 
-        status: 'playing', 
-        turn: { team: firstTeam, name: firstPlayerEntry[1].name }, 
-        activePlayerId: firstPlayerEntry[0],
-        timer: 3 
-      });
-      
-      // Обратный отсчёт
-      let countdown = 3;
-      if (timerInterval) clearInterval(timerInterval);
-      timerInterval = setInterval(() => {
-        countdown--;
-        update(gameRef, { timer: countdown });
-        if (countdown <= 0) { 
-          clearInterval(timerInterval); 
-          update(gameRef, { timer: null }); 
+        if (players.length === 0) {
+          list.innerHTML = `<li class="text-center text-white/30 italic py-4">Нет игроков</li>`;
+        } else {
+          list.innerHTML = players.map(([id, p]) => `
+            <li class="flex justify-between items-center bg-black/40 p-3 rounded-lg border border-white/10">
+              <span class="font-bold truncate">👤 ${escapeHtml(p.name)}</span>
+              <button onclick="kickPlayer('${team}', '${id}')" class="text-red-400 hover:text-red-300 font-black px-2 text-lg ml-2">✖</button>
+            </li>
+          `).join('');
         }
-      }, 1000);
+        count.innerText = `${players.length} игрок${players.length === 1 ? '' : 'ов'}`;
+      };
+      render('red', 'list-red', 'count-red');
+      render('blue', 'list-blue', 'count-blue');
+    }
+
+    // ============================================================
+    // РЕНДЕР ИГРОВЫХ СПИСКОВ
+    // ============================================================
+    function renderGameLists(data) {
+      const render = (team, listId) => {
+        const players = Object.entries(data.players?.[team] || {});
+        const list = document.getElementById(listId);
+        
+        if (players.length === 0) {
+          list.innerHTML = `<li class="text-white/30 italic text-center py-2">—</li>`;
+        } else {
+          list.innerHTML = players.map(([id, p]) => {
+            const isDead = !p.alive || p.lives <= 0;
+            const isActive = data.activePlayerId === id;
+            const hearts = isDead ? '💀' : '❤️'.repeat(p.lives);
+            return `
+              <li class="flex justify-between items-center p-2 rounded-lg ${isActive ? 'bg-yellow-500/20 border border-yellow-500/50' : 'bg-black/30'} ${isDead ? 'opacity-50' : ''}">
+                <span class="font-bold truncate">${isActive ? '▶ ' : ''}${escapeHtml(p.name)}</span>
+                <span class="ml-2">${hearts}</span>
+              </li>
+            `;
+          }).join('');
+        }
+      };
+      render('red', 'game-list-red');
+      render('blue', 'game-list-blue');
+    }
+
+    // ============================================================
+    // КНОПКА СТАРТ
+    // ============================================================
+    function updateStartButton(data) {
+      const btn = document.getElementById('btn-start');
+      const maxP = parseInt(data.mode?.charAt(0) || 1);
+      const redCount = Object.keys(data.players?.red || {}).length;
+      const blueCount = Object.keys(data.players?.blue || {}).length;
+
+      if (data.status === 'lobby') {
+        if (redCount >= maxP && blueCount >= maxP) {
+          btn.disabled = false;
+          btn.innerText = '🚀 НАЧАТЬ БОЙ';
+          btn.classList.add('pulse-status');
+        } else {
+          btn.disabled = true;
+          btn.innerText = `ОЖИДАНИЕ (${redCount}/${maxP} vs ${blueCount}/${maxP})`;
+          btn.classList.remove('pulse-status');
+        }
+      }
+    }
+
+    // ============================================================
+    // ИГРОВОЙ ЭКРАН
+    // ============================================================
+    function updateGameView(data) {
+      const isPreloading = !data.preloadDone;
+
+      // Заголовок
+      const title = document.getElementById('game-status-title');
+      if (isPreloading) {
+        title.innerText = 'ПРЕЛОУДИНГ...';
+        title.className = 'text-4xl font-black text-yellow-400 mb-4 pulse-status';
+      } else {
+        title.innerText = 'ИГРА ИДЕТ';
+        title.className = 'text-4xl font-black text-green-400 mb-4';
+      }
+
+      // Ход
+      const turnInfo = document.getElementById('mod-turn-info');
+      if (data.turn && data.preloadDone) {
+        turnInfo.innerText = `ХОД: ${data.turn.name.toUpperCase()}`;
+        turnInfo.style.color = data.turn.team === 'red' ? '#ef4444' : '#3b82f6';
+      } else {
+        turnInfo.innerText = 'ПОДГОТОВКА...';
+        turnInfo.style.color = '#fbbf24';
+      }
+
+      // HP
+      const redLives = Object.values(data.players?.red || {}).reduce((sum, p) => sum + (p.alive ? p.lives : 0), 0);
+      const blueLives = Object.values(data.players?.blue || {}).reduce((sum, p) => sum + (p.alive ? p.lives : 0), 0);
+      const maxRed = Object.keys(data.players?.red || {}).length * 3;
+      const maxBlue = Object.keys(data.players?.blue || {}).length * 3;
+
+      document.getElementById('mod-hp-red').innerText = `❤️ ${redLives}`;
+      document.getElementById('mod-hp-blue').innerText = `❤️ ${blueLives}`;
+      document.getElementById('hp-fill-red').style.width = maxRed > 0 ? `${(redLives / maxRed) * 100}%` : '0%';
+      document.getElementById('hp-fill-blue').style.width = maxBlue > 0 ? `${(blueLives / maxBlue) * 100}%` : '0%';
+
+      // Таймер
+      const timerInfo = document.getElementById('mod-timer-info');
+      if (data.timer !== null && data.timer !== undefined) {
+        timerInfo.innerText = `⏱️ Прелоадинг: ${data.timer} сек`;
+      } else {
+        timerInfo.innerText = '';
+      }
+    }
+
+    // ============================================================
+    // ФИНИШ
+    // ============================================================
+    function updateFinishedView(data) {
+      const title = document.getElementById('finish-title');
+      const emoji = document.getElementById('finish-emoji');
+      const subtitle = document.getElementById('finish-subtitle');
+
+      if (data.winner === 'red') {
+        title.innerText = 'КРАСНЫЕ ПОБЕДИЛИ!';
+        title.className = 'text-5xl font-black mb-4 text-red-500';
+        emoji.innerText = '🔴';
+        subtitle.innerText = 'ТАКТИКА, СИЛА, ПОБЕДА';
+      } else if (data.winner === 'blue') {
+        title.innerText = 'СИНИЕ ПОБЕДИЛИ!';
+        title.className = 'text-5xl font-black mb-4 text-blue-500';
+        emoji.innerText = '🔵';
+        subtitle.innerText = 'ЛЁД, СКОРОСТЬ, ТОЧНОСТЬ';
+      } else {
+        title.innerText = 'ИГРА ОКОНЧЕНА';
+        title.className = 'text-5xl font-black mb-4 text-white';
+        emoji.innerText = '🏁';
+        subtitle.innerText = 'Ведущий завершил бой';
+      }
+    }
+
+    // ============================================================
+    // КИК ИГРОКА
+    // ============================================================
+    window.kickPlayer = (team, id) => { 
+      if (currentData?.status !== 'lobby') {
+        alert('Нельзя кикнуть во время игры');
+        return;
+      }
+      if (!confirm('Кикнуть игрока?')) return;
+      remove(ref(db, `games/battle_1/players/${team}/${id}`)); 
     };
+
+    // ============================================================
+    // ЗАВЕРШЕНИЕ ИГРЫ
+    // ============================================================
+    window.endGame = () => {
+      if (currentData?.status !== 'playing') return;
+      if (!confirm('Завершить бой? Игра будет окончена.')) return;
+      
+      update(gameRef, { 
+        status: 'finished', 
+        winner: 'none',
+        activePlayerId: null,
+        timer: null
+      });
+    };
+
+    // ============================================================
+    // ВОЗВРАТ В ЛОББИ
+    // ============================================================
+    window.returnToLobby = async () => {
+      if (!confirm('Вернуться в лобби? Все игроки отключатся.')) return;
+
+      await update(gameRef, {
+        status: 'lobby',
+        players: { red: {}, blue: {} },
+        turn: { team: firstTeam, name: '...' },
+        activePlayerId: null,
+        timer: null,
+        preloadDone: false,
+        winner: null,
+        last_shot: null,
+        shots: null
+      });
+      
+      // Очищаем выстрелы (могут остаться как история)
+      try {
+        await remove(ref(db, 'games/battle_1/shots'));
+        await remove(ref(db, 'games/battle_1/last_shot'));
+      } catch (e) {
+        console.warn('Не удалось очистить выстрелы', e);
+      }
+    };
+
+    // ============================================================
+    // СТАРТ ИГРЫ
+    // ============================================================
+    document.getElementById('btn-start').onclick = async () => {
+      if (isStarting) return;
+      isStarting = true;
+
+      try {
+        // Свежие данные из БД, чтобы не было race condition
+        const snap = await get(gameRef);
+        const data = snap.val();
+        if (!data) return;
+
+        const playersRed = data.players?.red || {};
+        const playersBlue = data.players?.blue || {};
+
+        const maxP = parseInt(data.mode?.charAt(0) || 1);
+        if (Object.keys(playersRed).length < maxP || Object.keys(playersBlue).length < maxP) {
+          alert('Недостаточно игроков');
+          return;
+        }
+
+        // ---------- ГЕНЕРАЦИЯ КООРДИНАТ ----------
+        function generateUniquePositions(keys, minX, maxX) {
+          const positions = [];
+          const usedY = [];
+          
+          keys.forEach((id) => {
+            let posX, posY, attempts = 0;
+            do {
+              posX = minX + Math.random() * (maxX - minX);
+              posY = 20 + Math.random() * 60;
+              attempts++;
+            } while (usedY.some(y => Math.abs(y - posY) < 8) && attempts < 100);
+            usedY.push(posY);
+            positions.push({ id, posX, posY });
+          });
+          
+          return positions;
+        }
+
+        const redKeys = Object.keys(playersRed);
+        const redPositions = generateUniquePositions(redKeys, 5, 20);
+        const blueKeys = Object.keys(playersBlue);
+        const bluePositions = generateUniquePositions(blueKeys, 80, 95);
+
+        // Записываем координаты
+        const coordUpdates = [];
+        redPositions.forEach(({ id, posX, posY }) => {
+          coordUpdates.push(update(ref(db, `games/battle_1/players/red/${id}`), { posX, posY }));
+        });
+        bluePositions.forEach(({ id, posX, posY }) => {
+          coordUpdates.push(update(ref(db, `games/battle_1/players/blue/${id}`), { posX, posY }));
+        });
+        await Promise.all(coordUpdates);
+
+        // ---------- ПЕРВЫЙ ИГРОК ----------
+        const firstTeamPlayers = firstTeam === 'red' ? playersRed : playersBlue;
+        const firstPlayerEntry = Object.entries(firstTeamPlayers)[0];
+        if (!firstPlayerEntry) {
+          alert('Нет игроков в выбранной команде!');
+          return;
+        }
+
+        // ---------- СТАРТ ----------
+        // ВАЖНО: preloadDone: false → TV запустит прелоадинг
+        // timer: 10 → play.html покажет отсчёт
+        await update(gameRef, { 
+          status: 'playing', 
+          turn: { team: firstTeam, name: firstPlayerEntry[1].name }, 
+          activePlayerId: firstPlayerEntry[0],
+          timer: 10,
+          preloadDone: false,
+          winner: null
+        });
+
+        // ---------- ТИК ТАЙМЕРА 10 → 0 ----------
+        let countdown = 10;
+        const tick = setInterval(async () => {
+          countdown--;
+          if (countdown > 0) {
+            await update(gameRef, { timer: countdown });
+          } else {
+            clearInterval(tick);
+            // TV сам выставит preloadDone: true через startPreload
+            // Но на всякий случай — если TV не открыт, ставим сами
+            await update(gameRef, { timer: null, preloadDone: true });
+          }
+        }, 1000);
+
+      } finally {
+        isStarting = false;
+      }
+    };
+
+    // ============================================================
+    // УТИЛИТЫ
+    // ============================================================
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
   </script>
 </body>
 </html>
