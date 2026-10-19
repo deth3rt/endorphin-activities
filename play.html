@@ -19,69 +19,71 @@
 
     .glass-panel {
       background: rgba(10, 37, 64, 0.7);
-      backdrop-filter: blur(12px);
+      backdrop-filter: blur(16px);
       border: 1px solid rgba(127, 227, 255, 0.2);
+      box-shadow: 0 0 40px rgba(31, 143, 214, 0.2);
     }
 
     /* ============================================================
-       НОВАЯ СТРЕЛКА (ПОЛУКРУГ)
+       ДЖОЙСТИК (ПРИЦЕЛ)
        ============================================================ */
-    .aim-container {
+    .joystick-container {
       position: relative;
-      width: 300px;
-      height: 150px; /* Полукруг */
+      width: 260px;
+      height: 260px;
       margin: 0 auto;
-      overflow: hidden;
+      border-radius: 50%;
+      background: radial-gradient(circle at 50% 50%, rgba(34, 211, 238, 0.1) 0%, transparent 70%);
+      border: 2px solid rgba(34, 211, 238, 0.3);
+      box-shadow: inset 0 0 30px rgba(34, 211, 238, 0.1), 0 0 30px rgba(34, 211, 238, 0.2);
+      touch-action: none;
+      cursor: crosshair;
     }
-    .aim-bg {
+    .joystick-base {
       position: absolute;
-      inset: 0;
-      border-radius: 150px 150px 0 0; /* Верхний полукруг */
-      border: 2px dashed rgba(255,255,255,0.2);
-      border-bottom: none;
-      background: radial-gradient(circle at 50% 100%, transparent 60%, rgba(34, 211, 238, 0.05) 100%);
+      inset: 20px;
+      border-radius: 50%;
+      border: 2px dashed rgba(255, 255, 255, 0.1);
     }
-    .aim-arrow {
+    .joystick-crosshair {
       position: absolute;
-      bottom: 0;
+      top: 50%;
       left: 50%;
-      width: 4px;
-      height: 130px;
-      background: linear-gradient(to top, transparent, #22d3ee);
-      transform-origin: bottom center;
-      transform: translate(-50%, 0) rotate(0deg);
-      transition: transform 0.1s linear;
-      border-radius: 4px;
+      width: 100%;
+      height: 2px;
+      background: rgba(255, 255, 255, 0.05);
+      transform: translate(-50%, -50%);
     }
-    .aim-arrow::before {
+    .joystick-crosshair::before {
       content: '';
       position: absolute;
-      top: -12px;
-      left: -10px;
-      border-left: 12px solid transparent;
-      border-right: 12px solid transparent;
-      border-bottom: 24px solid #22d3ee;
-      filter: drop-shadow(0 0 10px #22d3ee);
-    }
-    .aim-center-dot {
-      position: absolute;
-      bottom: 0;
+      top: -50%;
       left: 50%;
-      width: 20px;
-      height: 20px;
-      background: #fff;
+      width: 2px;
+      height: 200%;
+      background: rgba(255, 255, 255, 0.05);
+      transform: translateX(-50%);
+    }
+    .joystick-thumb {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 50px;
+      height: 50px;
+      background: #ffffff;
       border-radius: 50%;
-      transform: translate(-50%, 50%);
-      box-shadow: 0 0 15px #22d3ee;
+      transform: translate(-50%, -50%);
+      box-shadow: 0 0 25px rgba(34, 211, 238, 0.8), inset 0 0 10px rgba(0,0,0,0.2);
+      border: 3px solid #22d3ee;
+      pointer-events: none;
+      transition: transform 0.05s linear;
     }
-    
-    /* Для синей команды переворачиваем контейнер */
-    .aim-container.blue-team {
-      transform: scaleX(-1);
-    }
-    .aim-container.blue-team .aim-arrow {
-      /* Стрелка тоже должна смотреть влево (внутри перевернутого контейнера она будет смотреть вправо, но визуально влево) */
-      /* Оставляем как есть, так как контейнер перевернут */
+    .joystick-thumb::after {
+      content: '';
+      position: absolute;
+      inset: 10px;
+      border-radius: 50%;
+      background: rgba(34, 211, 238, 0.3);
     }
 
     /* ============================================================
@@ -207,13 +209,13 @@
   <!-- ЭКРАН ИГРЫ -->
   <div id="game-screen" class="hidden w-full h-full flex flex-col items-center justify-center relative z-10">
     
-    <!-- Угол (Стрелка 360) -->
+    <!-- Джойстик (Прицел) -->
     <div class="text-center mb-8">
-      <p class="text-cyan-300/80 mb-2 font-bold tracking-[0.2em] text-sm">УГОЛ</p>
-      <div class="aim-container" id="angle-container">
-        <div class="aim-bg"></div>
-        <div class="aim-center-dot"></div>
-        <div class="aim-arrow" id="angle-arrow"></div>
+      <p class="text-cyan-300/80 mb-2 font-bold tracking-[0.2em] text-sm">ПРИЦЕЛ</p>
+      <div class="joystick-container" id="joystick">
+        <div class="joystick-base"></div>
+        <div class="joystick-crosshair"></div>
+        <div class="joystick-thumb" id="joystick-thumb"></div>
       </div>
     </div>
 
@@ -327,50 +329,59 @@
     });
 
     // ============================================================
-    // УГОЛ (ПОЛУКРУГ)
+    // ДЖОЙСТИК (ПРИЦЕЛ)
     // ============================================================
-    const container = document.getElementById('angle-container');
-    const arrow = document.getElementById('angle-arrow');
-    
-    // Если команда синяя, переворачиваем контейнер (чтобы полукруг был справа)
-    if (!isRed) {
-      container.classList.add('blue-team');
-    }
+    const joystick = document.getElementById('joystick');
+    const thumb = document.getElementById('joystick-thumb');
     
     const handleMove = (e) => {
       if (!isMyTurn || isShooting) return;
       if (e.touches) e.preventDefault();
       
-      const rect = container.getBoundingClientRect();
+      const rect = joystick.getBoundingClientRect();
       const clientX = e.clientX || e.touches[0].clientX;
       const clientY = e.clientY || e.touches[0].clientY;
       
-      // Для красных (полукруг слева): центр внизу по центру.
-      // Вычисляем угол от центра внизу.
       const centerX = rect.left + rect.width / 2;
-      const bottomY = rect.bottom;
+      const centerY = rect.top + rect.height / 2;
       
-      let rad = Math.atan2(bottomY - clientY, clientX - centerX); // Инвертируем Y, чтобы 0 был справа
+      let dx = clientX - centerX;
+      let dy = clientY - centerY;
+      
+      const maxDist = rect.width / 2 - 30; // Ограничение радиуса
+      const dist = Math.sqrt(dx*dx + dy*dy);
+      
+      if (dist > maxDist) {
+        dx = (dx / dist) * maxDist;
+        dy = (dy / dist) * maxDist;
+      }
+      
+      thumb.style.transform = `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px))`;
+      
+      // Вычисляем угол (0 - вправо, 180 - влево)
+      let rad = Math.atan2(dy, dx);
       let deg = (rad * 180) / Math.PI;
       
-      // Ограничиваем 0..180
+      // Для красных: стреляем вправо (0..180), ограничиваем
       if (isRed) {
         deg = Math.max(0, Math.min(180, deg));
       } else {
-        // Для синих контейнер перевернут, поэтому визуально стрелка смотрит влево.
-        // Но математика та же, только контейнер отзеркален.
-        // Нам нужно, чтобы ползунок двигался в пределах 0..180.
-        deg = Math.max(0, Math.min(180, deg));
+        // Для синих: стреляем влево (180..360 или -180..0)
+        deg = Math.max(180, Math.min(360, deg));
+        if (deg < 0) deg += 360;
       }
       
       currentAngle = deg;
-      // Внутри контейнера стрелка всегда от 0 до 180
-      arrow.style.transform = `translate(-50%, 0) rotate(${deg}deg)`;
     };
     
-    container.addEventListener('touchmove', handleMove, { passive: false });
-    container.addEventListener('touchstart', handleMove, { passive: false });
-    container.addEventListener('mousemove', handleMove);
+    joystick.addEventListener('touchmove', handleMove, { passive: false });
+    joystick.addEventListener('touchstart', handleMove, { passive: false });
+    joystick.addEventListener('mousemove', (e) => { if (e.buttons === 1) handleMove(e); });
+    
+    // Сброс джойстика
+    joystick.addEventListener('touchend', () => {
+      thumb.style.transform = 'translate(-50%, -50%)';
+    });
 
     // ============================================================
     // ВЫСТРЕЛ
