@@ -172,13 +172,13 @@
       justify-content: center;
       font-weight: 900;
       color: #fff;
-      text-shadow: 0 2px 8px rgba(0,0,0,0.5);
       flex-shrink: 0;
       border: 2px solid rgba(255,255,255,0.3);
       box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-      font-variant-numeric: tabular-nums;
+      background: rgba(0,0,0,0.4);
+      line-height: 1;
     }
-    .avatar-sm { width: 34px; height: 34px; font-size: 0.95rem; }
+    .avatar-sm { width: 34px; height: 34px; font-size: 1.2rem; }
 
     .num-selector {
       display: flex;
@@ -634,8 +634,7 @@
     let lastUIHash = '';
 
     // ============================================================
-    // АУДИО
-    // ============================================================
+    // АУДИО    // ============================================================
     let audioCtx = null;
     function getAudioCtx() {
       if (!audioCtx) {
@@ -674,21 +673,8 @@
         .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
     }
 
-    function getNameGradient(name) {
-      let hash = 0;
-      const s = name || '?';
-      for (let i = 0; i < s.length; i++) {
-        hash = s.charCodeAt(i) + ((hash << 5) - hash);
-        hash |= 0;
-      }
-      const hue1 = Math.abs(hash) % 360;
-      const hue2 = (hue1 + 60 + Math.abs(hash >> 8) % 60) % 360;
-      return `linear-gradient(135deg, hsl(${hue1}, 70%, 55%), hsl(${hue2}, 70%, 45%))`;
-    }
-
-    function applyAvatar(el, name) {
-      el.style.background = getNameGradient(name);
-      el.innerText = (name || '?').trim().charAt(0).toUpperCase() || '?';
+    function getPlayerEmoji(p) {
+      return (p && p.emoji) ? p.emoji : '😀';
     }
 
     function parseMode(mode) {
@@ -775,8 +761,6 @@
         firstTeam = existing.firstTeam || 'red';
 
         if (existing.status === 'finished') {
-          // ФИКС #2: сначала присваиваем firstTeam, потом moveAllPlayersToRoom,
-          // чтобы первый ход не сбрасывался на красных
           firstTeam = existing.firstTeam || 'red';
           await moveAllPlayersToRoom(existing);
         } else if (existing.status === 'playing') {
@@ -796,7 +780,6 @@
     }
 
     async function moveAllPlayersToRoom(data) {
-      // ФИКС #3: остановить прелоадинг-каунтер, если он был
       if (countdownInterval) { clearInterval(countdownInterval); countdownInterval = null; }
 
       const players = data.players || {};
@@ -805,7 +788,7 @@
         Object.entries(players[team] || {}).forEach(([id, p]) => {
           roomUpdates.push(set(ref(db, `games/battle_1/room/${team}/${id}`), {
             name: p.name,
-            // ФИКС #1: сохраняем старый joinedAt, если был
+            emoji: getPlayerEmoji(p),
             joinedAt: p.joinedAt || Date.now()
           }));
         });
@@ -905,7 +888,11 @@
       playClick();
       try {
         await set(ref(db, `games/battle_1/players/${team}/${id}`), {
-          name: roomPlayer.name, lives: 3, alive: true, connected: true,
+          name: roomPlayer.name,
+          emoji: getPlayerEmoji(roomPlayer),
+          lives: 3,
+          alive: true,
+          connected: true,
           joinedAt: roomPlayer.joinedAt || Date.now()
         });
         await remove(ref(db, `games/battle_1/room/${team}/${id}`));
@@ -922,6 +909,7 @@
       try {
         await set(ref(db, `games/battle_1/room/${team}/${id}`), {
           name: player.name,
+          emoji: getPlayerEmoji(player),
           joinedAt: player.joinedAt || Date.now()
         });
         await remove(ref(db, `games/battle_1/players/${team}/${id}`));
@@ -1015,12 +1003,11 @@
         }
         container.innerHTML = players.map(([id, p]) => `
           <div class="player-row active">
-            <div class="avatar avatar-sm" data-name="${escapeHtml(p.name)}"></div>
+            <div class="avatar avatar-sm">${getPlayerEmoji(p)}</div>
             <div class="name">${escapeHtml(p.name)}</div>
             <button class="kick-btn" onclick="removeFromGame('${team}', '${id}')" title="Вернуть в комнату">↩</button>
           </div>
         `).join('');
-        container.querySelectorAll('.avatar[data-name]').forEach(el => applyAvatar(el, el.dataset.name));
       };
       render('red', 'active-red', 'count-red', redMax);
       render('blue', 'active-blue', 'count-blue', blueMax);
@@ -1039,13 +1026,12 @@
         }
         container.innerHTML = players.map(([id, p]) => `
           <div class="player-row clickable" onclick="addToGame('${team}', '${id}')">
-            <div class="avatar avatar-sm" data-name="${escapeHtml(p.name)}"></div>
+            <div class="avatar avatar-sm">${getPlayerEmoji(p)}</div>
             <div class="name">${escapeHtml(p.name)}</div>
             <span class="text-cyan-400/60 text-sm">➕</span>
             <button class="kick-btn" onclick="event.stopPropagation(); kickFromRoom('${team}', '${id}')" title="Кикнуть">✖</button>
           </div>
         `).join('');
-        container.querySelectorAll('.avatar[data-name]').forEach(el => applyAvatar(el, el.dataset.name));
       };
       render('red', 'room-red', 'room-count-red');
       render('blue', 'room-blue', 'room-count-blue');
@@ -1126,7 +1112,7 @@
           const hearts = isDead ? '💀' : (p.lives <= 5 ? '❤️'.repeat(p.lives) : `❤️×${p.lives}`);
           return `
             <li class="flex justify-between items-center p-2 rounded-lg ${isActive ? 'bg-yellow-500/15 border border-yellow-500/40' : 'bg-black/25'} ${isDead ? 'opacity-40' : ''}">
-              <span class="font-bold truncate text-sm">${isActive ? '▶ ' : ''}${escapeHtml(p.name)}</span>
+              <span class="font-bold truncate text-sm">${isActive ? '▶ ' : ''}${getPlayerEmoji(p)} ${escapeHtml(p.name)}</span>
               <span class="ml-2 text-xs">${hearts}</span>
             </li>
           `;
@@ -1237,12 +1223,20 @@
         const extraRed = Object.keys(playersRed).slice(redMax);
         const extraBlue = Object.keys(playersBlue).slice(blueMax);
         for (const id of extraRed) {
-          await set(ref(db, `games/battle_1/room/red/${id}`), { name: playersRed[id].name, joinedAt: playersRed[id].joinedAt || Date.now() });
+          await set(ref(db, `games/battle_1/room/red/${id}`), {
+            name: playersRed[id].name,
+            emoji: getPlayerEmoji(playersRed[id]),
+            joinedAt: playersRed[id].joinedAt || Date.now()
+          });
           await remove(ref(db, `games/battle_1/players/red/${id}`));
           delete playersRed[id];
         }
         for (const id of extraBlue) {
-          await set(ref(db, `games/battle_1/room/blue/${id}`), { name: playersBlue[id].name, joinedAt: playersBlue[id].joinedAt || Date.now() });
+          await set(ref(db, `games/battle_1/room/blue/${id}`), {
+            name: playersBlue[id].name,
+            emoji: getPlayerEmoji(playersBlue[id]),
+            joinedAt: playersBlue[id].joinedAt || Date.now()
+          });
           await remove(ref(db, `games/battle_1/players/blue/${id}`));
           delete playersBlue[id];
         }
@@ -1251,7 +1245,14 @@
           const sorted = Object.entries(roomRed).sort((a, b) => (a[1].joinedAt || 0) - (b[1].joinedAt || 0));
           for (const [id, p] of sorted) {
             if (Object.keys(playersRed).length >= redMax) break;
-            playersRed[id] = { name: p.name, lives: redLives, alive: true, connected: true, joinedAt: p.joinedAt || Date.now() };
+            playersRed[id] = {
+              name: p.name,
+              emoji: getPlayerEmoji(p),
+              lives: redLives,
+              alive: true,
+              connected: true,
+              joinedAt: p.joinedAt || Date.now()
+            };
             await set(ref(db, `games/battle_1/players/red/${id}`), playersRed[id]);
             await remove(ref(db, `games/battle_1/room/red/${id}`));
           }
@@ -1260,7 +1261,14 @@
           const sorted = Object.entries(roomBlue).sort((a, b) => (a[1].joinedAt || 0) - (b[1].joinedAt || 0));
           for (const [id, p] of sorted) {
             if (Object.keys(playersBlue).length >= blueMax) break;
-            playersBlue[id] = { name: p.name, lives: blueLives, alive: true, connected: true, joinedAt: p.joinedAt || Date.now() };
+            playersBlue[id] = {
+              name: p.name,
+              emoji: getPlayerEmoji(p),
+              lives: blueLives,
+              alive: true,
+              connected: true,
+              joinedAt: p.joinedAt || Date.now()
+            };
             await set(ref(db, `games/battle_1/players/blue/${id}`), playersBlue[id]);
             await remove(ref(db, `games/battle_1/room/blue/${id}`));
           }
