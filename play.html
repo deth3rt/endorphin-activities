@@ -90,6 +90,11 @@
       50% { box-shadow: 0 0 40px rgba(251,191,36,0.9); }
     }
     @keyframes roomPulse { 0%, 100% { opacity: 0.6; } 50% { opacity: 1; } }
+    @keyframes emojiPop {
+      0% { transform: scale(0.5); opacity: 0; }
+      60% { transform: scale(1.15); opacity: 1; }
+      100% { transform: scale(1); opacity: 1; }
+    }
     .animate-shake { animation: shake 0.4s ease-in-out; }
 
     .avatar {
@@ -103,9 +108,11 @@
       flex-shrink: 0;
       border: 2px solid rgba(255,255,255,0.3);
       box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+      background: rgba(0,0,0,0.35);
+      line-height: 1;
     }
-    .avatar-sm { width: 32px; height: 32px; font-size: 0.9rem; }
-    .avatar-md { width: 46px; height: 46px; font-size: 1.3rem; }
+    .avatar-sm { width: 32px; height: 32px; font-size: 1.1rem; }
+    .avatar-md { width: 46px; height: 46px; font-size: 1.6rem; }
 
     /* ТАЙМЕР ХОДА */
     .turn-timer {
@@ -582,6 +589,35 @@
       outline: none;
     }
 
+    /* ВЫБОР ЭМОДЗИ */
+    .emoji-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      width: 100%;
+    }
+    .emoji-btn {
+      aspect-ratio: 1;
+      border-radius: 14px;
+      background: rgba(0,0,0,0.4);
+      border: 2px solid rgba(127, 227, 255, 0.2);
+      font-size: 1.7rem;
+      line-height: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.15s;
+      user-select: none;
+    }
+    .emoji-btn:active { transform: scale(0.9); }
+    .emoji-btn.selected {
+      border-color: var(--team-color);
+      background: rgba(34, 211, 238, 0.15);
+      box-shadow: 0 0 20px var(--team-color), inset 0 0 15px rgba(34, 211, 238, 0.1);
+      transform: scale(1.05);
+    }
+
     /* ROOM */
     .room-screen {
       position: fixed;
@@ -714,13 +750,13 @@
 </head>
 <body class="relative" id="main-body">
 
-  <div id="join-screen" class="fixed inset-0 flex flex-col items-center justify-center p-6 z-10">
-    <div class="glass-panel join-card p-7 rounded-3xl w-full max-w-sm flex flex-col items-center">
-      <div class="text-4xl mb-3">❄️</div>
+  <div id="join-screen" class="fixed inset-0 flex flex-col items-center justify-center p-6 z-10 overflow-y-auto">
+    <div class="glass-panel join-card p-6 rounded-3xl w-full max-w-sm flex flex-col items-center my-4">
+      <div class="text-4xl mb-2">❄️</div>
       <h1 class="text-2xl font-black text-cyan-300 mb-1 tracking-widest">ENDORPHIN</h1>
-      <p class="text-cyan-100/50 text-[10px] tracking-[0.3em] mb-5">СНЕЖНЫЙ БАТТЛ</p>
+      <p class="text-cyan-100/50 text-[10px] tracking-[0.3em] mb-4">СНЕЖНЫЙ БАТТЛ</p>
 
-      <div class="w-full mb-5">
+      <div class="w-full mb-4">
         <label class="block text-xs font-bold text-cyan-300/70 mb-2 tracking-wider">ТВОЁ ИМЯ</label>
         <input
           type="text"
@@ -732,7 +768,12 @@
         >
       </div>
 
-      <div id="team-badge" class="mb-5 px-5 py-1.5 rounded-full font-black text-xs tracking-wider"></div>
+      <div class="w-full mb-4">
+        <label class="block text-xs font-bold text-cyan-300/70 mb-2 tracking-wider text-center">ВЫБЕРИ СЕБЕ СМАЙЛИК</label>
+        <div class="emoji-grid" id="emoji-grid"></div>
+      </div>
+
+      <div id="team-badge" class="mb-4 px-5 py-1.5 rounded-full font-black text-xs tracking-wider"></div>
 
       <button
         id="join-btn"
@@ -780,7 +821,7 @@
     </div>
 
     <div class="player-info hidden" id="player-info">
-      <div class="avatar avatar-sm" id="info-avatar">?</div>
+      <div class="avatar avatar-sm" id="info-avatar">😀</div>
       <div class="info-text">
         <div class="name" id="info-name">Игрок</div>
         <div class="lives" id="info-lives">❤️❤️❤️</div>
@@ -791,9 +832,8 @@
 
     <div class="game-content">
 
-      <!-- УГОЛ -->
       <div class="control-card">
-        <div class="section-label">Угол <span id="angle-hint-inline" style="opacity: 0.5;">· вверх</span></div>
+        <div class="section-label">Угол</div>
         <div class="angle-control" id="angle-control">
           <div class="angle-hint" id="angle-hint">ВВЕРХ</div>
           <svg viewBox="0 0 320 130" preserveAspectRatio="xMidYMax meet" id="angle-svg">
@@ -806,7 +846,6 @@
         </div>
       </div>
 
-      <!-- СИЛА — DRAG -->
       <div class="control-card">
         <div class="section-label">Сила</div>
         <div class="power-drag" id="power-drag">
@@ -820,7 +859,6 @@
         </div>
       </div>
 
-      <!-- СУПЕР -->
       <div class="super-panel hidden" id="super-panel">
         <div class="super-header">
           <div class="super-title">⚡ СУПЕРБРОСОК</div>
@@ -862,10 +900,10 @@
   <div id="dead-overlay" class="overlay hidden">
     <div class="text-7xl mb-4">💀</div>
     <h1 class="text-3xl font-black text-white mb-3">ТЫ ВЫБЫЛ</h1>
-    <p class="text-sm text-gray-400 text-center px-8 mb-6">Твоя команда ещё сражается!</p>
+    <p class="text-sm text-gray-400 text-center px-8 mb-6">Твоя команда ещё сражается!<br>Жди окончания боя.</p>
     <div class="flex flex-col gap-3 w-full max-w-xs">
       <button id="watch-btn" class="py-3 rounded-xl bg-cyan-600 hover:bg-cyan-500 font-black text-white transition active:scale-95">
-        👀 СМОТРЕТЬ
+        👀 СМОТРЕТЬ НА ТВ
       </button>
       <button id="leave-dead-btn" class="py-3 rounded-xl bg-white/10 border border-white/20 font-bold text-white/70 hover:bg-white/20 transition text-sm">
         ЗАКРЫТЬ
@@ -878,8 +916,14 @@
     <h1 class="result-title win" id="result-title">ПОБЕДА!</h1>
     <p class="result-subtitle" id="result-subtitle">Твоя команда победила</p>
 
-    <div class="mt-8 px-8 text-center">
-      <p class="text-white/40 text-[10px] tracking-wider mb-4">ИГРА ЗАВЕРШЕНА</p>
+    <div class="mt-8 px-8 text-center flex flex-col gap-3 w-full max-w-xs">
+      <p class="text-white/40 text-[10px] tracking-wider mb-2">ИГРА ЗАВЕРШЕНА</p>
+      <button
+        id="play-again-btn"
+        class="px-8 py-4 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 font-black text-white hover:opacity-90 transition active:scale-95 text-base tracking-wider"
+      >
+        🎮 ИГРАТЬ ЕЩЁ
+      </button>
       <button
         id="result-close-btn"
         class="px-8 py-3 rounded-xl bg-white/10 border border-white/20 font-bold text-white hover:bg-white/20 transition active:scale-95 text-sm"
@@ -934,6 +978,7 @@
     const joinedKey = `endorphin_joined_${team}_${playerId}`;
     let hasJoined = localStorage.getItem(joinedKey) === '1';
     const nameStorageKey = `endorphin_name_${team}`;
+    const emojiStorageKey = `endorphin_emoji_${team}`;
 
     const playerRef = ref(db, `games/battle_1/players/${team}/${playerId}`);
     const roomRef = ref(db, `games/battle_1/room/${team}/${playerId}`);
@@ -942,6 +987,13 @@
     const TURN_TIME = 15;
     const FORM_TIME = 1500;
     const NAME_MAX = 16;
+
+    const EMOJIS = [
+      '😀','😎','🥳','🤠',
+      '😺','🐯','🦊','🐼',
+      '🐸','🦁','🐵','🦄',
+      '🐻','🐨','🐹','🐰'
+    ];
 
     const SUPERS = {
       fan: { id: 'fan', emoji: '🌪', name: 'ВЕЕР', desc: '6 снежков ±30°', cost: 1, count: 6 },
@@ -955,6 +1007,7 @@
     let currentPower = 30;
     let isShooting = false;
     let myName = '';
+    let myEmoji = '😀';
     let gameStatus = 'lobby';
     let lastPreloadValue = null;
     let myLives = 3;
@@ -1019,22 +1072,9 @@
         .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
     }
 
-    function getNameGradient(name) {
-      let hash = 0;
-      const s = name || '?';
-      for (let i = 0; i < s.length; i++) {
-        hash = s.charCodeAt(i) + ((hash << 5) - hash);
-        hash |= 0;
-      }
-      const hue1 = Math.abs(hash) % 360;
-      const hue2 = (hue1 + 60 + Math.abs(hash >> 8) % 60) % 360;
-      return `linear-gradient(135deg, hsl(${hue1}, 70%, 55%), hsl(${hue2}, 70%, 45%))`;
-    }
-    function getInitial(name) { return (name || '?').trim().charAt(0).toUpperCase() || '?'; }
-    function applyAvatar(el, name, size) {
-      el.style.background = getNameGradient(name);
-      el.innerText = getInitial(name);
-      if (size) el.className = `avatar avatar-${size}`;
+    function setAvatarEmoji(el, emoji) {
+      el.innerText = emoji || '😀';
+      el.style.background = 'rgba(0,0,0,0.35)';
     }
 
     function showToast(message, type = 'info') {
@@ -1070,6 +1110,32 @@
     document.getElementById('modal').addEventListener('click', (e) => {
       if (e.target.id === 'modal') { playClick(); closeModal(false); }
     });
+
+    // ============================================================
+    // ВЫБОР ЭМОДЗИ
+    // ============================================================
+    function buildEmojiGrid() {
+      const grid = document.getElementById('emoji-grid');
+      grid.innerHTML = '';
+      const savedEmoji = localStorage.getItem(emojiStorageKey);
+      myEmoji = savedEmoji && EMOJIS.includes(savedEmoji) ? savedEmoji : EMOJIS[0];
+
+      EMOJIS.forEach(e => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'emoji-btn' + (e === myEmoji ? ' selected' : '');
+        btn.innerText = e;
+        btn.onclick = () => {
+          playClick();
+          myEmoji = e;
+          grid.querySelectorAll('.emoji-btn').forEach(b => b.classList.remove('selected'));
+          btn.classList.add('selected');
+          vibrate(15);
+        };
+        grid.appendChild(btn);
+      });
+    }
+    buildEmojiGrid();
 
     async function ensureMyPosition() {
       if (isEnsuringPosition) return;
@@ -1112,6 +1178,7 @@
       if (name.length > NAME_MAX) name = name.substring(0, NAME_MAX);
 
       myName = name;
+      if (!myEmoji) myEmoji = EMOJIS[0];
       errorEl.classList.add('hidden');
       playClick();
 
@@ -1120,14 +1187,14 @@
         const existingPlayer = playersSnap.val();
 
         if (existingPlayer) {
-          await update(playerRef, { name, connected: true });
+          await update(playerRef, { name, emoji: myEmoji, connected: true });
         } else {
           const roomSnap = await get(roomRef);
           const existingRoom = roomSnap.val();
           if (existingRoom) {
-            await update(roomRef, { name, joinedAt: existingRoom.joinedAt || Date.now() });
+            await update(roomRef, { name, emoji: myEmoji, joinedAt: existingRoom.joinedAt || Date.now() });
           } else {
-            await set(roomRef, { name, joinedAt: Date.now() });
+            await set(roomRef, { name, emoji: myEmoji, joinedAt: Date.now() });
           }
         }
 
@@ -1138,6 +1205,7 @@
         hasJoined = true;
         localStorage.setItem(joinedKey, '1');
         localStorage.setItem(nameStorageKey, name);
+        localStorage.setItem(emojiStorageKey, myEmoji);
         vibrate(50);
 
         document.getElementById('join-screen').classList.add('hidden');
@@ -1166,7 +1234,7 @@
       const label = isRed ? '🔴 КРАСНЫЕ' : '🔵 СИНИЕ';
 
       const joinBadge = document.getElementById('team-badge');
-      joinBadge.className = `mb-5 px-5 py-1.5 rounded-full font-black text-xs tracking-wider border-2 ${color}`;
+      joinBadge.className = `mb-4 px-5 py-1.5 rounded-full font-black text-xs tracking-wider border-2 ${color}`;
       joinBadge.innerText = label;
 
       const gameBadge = document.getElementById('game-team-badge');
@@ -1176,23 +1244,18 @@
     updateTeamBadges();
 
     // ============================================================
-    // УГОЛ (SVG drag, с направлением)
+    // УГОЛ
     // ============================================================
     const angleSvg = document.getElementById('angle-svg');
     const anglePointer = document.getElementById('angle-pointer');
     const angleArcFill = document.getElementById('angle-arc-fill');
-    const angleArcBg = document.getElementById('angle-arc-bg');
     const angleValueBadge = document.getElementById('angle-value-badge');
     const angleHint = document.getElementById('angle-hint');
     const angleControl = document.getElementById('angle-control');
 
-    // У красных угол 0° = вправо, 180° = влево (в сторону синих)
-    // У синих угол 0° = влево, 180° = вправо (зеркально)
     function angleToPoint(angleDeg) {
       const rad = (angleDeg * Math.PI) / 180;
       const cx = 160, cy = 120, r = 120;
-      // Красные: 0° → (280,120), 90° → (160,0), 180° → (40,120)
-      // Синие: 0° → (40,120), 90° → (160,0), 180° → (280,120)
       const visual = isRed ? (Math.PI - rad) : rad;
       const x = cx + Math.cos(visual) * r;
       const y = cy - Math.sin(visual) * r;
@@ -1212,8 +1275,6 @@
     function buildArcPath(angleDeg) {
       const start = angleToPoint(0);
       const end = angleToPoint(angleDeg);
-      // направление дуги: у красных sweep=0 (по часовой от 0 к 180), у синих тоже sweep=0
-      // но так как angleToPoint уже отзеркален — sweep всегда 0
       return `M ${start.x} ${start.y} A 120 120 0 0 0 ${end.x} ${end.y}`;
     }
 
@@ -1293,7 +1354,7 @@
     angleControl.addEventListener('pointercancel', () => { isDraggingAngle = false; });
 
     // ============================================================
-    // СИЛА — DRAG-СЛАЙДЕР (без стрелочек)
+    // СИЛА
     // ============================================================
     const powerDrag = document.getElementById('power-drag');
     const powerDragFill = document.getElementById('power-drag-fill');
@@ -1638,12 +1699,11 @@
       } else {
         playingList.innerHTML = playingAll.map(p => `
           <div class="room-player-row">
-            <div class="avatar avatar-md" data-name="${escapeHtml(p.name)}"></div>
+            <div class="avatar avatar-md">${p.emoji || '😀'}</div>
             <div class="room-player-name">${escapeHtml(p.name)}</div>
             <div class="room-player-badge playing">В ИГРЕ</div>
           </div>
         `).join('');
-        playingList.querySelectorAll('.avatar[data-name]').forEach(el => applyAvatar(el, el.dataset.name, 'md'));
       }
 
       const waitingList = document.getElementById('room-waiting-list');
@@ -1659,13 +1719,12 @@
           const isMe = p.id === playerId;
           return `
             <div class="room-player-row ${isMe ? 'me' : ''}">
-              <div class="avatar avatar-md" data-name="${escapeHtml(p.name)}"></div>
+              <div class="avatar avatar-md">${p.emoji || '😀'}</div>
               <div class="room-player-name">${escapeHtml(p.name)}${isMe ? ' (ты)' : ''}</div>
               <div class="room-player-badge waiting">ЖДЁТ</div>
             </div>
           `;
         }).join('');
-        waitingList.querySelectorAll('.avatar[data-name]').forEach(el => applyAvatar(el, el.dataset.name, 'md'));
       }
 
       const statusEl = document.getElementById('room-status');
@@ -1697,9 +1756,10 @@
       if (me) {
         myLives = me.lives;
         meAlive = me.alive;
+        if (me.emoji) myEmoji = me.emoji;
         document.getElementById('info-name').innerText = me.name;
         document.getElementById('info-lives').innerHTML = renderHearts(me.lives, me.alive);
-        applyAvatar(document.getElementById('info-avatar'), me.name, 'sm');
+        setAvatarEmoji(document.getElementById('info-avatar'), myEmoji);
       }
     }
 
@@ -1732,6 +1792,7 @@
         meAlive = inPlayers.alive;
         myLives = inPlayers.lives;
         myName = inPlayers.name || myName;
+        if (inPlayers.emoji) myEmoji = inPlayers.emoji;
 
         if (inPlayers.posX == null || inPlayers.posY == null) ensureMyPosition();
 
@@ -1904,9 +1965,14 @@
       document.getElementById('confetti-container').innerHTML = '';
     };
 
+    document.getElementById('play-again-btn').onclick = () => {
+      playClick();
+      window.location.href = 'end.html';
+    };
+
     document.getElementById('watch-btn').onclick = () => {
       playClick();
-      hideOverlay('dead-overlay');
+      window.open('tv.html', '_blank');
     };
     document.getElementById('leave-dead-btn').onclick = () => {
       playClick();
@@ -1956,7 +2022,6 @@
       setTimeout(() => { container.innerHTML = ''; }, 5000);
     }
 
-    // INIT
     drawAngleTicks();
     updateAngleDisplay();
     updatePowerDisplay();
