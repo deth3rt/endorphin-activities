@@ -19,7 +19,6 @@
       --ice: #7fe3ff;
       --ice-bright: #22d3ee;
       --amber: #fbbf24;
-      --text-dim: rgba(168, 230, 255, 0.7);
       --text-dimmer: rgba(168, 230, 255, 0.4);
     }
 
@@ -62,14 +61,12 @@
       width: 100%;
     }
 
-    /* Логотип */
     .logo-wrap {
       width: clamp(200px, 50vw, 360px);
       filter: drop-shadow(0 0 30px rgba(34, 211, 238, 0.35));
     }
     .logo-wrap svg { width: 100%; height: auto; display: block; }
 
-    /* Заголовок */
     .title {
       font-size: clamp(2.6rem, 10vw, 5rem);
       font-weight: 900;
@@ -84,7 +81,6 @@
         0 0 80px rgba(34, 211, 238, 0.15);
     }
 
-    /* Подзаголовок */
     .subtitle {
       font-size: clamp(0.7rem, 1.6vw, 0.9rem);
       font-weight: 700;
@@ -94,29 +90,17 @@
       padding-left: 0.42em;
     }
 
-    /* Текст-инструкция */
     .hint {
-      font-size: clamp(0.95rem, 2vw, 1.15rem);
+      font-size: clamp(0.95rem, 2vw, 1.1rem);
       font-weight: 700;
       color: var(--ice);
       letter-spacing: 0.03em;
       line-height: 1.6;
       margin-top: 0.6rem;
-      max-width: 420px;
+      max-width: 400px;
     }
-    .hint .big {
-      display: block;
-      font-size: clamp(1.1rem, 2.4vw, 1.4rem);
-      font-weight: 900;
-      color: #fff;
-      margin-bottom: 0.6rem;
-      letter-spacing: 0.06em;
-    }
-    .hint .amber {
-      color: var(--amber);
-    }
+    .hint .amber { color: var(--amber); }
 
-    /* Футер */
     .footer {
       font-size: 0.65rem;
       color: var(--text-dimmer);
@@ -171,11 +155,10 @@
     <h1 class="title">ХОЧЕШЬ ЕЩЁ?</h1>
     <p class="subtitle">Снежный Баттл</p>
 
-    <div class="hint">
-      <span class="big">ОПЯТЬ ХОЧЕШЬ В БОЙ?</span>
+    <p class="hint">
       Попроси ведущего — он покажет <span class="amber">QR-код</span>.<br>
-      Сканируй его и возвращайся играть!
-    </div>
+      Сканируй его и возвращайся играть.
+    </p>
 
     <div class="footer">ENDORPHIN · СНЕЖНЫЙ БАТТЛ</div>
 
