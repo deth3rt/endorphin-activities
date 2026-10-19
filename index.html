@@ -6,34 +6,44 @@
     <meta name="theme-color" content="#03080f">
     <meta name="description" content="ENDORPHIN — Снежный Баттл. Мультиплеерная игра для вечеринок.">
     <title>ENDORPHIN | ГЛАВНОЕ МЕНЮ</title>
-    
+
+    <!-- Шрифты: preconnect + display=swap, чтобы не блокировали рендер -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&family=JetBrains+Mono:wght@700;900&display=swap" rel="stylesheet">
+
     <script src="https://cdn.tailwindcss.com"></script>
-    
+
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap');
-        
         :root {
-            --bg-gradient: radial-gradient(circle at 50% 0%, #0a2540 0%, #03080f 100%);
-            --ice-blue: #22d3ee;
-            --ice-dark: #0a2540;
-            --ice-glow: rgba(34, 211, 238, 0.4);
+            --bg-deep: #03080f;
+            --bg-mid: #0a2540;
+            --ice: #7fe3ff;
+            --ice-bright: #22d3ee;
+            --amber: #fbbf24;
+            --red-team: #ff3b5c;
+            --blue-team: #3d8bff;
+            --text-dim: rgba(168, 230, 255, 0.7);
+            --text-dimmer: rgba(168, 230, 255, 0.45);
+            --glass-bg: rgba(10, 37, 64, 0.55);
+            --glass-border: rgba(127, 227, 255, 0.28);
         }
 
-        * { 
-            box-sizing: border-box; 
-            margin: 0; 
-            padding: 0; 
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
             -webkit-tap-highlight-color: transparent;
         }
-        
-        html, body { 
-            width: 100%; 
-            min-height: 100%; 
+
+        html, body {
+            width: 100%;
+            min-height: 100%;
             overflow-x: hidden;
         }
-        
+
         body {
-            background: var(--bg-gradient);
+            background: radial-gradient(circle at 50% 0%, var(--bg-mid) 0%, var(--bg-deep) 70%);
             font-family: 'Montserrat', sans-serif;
             color: #fff;
             user-select: none;
@@ -42,10 +52,26 @@
             justify-content: center;
             min-height: 100dvh;
             padding: 1rem;
+            position: relative;
+            overflow: hidden;
         }
 
         /* ============================================================
-           CANVAS
+           NOISE TEXTURE (тонкая «дорогая» текстура поверх фона)
+           ============================================================ */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 2;
+            opacity: 0.035;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+            mix-blend-mode: overlay;
+        }
+
+        /* ============================================================
+           СНЕГОПАД (canvas)
            ============================================================ */
         #snow-canvas {
             position: fixed;
@@ -56,7 +82,7 @@
         }
 
         /* ============================================================
-           ГЛАВНЫЙ КОНТЕЙНЕР
+           КОНТЕЙНЕР
            ============================================================ */
         .menu-container {
             position: relative;
@@ -67,41 +93,34 @@
             text-align: center;
             padding: 1rem;
             width: 100%;
-            max-width: 900px;
+            max-width: 960px;
         }
 
         /* ============================================================
-           ЗАГОЛОВОК
+           ЛОГОТИП (SVG с обводкой и глоу — не «плывёт» на Retina)
            ============================================================ */
-        .title {
-            font-size: clamp(3rem, 12vw, 6rem);
-            font-weight: 900;
-            line-height: 1;
-            background: linear-gradient(180deg, #ffffff 0%, #a8e6ff 50%, #22d3ee 100%);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-            text-shadow: 
-                0 0 30px rgba(34, 211, 238, 0.4),
-                0 0 60px rgba(34, 211, 238, 0.2);
-            letter-spacing: -2px;
-            margin-bottom: 0.5rem;
-            position: relative;
-            animation: titleFloat 4s ease-in-out infinite;
+        .logo-wrap {
+            width: clamp(280px, 62vw, 560px);
+            margin-bottom: 0.4rem;
+            filter: drop-shadow(0 0 30px rgba(34, 211, 238, 0.35))
+                    drop-shadow(0 0 70px rgba(34, 211, 238, 0.15));
+            animation: logoFloat 5s ease-in-out infinite;
         }
+        .logo-wrap svg { width: 100%; height: auto; display: block; }
 
-        @keyframes titleFloat {
+        @keyframes logoFloat {
             0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-8px); }
+            50% { transform: translateY(-7px); }
         }
 
         .subtitle {
-            font-size: clamp(0.9rem, 2.5vw, 1.4rem);
+            font-size: clamp(0.8rem, 2.2vw, 1.15rem);
             font-weight: 700;
-            letter-spacing: 0.3em;
+            letter-spacing: 0.42em;
             text-transform: uppercase;
-            color: rgba(168, 230, 255, 0.7);
-            margin-bottom: clamp(2rem, 6vh, 3.5rem);
+            color: var(--text-dim);
+            margin-bottom: clamp(1.8rem, 5vh, 3rem);
+            padding-left: 0.42em; /* компенсируем letter-spacing для центрирования */
         }
 
         /* ============================================================
@@ -118,12 +137,10 @@
 
         .card-btn {
             position: relative;
-            width: 260px;
-            padding: 2rem 1.5rem;
-            background: rgba(10, 37, 64, 0.6);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 2px solid rgba(127, 227, 255, 0.3);
+            width: 270px;
+            padding: 2rem 1.5rem 1.9rem;
+            background: var(--glass-bg);
+            border: 1.5px solid var(--glass-border);
             border-radius: 1.5rem;
             text-align: center;
             cursor: pointer;
@@ -135,6 +152,7 @@
             color: #fff;
             display: block;
             outline: none;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.06);
         }
 
         .card-btn::before {
@@ -142,7 +160,7 @@
             position: absolute;
             top: -50%; left: -50%;
             width: 200%; height: 200%;
-            background: conic-gradient(from 0deg, transparent, rgba(34, 211, 238, 0.12), transparent 30%);
+            background: conic-gradient(from 0deg, transparent, rgba(34, 211, 238, 0.14), transparent 30%);
             animation: rotate 8s linear infinite;
             pointer-events: none;
             opacity: 0;
@@ -154,87 +172,99 @@
         .card-btn:hover,
         .card-btn:focus-visible {
             transform: translateY(-8px) scale(1.03);
-            border-color: rgba(34, 211, 238, 0.8);
-            box-shadow: 
-                0 20px 40px rgba(34, 211, 238, 0.2),
-                0 0 60px rgba(34, 211, 238, 0.3),
-                inset 0 0 30px rgba(34, 211, 238, 0.1);
+            border-color: rgba(34, 211, 238, 0.85);
+            box-shadow:
+                0 20px 40px rgba(34, 211, 238, 0.18),
+                0 0 60px rgba(34, 211, 238, 0.22),
+                inset 0 1px 0 rgba(255,255,255,0.1);
         }
 
         .card-btn:hover::before,
         .card-btn:focus-visible::before { opacity: 1; }
 
-        .card-btn:active {
-            transform: translateY(-2px) scale(0.98);
-        }
+        .card-btn:active { transform: translateY(-2px) scale(0.98); }
 
         .card-btn:focus-visible {
-            outline: 2px solid #22d3ee;
+            outline: 2px solid var(--ice-bright);
             outline-offset: 4px;
         }
 
-        .card-icon {
-            font-size: 3.5rem;
-            margin-bottom: 1rem;
-            display: block;
-            filter: drop-shadow(0 0 20px rgba(34, 211, 238, 0.6));
-            transition: transform 0.4s;
-            line-height: 1;
+        .card-icon-wrap {
+            width: 64px;
+            height: 64px;
+            margin: 0 auto 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 16px;
+            background: rgba(34, 211, 238, 0.08);
+            border: 1px solid rgba(127, 227, 255, 0.2);
+            transition: transform 0.4s, background 0.3s;
         }
 
-        .card-btn:hover .card-icon,
-        .card-btn:focus-visible .card-icon {
-            transform: scale(1.15) rotate(5deg);
+        .card-icon-wrap svg { width: 34px; height: 34px; }
+
+        .card-btn:hover .card-icon-wrap,
+        .card-btn:focus-visible .card-icon-wrap {
+            transform: scale(1.1) rotate(-4deg);
+            background: rgba(34, 211, 238, 0.16);
         }
 
         .card-title {
-            font-size: 1.15rem;
+            font-size: 1.1rem;
             font-weight: 900;
-            letter-spacing: 0.1em;
+            letter-spacing: 0.08em;
             margin-bottom: 0.4rem;
             position: relative;
             z-index: 2;
         }
 
         .card-desc {
-            font-size: 0.8rem;
-            color: rgba(168, 230, 255, 0.6);
+            font-size: 0.78rem;
+            color: var(--text-dimmer);
             position: relative;
             z-index: 2;
+            letter-spacing: 0.04em;
         }
 
         /* ============================================================
-           НИЖНЯЯ ПАНЕЛЬ
+           FOOTER-ССЫЛКИ
            ============================================================ */
         .footer-links {
             display: flex;
-            gap: 1.5rem;
+            gap: 0.6rem 1.2rem;
             flex-wrap: wrap;
             justify-content: center;
             align-items: center;
-            margin-top: 1rem;
+            margin-top: 0.5rem;
         }
 
         .footer-link {
-            font-size: 0.7rem;
-            color: rgba(168, 230, 255, 0.4);
-            letter-spacing: 0.2em;
+            font-size: 0.68rem;
+            color: var(--text-dimmer);
+            letter-spacing: 0.16em;
             text-transform: uppercase;
-            transition: color 0.3s;
+            transition: color 0.25s, background 0.25s;
             text-decoration: none;
-            padding: 0.5rem 0.8rem;
-            border-radius: 8px;
+            padding: 0.5rem 0.9rem;
+            border-radius: 999px;
+            font-weight: 700;
         }
 
         .footer-link:hover,
         .footer-link:focus-visible {
-            color: rgba(34, 211, 238, 0.9);
-            background: rgba(34, 211, 238, 0.08);
+            color: var(--ice-bright);
+            background: rgba(34, 211, 238, 0.1);
             outline: none;
         }
 
+        .footer-link.red:hover,
+        .footer-link.red:focus-visible { color: var(--red-team); background: rgba(255, 59, 92, 0.1); }
+        .footer-link.blue:hover,
+        .footer-link.blue:focus-visible { color: var(--blue-team); background: rgba(61, 139, 255, 0.1); }
+
         /* ============================================================
-           ИНДИКАТОР СТАТУСА
+           СТАТУС
            ============================================================ */
         .status-indicator {
             position: fixed;
@@ -242,13 +272,15 @@
             right: 12px;
             display: flex;
             align-items: center;
-            gap: 6px;
-            font-size: 0.65rem;
-            color: rgba(168, 230, 255, 0.5);
-            letter-spacing: 0.15em;
+            gap: 7px;
+            font-size: 0.62rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 700;
+            color: var(--text-dimmer);
+            letter-spacing: 0.12em;
             z-index: 20;
             padding: 6px 12px;
-            background: rgba(0,0,0,0.4);
+            background: rgba(0,0,0,0.45);
             border-radius: 999px;
             border: 1px solid rgba(127, 227, 255, 0.15);
         }
@@ -257,8 +289,8 @@
             width: 6px;
             height: 6px;
             border-radius: 50%;
-            background: #22d3ee;
-            box-shadow: 0 0 8px #22d3ee;
+            background: var(--ice-bright);
+            box-shadow: 0 0 8px var(--ice-bright);
             animation: pulseDot 2s ease-in-out infinite;
         }
 
@@ -277,32 +309,38 @@
            АДАПТАЦИЯ
            ============================================================ */
         @media (max-width: 640px) {
-            .cards-grid { 
-                gap: 1rem;
+            .cards-grid {
+                gap: 0.85rem;
                 flex-direction: column;
                 align-items: center;
             }
-            .card-btn { 
-                width: 100%; 
+            .card-btn {
+                width: 100%;
                 max-width: 340px;
-                padding: 1.5rem 1.2rem;
+                padding: 1.4rem 1.2rem;
             }
-            .card-icon { font-size: 2.5rem; margin-bottom: 0.6rem; }
+            .card-icon-wrap { width: 52px; height: 52px; margin-bottom: 0.75rem; }
+            .card-icon-wrap svg { width: 28px; height: 28px; }
             .card-title { font-size: 1rem; }
-            .card-desc { font-size: 0.75rem; }
+            .card-desc { font-size: 0.72rem; }
+        }
+
+        @media (max-height: 720px) {
+            .logo-wrap { width: clamp(240px, 50vw, 420px); }
+            .subtitle { margin-bottom: 1.2rem; }
+            .cards-grid { margin-bottom: 1rem; }
         }
 
         /* ============================================================
            REDUCED MOTION
            ============================================================ */
         @media (prefers-reduced-motion: reduce) {
-            *,
-            *::before,
-            *::after {
+            *, *::before, *::after {
                 animation-duration: 0.01ms !important;
                 animation-iteration-count: 1 !important;
                 transition-duration: 0.01ms !important;
             }
+            .logo-wrap { animation: none; }
         }
     </style>
 </head>
@@ -311,69 +349,111 @@
     <canvas id="snow-canvas"></canvas>
 
     <div class="menu-container">
-        
-        <h1 class="title">ENDORPHIN</h1>
+
+        <!-- SVG-логотип: обводка + градиент + глоу -->
+        <div class="logo-wrap" aria-label="ENDORPHIN">
+            <svg viewBox="0 0 600 120" xmlns="http://www.w3.org/2000/svg" role="img">
+                <defs>
+                    <linearGradient id="logoGrad" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stop-color="#ffffff"/>
+                        <stop offset="55%" stop-color="#a8e6ff"/>
+                        <stop offset="100%" stop-color="#22d3ee"/>
+                    </linearGradient>
+                    <filter id="logoGlow" x="-20%" y="-50%" width="140%" height="200%">
+                        <feGaussianBlur stdDeviation="6" result="blur"/>
+                        <feMerge>
+                            <feMergeNode in="blur"/>
+                            <feMergeNode in="SourceGraphic"/>
+                        </feMerge>
+                    </filter>
+                </defs>
+                <text x="300" y="88"
+                      text-anchor="middle"
+                      font-family="Montserrat, sans-serif"
+                      font-weight="900"
+                      font-size="96"
+                      letter-spacing="-3"
+                      fill="url(#logoGrad)"
+                      stroke="rgba(127,227,255,0.35)"
+                      stroke-width="0.7"
+                      filter="url(#logoGlow)">ENDORPHIN</text>
+            </svg>
+        </div>
+
         <p class="subtitle">Снежный Баттл</p>
 
         <div class="cards-grid">
             <a href="mod.html" class="card-btn" aria-label="Открыть пульт ведущего">
-                <span class="card-icon">🎮</span>
+                <div class="card-icon-wrap">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="#22d3ee" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="6" y1="12" x2="10" y2="12"/>
+                        <line x1="8" y1="10" x2="8" y2="14"/>
+                        <line x1="15" y1="13" x2="15.01" y2="13"/>
+                        <line x1="18" y1="11" x2="18.01" y2="11"/>
+                        <rect x="2" y="6" width="20" height="12" rx="2"/>
+                    </svg>
+                </div>
                 <div class="card-title" style="color: #22d3ee;">ПУЛЬТ ВЕДУЩЕГО</div>
                 <div class="card-desc">Управление игрой</div>
             </a>
 
             <a href="tv.html" class="card-btn" aria-label="Открыть экран для проектора">
-                <span class="card-icon">📺</span>
-                <div class="card-title" style="color: #3b82f6;">ЭКРАН ТВ</div>
+                <div class="card-icon-wrap">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="#3d8bff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="2" y="7" width="20" height="13" rx="2"/>
+                        <polyline points="17 2 12 7 7 2"/>
+                    </svg>
+                </div>
+                <div class="card-title" style="color: #3d8bff;">ЭКРАН ТВ</div>
                 <div class="card-desc">Для проектора</div>
             </a>
         </div>
 
         <div class="footer-links">
-            <a href="play.html?team=red" class="footer-link">🔴 Играть за красных</a>
-            <a href="play.html?team=blue" class="footer-link">🔵 Играть за синих</a>
+            <a href="play.html?team=red" class="footer-link red">🔴 Играть за красных</a>
+            <a href="play.html?team=blue" class="footer-link blue">🔵 Играть за синих</a>
             <a href="admin.html" class="footer-link">⚙️ Админ-панель</a>
         </div>
 
     </div>
 
-    <div class="status-indicator" id="status-indicator">
+    <div class="status-indicator" id="status-indicator" role="status" aria-live="polite">
         <div class="status-dot" id="status-dot"></div>
         <span id="status-text">ONLINE</span>
     </div>
 
     <script>
         // ============================================================
-        // CANVAS: СНЕГОПАД
+        // СНЕГОПАД НА CANVAS (с учётом DPR — не мыльно на Retina)
         // ============================================================
         const canvas = document.getElementById('snow-canvas');
-        const ctx = canvas.getContext('2d');
-        let width, height;
+        const ctx = canvas.getContext('2d', { alpha: true });
+        let width = 0, height = 0, dpr = 1;
         let snowflakes = [];
         let crystals = [];
         let animationId = null;
         let lastFrameTime = 0;
-        const FRAME_INTERVAL = 1000 / 60; // 60 FPS max
+        const FRAME_INTERVAL = 1000 / 60;
 
         const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
         function initParticles() {
             snowflakes = [];
             crystals = [];
-            
-            const flakeCount = prefersReducedMotion ? 0 : Math.min(80, Math.floor((width * height) / 20000));
-            const crystalCount = prefersReducedMotion ? 0 : Math.min(15, Math.floor((width * height) / 80000));
+
+            const flakeCount = prefersReducedMotion ? 0 : Math.min(90, Math.floor((width * height) / 18000));
+            const crystalCount = prefersReducedMotion ? 0 : Math.min(18, Math.floor((width * height) / 70000));
 
             for (let i = 0; i < flakeCount; i++) {
                 snowflakes.push({
                     x: Math.random() * width,
                     y: Math.random() * height,
-                    radius: Math.random() * 2.5 + 0.8,
-                    speedY: Math.random() * 0.8 + 0.3,
+                    radius: Math.random() * 2.4 + 0.7,
+                    speedY: Math.random() * 0.8 + 0.35,
                     speedX: Math.random() * 0.4 - 0.2,
-                    opacity: Math.random() * 0.5 + 0.3,
+                    opacity: Math.random() * 0.5 + 0.35,
                     wobble: Math.random() * Math.PI * 2,
-                    wobbleSpeed: Math.random() * 0.02 + 0.01
+                    wobbleSpeed: Math.random() * 0.02 + 0.008
                 });
             }
 
@@ -381,9 +461,9 @@
                 crystals.push({
                     x: Math.random() * width,
                     y: Math.random() * height,
-                    size: Math.random() * 12 + 5,
+                    size: Math.random() * 11 + 5,
                     speedY: Math.random() * 0.3 + 0.1,
-                    opacity: Math.random() * 0.25 + 0.1,
+                    opacity: Math.random() * 0.22 + 0.08,
                     rotation: Math.random() * Math.PI,
                     rotationSpeed: (Math.random() - 0.5) * 0.01
                 });
@@ -391,8 +471,14 @@
         }
 
         function resize() {
-            width = canvas.width = window.innerWidth;
-            height = canvas.height = window.innerHeight;
+            dpr = Math.min(window.devicePixelRatio || 1, 2);
+            width = window.innerWidth;
+            height = window.innerHeight;
+            canvas.width = Math.floor(width * dpr);
+            canvas.height = Math.floor(height * dpr);
+            canvas.style.width = width + 'px';
+            canvas.style.height = height + 'px';
+            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
             initParticles();
         }
 
@@ -405,13 +491,14 @@
         function drawFrame(timestamp) {
             animationId = requestAnimationFrame(drawFrame);
 
-            // Throttling до 60 FPS
             if (timestamp - lastFrameTime < FRAME_INTERVAL) return;
             lastFrameTime = timestamp;
 
             ctx.clearRect(0, 0, width, height);
 
             // Снежинки
+            ctx.shadowColor = 'rgba(34, 211, 238, 0.9)';
+            ctx.shadowBlur = 6;
             for (const flake of snowflakes) {
                 flake.y += flake.speedY;
                 flake.x += flake.speedX + Math.sin(flake.wobble) * 0.3;
@@ -427,8 +514,6 @@
                 ctx.beginPath();
                 ctx.arc(flake.x, flake.y, flake.radius, 0, Math.PI * 2);
                 ctx.fillStyle = `rgba(255, 255, 255, ${flake.opacity})`;
-                ctx.shadowColor = '#22d3ee';
-                ctx.shadowBlur = 6;
                 ctx.fill();
             }
             ctx.shadowBlur = 0;
@@ -446,9 +531,9 @@
                 ctx.save();
                 ctx.translate(crystal.x, crystal.y);
                 ctx.rotate(crystal.rotation);
-                ctx.fillStyle = `rgba(34, 211, 238, ${crystal.opacity})`;
-                ctx.shadowColor = '#22d3ee';
-                ctx.shadowBlur = 12;
+                ctx.fillStyle = `rgba(127, 227, 255, ${crystal.opacity})`;
+                ctx.shadowColor = 'rgba(34, 211, 238, 0.7)';
+                ctx.shadowBlur = 10;
                 ctx.beginPath();
                 ctx.moveTo(0, -crystal.size);
                 ctx.lineTo(crystal.size / 2, 0);
@@ -461,59 +546,51 @@
             ctx.shadowBlur = 0;
         }
 
-        // ============================================================
-        // PAUSE/RESUME ПРИ СКРЫТИИ ВКЛАДКИ
-        // ============================================================
+        // Пауза при скрытии вкладки — экономим батарею
         document.addEventListener('visibilitychange', () => {
             if (document.hidden) {
                 if (animationId) {
                     cancelAnimationFrame(animationId);
                     animationId = null;
                 }
-            } else {
-                if (!animationId && !prefersReducedMotion) {
-                    lastFrameTime = 0;
-                    animationId = requestAnimationFrame(drawFrame);
-                }
+            } else if (!animationId && !prefersReducedMotion) {
+                lastFrameTime = 0;
+                animationId = requestAnimationFrame(drawFrame);
             }
         });
 
-        // ============================================================
-        // СТАРТ
-        // ============================================================
         resize();
         if (!prefersReducedMotion) {
             animationId = requestAnimationFrame(drawFrame);
-        } else {
-            // Для reduced motion — рисуем один кадр
-            ctx.clearRect(0, 0, width, height);
         }
 
         // ============================================================
-        // ПРОВЕРКА ДОСТУПНОСТИ FIREBASE
+        // ПРОВЕРКА ДОСТУПНОСТИ FIREBASE (с замером задержки)
         // ============================================================
+        const DB_URL = 'https://endorphin-battle-default-rtdb.europe-west1.firebasedatabase.app/games/battle_1/status.json';
+
         async function checkFirebaseStatus() {
             const dot = document.getElementById('status-dot');
             const text = document.getElementById('status-text');
-            
+
+            const controller = new AbortController();
+            const timeout = setTimeout(() => controller.abort(), 5000);
+            const t0 = performance.now();
+
             try {
-                const controller = new AbortController();
-                const timeout = setTimeout(() => controller.abort(), 5000);
-                
-                const res = await fetch(
-                    'https://endorphin-battle-default-rtdb.europe-west1.firebasedatabase.app/games/battle_1/status.json',
-                    { signal: controller.signal }
-                );
+                const res = await fetch(DB_URL, { signal: controller.signal, cache: 'no-store' });
                 clearTimeout(timeout);
-                
-                if (res.ok) {
-                    const status = await res.json();
-                    text.innerText = status ? `ONLINE · ${String(status).toUpperCase()}` : 'ONLINE';
-                    dot.classList.remove('error');
-                } else {
-                    throw new Error('Not OK');
-                }
+                const latency = Math.round(performance.now() - t0);
+
+                if (!res.ok) throw new Error('HTTP ' + res.status);
+
+                const status = await res.json();
+                dot.classList.remove('error');
+                text.innerText = status
+                    ? `ONLINE · ${String(status).toUpperCase()} · ${latency}ms`
+                    : `ONLINE · ${latency}ms`;
             } catch (e) {
+                clearTimeout(timeout);
                 dot.classList.add('error');
                 text.innerText = 'OFFLINE';
             }
@@ -521,8 +598,13 @@
         checkFirebaseStatus();
         setInterval(checkFirebaseStatus, 30000);
 
+        // Обновить статус при возврате на вкладку
+        document.addEventListener('visibilitychange', () => {
+            if (!document.hidden) checkFirebaseStatus();
+        });
+
         // ============================================================
-        // ПРЕДЗАГРУЗКА ССЫЛОК (ускоряет переходы)
+        // PREFETCH — ускоряем переходы
         // ============================================================
         ['mod.html', 'tv.html', 'play.html', 'admin.html'].forEach(href => {
             const link = document.createElement('link');
