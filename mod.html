@@ -76,7 +76,6 @@
     }
     .animate-shake { animation: shake 0.4s ease-in-out; }
 
-    /* Аватар */
     .avatar {
       border-radius: 50%;
       display: inline-flex;
@@ -93,7 +92,6 @@
     .avatar-sm { width: 32px; height: 32px; font-size: 0.9rem; }
     .avatar-md { width: 40px; height: 40px; font-size: 1.1rem; }
 
-    /* Селектор чисел */
     .num-selector {
       display: flex;
       align-items: center;
@@ -139,7 +137,6 @@
       background: rgba(59, 130, 246, 0.1);
     }
 
-    /* Бейдж нечестного */
     .unfair-badge {
       background: linear-gradient(90deg, #fbbf24, #f59e0b);
       color: #000;
@@ -151,7 +148,6 @@
       animation: pulseStatus 2s ease-in-out infinite;
     }
 
-    /* Строка игрока */
     .player-row {
       display: flex;
       align-items: center;
@@ -212,12 +208,8 @@
     <a href="index.html" class="px-4 py-2 bg-gray-800 rounded-lg font-bold text-sm hover:bg-gray-700 transition">В МЕНЮ</a>
   </div>
 
-  <!-- ============================================================
-       ЛОББИ
-       ============================================================ -->
   <div id="lobby-controls" class="w-full flex flex-col items-center">
     
-    <!-- Статус экрана -->
     <div class="glass w-full max-w-4xl p-4 mb-4 flex justify-between items-center">
       <div>
         <div class="text-xs font-bold text-cyan-300/60 tracking-wider mb-1">ЭКРАН ТВ</div>
@@ -228,7 +220,6 @@
       </button>
     </div>
 
-    <!-- Обычные режимы -->
     <div class="glass w-full max-w-4xl p-6 mb-4 flex flex-col items-center">
       <h2 class="text-lg font-bold mb-3 text-cyan-100">БЫСТРЫЙ ВЫБОР</h2>
       <div class="flex gap-3 flex-wrap justify-center">
@@ -239,7 +230,6 @@
       </div>
     </div>
 
-    <!-- Нечестный режим -->
     <div class="glass w-full max-w-4xl p-6 mb-6 flex flex-col items-center">
       <div class="flex items-center gap-3 mb-4 flex-wrap justify-center">
         <h2 class="text-lg font-bold text-cyan-100">НЕЧЕСТНЫЙ БОЙ</h2>
@@ -281,7 +271,6 @@
       </p>
     </div>
 
-    <!-- Первая команда -->
     <div class="glass w-full max-w-4xl p-6 mb-6">
       <h2 class="text-xl font-bold mb-4 text-cyan-100 text-center">КАКАЯ КОМАНДА НАЧИНАЕТ?</h2>
       <div class="flex justify-center gap-6">
@@ -290,9 +279,6 @@
       </div>
     </div>
 
-    <!-- ============================================================
-         АКТИВНЫЕ ИГРОКИ (в текущей игре)
-         ============================================================ -->
     <div class="glass w-full max-w-4xl p-6 mb-4">
       <div class="flex justify-between items-center mb-3">
         <h2 class="text-xl font-bold text-cyan-100">🎮 В ИГРЕ</h2>
@@ -316,9 +302,6 @@
       </div>
     </div>
 
-    <!-- ============================================================
-         КОМНАТА ОЖИДАНИЯ
-         ============================================================ -->
     <div class="glass w-full max-w-4xl p-6 mb-6">
       <div class="flex justify-between items-center mb-3">
         <h2 class="text-xl font-bold text-cyan-100">⏳ КОМНАТА ОЖИДАНИЯ</h2>
@@ -348,9 +331,6 @@
     </button>
   </div>
 
-  <!-- ============================================================
-       ИГРА
-       ============================================================ -->
   <div id="game-controls" class="hidden w-full max-w-4xl flex-col items-center">
     <div class="glass w-full p-8 mb-8 text-center border-green-500/50">
       <h2 class="text-4xl font-black text-green-400 mb-4" id="game-status-title">ИГРА ИДЕТ</h2>
@@ -384,9 +364,6 @@
     </div>
   </div>
 
-  <!-- ============================================================
-       ФИНИШ
-       ============================================================ -->
   <div id="finished-controls" class="hidden w-full max-w-4xl flex-col items-center">
     <div class="glass w-full p-12 mb-8 text-center border-yellow-500/50">
       <div class="text-6xl mb-4" id="finish-emoji">🏆</div>
@@ -421,9 +398,6 @@
     let unfairRed = 1;
     let unfairBlue = 1;
 
-    // ============================================================
-    // УТИЛИТЫ
-    // ============================================================
     function escapeHtml(str) {
       if (!str) return '';
       return String(str)
@@ -451,9 +425,6 @@
       el.innerText = (name || '?').trim().charAt(0).toUpperCase() || '?';
     }
 
-    // ============================================================
-    // ПАРСИНГ РЕЖИМА
-    // ============================================================
     function parseMode(mode) {
       if (!mode || typeof mode !== 'string') return { redMax: 1, blueMax: 1, isUnfair: false };
       
@@ -507,22 +478,55 @@
           timer: null,
           preloadDone: false
         });
+      } else if (existing.status === 'finished') {
+        // Была финиш-фаза — принудительно возвращаем в лобби
+        // (не через newGame, чтобы не зависеть от currentData)
+        firstTeam = existing.firstTeam || 'red';
+        
+        const players = existing.players || {};
+        const roomUpdates = [];
+        
+        ['red', 'blue'].forEach(team => {
+          Object.entries(players[team] || {}).forEach(([id, p]) => {
+            roomUpdates.push(set(ref(db, `games/battle_1/room/${team}/${id}`), {
+              name: p.name,
+              joinedAt: Date.now()
+            }));
+          });
+        });
+        
+        await Promise.all(roomUpdates);
+        
+        await update(gameRef, {
+          screen: 'attract',
+          status: 'lobby',
+          players: { red: {}, blue: {} },
+          activePlayerId: null,
+          timer: null,
+          preloadDone: false,
+          winner: null,
+          last_shot: null,
+          shots: null,
+          turn: { team: firstTeam, name: '...' }
+        });
+        
+        try { await remove(ref(db, 'games/battle_1/aim')); } catch {}
+        
       } else if (existing.status === 'playing') {
         // Игра уже идёт
+        firstTeam = existing.firstTeam || 'red';
+        
         if (!confirm('Игра уже идёт. Сбросить её и вернуться в лобби?')) {
           return;
         }
-        // Переносим всех из players в room
         await moveAllPlayersToRoom(existing);
-      } else if (existing.status === 'finished') {
-        // Была финиш-фаза — возвращаем в attract
-        await newGame();
       } else {
-        // Лобби — просто убедимся, что screen: attract
+        // Лобби
+        firstTeam = existing.firstTeam || 'red';
+        
         if (existing.screen !== 'attract') {
           await update(gameRef, { screen: 'attract' });
         }
-        // Убедимся, что room существует
         if (!existing.room) {
           await update(gameRef, { room: { red: {}, blue: {} } });
         }
@@ -628,16 +632,13 @@
       update(gameRef, { mode: `${unfairRed}v${unfairBlue}` });
     };
 
-    // ============================================================
-    // ПОКАЗАТЬ QR
-    // ============================================================
     window.showQR = async () => {
       if (currentData?.status !== 'lobby') return;
       await update(gameRef, { screen: 'qr' });
     };
 
     // ============================================================
-    // РУЧНОЙ ВЫБОР ИГРОКА
+    // РУЧНОЙ ВЫБОР
     // ============================================================
     window.addToGame = async (team, id) => {
       if (currentData?.status !== 'lobby') return;
@@ -654,7 +655,6 @@
       const roomPlayer = currentData.room?.[team]?.[id];
       if (!roomPlayer) return;
       
-      // Переносим из room в players
       await set(ref(db, `games/battle_1/players/${team}/${id}`), {
         name: roomPlayer.name,
         lives: 3,
@@ -670,7 +670,6 @@
       const player = currentData.players?.[team]?.[id];
       if (!player) return;
       
-      // Возвращаем в room
       await set(ref(db, `games/battle_1/room/${team}/${id}`), {
         name: player.name,
         joinedAt: Date.now()
@@ -697,7 +696,6 @@
       const mode = data.mode || '1v1';
       const { redMax, blueMax, isUnfair } = parseMode(mode);
 
-      // Видимость панелей
       document.getElementById('lobby-controls').classList.toggle('hidden', status !== 'lobby');
       document.getElementById('game-controls').classList.toggle('hidden', status !== 'playing');
       document.getElementById('finished-controls').classList.toggle('hidden', status !== 'finished');
@@ -705,7 +703,6 @@
       document.getElementById('game-controls').classList.toggle('flex', status === 'playing');
       document.getElementById('finished-controls').classList.toggle('flex', status === 'finished');
 
-      // Screen status
       const screenEl = document.getElementById('screen-status');
       const screenLabels = {
         attract: 'ЗАСТАВКА',
@@ -716,14 +713,12 @@
       screenEl.innerText = screenLabels[screen] || 'ЗАСТАВКА';
       screenEl.style.color = screen === 'qr' ? '#22d3ee' : screen === 'game' ? '#22c55e' : screen === 'winner' ? '#fbbf24' : '#fff';
 
-      // Первая команда
       if (data.firstTeam) {
         firstTeam = data.firstTeam;
         document.getElementById('btn-first-red').classList.toggle('active-red', firstTeam === 'red');
         document.getElementById('btn-first-blue').classList.toggle('active-blue', firstTeam === 'blue');
       }
 
-      // Режим
       if (data.mode) {
         document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
         document.getElementById(`btn-${data.mode}`)?.classList.add('active');
@@ -740,31 +735,27 @@
         document.getElementById('mode-display').style.color = isUnfair ? '#fbbf24' : '#22d3ee';
       }
 
-      // Блокировка
       const inGame = status === 'playing' || status === 'finished';
       document.querySelectorAll('.mode-btn, .team-btn, .num-btn, #unfair-apply-btn').forEach(b => {
         b.disabled = inGame;
       });
       document.getElementById('btn-show-qr').disabled = inGame || screen === 'qr';
 
-      // Рендер
       renderActivePlayers(data, redMax, blueMax);
       renderRoomPlayers(data);
       updateStartButton(data, redMax, blueMax);
 
-      // Игра
       if (status === 'playing') {
         updateGameView(data, mode);
       }
 
-      // Финиш
       if (status === 'finished') {
         updateFinishedView(data);
       }
     });
 
     // ============================================================
-    // РЕНДЕР АКТИВНЫХ
+    // РЕНДЕР
     // ============================================================
     function renderActivePlayers(data, redMax, blueMax) {
       const render = (team, containerId, countId, max) => {
@@ -796,9 +787,6 @@
       render('blue', 'active-blue', 'count-blue', blueMax);
     }
 
-    // ============================================================
-    // РЕНДЕР КОМНАТЫ
-    // ============================================================
     function renderRoomPlayers(data) {
       const render = (team, containerId, countId) => {
         const players = Object.entries(data.room?.[team] || {})
@@ -834,9 +822,6 @@
       document.getElementById('room-count').innerText = `${total} игроков`;
     }
 
-    // ============================================================
-    // КНОПКА СТАРТ
-    // ============================================================
     function updateStartButton(data, redMax, blueMax) {
       const btn = document.getElementById('btn-start');
       const redCount = Object.keys(data.players?.red || {}).length;
@@ -848,13 +833,11 @@
         const activeReady = redCount >= redMax && blueCount >= blueMax;
         const canAutoFill = (redCount + roomRed) >= redMax && (blueCount + roomBlue) >= blueMax;
         
-        if (activeReady) {
+        if (activeReady || canAutoFill) {
           btn.disabled = false;
-          btn.innerText = '🚀 НАЧАТЬ БОЙ';
-          btn.classList.add('pulse-status');
-        } else if (canAutoFill) {
-          btn.disabled = false;
-          btn.innerText = `🚀 НАЧАТЬ БОЙ (автовыбор: ${redCount + roomRed}/${redMax} vs ${blueCount + roomBlue}/${blueMax})`;
+          btn.innerText = canAutoFill && !activeReady
+            ? `🚀 НАЧАТЬ БОЙ (автовыбор: ${redCount + roomRed}/${redMax} vs ${blueCount + roomBlue}/${blueMax})`
+            : '🚀 НАЧАТЬ БОЙ';
           btn.classList.add('pulse-status');
         } else {
           btn.disabled = true;
@@ -864,9 +847,6 @@
       }
     }
 
-    // ============================================================
-    // ИГРОВОЙ ЭКРАН
-    // ============================================================
     function updateGameView(data, mode) {
       const isPreloading = !data.preloadDone;
       const { redMax, blueMax, isUnfair } = parseMode(mode);
@@ -903,7 +883,6 @@
       document.getElementById('hp-fill-red').style.width = maxRed > 0 ? `${(redTotal / maxRed) * 100}%` : '0%';
       document.getElementById('hp-fill-blue').style.width = maxBlue > 0 ? `${(blueTotal / maxBlue) * 100}%` : '0%';
 
-      // Списки игроков
       const renderGameList = (team, listId) => {
         const players = Object.entries(data.players?.[team] || {});
         const list = document.getElementById(listId);
@@ -916,7 +895,7 @@
         list.innerHTML = players.map(([id, p]) => {
           const isDead = !p.alive || p.lives <= 0;
           const isActive = data.activePlayerId === id;
-          const hearts = isDead ? '💀' : '❤️'.repeat(p.lives);
+          const hearts = isDead ? '💀' : (p.lives <= 5 ? '❤️'.repeat(p.lives) : `❤️×${p.lives}`);
           return `
             <li class="flex justify-between items-center p-2 rounded-lg ${isActive ? 'bg-yellow-500/20 border border-yellow-500/50' : 'bg-black/30'} ${isDead ? 'opacity-50' : ''}">
               <span class="font-bold truncate">${isActive ? '▶ ' : ''}${escapeHtml(p.name)}</span>
@@ -936,9 +915,6 @@
       }
     }
 
-    // ============================================================
-    // ФИНИШ
-    // ============================================================
     function updateFinishedView(data) {
       const title = document.getElementById('finish-title');
       const emoji = document.getElementById('finish-emoji');
@@ -980,9 +956,6 @@
       try { await remove(ref(db, 'games/battle_1/aim')); } catch {}
     };
 
-    // ============================================================
-    // ВОЗВРАТ В ЛОББИ
-    // ============================================================
     window.returnToLobby = async () => {
       if (currentData?.status !== 'playing') return;
       if (!confirm('Вернуться в лобби? Все игроки перейдут в комнату.')) return;
@@ -990,41 +963,9 @@
       await moveAllPlayersToRoom(currentData);
     };
 
-    // ============================================================
-    // НОВАЯ ИГРА (после финиша)
-    // ============================================================
     window.newGame = async () => {
       if (currentData?.status !== 'finished') return;
-      
-      // Переносим всех из players в room
-      const players = currentData.players || {};
-      const roomUpdates = [];
-      
-      ['red', 'blue'].forEach(team => {
-        Object.entries(players[team] || {}).forEach(([id, p]) => {
-          roomUpdates.push(set(ref(db, `games/battle_1/room/${team}/${id}`), {
-            name: p.name,
-            joinedAt: Date.now()
-          }));
-        });
-      });
-      
-      await Promise.all(roomUpdates);
-      
-      await update(gameRef, {
-        screen: 'attract',
-        status: 'lobby',
-        players: { red: {}, blue: {} },
-        activePlayerId: null,
-        timer: null,
-        preloadDone: false,
-        winner: null,
-        last_shot: null,
-        shots: null,
-        turn: { team: firstTeam, name: '...' }
-      });
-      
-      try { await remove(ref(db, 'games/battle_1/aim')); } catch {}
+      await moveAllPlayersToRoom(currentData);
     };
 
     // ============================================================
@@ -1048,8 +989,29 @@
         const roomRed = data.room?.red || {};
         const roomBlue = data.room?.blue || {};
 
+        // ---------- ОБРЕЗКА ЛИШНИХ ----------
+        // Если в players больше, чем redMax/blueMax — вернуть лишних в room
+        const extraRed = Object.keys(playersRed).slice(redMax);
+        const extraBlue = Object.keys(playersBlue).slice(blueMax);
+        
+        for (const id of extraRed) {
+          await set(ref(db, `games/battle_1/room/red/${id}`), {
+            name: playersRed[id].name,
+            joinedAt: Date.now()
+          });
+          await remove(ref(db, `games/battle_1/players/red/${id}`));
+          delete playersRed[id];
+        }
+        for (const id of extraBlue) {
+          await set(ref(db, `games/battle_1/room/blue/${id}`), {
+            name: playersBlue[id].name,
+            joinedAt: Date.now()
+          });
+          await remove(ref(db, `games/battle_1/players/blue/${id}`));
+          delete playersBlue[id];
+        }
+
         // ---------- АВТОВЫБОР ----------
-        // Если не хватает — добираем из room по joinedAt
         if (Object.keys(playersRed).length < redMax) {
           const sorted = Object.entries(roomRed).sort((a, b) => (a[1].joinedAt || 0) - (b[1].joinedAt || 0));
           for (const [id, p] of sorted) {
@@ -1076,7 +1038,7 @@
           return;
         }
 
-        // ---------- FALLBACK КООРДИНАТ ----------
+        // ---------- КООРДИНАТЫ ----------
         const usedYRed = [];
         const usedYBlue = [];
         const coordUpdates = [];
@@ -1171,7 +1133,6 @@
       }
     };
 
-    // Инициализация
     updateUnfairSelectorUI();
   </script>
 </body>
