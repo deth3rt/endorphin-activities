@@ -50,10 +50,6 @@
       0%, 100% { box-shadow: 0 0 20px rgba(34, 211, 238, 0.3); }
       50% { box-shadow: 0 0 50px rgba(34, 211, 238, 0.8); }
     }
-    @keyframes floatHeart {
-      0%, 100% { transform: translateY(0) scale(1); }
-      50% { transform: translateY(-6px) scale(1.1); }
-    }
     @keyframes winPop {
       0% { transform: scale(0.3); opacity: 0; }
       60% { transform: scale(1.1); opacity: 1; }
@@ -84,7 +80,7 @@
        ============================================================ */
     .turn-timer {
       position: fixed;
-      top: calc(var(--safe-top) + 10px);
+      top: calc(var(--safe-top) + 6px);
       left: 50%;
       transform: translateX(-50%);
       z-index: 60;
@@ -97,23 +93,20 @@
 
     .turn-timer-ring {
       position: relative;
-      width: 70px;
-      height: 70px;
+      width: 60px;
+      height: 60px;
       margin: 0 auto;
     }
-
     .turn-timer-ring svg {
       transform: rotate(-90deg);
       width: 100%;
       height: 100%;
     }
-
     .turn-timer-ring .bg {
       fill: none;
       stroke: rgba(255,255,255,0.1);
       stroke-width: 6;
     }
-
     .turn-timer-ring .progress {
       fill: none;
       stroke: var(--team-color);
@@ -122,35 +115,24 @@
       transition: stroke-dashoffset 0.1s linear, stroke 0.3s;
       filter: drop-shadow(0 0 8px var(--team-color));
     }
-
     .turn-timer-ring.danger .progress {
       stroke: #ef4444;
       filter: drop-shadow(0 0 12px #ef4444);
     }
-
     .turn-timer-value {
       position: absolute;
       top: 50%; left: 50%;
       transform: translate(-50%, -50%);
-      font-size: 1.8rem;
+      font-size: 1.5rem;
       font-weight: 900;
       color: #fff;
       font-variant-numeric: tabular-nums;
       text-shadow: 0 0 20px var(--team-color);
     }
-
     .turn-timer-ring.danger .turn-timer-value {
       color: #ef4444;
       text-shadow: 0 0 30px #ef4444;
       animation: timerPulse 0.5s ease-in-out infinite;
-    }
-
-    .turn-timer-label {
-      font-size: 0.6rem;
-      font-weight: 900;
-      letter-spacing: 0.2em;
-      color: rgba(168, 230, 255, 0.6);
-      margin-top: 4px;
     }
 
     /* ============================================================
@@ -158,68 +140,92 @@
        ============================================================ */
     .player-info {
       position: fixed;
-      top: calc(var(--safe-top) + 12px);
-      left: 50%;
-      transform: translateX(-50%);
+      top: calc(var(--safe-top) + 6px);
+      left: 12px;
       background: rgba(0,0,0,0.65);
-      padding: 8px 20px;
-      border-radius: 20px;
+      padding: 6px 14px;
+      border-radius: 14px;
       border: 1px solid rgba(127, 227, 255, 0.35);
-      text-align: center;
+      text-align: left;
       z-index: 50;
       backdrop-filter: blur(12px);
-      min-width: 150px;
+      min-width: 110px;
     }
     .player-info .name {
-      font-size: 1rem;
+      font-size: 0.85rem;
       font-weight: 900;
       color: #fff;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-      max-width: 220px;
+      max-width: 130px;
     }
     .player-info .lives {
-      font-size: 1.3rem;
-      margin-top: 2px;
-      letter-spacing: 3px;
-    }
-
-    .game-screen-inner {
-      padding-top: calc(var(--safe-top) + 12px);
-      padding-bottom: calc(var(--safe-bottom) + 16px);
+      font-size: 1rem;
+      margin-top: 1px;
+      letter-spacing: 2px;
     }
 
     /* ============================================================
-       КНОПКИ УПРАВЛЕНИЯ (НОВЫЙ UI)
+       ЭКРАН ИГРЫ
        ============================================================ */
-    .control-panel {
+    .game-screen {
+      display: flex;
+      flex-direction: column;
+      height: 100dvh;
+      padding-top: calc(var(--safe-top) + 4px);
+      padding-bottom: calc(var(--safe-bottom) + 6px);
+      padding-left: 8px;
+      padding-right: 8px;
+      gap: 6px;
+    }
+
+    .game-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 8px;
+      min-height: 0;
+      overflow-y: auto;
+    }
+
+    /* ============================================================
+       СЕКЦИЯ УГОЛ
+       ============================================================ */
+    .control-section {
+      width: 100%;
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 12px;
-      width: 100%;
-      padding: 0 12px;
+      gap: 6px;
+    }
+
+    .section-label {
+      font-size: 0.6rem;
+      font-weight: 900;
+      letter-spacing: 0.2em;
+      color: rgba(168, 230, 255, 0.6);
+      text-align: center;
     }
 
     .control-row {
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 12px;
+      gap: 8px;
       width: 100%;
-      max-width: 360px;
+      max-width: 340px;
     }
 
     .control-btn {
-      flex: 1;
-      aspect-ratio: 1;
-      max-width: 90px;
-      border-radius: 20px;
+      width: clamp(54px, 15vw, 72px);
+      height: clamp(54px, 15vw, 72px);
+      border-radius: 18px;
       background: rgba(10, 37, 64, 0.85);
       border: 2px solid rgba(127, 227, 255, 0.35);
       color: #fff;
-      font-size: 2.2rem;
+      font-size: clamp(1.5rem, 5vw, 2rem);
       font-weight: 900;
       display: flex;
       align-items: center;
@@ -228,6 +234,7 @@
       box-shadow: 0 4px 15px rgba(0,0,0,0.4);
       cursor: pointer;
       touch-action: manipulation;
+      flex-shrink: 0;
     }
     .control-btn:active:not(:disabled) {
       transform: scale(0.92);
@@ -240,36 +247,26 @@
       cursor: not-allowed;
     }
 
-    .control-btn.up { color: #22d3ee; }
-    .control-btn.down { color: #22d3ee; }
-    .control-btn.left { color: #fbbf24; }
-    .control-btn.right { color: #fbbf24; }
+    .control-btn.up, .control-btn.down { color: #22d3ee; }
+    .control-btn.left, .control-btn.right { color: #fbbf24; }
 
     /* Центральный дисплей */
     .control-display {
-      flex: 1.2;
-      aspect-ratio: 1;
-      max-width: 110px;
-      border-radius: 24px;
+      flex: 1;
+      min-height: clamp(54px, 15vw, 72px);
+      max-width: 130px;
+      border-radius: 18px;
       background: radial-gradient(circle at 50% 30%, rgba(34, 211, 238, 0.15), rgba(10, 37, 64, 0.95));
       border: 2px solid rgba(127, 227, 255, 0.4);
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 4px;
-    }
-
-    .display-label {
-      font-size: 0.55rem;
-      font-weight: 900;
-      letter-spacing: 0.15em;
-      color: rgba(168, 230, 255, 0.6);
-      margin-bottom: 2px;
+      padding: 2px 6px;
     }
 
     .display-value {
-      font-size: 2rem;
+      font-size: clamp(1.4rem, 5vw, 1.9rem);
       font-weight: 900;
       color: var(--team-color);
       text-shadow: 0 0 15px var(--team-color);
@@ -278,18 +275,19 @@
     }
 
     .display-unit {
-      font-size: 0.8rem;
+      font-size: 0.6rem;
       color: rgba(168, 230, 255, 0.5);
       font-weight: 700;
+      margin-top: 1px;
     }
 
     /* Индикатор мощности */
     .power-bar {
       width: 100%;
-      max-width: 360px;
-      height: 14px;
+      max-width: 340px;
+      height: 10px;
       background: rgba(0,0,0,0.6);
-      border-radius: 7px;
+      border-radius: 5px;
       overflow: hidden;
       border: 2px solid rgba(127, 227, 255, 0.2);
       position: relative;
@@ -301,134 +299,118 @@
       border-radius: 5px;
     }
 
-    /* Кнопка БРОСОК */
-    .shoot-btn {
-      width: min(52vw, 180px);
-      height: min(52vw, 180px);
-      border-radius: 50%;
-      font-size: 1.5rem;
-      font-weight: 900;
-      text-transform: uppercase;
-      letter-spacing: 2px;
-      transition: all 0.15s;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: radial-gradient(circle at 35% 35%, var(--team-color), rgba(0,0,0,0.6) 120%);
-      border: 6px solid rgba(255,255,255,0.2);
-      color: #fff;
-      box-shadow: 0 0 40px var(--team-color), inset 0 0 20px rgba(0,0,0,0.3);
-      position: relative;
-      overflow: hidden;
-      text-shadow: 0 2px 10px rgba(0,0,0,0.5);
-    }
-    .shoot-btn::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: radial-gradient(circle at 50% 0%, rgba(255,255,255,0.4), transparent 60%);
-      opacity: 0.6;
-    }
-    .shoot-btn:active:not(:disabled) {
-      transform: scale(0.93);
-      box-shadow: 0 0 70px var(--team-color), inset 0 0 30px rgba(0,0,0,0.5);
-    }
-    .shoot-btn:disabled {
-      filter: grayscale(1);
-      opacity: 0.25;
-      transform: scale(0.85);
-      box-shadow: none;
-    }
-
     /* ============================================================
        СУПЕРСПОСОБНОСТИ
        ============================================================ */
     .super-panel {
       width: 100%;
-      max-width: 360px;
-      margin-top: 10px;
+      max-width: 340px;
     }
 
     .super-header {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 8px 12px;
+      padding: 4px 10px;
       background: rgba(251, 191, 36, 0.15);
       border: 1px solid rgba(251, 191, 36, 0.4);
-      border-radius: 12px;
-      margin-bottom: 8px;
+      border-radius: 10px;
+      margin-bottom: 4px;
     }
-
     .super-title {
-      font-size: 0.7rem;
+      font-size: 0.6rem;
       font-weight: 900;
       letter-spacing: 0.15em;
       color: #fbbf24;
       text-shadow: 0 0 10px #fbbf24;
     }
-
     .super-hearts {
-      font-size: 0.8rem;
+      font-size: 0.65rem;
       font-weight: 700;
       color: rgba(251, 191, 36, 0.8);
     }
 
     .super-grid {
       display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 8px;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 4px;
     }
 
     .super-btn {
-      padding: 12px 8px;
-      border-radius: 14px;
+      padding: 6px 2px;
+      border-radius: 10px;
       background: rgba(10, 37, 64, 0.85);
       border: 2px solid rgba(251, 191, 36, 0.4);
       color: #fff;
       font-weight: 900;
-      font-size: 0.75rem;
       text-align: center;
       transition: all 0.15s;
       cursor: pointer;
       position: relative;
       overflow: hidden;
     }
-
     .super-btn .super-emoji {
-      font-size: 1.6rem;
+      font-size: 1.1rem;
       display: block;
-      margin-bottom: 2px;
+      line-height: 1;
     }
-
-    .super-btn .super-name {
-      font-size: 0.7rem;
-      letter-spacing: 0.08em;
-    }
-
     .super-btn .super-cost {
-      font-size: 0.6rem;
-      color: rgba(251, 191, 36, 0.8);
-      margin-top: 2px;
+      font-size: 0.55rem;
+      color: rgba(251, 191, 36, 0.9);
+      margin-top: 1px;
+      font-weight: 900;
     }
-
     .super-btn:active:not(:disabled) {
       transform: scale(0.95);
-      background: rgba(251, 191, 36, 0.2);
+      background: rgba(251, 191, 36, 0.25);
       border-color: #fbbf24;
-      box-shadow: 0 0 25px #fbbf24;
+      box-shadow: 0 0 20px #fbbf24;
     }
-
     .super-btn:disabled {
       opacity: 0.3;
       cursor: not-allowed;
     }
-
     .super-btn.can-use {
       animation: superPulse 2s ease-in-out infinite;
     }
 
-    /* Модалка суперброска */
+    /* ============================================================
+       КНОПКА БРОСОК
+       ============================================================ */
+    .shoot-btn {
+      width: 100%;
+      max-width: 340px;
+      height: clamp(52px, 12vh, 70px);
+      border-radius: 20px;
+      font-size: clamp(1.1rem, 4vw, 1.4rem);
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      transition: all 0.15s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: radial-gradient(circle at 50% 30%, var(--team-color), rgba(0,0,0,0.7) 150%);
+      border: 3px solid rgba(255,255,255,0.25);
+      color: #fff;
+      box-shadow: 0 0 40px var(--team-color), inset 0 0 20px rgba(0,0,0,0.3);
+      text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+      flex-shrink: 0;
+      margin-top: auto;
+    }
+    .shoot-btn:active:not(:disabled) {
+      transform: scale(0.97);
+      box-shadow: 0 0 60px var(--team-color), inset 0 0 30px rgba(0,0,0,0.5);
+    }
+    .shoot-btn:disabled {
+      filter: grayscale(1);
+      opacity: 0.3;
+      box-shadow: none;
+    }
+
+    /* ============================================================
+       МОДАЛКА СУПЕРБРОСКА
+       ============================================================ */
     .super-modal {
       position: fixed;
       inset: 0;
@@ -459,11 +441,9 @@
     }
     .overlay.hidden { display: none; }
 
-    .wait-overlay {
-      background: rgba(0,0,0,0.88);
-    }
+    .wait-overlay { background: rgba(0,0,0,0.88); }
     .wait-overlay .pulse-dot {
-      width: 20px; height: 20px;
+      width: 18px; height: 18px;
       border-radius: 50%;
       background: #22d3ee;
       box-shadow: 0 0 20px #22d3ee;
@@ -498,12 +478,12 @@
       filter: drop-shadow(0 0 20px rgba(148, 163, 184, 0.4));
     }
     .result-subtitle {
-      font-size: 1.1rem;
+      font-size: 1rem;
       color: rgba(168, 230, 255, 0.7);
       margin-top: 1rem;
     }
     .result-emoji {
-      font-size: 5rem;
+      font-size: 4rem;
       margin-bottom: 1rem;
       animation: winPop 0.8s 0.1s both;
       filter: drop-shadow(0 0 40px rgba(251, 191, 36, 0.6));
@@ -536,13 +516,31 @@
     }
 
     /* ============================================================
-       КОМПАКТНЫЙ ЛЭЙАУТ
+       АДАПТИВ
        ============================================================ */
     @media (max-height: 720px) {
-      .shoot-btn { width: min(42vw, 140px); height: min(42vw, 140px); font-size: 1.2rem; }
-      .control-btn { font-size: 1.8rem; }
-      .display-value { font-size: 1.6rem; }
-      .game-screen-inner { padding-top: calc(var(--safe-top) + 8px); }
+      .game-content { gap: 5px; }
+      .control-section { gap: 4px; }
+      .control-row { gap: 6px; }
+      .super-grid { gap: 3px; }
+      .super-btn { padding: 4px 2px; }
+      .super-btn .super-emoji { font-size: 0.95rem; }
+    }
+
+    @media (max-height: 620px) {
+      .game-content { gap: 3px; }
+      .control-section { gap: 3px; }
+      .control-row { gap: 5px; }
+      .control-btn { width: clamp(44px, 12vw, 58px); height: clamp(44px, 12vw, 58px); border-radius: 14px; }
+      .control-display { min-height: clamp(44px, 12vw, 58px); }
+      .display-value { font-size: 1.3rem; }
+      .display-unit { font-size: 0.55rem; }
+      .super-header { padding: 3px 8px; }
+      .super-title { font-size: 0.55rem; }
+      .super-hearts { font-size: 0.6rem; }
+      .super-btn { padding: 3px 2px; }
+      .super-btn .super-emoji { font-size: 0.9rem; }
+      .shoot-btn { height: clamp(46px, 10vh, 58px); font-size: 1rem; }
     }
   </style>
 </head>
@@ -552,41 +550,39 @@
        ЭКРАН ВХОДА
        ============================================================ -->
   <div id="join-screen" class="fixed inset-0 flex flex-col items-center justify-center p-6 z-10">
-    <div class="glass-panel join-card p-8 rounded-3xl w-full max-w-sm flex flex-col items-center">
-      <div class="text-5xl mb-4">❄️</div>
-      <h1 class="text-3xl font-black text-cyan-300 mb-1 tracking-widest">ENDORPHIN</h1>
-      <p class="text-cyan-100/50 text-xs tracking-[0.3em] mb-6">СНЕЖНЫЙ БАТТЛ</p>
+    <div class="glass-panel join-card p-7 rounded-3xl w-full max-w-sm flex flex-col items-center">
+      <div class="text-4xl mb-3">❄️</div>
+      <h1 class="text-2xl font-black text-cyan-300 mb-1 tracking-widest">ENDORPHIN</h1>
+      <p class="text-cyan-100/50 text-[10px] tracking-[0.3em] mb-5">СНЕЖНЫЙ БАТТЛ</p>
       
-      <div class="w-full mb-6">
+      <div class="w-full mb-5">
         <label class="block text-xs font-bold text-cyan-300/70 mb-2 tracking-wider">ТВОЁ ИМЯ</label>
         <input 
           type="text" 
           id="input-name" 
           placeholder="ВВЕДИ ИМЯ" 
           maxlength="16"
-          class="join-input w-full rounded-xl px-4 py-4 text-center text-xl font-bold text-white placeholder:text-white/30"
+          class="join-input w-full rounded-xl px-4 py-3 text-center text-lg font-bold text-white placeholder:text-white/30"
         >
       </div>
 
-      <div id="team-badge" class="mb-6 px-6 py-2 rounded-full font-black text-sm tracking-wider"></div>
+      <div id="team-badge" class="mb-5 px-5 py-1.5 rounded-full font-black text-xs tracking-wider"></div>
 
       <button 
         id="join-btn" 
-        class="w-full py-5 text-white font-black text-xl rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 shadow-lg active:scale-95 transition-all"
+        class="w-full py-4 text-white font-black text-lg rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 shadow-lg active:scale-95 transition-all"
       >
         ПОДКЛЮЧИТЬСЯ
       </button>
-      <p id="join-error" class="text-red-400 text-xs mt-3 hidden"></p>
+      <p id="join-error" class="text-red-400 text-xs mt-2 hidden"></p>
     </div>
   </div>
 
   <!-- ============================================================
        ЭКРАН ИГРЫ
        ============================================================ -->
-  <div id="game-screen" class="hidden fixed inset-0 flex flex-col items-center z-10 game-screen-inner">
-
-    <div class="tv-timer hidden" id="tv-timer"></div>
-
+  <div id="game-screen" class="hidden game-screen">
+    
     <!-- Таймер хода -->
     <div class="turn-timer" id="turn-timer">
       <div class="turn-timer-ring" id="turn-timer-ring">
@@ -594,9 +590,8 @@
           <circle class="bg" cx="35" cy="35" r="30"></circle>
           <circle class="progress" cx="35" cy="35" r="30" id="turn-timer-progress"></circle>
         </svg>
-        <div class="turn-timer-value" id="turn-timer-value">10</div>
+        <div class="turn-timer-value" id="turn-timer-value">15</div>
       </div>
-      <div class="turn-timer-label">СЕК</div>
     </div>
 
     <div class="player-info hidden" id="player-info">
@@ -604,69 +599,65 @@
       <div class="lives" id="info-lives">❤️❤️❤️</div>
     </div>
 
-    <div id="game-team-badge" class="mb-2 px-5 py-1.5 rounded-full font-black text-xs tracking-widest"></div>
+    <div id="game-team-badge" class="self-center mb-1 px-4 py-1 rounded-full font-black text-[10px] tracking-widest"></div>
 
     <!-- ========================================================
-         ПАНЕЛЬ УПРАВЛЕНИЯ
+         КОНТЕНТ
          ======================================================== -->
-    <div class="control-panel flex-1 justify-center">
+    <div class="game-content">
 
-      <!-- УГОЛ: верхний ряд -->
-      <div class="control-row">
-        <button class="control-btn up" id="angle-up" disabled>▲</button>
-      </div>
-
-      <!-- ЦЕНТР: дисплей + боковые кнопки -->
-      <div class="control-row">
-        <button class="control-btn left" id="power-down" disabled>◀</button>
-        
-        <div class="control-display">
-          <div class="display-label">УГОЛ</div>
-          <div class="display-value" id="angle-display">45°</div>
-          <div class="display-unit" id="angle-hint">ВПЕРЁД</div>
+      <!-- СЕКЦИЯ УГОЛ -->
+      <div class="control-section">
+        <div class="section-label">УГОЛ</div>
+        <div class="control-row">
+          <button class="control-btn up" id="angle-up" disabled>▲</button>
+          <div class="control-display">
+            <div class="display-value" id="angle-display">45°</div>
+            <div class="display-unit" id="angle-hint">ВВЕРХ</div>
+          </div>
+          <button class="control-btn down" id="angle-down" disabled>▼</button>
         </div>
-
-        <button class="control-btn right" id="power-up" disabled>▶</button>
       </div>
 
-      <!-- УГОЛ: нижний ряд -->
-      <div class="control-row">
-        <button class="control-btn down" id="angle-down" disabled>▼</button>
-      </div>
-
-      <!-- Мощность: бар -->
-      <div class="w-full flex flex-col items-center gap-1 mt-2">
-        <div class="flex justify-between text-xs font-bold text-white/60 w-full max-w-[360px] px-1">
-          <span>МОЩНОСТЬ</span>
-          <span id="power-value" class="text-white">10%</span>
+      <!-- СЕКЦИЯ СИЛА -->
+      <div class="control-section">
+        <div class="section-label">СИЛА</div>
+        <div class="control-row">
+          <button class="control-btn left" id="power-down" disabled>◀</button>
+          <div class="control-display">
+            <div class="display-value" id="power-value">30%</div>
+            <div class="display-unit" id="power-hint">СРЕДНЯЯ</div>
+          </div>
+          <button class="control-btn right" id="power-up" disabled>▶</button>
         </div>
         <div class="power-bar">
-          <div class="power-bar-fill" id="power-bar-fill" style="width: 10%"></div>
+          <div class="power-bar-fill" id="power-bar-fill" style="width: 30%"></div>
         </div>
       </div>
 
-      <!-- Суперспособности -->
+      <!-- СУПЕРСПОСОБНОСТИ -->
       <div class="super-panel hidden" id="super-panel">
         <div class="super-header">
-          <div class="super-title">⚡ СУПЕРСПОСОБНОСТИ</div>
-          <div class="super-hearts" id="super-hearts-info">-1❤️ за приём</div>
+          <div class="super-title">⚡ СУПЕР</div>
+          <div class="super-hearts" id="super-hearts-info">-1❤️</div>
         </div>
         <div class="super-grid" id="super-grid"></div>
       </div>
 
-      <!-- Кнопка БРОСОК -->
-      <button id="shoot-btn" class="shoot-btn mt-3" disabled>БРОСОК</button>
     </div>
+
+    <!-- КНОПКА БРОСОК -->
+    <button id="shoot-btn" class="shoot-btn self-center" disabled>БРОСОК</button>
   </div>
 
   <!-- ============================================================
-       МОДАЛКА ВЫБОРА СУПЕРБРОСКА
+       МОДАЛКА СУПЕРБРОСКА
        ============================================================ -->
   <div id="super-modal" class="super-modal hidden">
-    <div class="glass-panel p-6 rounded-3xl w-full max-w-sm">
-      <h2 class="text-xl font-black text-center mb-4 text-yellow-400 tracking-widest">ВЫБЕРИ СУПЕРБРОСОК</h2>
-      <div id="super-modal-list" class="space-y-3"></div>
-      <button id="super-cancel" class="w-full mt-4 py-3 rounded-xl bg-white/10 border border-white/20 font-bold text-white">ОТМЕНА</button>
+    <div class="glass-panel p-5 rounded-3xl w-full max-w-sm">
+      <h2 class="text-lg font-black text-center mb-3 text-yellow-400 tracking-widest">ВЫБЕРИ СУПЕРБРОСОК</h2>
+      <div id="super-modal-list"></div>
+      <button id="super-cancel" class="w-full mt-3 py-3 rounded-xl bg-white/10 border border-white/20 font-bold text-white text-sm">ОТМЕНА</button>
     </div>
   </div>
 
@@ -674,10 +665,10 @@
        ОВЕРЛЕИ
        ============================================================ -->
   <div id="wait-overlay" class="overlay wait-overlay hidden">
-    <div class="text-6xl mb-6">⏳</div>
-    <h1 class="text-3xl font-black text-white mb-3 text-center">ХОД СОПЕРНИКА</h1>
-    <p class="text-base text-gray-400 text-center px-8">СМОТРИ НА ЭКРАН!</p>
-    <div class="flex mt-6">
+    <div class="text-5xl mb-4">⏳</div>
+    <h1 class="text-2xl font-black text-white mb-2 text-center">ХОД СОПЕРНИКА</h1>
+    <p class="text-sm text-gray-400 text-center px-8">СМОТРИ НА ЭКРАН!</p>
+    <div class="flex mt-5">
       <div class="pulse-dot"></div>
       <div class="pulse-dot" style="animation-delay:0.2s"></div>
       <div class="pulse-dot" style="animation-delay:0.4s"></div>
@@ -685,9 +676,9 @@
   </div>
 
   <div id="preload-overlay" class="overlay wait-overlay hidden">
-    <p class="text-cyan-300 font-bold tracking-[0.3em] text-sm mb-4">ПРИГОТОВЬСЯ</p>
-    <div class="text-8xl font-black text-white" id="preload-count" style="text-shadow: 0 0 40px rgba(34,211,238,0.8); font-variant-numeric: tabular-nums;">10</div>
-    <p class="text-gray-400 text-sm mt-4">ИГРА НАЧНЁТСЯ СЕЙЧАС</p>
+    <p class="text-cyan-300 font-bold tracking-[0.3em] text-xs mb-3">ПРИГОТОВЬСЯ</p>
+    <div class="text-7xl font-black text-white" id="preload-count" style="text-shadow: 0 0 40px rgba(34,211,238,0.8); font-variant-numeric: tabular-nums;">10</div>
+    <p class="text-gray-400 text-xs mt-3">ИГРА НАЧНЁТСЯ СЕЙЧАС</p>
   </div>
 
   <div id="result-overlay" class="overlay result-overlay hidden">
@@ -695,11 +686,11 @@
     <h1 class="result-title win" id="result-title">ПОБЕДА!</h1>
     <p class="result-subtitle" id="result-subtitle">Твоя команда победила</p>
     
-    <div class="mt-10 px-8 text-center">
-      <p class="text-white/40 text-xs tracking-wider mb-6">ИГРА ЗАВЕРШЕНА</p>
+    <div class="mt-8 px-8 text-center">
+      <p class="text-white/40 text-[10px] tracking-wider mb-4">ИГРА ЗАВЕРШЕНА</p>
       <button 
         id="result-close-btn"
-        class="px-10 py-4 rounded-xl bg-white/10 border border-white/20 font-bold text-white hover:bg-white/20 transition active:scale-95"
+        class="px-8 py-3 rounded-xl bg-white/10 border border-white/20 font-bold text-white hover:bg-white/20 transition active:scale-95 text-sm"
       >
         ЗАКРЫТЬ
       </button>
@@ -731,11 +722,12 @@
     localStorage.setItem(storageKey, playerId);
 
     const playerRef = ref(db, `games/battle_1/players/${team}/${playerId}`);
+    const aimRef = ref(db, `games/battle_1/aim/${playerId}`);
 
     // ============================================================
     // КОНСТАНТЫ
     // ============================================================
-    const TURN_TIME = 10;
+    const TURN_TIME = 15;
     const FORM_TIME = 1500;
     const ANGLE_STEP = 5;
     const POWER_STEP = 10;
@@ -744,38 +736,10 @@
     // СУПЕРСПОСОБНОСТИ
     // ============================================================
     const SUPERS = {
-      fan: {
-        id: 'fan',
-        emoji: '🌪',
-        name: 'ВЕЕР',
-        desc: '6 снежков ±30°',
-        cost: 1,
-        count: 6
-      },
-      shotgun: {
-        id: 'shotgun',
-        emoji: '💥',
-        name: 'ДРОБОВИК',
-        desc: '8 снежков ±10°',
-        cost: 1,
-        count: 8
-      },
-      chaos: {
-        id: 'chaos',
-        emoji: '🎲',
-        name: 'ХАОС',
-        desc: '6 снежков рандом',
-        cost: 1,
-        count: 6
-      },
-      nuke: {
-        id: 'nuke',
-        emoji: '☄️',
-        name: 'ЯДЕРКА',
-        desc: '1 снежок, 3❤️ урона',
-        cost: 2,
-        count: 1
-      }
+      fan: { id: 'fan', emoji: '🌪', name: 'ВЕЕР', desc: '6 снежков ±30°', cost: 1, count: 6 },
+      shotgun: { id: 'shotgun', emoji: '💥', name: 'ДРОБОВИК', desc: '8 снежков ±10°', cost: 1, count: 8 },
+      chaos: { id: 'chaos', emoji: '🎲', name: 'ХАОС', desc: '6 снежков рандом', cost: 1, count: 6 },
+      nuke: { id: 'nuke', emoji: '☄️', name: 'ЯДЕРКА', desc: '1 снежок, 3❤️ урона', cost: 2, count: 1 }
     };
 
     // ============================================================
@@ -792,39 +756,33 @@
     let isUnfairMode = false;
     let myTeamMax = 1;
     let enemyTeamMax = 1;
-    let isSmallerTeam = false;
-    let superModalOpen = false;
-
-    // Таймер хода
+    let costMultiplier = 1;
     let turnTimerInterval = null;
     let turnDeadline = 0;
+
+    // Throttle для live-прицела
+    let aimSyncTimeout = null;
+    let lastAimSent = null;
 
     // ============================================================
     // УТИЛИТЫ
     // ============================================================
-    const vibrate = (pattern) => {
-      if (navigator.vibrate) navigator.vibrate(pattern);
-    };
+    const vibrate = (p) => { if (navigator.vibrate) navigator.vibrate(p); };
     const showOverlay = (id) => document.getElementById(id).classList.remove('hidden');
     const hideOverlay = (id) => document.getElementById(id).classList.add('hidden');
     const clamp = (v, min, max) => Math.max(min, Math.min(max, v));
 
     // ============================================================
-    // ГЕНЕРАЦИЯ КООРДИНАТ (идеальная расстановка)
+    // ГЕНЕРАЦИЯ КООРДИНАТ
     // ============================================================
     async function ensureMyPosition() {
       const snap = await get(playerRef);
       const me = snap.val();
-      
       if (!me) return;
-      
-      // Уже есть координаты — не трогаем
       if (me.posX !== undefined && me.posY !== undefined) return;
 
-      // Генерируем с учётом других игроков команды
       const teamSnap = await get(ref(db, `games/battle_1/players/${team}`));
       const teamPlayers = teamSnap.val() || {};
-      
       const usedY = [];
       Object.values(teamPlayers).forEach(p => {
         if (p.posY !== undefined && p.id !== playerId) usedY.push(p.posY);
@@ -865,10 +823,10 @@
         });
       }
 
-      // ГАРАНТИРОВАННАЯ РАССТАНОВКА
       await ensureMyPosition();
 
       onDisconnect(playerRef).remove();
+      onDisconnect(aimRef).remove();
 
       hasJoined = true;
       vibrate(50);
@@ -881,6 +839,7 @@
       updateTeamBadges();
       updateAngleDisplay();
       updatePowerDisplay();
+      syncAimToFirebase();
     }
 
     document.getElementById('join-btn').onclick = joinGame;
@@ -893,89 +852,42 @@
       const label = isRed ? '🔴 КРАСНЫЕ' : '🔵 СИНИЕ';
       
       const joinBadge = document.getElementById('team-badge');
-      joinBadge.className = `mb-6 px-6 py-2 rounded-full font-black text-sm tracking-wider border-2 ${color}`;
+      joinBadge.className = `mb-5 px-5 py-1.5 rounded-full font-black text-xs tracking-wider border-2 ${color}`;
       joinBadge.innerText = label;
 
       const gameBadge = document.getElementById('game-team-badge');
-      gameBadge.className = `mb-2 px-5 py-1.5 rounded-full font-black text-xs tracking-widest border-2 ${color}`;
+      gameBadge.className = `self-center mb-1 px-4 py-1 rounded-full font-black text-[10px] tracking-widest border-2 ${color}`;
       gameBadge.innerText = label;
     }
     updateTeamBadges();
 
     // ============================================================
-    // УПРАВЛЕНИЕ: УГОЛ
+    // УГОЛ
     // ============================================================
     function angleUp() {
       if (!isMyTurn || isShooting) return;
-      // Для красных: увеличение угла = вверх (к 180 → вверх-влево, но мы вправо смотрим)
-      // Реально: 0 = горизонтально вправо, 180 = горизонтально влево, 90 = вверх
-      // Кнопка ВВЕРХ должна увеличивать угол (к 90 = вверх)
-      // Но если > 90, то уже вниз-влево. Ограничим 0-90 для красных?
-      // Нет, оставим 0-180: 0 = вправо, 90 = вверх, 180 = влево
-      // ВВЕРХ: к 90. Если < 90 → +step, если > 90 → -step (возврат к 90)
-      // Проще: ВВЕРХ = +step, если <= 90, иначе -step (но это странно)
-      // 
-      // Альтернатива: ВВЕРХ = увеличить "высоту" = приблизить к 90
-      // ВНИЗ = отдалить от 90
-      
-      if (currentAngle < 90) {
-        currentAngle = Math.min(180, currentAngle + ANGLE_STEP);
-      } else {
-        currentAngle = Math.max(0, currentAngle - ANGLE_STEP);
-      }
-      currentAngle = clamp(currentAngle, 0, 180);
+      currentAngle = clamp(currentAngle + ANGLE_STEP, 0, 180);
       updateAngleDisplay();
+      syncAimToFirebase();
       vibrate(10);
     }
 
     function angleDown() {
       if (!isMyTurn || isShooting) return;
-      // ВНИЗ = уменьшить угол (если < 90) или увеличить (если > 90)
-      if (currentAngle < 90) {
-        currentAngle = Math.max(0, currentAngle - ANGLE_STEP);
-      } else {
-        currentAngle = Math.min(180, currentAngle + ANGLE_STEP);
-      }
-      currentAngle = clamp(currentAngle, 0, 180);
-      updateAngleDisplay();
-      vibrate(10);
-    }
-
-    // Альтернативная логика: ВВЕРХ/ВНИЗ = просто +/-, 0 = вправо, 180 = влево
-    // Но это сбивает. Давайте попробуем так:
-    // ВВЕРХ = +step (0→180, вправо→влево через верх)
-    // ВНИЗ = -step
-    // И для синих: ВВЕРХ = -step (360→180, влево→вправо через верх)
-    // 
-    // Хм, но тогда "вверх" в смысле "поднять" работает только на 0-90.
-    // 
-    // Лучше: кнопки ▲▼ меняют угол от 0 до 180 (для красных) — это градусы наклона.
-    // 0° = прямо, 90° = вверх, 180° = назад-вверх? Нет, 180 = влево.
-    // 
-    // Оставим линейно: ▲ = +5°, ▼ = -5°. Игрок сам поймёт.
-
-    // Переопределим проще — линейно
-    function angleUpLinear() {
-      if (!isMyTurn || isShooting) return;
-      currentAngle = clamp(currentAngle + ANGLE_STEP, 0, 180);
-      updateAngleDisplay();
-      vibrate(10);
-    }
-
-    function angleDownLinear() {
-      if (!isMyTurn || isShooting) return;
       currentAngle = clamp(currentAngle - ANGLE_STEP, 0, 180);
       updateAngleDisplay();
+      syncAimToFirebase();
       vibrate(10);
     }
 
     // ============================================================
-    // УПРАВЛЕНИЕ: МОЩНОСТЬ
+    // МОЩНОСТЬ
     // ============================================================
     function powerUp() {
       if (!isMyTurn || isShooting) return;
       currentPower = clamp(currentPower + POWER_STEP, 10, 100);
       updatePowerDisplay();
+      syncAimToFirebase();
       vibrate(10);
     }
 
@@ -983,6 +895,7 @@
       if (!isMyTurn || isShooting) return;
       currentPower = clamp(currentPower - POWER_STEP, 10, 100);
       updatePowerDisplay();
+      syncAimToFirebase();
       vibrate(10);
     }
 
@@ -1005,10 +918,49 @@
     function updatePowerDisplay() {
       document.getElementById('power-value').innerText = currentPower + '%';
       document.getElementById('power-bar-fill').style.width = currentPower + '%';
+      
+      let hint;
+      if (currentPower < 30) hint = 'СЛАБО';
+      else if (currentPower < 60) hint = 'СРЕДНЕ';
+      else if (currentPower < 85) hint = 'СИЛЬНО';
+      else hint = 'МАКС';
+      
+      document.getElementById('power-hint').innerText = hint;
     }
 
     // ============================================================
-    // ТАЙМЕР ХОДА
+    // СИНХРОНИЗАЦИЯ ПРИЦЕЛА НА TV
+    // ============================================================
+    function syncAimToFirebase() {
+      if (!isMyTurn) return;
+      
+      if (aimSyncTimeout) return;
+      
+      aimSyncTimeout = setTimeout(() => {
+        aimSyncTimeout = null;
+        
+        const aimData = {
+          angle: currentAngle,
+          power: currentPower,
+          team,
+          name: document.getElementById('info-name').innerText || 'Игрок',
+          time: Date.now()
+        };
+        
+        // Не шлём, если не изменилось
+        if (lastAimSent && 
+            Math.abs(lastAimSent.angle - aimData.angle) < 1 && 
+            Math.abs(lastAimSent.power - aimData.power) < 2) {
+          return;
+        }
+        lastAimSent = aimData;
+        
+        update(aimRef, aimData).catch(() => {});
+      }, 60);
+    }
+
+    // ============================================================
+    // ТАЙМЕР ХОДА (15 сек)
     // ============================================================
     function startTurnTimer() {
       stopTurnTimer();
@@ -1048,9 +1000,7 @@
         
         if (remaining <= 0) {
           stopTurnTimer();
-          if (isMyTurn && !isShooting) {
-            autoShoot();
-          }
+          if (isMyTurn && !isShooting) autoShoot();
         }
       }, 100);
     }
@@ -1072,7 +1022,7 @@
       vibrate([100, 50, 100]);
       
       const notif = document.createElement('div');
-      notif.className = 'fixed top-1/3 left-1/2 -translate-x-1/2 bg-red-500/90 text-white px-6 py-3 rounded-xl font-black text-lg z-[150] animate-shake';
+      notif.className = 'fixed top-1/3 left-1/2 -translate-x-1/2 bg-red-500/90 text-white px-5 py-2 rounded-xl font-black text-base z-[150] animate-shake';
       notif.innerText = '⏰ ВРЕМЯ ВЫШЛО!';
       document.body.appendChild(notif);
       setTimeout(() => notif.remove(), 1500);
@@ -1083,30 +1033,39 @@
     // ============================================================
     // СУПЕРСПОСОБНОСТИ
     // ============================================================
+    function getSuperCost(baseCost) {
+      return baseCost * costMultiplier;
+    }
+
     function updateSuperPanel() {
       const panel = document.getElementById('super-panel');
       
-      if (!isUnfairMode || !isSmallerTeam) {
+      // В нечестном режиме — всем
+      if (!isUnfairMode) {
         panel.classList.add('hidden');
         return;
       }
       
       panel.classList.remove('hidden');
-      document.getElementById('super-hearts-info').innerText = `У тебя ${myLives}❤️`;
+      
+      const costInfo = costMultiplier > 1 
+        ? `×${costMultiplier} (вы в большинстве)` 
+        : `БОНУС`;
+      document.getElementById('super-hearts-info').innerText = costInfo;
       
       const grid = document.getElementById('super-grid');
       grid.innerHTML = '';
       
       Object.values(SUPERS).forEach(superItem => {
-        const canUse = myLives > superItem.cost && isMyTurn && !isShooting;
+        const actualCost = getSuperCost(superItem.cost);
+        const canUse = myLives > actualCost && isMyTurn && !isShooting;
         
         const btn = document.createElement('button');
         btn.className = 'super-btn' + (canUse ? ' can-use' : '');
         btn.disabled = !canUse;
         btn.innerHTML = `
           <span class="super-emoji">${superItem.emoji}</span>
-          <span class="super-name">${superItem.name}</span>
-          <span class="super-cost">-${superItem.cost}❤️</span>
+          <span class="super-cost">${actualCost > superItem.cost ? '⚠' : ''}-${actualCost}❤️</span>
         `;
         btn.onclick = () => openSuperModal(superItem);
         grid.appendChild(btn);
@@ -1115,20 +1074,22 @@
 
     function openSuperModal(superItem) {
       if (!isMyTurn || isShooting) return;
-      if (myLives <= superItem.cost) return;
       
-      superModalOpen = true;
+      const actualCost = getSuperCost(superItem.cost);
+      if (myLives <= actualCost) return;
+      
       document.getElementById('super-modal').classList.remove('hidden');
       
       const list = document.getElementById('super-modal-list');
       list.innerHTML = `
         <div class="text-center mb-4">
-          <div class="text-6xl mb-2">${superItem.emoji}</div>
-          <div class="text-2xl font-black text-yellow-400">${superItem.name}</div>
+          <div class="text-5xl mb-2">${superItem.emoji}</div>
+          <div class="text-xl font-black text-yellow-400">${superItem.name}</div>
           <div class="text-sm text-gray-300 mt-1">${superItem.desc}</div>
-          <div class="text-yellow-400 font-bold mt-2">Стоимость: ${superItem.cost} ❤️</div>
+          <div class="text-yellow-400 font-bold mt-2">Стоимость: ${actualCost} ❤️</div>
+          ${costMultiplier > 1 ? `<div class="text-xs text-red-400 mt-1">⚠ Штраф за большинство: ×${costMultiplier}</div>` : ''}
         </div>
-        <button id="super-confirm" class="w-full py-4 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-xl font-black text-lg text-black">
+        <button id="super-confirm" class="w-full py-3 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-xl font-black text-base text-black">
           ПРИМЕНИТЬ
         </button>
       `;
@@ -1140,10 +1101,8 @@
     }
 
     function closeSuperModal() {
-      superModalOpen = false;
       document.getElementById('super-modal').classList.add('hidden');
     }
-
     document.getElementById('super-cancel').onclick = closeSuperModal;
 
     // ============================================================
@@ -1178,11 +1137,7 @@
           });
         }
       } else if (superItem.id === 'nuke') {
-        shots.push({
-          angle: currentAngle,
-          power: currentPower,
-          damage: 3
-        });
+        shots.push({ angle: currentAngle, power: currentPower, damage: 3 });
       }
       
       return shots;
@@ -1198,14 +1153,15 @@
 
     async function executeSuperShot(superItem) {
       if (isShooting) return;
-      if (myLives <= superItem.cost) return;
+      
+      const actualCost = getSuperCost(superItem.cost);
+      if (myLives <= actualCost) return;
       
       const shots = generateSuperShots(superItem);
       
       vibrate([60, 30, 60, 30, 100]);
       
-      // Списываем жизни
-      const newLives = Math.max(1, myLives - superItem.cost);
+      const newLives = Math.max(1, myLives - actualCost);
       await update(playerRef, { lives: newLives });
       myLives = newLives;
       
@@ -1219,6 +1175,9 @@
 
       const btn = document.getElementById('shoot-btn');
       btn.disabled = true;
+
+      // Убираем прицел с TV
+      remove(aimRef).catch(() => {});
 
       const now = Date.now();
       const shotData = {
@@ -1239,7 +1198,6 @@
       await push(ref(db, 'games/battle_1/shots'), shotData);
       await set(ref(db, 'games/battle_1/last_shot'), shotData);
 
-      // Формирование завершено → полёт
       setTimeout(async () => {
         try {
           await update(ref(db, 'games/battle_1/last_shot'), {
@@ -1249,7 +1207,6 @@
         } catch {}
       }, FORM_TIME);
 
-      // Передача хода
       setTimeout(async () => {
         const playersSnap = await get(ref(db, 'games/battle_1/players'));
         const players = playersSnap.val() || {};
@@ -1292,10 +1249,7 @@
       const prevStatus = gameStatus;
       gameStatus = data.status || 'lobby';
 
-      // Нечестный режим
-      if (data.mode) {
-        updateModeInfo(data.mode, data);
-      }
+      if (data.mode) updateModeInfo(data.mode);
 
       if (gameStatus === 'finished') {
         handleFinished(data);
@@ -1309,8 +1263,9 @@
         hideOverlay('wait-overlay');
         hideOverlay('preload-overlay');
         hideOverlay('result-overlay');
-        document.getElementById('tv-timer').classList.add('hidden');
         stopTurnTimer();
+        remove(aimRef).catch(() => {});
+        lastAimSent = null;
         
         const me = data.players?.[team]?.[playerId];
         if (me) {
@@ -1335,22 +1290,11 @@
 
       // ИГРА
       if (gameStatus === 'playing' && !data.timer) {
-        const tvTimer = document.getElementById('tv-timer');
-        if (data.timer) {
-          tvTimer.classList.remove('hidden');
-          tvTimer.innerText = data.timer;
-        } else {
-          tvTimer.classList.add('hidden');
-        }
-
         const wasMyTurn = isMyTurn;
         isMyTurn = (data.activePlayerId === playerId);
 
         const btn = document.getElementById('shoot-btn');
-        const angleUpBtn = document.getElementById('angle-up');
-        const angleDownBtn = document.getElementById('angle-down');
-        const powerUpBtn = document.getElementById('power-up');
-        const powerDownBtn = document.getElementById('power-down');
+        const buttons = ['angle-up', 'angle-down', 'power-up', 'power-down'].map(id => document.getElementById(id));
         
         if (isMyTurn) {
           if (!wasMyTurn) {
@@ -1363,22 +1307,19 @@
             currentPower = 30;
             updateAngleDisplay();
             updatePowerDisplay();
+            syncAimToFirebase();
           }
           btn.disabled = false;
-          angleUpBtn.disabled = false;
-          angleDownBtn.disabled = false;
-          powerUpBtn.disabled = false;
-          powerDownBtn.disabled = false;
+          buttons.forEach(b => b.disabled = false);
           hideOverlay('wait-overlay');
         } else {
           if (wasMyTurn) {
             stopTurnTimer();
+            remove(aimRef).catch(() => {});
+            lastAimSent = null;
           }
           btn.disabled = true;
-          angleUpBtn.disabled = true;
-          angleDownBtn.disabled = true;
-          powerUpBtn.disabled = true;
-          powerDownBtn.disabled = true;
+          buttons.forEach(b => b.disabled = true);
           if (hasJoined && !isShooting) showOverlay('wait-overlay');
         }
 
@@ -1393,9 +1334,9 @@
     });
 
     // ============================================================
-    // РЕЖИМ
+    // РЕЖИМ + КОЭФФИЦИЕНТ СТОИМОСТИ
     // ============================================================
-    function updateModeInfo(mode, data) {
+    function updateModeInfo(mode) {
       if (typeof mode === 'string' && mode.includes('v')) {
         const parts = mode.split('v');
         myTeamMax = isRed ? parseInt(parts[0]) : parseInt(parts[1]);
@@ -1406,20 +1347,24 @@
       }
       
       isUnfairMode = myTeamMax !== enemyTeamMax;
-      isSmallerTeam = isUnfairMode && myTeamMax < enemyTeamMax;
+      
+      // Коэффициент стоимости: если в большинстве — дороже
+      if (isUnfairMode) {
+        if (myTeamMax > enemyTeamMax) {
+          costMultiplier = Math.ceil(myTeamMax / enemyTeamMax);
+        } else {
+          costMultiplier = 1;
+        }
+      } else {
+        costMultiplier = 1;
+      }
       
       updateSuperPanel();
     }
 
     // ============================================================
-    // КНОПКИ УПРАВЛЕНИЯ (обработчики)
+    // КНОПКИ + ДОЛГОЕ НАЖАТИЕ
     // ============================================================
-    document.getElementById('angle-up').onclick = angleUpLinear;
-    document.getElementById('angle-down').onclick = angleDownLinear;
-    document.getElementById('power-up').onclick = powerUp;
-    document.getElementById('power-down').onclick = powerDown;
-
-    // Долгое нажатие = ускорение
     function addHoldSupport(btnId, action) {
       const btn = document.getElementById(btnId);
       let holdInterval = null;
@@ -1444,8 +1389,8 @@
       btn.addEventListener('touchcancel', stop);
     }
 
-    addHoldSupport('angle-up', angleUpLinear);
-    addHoldSupport('angle-down', angleDownLinear);
+    addHoldSupport('angle-up', angleUp);
+    addHoldSupport('angle-down', angleDown);
     addHoldSupport('power-up', powerUp);
     addHoldSupport('power-down', powerDown);
 
@@ -1455,11 +1400,10 @@
     function handleFinished(data) {
       hideOverlay('wait-overlay');
       hideOverlay('preload-overlay');
-      document.getElementById('tv-timer').classList.add('hidden');
       stopTurnTimer();
+      remove(aimRef).catch(() => {});
 
       const resultOverlay = document.getElementById('result-overlay');
-      
       if (!resultOverlay.classList.contains('hidden')) return;
 
       const titleEl = document.getElementById('result-title');
@@ -1533,9 +1477,7 @@
         container.appendChild(c);
       }
       
-      setTimeout(() => {
-        container.innerHTML = '';
-      }, 5000);
+      setTimeout(() => { container.innerHTML = ''; }, 5000);
     }
 
     // ============================================================
