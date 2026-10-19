@@ -318,32 +318,271 @@
         .avatar-sm { width: 34px; height: 34px; font-size: 0.95rem; }
 
         /* ============================================================
-           PRELOAD / WINNER
+           PRELOAD — АНИМЕ-СЦЕНА
            ============================================================ */
-        .preload-title {
-            font-size: clamp(2rem, 5vw, 4.5rem);
-            font-weight: 900;
-            text-align: center;
-            line-height: 1.15;
-            margin-bottom: 2rem;
-            animation: preloadPulse 2s ease-in-out infinite;
-            letter-spacing: 0.02em;
+        #preload-view {
+            background: radial-gradient(ellipse at 50% 40%, #0a2540 0%, #03080f 80%);
+            overflow: hidden;
         }
-        @keyframes preloadPulse {
-            0%, 100% { transform: scale(1); text-shadow: 0 0 30px rgba(34, 211, 238, 0.4); }
-            50% { transform: scale(1.02); text-shadow: 0 0 60px rgba(34, 211, 238, 0.8); }
+
+        #preload-view::before,
+        #preload-view::after {
+            content: '';
+            position: absolute;
+            top: 0; bottom: 0;
+            width: 38%;
+            pointer-events: none;
+            z-index: 0;
+            filter: blur(60px);
+            opacity: 0.35;
+        }
+        #preload-view::before {
+            left: -10%;
+            background: radial-gradient(ellipse at center, var(--red-team) 0%, transparent 70%);
+            animation: preloadSideRed 3s ease-in-out infinite;
+        }
+        #preload-view::after {
+            right: -10%;
+            background: radial-gradient(ellipse at center, var(--blue-team) 0%, transparent 70%);
+            animation: preloadSideBlue 3s ease-in-out infinite;
+        }
+        @keyframes preloadSideRed {
+            0%, 100% { opacity: 0.25; transform: scale(1); }
+            50% { opacity: 0.45; transform: scale(1.05); }
+        }
+        @keyframes preloadSideBlue {
+            0%, 100% { opacity: 0.25; transform: scale(1); }
+            50% { opacity: 0.45; transform: scale(1.05); }
+        }
+
+        #preload-view .preload-rays {
+            position: absolute;
+            inset: 0;
+            z-index: 0;
+            pointer-events: none;
+            background:
+                conic-gradient(from 0deg at 50% 45%,
+                    transparent 0deg,
+                    rgba(255,255,255,0.04) 30deg,
+                    transparent 60deg,
+                    rgba(255,255,255,0.04) 120deg,
+                    transparent 150deg,
+                    rgba(255,255,255,0.04) 210deg,
+                    transparent 240deg,
+                    rgba(255,255,255,0.04) 300deg,
+                    transparent 330deg);
+            animation: raysRotate 24s linear infinite;
+        }
+        @keyframes raysRotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .preload-scene {
+            position: relative;
+            z-index: 2;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: clamp(1.5rem, 4vw, 4rem);
+            width: 100%;
+            max-width: 1500px;
+            padding: 0 2rem;
+        }
+
+        .preload-side {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: clamp(0.5rem, 1.5vh, 1rem);
+            min-width: 0;
+        }
+        .preload-side.red { align-items: flex-end; text-align: right; }
+        .preload-side.blue { align-items: flex-start; text-align: left; }
+
+        .preload-name {
+            font-size: clamp(2rem, 5.5vw, 4.5rem);
+            font-weight: 900;
+            line-height: 1.05;
+            letter-spacing: -0.02em;
+            text-transform: uppercase;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 100%;
+            opacity: 0;
+            animation-fill-mode: forwards;
+            animation-duration: 0.7s;
+            animation-timing-function: cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            animation-delay: 0.15s;
+        }
+        .preload-side.red .preload-name {
+            color: var(--red-team);
+            text-shadow: 0 0 40px rgba(255, 59, 92, 0.8), 0 0 80px rgba(255, 59, 92, 0.4);
+            animation-name: nameInLeft;
+        }
+        .preload-side.blue .preload-name {
+            color: var(--blue-team);
+            text-shadow: 0 0 40px rgba(61, 139, 255, 0.8), 0 0 80px rgba(61, 139, 255, 0.4);
+            animation-name: nameInRight;
+        }
+        @keyframes nameInLeft {
+            from { transform: translateX(-120px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        @keyframes nameInRight {
+            from { transform: translateX(120px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        .preload-list-item {
+            font-size: clamp(1.2rem, 2.6vw, 2.2rem);
+            font-weight: 900;
+            line-height: 1.1;
+            letter-spacing: 0.02em;
+            text-transform: uppercase;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            opacity: 0;
+            animation-fill-mode: forwards;
+            animation-duration: 0.55s;
+            animation-timing-function: cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            display: flex;
+            align-items: center;
+            gap: 0.7rem;
+            max-width: 100%;
+        }
+        .preload-side.red .preload-list-item {
+            color: var(--red-team);
+            text-shadow: 0 0 25px rgba(255, 59, 92, 0.6);
+            animation-name: itemInLeft;
+            flex-direction: row-reverse;
+        }
+        .preload-side.blue .preload-list-item {
+            color: var(--blue-team);
+            text-shadow: 0 0 25px rgba(61, 139, 255, 0.6);
+            animation-name: itemInRight;
+        }
+        @keyframes itemInLeft {
+            from { transform: translateX(-80px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        @keyframes itemInRight {
+            from { transform: translateX(80px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        .preload-list-item .dot {
+            width: clamp(8px, 1vw, 14px);
+            height: clamp(8px, 1vw, 14px);
+            border-radius: 50%;
+            flex-shrink: 0;
+            box-shadow: 0 0 12px currentColor;
+        }
+        .preload-side.red .preload-list-item .dot { background: var(--red-team); }
+        .preload-side.blue .preload-list-item .dot { background: var(--blue-team); }
+
+        .preload-vs-wrap {
+            position: relative;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: clamp(80px, 10vw, 160px);
+            height: clamp(80px, 10vw, 160px);
+        }
+        .preload-vs {
+            font-size: clamp(3rem, 7vw, 6rem);
+            font-weight: 900;
+            font-style: italic;
+            letter-spacing: -0.05em;
+            color: #fff;
+            text-shadow:
+                0 0 30px var(--amber),
+                0 0 60px var(--amber),
+                0 0 100px rgba(245, 158, 11, 0.6);
+            position: relative;
+            z-index: 3;
+            animation: vsPulse 1.6s ease-in-out infinite;
+        }
+        @keyframes vsPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.12); }
+        }
+        .preload-vs-glow {
+            position: absolute;
+            inset: 0;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(251, 191, 36, 0.5) 0%, transparent 65%);
+            animation: vsGlowPulse 1.6s ease-in-out infinite;
+            z-index: 1;
+            filter: blur(10px);
+        }
+        @keyframes vsGlowPulse {
+            0%, 100% { transform: scale(1); opacity: 0.7; }
+            50% { transform: scale(1.25); opacity: 1; }
+        }
+
+        .preload-timer-wrap {
+            position: absolute;
+            bottom: clamp(2rem, 6vh, 4rem);
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 3;
+            text-align: center;
         }
         .preload-timer {
-            font-size: clamp(5rem, 12vw, 9rem);
+            font-size: clamp(4rem, 10vw, 7rem);
             font-weight: 900;
             color: #fff;
-            text-shadow: 0 0 40px rgba(34, 211, 238, 0.6);
-            margin: 1rem 0;
+            text-shadow: 0 0 40px rgba(34, 211, 238, 0.7), 0 0 80px rgba(34, 211, 238, 0.4);
             font-family: 'Montserrat', sans-serif;
             font-variant-numeric: tabular-nums;
             letter-spacing: -0.02em;
+            line-height: 1;
+            animation: timerPulse 1s ease-in-out infinite;
+        }
+        @keyframes timerPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.06); }
+        }
+        .preload-timer-label {
+            font-size: clamp(0.7rem, 1.4vw, 1rem);
+            font-weight: 900;
+            letter-spacing: 0.3em;
+            color: rgba(168, 230, 255, 0.6);
+            text-transform: uppercase;
+            margin-top: 0.5rem;
         }
 
+        .preload-ready {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: clamp(2rem, 5vw, 4rem);
+            font-weight: 900;
+            color: #fff;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            text-shadow: 0 0 40px var(--amber), 0 0 80px var(--amber);
+            z-index: 10;
+            opacity: 0;
+            pointer-events: none;
+        }
+        .preload-ready.show {
+            animation: readyFlash 1s ease-out forwards;
+        }
+        @keyframes readyFlash {
+            0% { opacity: 0; transform: translate(-50%, -50%) scale(0.3); }
+            40% { opacity: 1; transform: translate(-50%, -50%) scale(1.15); }
+            100% { opacity: 0; transform: translate(-50%, -50%) scale(1.6); }
+        }
+
+        /* ============================================================
+           MEGA / SUPER TEXT
+           ============================================================ */
         @keyframes megaZoom {
             0% { transform: translate(-50%, -50%) scale(0.1); opacity: 0; }
             50% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
@@ -425,7 +664,7 @@
         }
 
         /* ============================================================
-           HP-ДИСПЛЕЙ (КРУПНО, для проектора)
+           HP-ДИСПЛЕЙ
            ============================================================ */
         .hp-display {
             position: absolute;
@@ -704,11 +943,27 @@
         <div class="mt-8 text-xl font-black text-white/60 tracking-wider" id="qr-status">ОЖИДАНИЕ ИГРОКОВ...</div>
     </div>
 
-    <!-- PRELOAD -->
+    <!-- PRELOAD — АНИМЕ-СЦЕНА -->
     <div id="preload-view" class="full-screen hidden">
-        <h1 class="preload-title" id="preload-title">ИГРОК 1 VS ИГРОК 2</h1>
-        <div class="preload-timer" id="preload-timer">10</div>
-        <p class="text-gray-400 text-sm tracking-wider">ПРИГОТОВЬТЕСЬ</p>
+        <div class="preload-rays"></div>
+
+        <div class="preload-scene">
+            <div class="preload-side red" id="preload-red-side"></div>
+
+            <div class="preload-vs-wrap">
+                <div class="preload-vs-glow"></div>
+                <div class="preload-vs">VS</div>
+            </div>
+
+            <div class="preload-side blue" id="preload-blue-side"></div>
+        </div>
+
+        <div class="preload-timer-wrap">
+            <div class="preload-timer" id="preload-timer">10</div>
+            <div class="preload-timer-label">ПРИГОТОВЬТЕСЬ</div>
+        </div>
+
+        <div class="preload-ready" id="preload-ready">В БОЙ!</div>
     </div>
 
     <!-- WINNER -->
@@ -742,7 +997,6 @@
         const db = getDatabase(app);
         const gameId = 'battle_1';
         const gameRef = ref(db, `games/${gameId}`);
-
 
         // ============================================================
         // СОСТОЯНИЕ (объявлено до resizeCanvas — иначе TDZ)
@@ -1779,9 +2033,7 @@
         function updateQRPlayersList(data) {
             const renderList = (containerId, team) => {
                 const container = document.getElementById(containerId);
-
-                // Показываем ТОЛЬКО тех, кого ведущий уже закинул в бой (players).
-                // Ждущие в room — не видны на QR-экране.
+                // QR показывает только тех, кого ведущий уже закинул в бой (players)
                 const activePlayers = Object.entries(data.players?.[team] || {})
                     .sort((a, b) => (a[1].joinedAt || 0) - (b[1].joinedAt || 0));
 
@@ -2162,25 +2414,50 @@
             if (isPreloading) return;
             isPreloading = true;
 
-            const preloadTitle = document.getElementById('preload-title');
+            const redSide = document.getElementById('preload-red-side');
+            const blueSide = document.getElementById('preload-blue-side');
             const preloadTimer = document.getElementById('preload-timer');
+            const preloadReady = document.getElementById('preload-ready');
 
-            const redPlayers = Object.values(data.players?.red || {});
-            const bluePlayers = Object.values(data.players?.blue || {});
+            const redPlayers = Object.entries(data.players?.red || {});
+            const bluePlayers = Object.entries(data.players?.blue || {});
 
+            redSide.innerHTML = '';
+            blueSide.innerHTML = '';
+            preloadReady.classList.remove('show');
+
+            // 1v1: крупные имена
             if (redPlayers.length === 1 && bluePlayers.length === 1) {
-                preloadTitle.innerText = `${redPlayers[0].name.toUpperCase()} VS ${bluePlayers[0].name.toUpperCase()}`;
+                const el = document.createElement('div');
+                el.className = 'preload-name';
+                el.innerText = redPlayers[0][1].name.toUpperCase();
+                redSide.appendChild(el);
+
+                const el2 = document.createElement('div');
+                el2.className = 'preload-name';
+                el2.innerText = bluePlayers[0][1].name.toUpperCase();
+                blueSide.appendChild(el2);
             } else {
-                const redCount = redPlayers.length;
-                const blueCount = bluePlayers.length;
-                const isUnfair = redCount !== blueCount;
-                preloadTitle.innerText = isUnfair
-                    ? `⚔️ ${redCount} vs ${blueCount}`
-                    : `${redCount} vs ${blueCount}`;
+                // Команда на команду: список имён с задержкой
+                redPlayers.forEach(([id, p], i) => {
+                    const el = document.createElement('div');
+                    el.className = 'preload-list-item';
+                    el.style.animationDelay = (0.15 + i * 0.12) + 's';
+                    el.innerHTML = `<span class="dot"></span><span>${escapeHtml(p.name.toUpperCase())}</span>`;
+                    redSide.appendChild(el);
+                });
+                bluePlayers.forEach(([id, p], i) => {
+                    const el = document.createElement('div');
+                    el.className = 'preload-list-item';
+                    el.style.animationDelay = (0.15 + i * 0.12) + 's';
+                    el.innerHTML = `<span class="dot"></span><span>${escapeHtml(p.name.toUpperCase())}</span>`;
+                    blueSide.appendChild(el);
+                });
             }
 
             document.getElementById('preload-view').classList.remove('hidden');
-            preloadTimer.innerText = (data.timer !== null && data.timer !== undefined) ? data.timer : '10';
+            const startTimer = (data.timer !== null && data.timer !== undefined) ? data.timer : 10;
+            preloadTimer.innerText = startTimer;
         }
 
         function syncPlayers(data) {
