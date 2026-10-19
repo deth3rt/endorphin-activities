@@ -29,9 +29,7 @@
             user-select: none;
         }
 
-        /* ============================================================
-           СНЕЖИНКИ
-           ============================================================ */
+        /* СНЕЖИНКИ */
         .snowflake {
             position: absolute;
             color: rgba(255, 255, 255, 0.6);
@@ -50,9 +48,7 @@
             100% { transform: translateY(110vh) rotate(360deg); opacity: 0; }
         }
 
-        /* ============================================================
-           СТЕКЛО
-           ============================================================ */
+        /* СТЕКЛО */
         .glass-panel {
             background: var(--glass-bg);
             backdrop-filter: blur(16px);
@@ -62,9 +58,7 @@
             border-radius: 1.5rem;
         }
 
-        /* ============================================================
-           SHAKE
-           ============================================================ */
+        /* SHAKE */
         @keyframes screenShake {
             0%, 100% { transform: translate(0, 0); }
             20% { transform: translate(-5px, 2px); }
@@ -74,9 +68,7 @@
         }
         .screen-shake { animation: screenShake 0.4s cubic-bezier(.36,.07,.19,.97) both; }
 
-        /* ============================================================
-           CANVAS
-           ============================================================ */
+        /* CANVAS */
         #game-canvas {
             position: absolute;
             top: 0; left: 0;
@@ -85,9 +77,7 @@
             display: block;
         }
 
-        /* ============================================================
-           UI СЛОЙ
-           ============================================================ */
+        /* UI СЛОЙ */
         .ui-layer {
             position: absolute;
             inset: 0;
@@ -95,9 +85,7 @@
             pointer-events: none;
         }
 
-        /* ============================================================
-           ЛОББИ
-           ============================================================ */
+        /* ЛОББИ */
         #lobby-view {
             position: absolute;
             inset: 0;
@@ -111,9 +99,7 @@
             transition: opacity 0.5s;
         }
 
-        /* ============================================================
-           ПРЕЛОУДИНГ
-           ============================================================ */
+        /* ПРЕЛОУДИНГ */
         #preload-view {
             position: absolute;
             inset: 0;
@@ -148,9 +134,7 @@
             font-variant-numeric: tabular-nums;
         }
 
-        /* ============================================================
-           РЕКЛАМНЫЙ БЛОК
-           ============================================================ */
+        /* РЕКЛАМА */
         .ad-block {
             width: 100%;
             max-width: 600px;
@@ -173,9 +157,7 @@
             letter-spacing: 0.2em;
         }
 
-        /* ============================================================
-           МЕГАБРОСОК
-           ============================================================ */
+        /* МЕГАБРОСОК */
         @keyframes megaZoom {
             0% { transform: translate(-50%, -50%) scale(0.1); opacity: 0; }
             50% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
@@ -196,9 +178,7 @@
             pointer-events: none;
         }
 
-        /* ============================================================
-           БЕГУЩАЯ СТРОКА
-           ============================================================ */
+        /* БЕГУЩАЯ СТРОКА */
         .ticker-wrap {
             position: fixed;
             bottom: 0;
@@ -227,9 +207,7 @@
             100% { transform: translate3d(-100%, 0, 0); }
         }
 
-        /* ============================================================
-           СЕРДЕЧКИ
-           ============================================================ */
+        /* СЕРДЕЧКИ */
         .hp-display {
             position: absolute;
             font-size: 3rem;
@@ -238,9 +216,7 @@
         .hp-red { top: 20px; left: 20px; color: var(--red-team); }
         .hp-blue { bottom: 80px; right: 20px; color: var(--blue-team); }
 
-        /* ============================================================
-           ВЫБОР КОМАНДЫ
-           ============================================================ */
+        /* ВЫБОР КОМАНДЫ */
         .team-select {
             display: flex;
             gap: 20px;
@@ -277,9 +253,7 @@
             box-shadow: 0 0 30px rgba(59, 130, 246, 0.6);
         }
 
-        /* ============================================================
-           ФИНИШ
-           ============================================================ */
+        /* ФИНИШ */
         @keyframes winPop {
             0% { transform: scale(0.3); opacity: 0; }
             60% { transform: scale(1.1); opacity: 1; }
@@ -297,6 +271,101 @@
             pointer-events: none;
             animation: confettiFall linear forwards;
         }
+
+        /* ТАЙМЕР ХОДА (TV) */
+        .tv-turn-timer {
+            position: absolute;
+            z-index: 25;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .tv-turn-timer.active { opacity: 1; }
+
+        .tv-turn-timer-ring {
+            position: relative;
+            width: 90px;
+            height: 90px;
+        }
+
+        .tv-turn-timer-ring svg {
+            transform: rotate(-90deg);
+            width: 100%;
+            height: 100%;
+        }
+
+        .tv-turn-timer-ring .bg {
+            fill: none;
+            stroke: rgba(255,255,255,0.15);
+            stroke-width: 6;
+        }
+
+        .tv-turn-timer-ring .progress {
+            fill: none;
+            stroke-width: 6;
+            stroke-linecap: round;
+            transition: stroke-dashoffset 0.1s linear;
+        }
+
+        .tv-turn-timer-ring.red .progress {
+            stroke: #ef4444;
+            filter: drop-shadow(0 0 10px #ef4444);
+        }
+        .tv-turn-timer-ring.blue .progress {
+            stroke: #3b82f6;
+            filter: drop-shadow(0 0 10px #3b82f6);
+        }
+
+        .tv-turn-timer-ring.danger .progress {
+            stroke: #fbbf24;
+            filter: drop-shadow(0 0 15px #fbbf24);
+        }
+
+        .tv-turn-timer-value {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 2.2rem;
+            font-weight: 900;
+            color: #fff;
+            font-variant-numeric: tabular-nums;
+            text-shadow: 0 0 20px currentColor;
+        }
+
+        .tv-turn-timer-name {
+            position: absolute;
+            bottom: -28px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.85rem;
+            font-weight: 900;
+            letter-spacing: 0.15em;
+            white-space: nowrap;
+            text-shadow: 0 0 10px currentColor;
+        }
+
+        /* АНИМАЦИЯ ФОРМИРОВАНИЯ СНЕЖКА */
+        @keyframes formingPulse {
+            0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.7; }
+            50% { transform: translate(-50%, -50%) scale(1.4); opacity: 1; }
+        }
+        @keyframes formingSpin {
+            0% { transform: translate(-50%, -50%) rotate(0deg); }
+            100% { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+
+        .forming-label {
+            position: absolute;
+            transform: translate(-50%, -50%);
+            font-size: 0.9rem;
+            font-weight: 900;
+            letter-spacing: 0.15em;
+            white-space: nowrap;
+            pointer-events: none;
+            z-index: 15;
+            animation: formingPulse 0.6s ease-in-out infinite;
+            text-shadow: 0 0 20px currentColor;
+        }
     </style>
 </head>
 <body class="h-screen w-screen relative overflow-hidden" id="main-body">
@@ -310,6 +379,18 @@
         
         <div class="absolute top-4 left-1/2 -translate-x-1/2 glass-panel px-8 py-2 rounded-full text-2xl font-black" id="turn-indicator" style="display: none;">ХОД: ...</div>
         <div class="absolute top-20 left-1/2 -translate-x-1/2 text-6xl font-black text-white" id="tv-timer" style="display: none;"></div>
+
+        <!-- Таймер хода (рядом с активным игроком) -->
+        <div class="tv-turn-timer" id="tv-turn-timer">
+            <div class="tv-turn-timer-ring" id="tv-turn-timer-ring">
+                <svg viewBox="0 0 90 90">
+                    <circle class="bg" cx="45" cy="45" r="38"></circle>
+                    <circle class="progress" cx="45" cy="45" r="38" id="tv-turn-timer-progress"></circle>
+                </svg>
+                <div class="tv-turn-timer-value" id="tv-turn-timer-value">10</div>
+            </div>
+            <div class="tv-turn-timer-name" id="tv-turn-timer-name"></div>
+        </div>
     </div>
 
     <div id="lobby-view">
@@ -370,7 +451,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getDatabase, ref, onValue, update, set, get } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+        import { getDatabase, ref, onValue, update, set, get, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
         const firebaseConfig = { apiKey: "AIzaSyCXIR5Tv8lB6ivcGRC3yt1SC66MM6T5b_M", authDomain: "endorphin-battle.firebaseapp.com", databaseURL: "https://endorphin-battle-default-rtdb.europe-west1.firebasedatabase.app", projectId: "endorphin-battle", storageBucket: "endorphin-battle.firebasestorage.app", messagingSenderId: "185259733030", appId: "1:185259733030:web:d72a89a436880973e636e7" };
         const app = initializeApp(firebaseConfig);
@@ -393,22 +474,42 @@
         resizeCanvas();
 
         // ============================================================
+        // КОНСТАНТЫ
+        // ============================================================
+        const TURN_TIME = 10;           // сек
+        const FORM_TIME = 1500;         // мс — совпадает с play.html
+
+        // ============================================================
         // СОСТОЯНИЕ
         // ============================================================
         let currentData = null;
         let currentBaseUrl = getBaseUrl();
         
-        // Игроки — объект по ID, чтобы не терять при смене состава
-        const players = new Map(); // id -> Player
+        const players = new Map();
         let snowballs = []; 
         let particles = [];
         let lastShotTime = 0;
+        let lastShotState = null;
 
         let preloadInterval = null;
         let isPreloading = false;
         let hasGeneratedQR = false;
         let lastTickerText = '';
         let finishedHandled = false;
+
+        // Прицел (live)
+        let currentAim = null;          // { angle, power, team, name, playerId }
+        let currentAimPlayerId = null;
+        let displayedAimAngle = null;   // для интерполяции
+        let displayedAimPower = null;
+
+        // Таймер хода
+        let turnTimerStart = 0;
+        let turnTimerPlayerId = null;
+        let turnTimerActive = false;
+
+        // Формирование снежка
+        let formingBall = null;         // { shooterId, x, y, angle, power, team, startTime }
 
         function getBaseUrl() {
             const url = new URL(window.location.href);
@@ -446,7 +547,7 @@
                 if (data.posY !== undefined) this.y = (data.posY / 100) * height;
             }
 
-            draw(ctx) {
+            draw(ctx, isActive) {
                 if (!this.alive) {
                     ctx.font = '40px Montserrat';
                     ctx.fillStyle = 'rgba(100, 100, 100, 0.5)';
@@ -455,11 +556,27 @@
                     return;
                 }
 
-                ctx.shadowColor = this.team === 'red' ? '#ef4444' : '#3b82f6';
+                const teamColor = this.team === 'red' ? '#ef4444' : '#3b82f6';
+
+                // Подсветка активного игрока
+                if (isActive) {
+                    ctx.save();
+                    const pulse = 0.5 + 0.5 * Math.sin(Date.now() / 200);
+                    ctx.strokeStyle = teamColor;
+                    ctx.lineWidth = 4;
+                    ctx.shadowColor = teamColor;
+                    ctx.shadowBlur = 30 * pulse;
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, this.width * 0.9 + pulse * 10, 0, Math.PI * 2);
+                    ctx.stroke();
+                    ctx.restore();
+                }
+
+                ctx.shadowColor = teamColor;
                 ctx.shadowBlur = 30;
 
                 ctx.fillStyle = this.team === 'red' ? 'rgba(239, 68, 68, 0.3)' : 'rgba(59, 130, 246, 0.3)';
-                ctx.strokeStyle = this.team === 'red' ? '#ef4444' : '#3b82f6';
+                ctx.strokeStyle = teamColor;
                 ctx.lineWidth = 3;
                 ctx.beginPath();
                 ctx.roundRect(this.x - this.width/2, this.y - this.height/2, this.width, this.height, 15);
@@ -526,7 +643,6 @@
                 this.y += this.vy;
                 this.vy += this.gravity;
 
-                // Трейл
                 this.trailCooldown--;
                 if (this.trailCooldown <= 0 && Math.random() > 0.3) {
                     particles.push({
@@ -559,7 +675,7 @@
         }
 
         // ============================================================
-        // РАССТАНОВКА ИГРОКОВ (только когда нужно)
+        // РАССТАНОВКА
         // ============================================================
         async function ensurePlayerPositions(data, force = false) {
             const redPlayers = data.players?.red || {};
@@ -609,9 +725,156 @@
         }
 
         // ============================================================
+        // ПРИЦЕЛ (LIVE)
+        // ============================================================
+        function drawAimIndicator(targetX, targetY, angle, power, team) {
+            // Экранный угол: для красных 0 = вправо, для синих 0 = влево
+            const screenAngle = team === 'red' ? -angle : -(180 - angle);
+            const rad = screenAngle * Math.PI / 180;
+
+            const teamColor = team === 'red' ? '#ef4444' : '#3b82f6';
+            const aimLength = 140 + power * 0.8;
+
+            // Пунктирная линия (траектория)
+            const endX = targetX + Math.cos(rad) * aimLength;
+            const endY = targetY + Math.sin(rad) * aimLength;
+
+            // Начало — от игрока, конец — по направлению
+            ctx.save();
+            ctx.setLineDash([12, 8]);
+            ctx.strokeStyle = teamColor;
+            ctx.lineWidth = 4;
+            ctx.shadowColor = teamColor;
+            ctx.shadowBlur = 20;
+            ctx.globalAlpha = 0.7;
+            ctx.beginPath();
+            ctx.moveTo(targetX, targetY);
+            ctx.lineTo(endX, endY);
+            ctx.stroke();
+            ctx.restore();
+
+            // Параболическая дуга (симуляция)
+            const powerNorm = power / 100;
+            const speed = 5 + powerNorm * 15;
+            const vx = Math.cos(rad) * speed;
+            const vy = Math.sin(rad) * speed;
+            const gravity = 0.4;
+
+            let sx = targetX;
+            let sy = targetY;
+            let svx = vx;
+            let svy = vy;
+
+            ctx.save();
+            ctx.setLineDash([6, 6]);
+            ctx.strokeStyle = teamColor;
+            ctx.lineWidth = 2;
+            ctx.globalAlpha = 0.4;
+            ctx.beginPath();
+            ctx.moveTo(sx, sy);
+            for (let i = 0; i < 30; i++) {
+                sx += svx;
+                sy += svy;
+                svy += gravity;
+                ctx.lineTo(sx, sy);
+                if (sx < 0 || sx > width || sy > height) break;
+            }
+            ctx.stroke();
+            ctx.restore();
+
+            // Стрелка на конце
+            ctx.save();
+            ctx.fillStyle = teamColor;
+            ctx.shadowColor = teamColor;
+            ctx.shadowBlur = 25;
+            ctx.beginPath();
+            ctx.arc(endX, endY, 8, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Треугольный наконечник
+            ctx.translate(endX, endY);
+            ctx.rotate(rad);
+            ctx.beginPath();
+            ctx.moveTo(0, 0);
+            ctx.lineTo(-18, -8);
+            ctx.lineTo(-18, 8);
+            ctx.closePath();
+            ctx.fill();
+            ctx.restore();
+        }
+
+        // ============================================================
+        // ФОРМИРОВАНИЕ СНЕЖКА (визуал)
+        // ============================================================
+        function drawFormingBall(now) {
+            if (!formingBall) return;
+
+            const elapsed = now - formingBall.startTime;
+            const progress = Math.min(1, elapsed / FORM_TIME);
+            const shooter = players.get(formingBall.shooterId);
+            if (!shooter) return;
+
+            const teamColor = formingBall.team === 'red' ? '#ef4444' : '#3b82f6';
+            const baseRadius = 5 + progress * 20;
+
+            // Снежок у ног игрока
+            const bx = shooter.x;
+            const by = shooter.y + 20;
+
+            // Основной шар
+            ctx.save();
+            ctx.shadowColor = '#7fe3ff';
+            ctx.shadowBlur = 30 * progress;
+
+            const gradient = ctx.createRadialGradient(bx - baseRadius * 0.3, by - baseRadius * 0.3, 2, bx, by, baseRadius);
+            gradient.addColorStop(0, '#ffffff');
+            gradient.addColorStop(1, '#a8e6ff');
+
+            ctx.fillStyle = gradient;
+            ctx.beginPath();
+            ctx.arc(bx, by, baseRadius, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.restore();
+
+            // Вращающиеся частицы вокруг
+            const particleCount = Math.floor(progress * 8);
+            for (let i = 0; i < particleCount; i++) {
+                const angle = (now / 200 + i * Math.PI * 2 / particleCount) % (Math.PI * 2);
+                const dist = baseRadius + 10 + Math.sin(now / 100 + i) * 5;
+                const px = bx + Math.cos(angle) * dist;
+                const py = by + Math.sin(angle) * dist;
+
+                ctx.save();
+                ctx.fillStyle = '#ffffff';
+                ctx.globalAlpha = 0.6 + 0.4 * Math.sin(now / 100 + i);
+                ctx.shadowColor = teamColor;
+                ctx.shadowBlur = 10;
+                ctx.beginPath();
+                ctx.arc(px, py, 3, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+            }
+
+            // Кольцо прогресса
+            ctx.save();
+            ctx.strokeStyle = teamColor;
+            ctx.lineWidth = 4;
+            ctx.shadowColor = teamColor;
+            ctx.shadowBlur = 15;
+            ctx.globalAlpha = 0.8;
+            ctx.beginPath();
+            ctx.arc(bx, by, baseRadius + 15, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * progress);
+            ctx.stroke();
+            ctx.restore();
+        }
+
+        // ============================================================
         // ИГРОВОЙ ЦИКЛ
         // ============================================================
         function gameLoop() {
+            const now = performance.now();
+
             ctx.clearRect(0, 0, width, height);
 
             // Фон
@@ -632,10 +895,41 @@
                 ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(width, y); ctx.stroke();
             }
 
-            // Игроки
-            players.forEach(p => p.draw(ctx));
+            // Активный игрок
+            const activeId = currentData?.activePlayerId;
 
-            // Снежки — обратный цикл, чтобы безопасно удалять
+            // Игроки
+            players.forEach(p => p.draw(ctx, p.id === activeId));
+
+            // Живой прицел
+            if (currentAim && currentData?.status === 'playing' && currentData?.preloadDone && !formingBall) {
+                const aimer = players.get(currentAim.playerId);
+                if (aimer && aimer.alive) {
+                    // Интерполяция
+                    if (displayedAimAngle === null) {
+                        displayedAimAngle = currentAim.angle;
+                        displayedAimPower = currentAim.power;
+                    } else {
+                        displayedAimAngle += (currentAim.angle - displayedAimAngle) * 0.3;
+                        displayedAimPower += (currentAim.power - displayedAimPower) * 0.3;
+                    }
+                    drawAimIndicator(aimer.x, aimer.y - 20, displayedAimAngle, displayedAimPower, aimer.team);
+                }
+            } else if (!currentAim) {
+                displayedAimAngle = null;
+                displayedAimPower = null;
+            }
+
+            // Формирование снежка
+            if (formingBall) {
+                drawFormingBall(now);
+                if (now - formingBall.startTime > FORM_TIME) {
+                    // Формирование завершено — снежок полетит
+                    // (сам полёт управляется через last_shot state)
+                }
+            }
+
+            // Снежки
             for (let i = snowballs.length - 1; i >= 0; i--) {
                 const ball = snowballs[i];
                 ball.update();
@@ -678,7 +972,57 @@
                 ctx.globalAlpha = 1;
             }
 
+            // Таймер хода — позиция у активного игрока
+            updateTurnTimerPosition(now);
+
             requestAnimationFrame(gameLoop);
+        }
+
+        // ============================================================
+        // ТАЙМЕР ХОДА — ПОЗИЦИЯ И ОБНОВЛЕНИЕ
+        // ============================================================
+        function updateTurnTimerPosition(now) {
+            const timerEl = document.getElementById('tv-turn-timer');
+            
+            if (!turnTimerActive || !turnTimerPlayerId) {
+                timerEl.classList.remove('active');
+                return;
+            }
+
+            const player = players.get(turnTimerPlayerId);
+            if (!player || !player.alive) {
+                timerEl.classList.remove('active');
+                return;
+            }
+
+            // Позиция над игроком
+            timerEl.style.left = `${player.x}px`;
+            timerEl.style.top = `${player.y - 120}px`;
+            timerEl.style.transform = 'translateX(-50%)';
+            timerEl.classList.add('active');
+
+            // Прогресс
+            const elapsed = (Date.now() - turnTimerStart) / 1000;
+            const remaining = Math.max(0, TURN_TIME - elapsed);
+            const ratio = remaining / TURN_TIME;
+
+            const progressEl = document.getElementById('tv-turn-timer-progress');
+            const valueEl = document.getElementById('tv-turn-timer-value');
+            const ringEl = document.getElementById('tv-turn-timer-ring');
+
+            const CIRCUMFERENCE = 2 * Math.PI * 38;
+            progressEl.style.strokeDasharray = CIRCUMFERENCE;
+            progressEl.style.strokeDashoffset = CIRCUMFERENCE * (1 - ratio);
+
+            valueEl.innerText = Math.ceil(remaining);
+
+            // Цвет
+            ringEl.classList.remove('red', 'blue', 'danger');
+            if (remaining <= 3) {
+                ringEl.classList.add('danger');
+            } else {
+                ringEl.classList.add(player.team);
+            }
         }
 
         // ============================================================
@@ -688,17 +1032,14 @@
             const newLives = Math.max(0, p.lives - 1);
             const newAlive = newLives > 0;
 
-            // Локально сразу обновляем
             p.lives = newLives;
             p.alive = newAlive;
 
-            // Отправляем в Firebase
             await update(ref(db, `games/${gameId}/players/${p.team}/${p.id}`), {
                 lives: newLives,
                 alive: newAlive
             });
 
-            // Эффекты
             spawnParticles(ball.x, ball.y, p.team === 'red' ? '#ef4444' : '#3b82f6');
             document.getElementById('main-body').classList.add('screen-shake');
             setTimeout(() => document.getElementById('main-body').classList.remove('screen-shake'), 400);
@@ -711,7 +1052,6 @@
                 setTimeout(() => megaDiv.remove(), 2000);
             }
 
-            // Проверка победы
             await checkGameOver();
         }
 
@@ -734,7 +1074,6 @@
                 const redLives = teamLives('red');
                 const blueLives = teamLives('blue');
 
-                // Обновляем верхние сердечки
                 document.getElementById('heart-red').innerText = redLives > 0 ? '❤️'.repeat(redLives) : '💀';
                 document.getElementById('heart-blue').innerText = blueLives > 0 ? '❤️'.repeat(blueLives) : '💀';
 
@@ -771,14 +1110,8 @@
             document.getElementById('qr-blue').innerHTML = qrBlue.createImgTag(4, 8);
         }
 
-        function resetQRs() {
-            hasGeneratedQR = false;
-            document.getElementById('qr-container').classList.add('hidden');
-            document.getElementById('tv-status').classList.add('hidden');
-        }
-
         // ============================================================
-        // ВЫБОР ПЕРВОЙ КОМАНДЫ
+        // ПЕРВАЯ КОМАНДА
         // ============================================================
         window.selectFirstTeam = (team) => {
             update(ref(db, `games/${gameId}`), { firstTeam: team });
@@ -838,7 +1171,6 @@
                 lastTickerText = text;
                 const ticker = document.getElementById('ticker-text');
                 ticker.innerText = text;
-                // Перезапуск анимации
                 ticker.style.animation = 'none';
                 void ticker.offsetWidth;
                 ticker.style.animation = '';
@@ -852,7 +1184,6 @@
             const data = snap.val();
             if (!data) return;
 
-            // Прелоудинг
             if (data.preload) {
                 const img = document.getElementById('preload-ad-img');
                 const text = document.getElementById('preload-ad-text');
@@ -869,7 +1200,6 @@
                 if (data.preload.link) link.href = data.preload.link;
             }
 
-            // Лобби
             if (data.lobby) {
                 const container = document.getElementById('lobby-ad');
                 const img = document.getElementById('lobby-ad-img');
@@ -889,6 +1219,87 @@
         });
 
         // ============================================================
+        // LIVE ПРИЦЕЛ (СЛУШАТЕЛЬ)
+        // ============================================================
+        onValue(ref(db, `games/${gameId}/aim`), (snap) => {
+            const aimData = snap.val();
+            
+            if (!aimData || Object.keys(aimData).length === 0) {
+                currentAim = null;
+                return;
+            }
+
+            // Берём первый (должен быть только один активный)
+            const [playerId, data] = Object.entries(aimData)[0];
+            
+            // Проверяем, что это активный игрок
+            if (currentData?.activePlayerId === playerId && currentData?.status === 'playing') {
+                currentAim = { ...data, playerId };
+            } else {
+                currentAim = null;
+            }
+        });
+
+        // ============================================================
+        // ВЫСТРЕЛ (С ФОРМИРОВАНИЕМ)
+        // ============================================================
+        onValue(ref(db, `games/${gameId}/last_shot`), (snap) => {
+            const shot = snap.val();
+            if (!shot || !shot.time) return;
+            
+            // Новый выстрел?
+            if (shot.time === lastShotTime && shot.state === lastShotState) return;
+            
+            const isNewShot = shot.time !== lastShotTime;
+            lastShotTime = shot.time;
+            lastShotState = shot.state;
+
+            if (isNewShot) {
+                // Начало формирования
+                const shooter = players.get(shot.shooterId);
+                if (shooter && shooter.alive) {
+                    formingBall = {
+                        shooterId: shot.shooterId,
+                        x: shooter.x,
+                        y: shooter.y,
+                        angle: shot.angle,
+                        power: shot.power,
+                        team: shot.team,
+                        startTime: performance.now()
+                    };
+                    // Прицел убираем при формировании
+                    currentAim = null;
+                    displayedAimAngle = null;
+                    displayedAimPower = null;
+                }
+            }
+
+            // Переход к полёту
+            if (shot.state === 'flying' && formingBall) {
+                const shooter = players.get(shot.shooterId);
+                if (shooter) {
+                    const ball = new Snowball(shooter, shot.power, shot.angle);
+                    snowballs.push(ball);
+                }
+                formingBall = null;
+            }
+        });
+
+        // ============================================================
+        // ТАЙМЕР (глобальный)
+        // ============================================================
+        onValue(ref(db, `games/${gameId}/timer`), (snap) => {
+            const val = snap.val();
+            const tvTimer = document.getElementById('tv-timer');
+            if (val !== null && val !== undefined) {
+                tvTimer.innerText = val;
+                tvTimer.style.display = 'block';
+            } else {
+                tvTimer.style.display = 'none';
+            }
+        });
+
+        // ============================================================
         // ОСНОВНОЙ СЛУШАТЕЛЬ
         // ============================================================
         onValue(gameRef, (snapshot) => {
@@ -897,15 +1308,11 @@
 
             currentData = data;
 
-            // Режим
             if (data.mode) {
                 document.getElementById('tv-mode').innerText = `РЕЖИМ: ${data.mode.toUpperCase()}`;
             }
 
-            // Синхронизация игроков
             syncPlayers(data);
-
-            // Сердечки на экране
             updateHeartsUI();
 
             // ---------- ЛОББИ ----------
@@ -937,7 +1344,6 @@
             const redPlayers = data.players?.red || {};
             const bluePlayers = data.players?.blue || {};
 
-            // Удаляем тех, кого нет в БД
             const allIds = new Set([
                 ...Object.keys(redPlayers),
                 ...Object.keys(bluePlayers)
@@ -946,7 +1352,6 @@
                 if (!allIds.has(id)) players.delete(id);
             }
 
-            // Обновляем/создаём
             Object.entries(redPlayers).forEach(([id, p]) => {
                 if (players.has(id)) players.get(id).update(p);
                 else players.set(id, new Player(id, p, 'red'));
@@ -958,7 +1363,7 @@
         }
 
         // ============================================================
-        // СЕРДЕЧКИ (UI)
+        // СЕРДЕЧКИ
         // ============================================================
         function updateHeartsUI() {
             let red = 0, blue = 0;
@@ -976,23 +1381,26 @@
         // ЛОББИ
         // ============================================================
         function handleLobby(data) {
-            // Показываем лобби
             const lobbyView = document.getElementById('lobby-view');
             lobbyView.style.opacity = '1';
             lobbyView.style.pointerEvents = 'auto';
 
-            // Скрываем остальное
             document.getElementById('win-view').classList.add('hidden');
             document.getElementById('win-view').classList.remove('flex');
             document.getElementById('preload-view').classList.remove('active');
             document.getElementById('turn-indicator').style.display = 'none';
             document.getElementById('tv-timer').style.display = 'none';
+            document.getElementById('tv-turn-timer').classList.remove('active');
 
-            // Сброс финишного состояния
             finishedHandled = false;
             document.getElementById('confetti-container').innerHTML = '';
+            
+            // Сброс состояния
+            formingBall = null;
+            snowballs = [];
+            currentAim = null;
+            turnTimerActive = false;
 
-            // QR
             if (data.mode) {
                 generateQRs();
                 
@@ -1020,7 +1428,6 @@
                     document.getElementById('tv-status').classList.remove('text-green-400');
                 }
 
-                // Активная команда
                 if (data.firstTeam) {
                     document.getElementById('btn-red-start').classList.toggle('active', data.firstTeam === 'red');
                     document.getElementById('btn-blue-start').classList.toggle('active', data.firstTeam === 'blue');
@@ -1037,7 +1444,7 @@
             lobbyView.style.pointerEvents = 'none';
             document.getElementById('team-select').classList.add('hidden');
 
-            // Таймер
+            // Таймер прелоада
             const tvTimer = document.getElementById('tv-timer');
             if (data.timer !== null && data.timer !== undefined) {
                 tvTimer.style.display = 'block';
@@ -1056,9 +1463,22 @@
                 turnIndicator.style.display = 'none';
             }
 
-            // Координаты — только если есть, и только если preloadDone
+            // Координаты
             if (data.preloadDone && data.players) {
                 ensurePlayerPositions(data);
+            }
+
+            // ТАЙМЕР ХОДА — определяем старт
+            if (data.preloadDone && data.activePlayerId && !data.timer) {
+                // Сменился активный игрок — новый таймер
+                if (turnTimerPlayerId !== data.activePlayerId) {
+                    turnTimerPlayerId = data.activePlayerId;
+                    turnTimerStart = Date.now();
+                    turnTimerActive = true;
+                }
+            } else {
+                turnTimerActive = false;
+                turnTimerPlayerId = null;
             }
         }
 
@@ -1069,15 +1489,17 @@
             if (finishedHandled) return;
             finishedHandled = true;
 
-            // Скрываем лобби
             const lobbyView = document.getElementById('lobby-view');
             lobbyView.style.opacity = '0';
             lobbyView.style.pointerEvents = 'none';
             document.getElementById('preload-view').classList.remove('active');
             document.getElementById('turn-indicator').style.display = 'none';
             document.getElementById('tv-timer').style.display = 'none';
+            document.getElementById('tv-turn-timer').classList.remove('active');
 
-            // Показываем финиш
+            turnTimerActive = false;
+            formingBall = null;
+
             const winView = document.getElementById('win-view');
             winView.classList.remove('hidden');
             winView.classList.add('flex');
@@ -1133,37 +1555,7 @@
         }
 
         // ============================================================
-        // ВЫСТРЕЛ
-        // ============================================================
-        onValue(ref(db, `games/${gameId}/last_shot`), (snap) => {
-            const shot = snap.val();
-            if (!shot || !shot.time) return;
-            if (shot.time === lastShotTime) return;
-            lastShotTime = shot.time;
-
-            const shooter = players.get(shot.shooterId);
-            if (shooter && shooter.alive) {
-                const ball = new Snowball(shooter, shot.power, shot.angle);
-                snowballs.push(ball);
-            }
-        });
-
-        // ============================================================
-        // ТАЙМЕР (глобальный)
-        // ============================================================
-        onValue(ref(db, `games/${gameId}/timer`), (snap) => {
-            const val = snap.val();
-            const tvTimer = document.getElementById('tv-timer');
-            if (val !== null && val !== undefined) {
-                tvTimer.innerText = val;
-                tvTimer.style.display = 'block';
-            } else {
-                tvTimer.style.display = 'none';
-            }
-        });
-
-        // ============================================================
-        // ЭКРАНИРОВАНИЕ HTML
+        // ЭКРАНИРОВАНИЕ
         // ============================================================
         function escapeHtml(str) {
             if (!str) return '';
