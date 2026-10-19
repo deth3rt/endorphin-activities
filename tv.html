@@ -2213,7 +2213,21 @@
             if (data) updateQRPlayersList(data);
         }
 
+        // ВАЖНО: showGame должен быть идемпотентным и всегда вызываться
+        // при переходе в игровое состояние. Раньше он вызывался только при
+        // screenChanged, из-за чего после preload оставался висеть qr-view.
         function showGame() {
+            // Guard: уже в игре? (все оверлеи скрыты, HP показаны)
+            const attractHidden = document.getElementById('attract-view').classList.contains('hidden');
+            const qrHidden = document.getElementById('qr-view').classList.contains('hidden');
+            const preloadHidden = document.getElementById('preload-view').classList.contains('hidden');
+            const winHidden = document.getElementById('win-view').classList.contains('hidden');
+            const heartsVisible = document.getElementById('heart-red').style.display === 'flex';
+
+            if (attractHidden && qrHidden && preloadHidden && winHidden && heartsVisible) {
+                return; // уже в игре
+            }
+
             demoPlayers = [];
             demoSnowballs = [];
             demoParticles = [];
@@ -2477,7 +2491,6 @@
                 if (screen !== 'game') isPreloading = false;
             }
 
-            // Отрисовку панелей делаем только при смене экрана — иначе просто обновляем данные
             const screenChanged = lastRenderedScreen !== screen;
             lastRenderedScreen = screen;
 
@@ -2499,11 +2512,20 @@
 
                 case 'game':
                     if (data.status === 'playing' && !data.preloadDone) {
-                        if (!isPreloading) startPreload(data);
+                        // Preload-фаза. Показываем preload-view, но СРАЗУ прячем
+                        // qr-view/attract-view/win-view, чтобы они не «мигали» под ним
+                        // и не остались висеть, если preload-view скроется раньше game.
+                        if (!isPreloading) {
+                            hideAllScreens();
+                            hideGameUI();
+                            startPreload(data);
+                        }
                     } else {
                         isPreloading = false;
                         document.getElementById('preload-view').classList.add('hidden');
-                        if (screenChanged) showGame();
+                        // ВСЕГДА вызываем showGame (он идемпотентен), а не только
+                        // при screenChanged. Это фикс бага «после preload снова QR».
+                        showGame();
 
                         const turnIndicator = document.getElementById('turn-indicator');
                         if (data.turn && data.preloadDone) {
@@ -2531,10 +2553,8 @@
                     if (screenChanged) showWinner(data);
                     break;
             }
-
-            if (screen === 'qr') {
-                updateQRPlayersList(data);
-            }
+            // Убран дублирующий if (screen === 'qr') updateQRPlayersList(data) —
+            // он уже есть в case 'qr' (else-ветка).
         });
 
         function startPreload(data) {
