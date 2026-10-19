@@ -2,28 +2,44 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#03080f">
   <title>ENDORPHIN | АДМИН-ПАНЕЛЬ</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap');
+    
     body { 
       background: radial-gradient(circle at 50% 0%, #0a2540 0%, #03080f 100%);
       font-family: 'Montserrat', sans-serif; 
       color: #fff; 
-      min-height: 100vh;
+      min-height: 100dvh;
+      -webkit-tap-highlight-color: transparent;
     }
+    
     .glass { 
       background: rgba(10, 37, 64, 0.8); 
       border: 1px solid rgba(127, 227, 255, 0.3); 
       backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
       border-radius: 1.5rem;
     }
+
+    .tab-btn {
+      transition: all 0.2s;
+    }
+    .tab-btn.active {
+      background: rgba(34, 211, 238, 0.2);
+      color: #22d3ee;
+      border-color: #22d3ee;
+      box-shadow: 0 0 15px rgba(34, 211, 238, 0.3);
+    }
+
     .msg-item {
-      transition: all 0.3s ease;
+      transition: all 0.2s ease;
     }
     .msg-item:hover {
-      background: rgba(239, 68, 68, 0.1);
+      background: rgba(239, 68, 68, 0.08);
       border-color: rgba(239, 68, 68, 0.5);
     }
     .msg-item:hover .delete-btn {
@@ -33,25 +49,215 @@
       opacity: 0.5;
       transition: opacity 0.2s;
     }
-    .tab-btn {
+
+    /* ============================================================
+       INPUT
+       ============================================================ */
+    .admin-input {
+      width: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      border: 1px solid rgba(127, 227, 255, 0.2);
+      border-radius: 12px;
+      padding: 10px 14px;
+      font-size: 0.875rem;
+      color: #fff;
+      outline: none;
       transition: all 0.2s;
     }
-    .tab-btn.active {
-      background: rgba(34, 211, 238, 0.2);
-      color: #22d3ee;
+    .admin-input:focus {
       border-color: #22d3ee;
+      box-shadow: 0 0 15px rgba(34, 211, 238, 0.2);
+    }
+    .admin-input::placeholder {
+      color: rgba(255, 255, 255, 0.25);
+    }
+    .admin-input.error {
+      border-color: #ef4444;
+      box-shadow: 0 0 15px rgba(239, 68, 68, 0.3);
+    }
+
+    .admin-label {
+      display: block;
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: rgba(168, 230, 255, 0.6);
+      margin-bottom: 6px;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    /* ============================================================
+       TOAST
+       ============================================================ */
+    .toast-container {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 1000;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      pointer-events: none;
+    }
+    .toast {
+      padding: 12px 20px;
+      border-radius: 12px;
+      font-size: 0.875rem;
+      font-weight: 700;
+      color: #fff;
+      backdrop-filter: blur(16px);
+      animation: toastIn 0.3s ease-out;
+      pointer-events: auto;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+    }
+    .toast.success {
+      background: rgba(34, 197, 94, 0.2);
+      border: 1px solid rgba(34, 197, 94, 0.5);
+    }
+    .toast.error {
+      background: rgba(239, 68, 68, 0.2);
+      border: 1px solid rgba(239, 68, 68, 0.5);
+    }
+    .toast.info {
+      background: rgba(34, 211, 238, 0.2);
+      border: 1px solid rgba(34, 211, 238, 0.5);
+    }
+    @keyframes toastIn {
+      from { transform: translateX(120%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+    @keyframes toastOut {
+      from { transform: translateX(0); opacity: 1; }
+      to { transform: translateX(120%); opacity: 0; }
+    }
+    .toast.out { animation: toastOut 0.3s ease-in forwards; }
+
+    /* ============================================================
+       ПРЕВЬЮ
+       ============================================================ */
+    .ad-preview {
+      width: 100%;
+      height: 100px;
+      background: rgba(0, 0, 0, 0.5);
+      border: 2px dashed rgba(127, 227, 255, 0.25);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      position: relative;
+    }
+    .ad-preview img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+    }
+    .ad-preview .placeholder {
+      color: rgba(168, 230, 255, 0.3);
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+    }
+
+    /* ============================================================
+       TICKER PREVIEW
+       ============================================================ */
+    .ticker-preview {
+      height: 44px;
+      background: rgba(0, 0, 0, 0.9);
+      border: 1px solid rgba(34, 211, 238, 0.3);
+      border-radius: 10px;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      position: relative;
+    }
+    .ticker-preview::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0;
+      width: 2px; height: 100%;
+      background: #22d3ee;
+      box-shadow: 0 0 10px #22d3ee;
+      z-index: 2;
+    }
+    .ticker-preview-inner {
+      display: inline-block;
+      white-space: nowrap;
+      padding-left: 100%;
+      animation: tickerPreview 12s linear infinite;
+      font-size: 14px;
+      font-weight: 700;
+      color: #22d3ee;
+      text-transform: uppercase;
+    }
+    @keyframes tickerPreview {
+      0% { transform: translate3d(0, 0, 0); }
+      100% { transform: translate3d(-100%, 0, 0); }
+    }
+
+    /* ============================================================
+       SPINNER
+       ============================================================ */
+    .spinner {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ============================================================
+       CHAR COUNTER
+       ============================================================ */
+    .char-counter {
+      font-size: 0.7rem;
+      color: rgba(255,255,255,0.4);
+      text-align: right;
+      margin-top: 4px;
+    }
+    .char-counter.warn { color: #fbbf24; }
+    .char-counter.danger { color: #ef4444; }
+
+    /* ============================================================
+       REDUCED MOTION
+       ============================================================ */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
     }
   </style>
 </head>
-<body class="min-h-screen p-4 flex items-center justify-center">
+<body class="p-4 flex items-center justify-center">
+
+  <div class="toast-container" id="toast-container"></div>
+
   <div class="glass max-w-2xl w-full p-6 rounded-3xl">
-    <h1 class="text-3xl font-black mb-6 text-cyan-400 text-center tracking-widest">АДМИН-ПАНЕЛЬ</h1>
+    <div class="flex justify-between items-center mb-6">
+      <h1 class="text-2xl font-black text-cyan-400 tracking-widest">АДМИН-ПАНЕЛЬ</h1>
+      <a href="index.html" class="text-xs font-bold text-cyan-300/60 hover:text-cyan-300 transition">← НАЗАД</a>
+    </div>
     
     <!-- Табы -->
-    <div class="flex gap-2 mb-6">
-      <button onclick="switchTab('ad')" id="tab-btn-ad" class="tab-btn active flex-1 py-3 rounded-xl border-2 border-gray-700 font-bold text-sm">📢 РЕКЛАМА</button>
-      <button onclick="switchTab('ticker')" id="tab-btn-ticker" class="tab-btn flex-1 py-3 rounded-xl border-2 border-gray-700 font-bold text-sm">📜 БЕГУЩАЯ СТРОКА</button>
-      <button onclick="switchTab('reset')" id="tab-btn-reset" class="tab-btn flex-1 py-3 rounded-xl border-2 border-gray-700 font-bold text-sm">🗑️ СБРОС</button>
+    <div class="flex gap-2 mb-6 flex-wrap">
+      <button onclick="switchTab('ad')" id="tab-btn-ad" class="tab-btn active flex-1 py-3 rounded-xl border-2 border-gray-700 font-bold text-sm min-w-[100px]">
+        📢 РЕКЛАМА
+      </button>
+      <button onclick="switchTab('ticker')" id="tab-btn-ticker" class="tab-btn flex-1 py-3 rounded-xl border-2 border-gray-700 font-bold text-sm min-w-[100px]">
+        📜 СТРОКА
+      </button>
+      <button onclick="switchTab('reset')" id="tab-btn-reset" class="tab-btn flex-1 py-3 rounded-xl border-2 border-gray-700 font-bold text-sm min-w-[100px]">
+        🗑️ СБРОС
+      </button>
     </div>
 
     <!-- ============================================================ -->
@@ -59,49 +265,61 @@
     <!-- ============================================================ -->
     <div id="tab-ad">
       
-      <!-- Реклама в прелоудинге -->
+      <!-- Прелоудинг -->
       <div class="mb-6">
-        <h2 class="text-lg font-bold mb-3 text-cyan-300">🎬 Реклама в прелоудинге</h2>
+        <h2 class="text-base font-bold mb-3 text-cyan-300">🎬 Реклама в прелоудинге</h2>
         
         <div class="space-y-3">
           <div>
-            <label class="block text-xs font-bold mb-1 text-gray-400">URL картинки (JPG/PNG/GIF):</label>
-            <input type="text" id="preload-img" class="w-full bg-gray-900 border border-gray-700 rounded-xl px-3 py-2 text-sm text-white outline-none focus:border-cyan-400" placeholder="https://example.com/banner.jpg">
+            <label class="admin-label">URL картинки (JPG/PNG/GIF)</label>
+            <input type="url" id="preload-img" class="admin-input" placeholder="https://example.com/banner.jpg" oninput="updateAdPreview('preload')">
           </div>
-          <div>
-            <label class="block text-xs font-bold mb-1 text-gray-400">Ссылка (куда ведёт):</label>
-            <input type="text" id="preload-link" class="w-full bg-gray-900 border border-gray-700 rounded-xl px-3 py-2 text-sm text-white outline-none focus:border-cyan-400" placeholder="https://t.me/yourchannel">
+          
+          <div class="ad-preview" id="preload-preview">
+            <span class="placeholder">ПРЕВЬЮ</span>
           </div>
+
           <div>
-            <label class="block text-xs font-bold mb-1 text-gray-400">Текст-заглушка (если картинки нет):</label>
-            <input type="text" id="preload-text" class="w-full bg-gray-900 border border-gray-700 rounded-xl px-3 py-2 text-sm text-white outline-none focus:border-cyan-400" placeholder="РЕКЛАМА">
+            <label class="admin-label">Ссылка (куда ведёт)</label>
+            <input type="url" id="preload-link" class="admin-input" placeholder="https://t.me/yourchannel">
+          </div>
+
+          <div>
+            <label class="admin-label">Текст-заглушка (если картинки нет)</label>
+            <input type="text" id="preload-text" class="admin-input" maxlength="40" placeholder="РЕКЛАМА">
           </div>
         </div>
       </div>
 
-      <hr class="border-gray-700 my-6">
+      <hr class="border-gray-700/50 my-6">
 
-      <!-- Реклама в лобби -->
+      <!-- Лобби -->
       <div class="mb-6">
-        <h2 class="text-lg font-bold mb-3 text-cyan-300">🏠 Реклама в лобби</h2>
+        <h2 class="text-base font-bold mb-3 text-cyan-300">🏠 Реклама в лобби</h2>
         
         <div class="space-y-3">
           <div>
-            <label class="block text-xs font-bold mb-1 text-gray-400">URL картинки:</label>
-            <input type="text" id="lobby-img" class="w-full bg-gray-900 border border-gray-700 rounded-xl px-3 py-2 text-sm text-white outline-none focus:border-cyan-400" placeholder="https://example.com/banner.jpg">
+            <label class="admin-label">URL картинки</label>
+            <input type="url" id="lobby-img" class="admin-input" placeholder="https://example.com/banner.jpg" oninput="updateAdPreview('lobby')">
           </div>
-          <div>
-            <label class="block text-xs font-bold mb-1 text-gray-400">Ссылка:</label>
-            <input type="text" id="lobby-link" class="w-full bg-gray-900 border border-gray-700 rounded-xl px-3 py-2 text-sm text-white outline-none focus:border-cyan-400" placeholder="https://t.me/yourchannel">
+          
+          <div class="ad-preview" id="lobby-preview">
+            <span class="placeholder">ПРЕВЬЮ</span>
           </div>
+
           <div>
-            <label class="block text-xs font-bold mb-1 text-gray-400">Текст-заглушка:</label>
-            <input type="text" id="lobby-text" class="w-full bg-gray-900 border border-gray-700 rounded-xl px-3 py-2 text-sm text-white outline-none focus:border-cyan-400" placeholder="РЕКЛАМА">
+            <label class="admin-label">Ссылка</label>
+            <input type="url" id="lobby-link" class="admin-input" placeholder="https://t.me/yourchannel">
+          </div>
+
+          <div>
+            <label class="admin-label">Текст-заглушка</label>
+            <input type="text" id="lobby-text" class="admin-input" maxlength="40" placeholder="РЕКЛАМА">
           </div>
         </div>
       </div>
 
-      <button onclick="saveAdSettings()" class="w-full py-4 bg-cyan-600 rounded-xl font-black text-lg hover:bg-cyan-500 transition active:scale-95">
+      <button onclick="saveAdSettings()" id="save-ad-btn" class="w-full py-4 bg-cyan-600 rounded-xl font-black text-lg hover:bg-cyan-500 transition active:scale-95">
         💾 СОХРАНИТЬ РЕКЛАМУ
       </button>
     </div>
@@ -110,29 +328,50 @@
     <!-- ВКЛАДКА: БЕГУЩАЯ СТРОКА -->
     <!-- ============================================================ -->
     <div id="tab-ticker" class="hidden">
-      <!-- Форма отправки -->
+      
+      <!-- Превью -->
       <div class="mb-6">
-        <label class="block text-sm font-bold mb-2 text-cyan-200">НОВОЕ СООБЩЕНИЕ:</label>
+        <label class="admin-label">Предпросмотр</label>
+        <div class="ticker-preview">
+          <div class="ticker-preview-inner" id="ticker-preview-text">
+            ДОБРО ПОЖАЛОВАТЬ НА ВЕЧЕРИНКУ ENDORPHIN!
+          </div>
+        </div>
+      </div>
+
+      <!-- Форма -->
+      <div class="mb-6">
+        <label class="admin-label">Новое сообщение</label>
         <div class="flex gap-2">
           <input 
             type="text" 
             id="ticker-input" 
-            class="flex-1 bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 text-white outline-none focus:border-cyan-400 transition"
+            class="admin-input flex-1"
             placeholder="Введите текст..."
+            maxlength="100"
+            oninput="updateCharCounter()"
             onkeydown="if(event.key === 'Enter') addMessage()"
           >
-          <button onclick="addMessage()" class="px-6 py-3 bg-cyan-600 rounded-xl font-bold hover:bg-cyan-500 transition active:scale-95">
+          <button onclick="addMessage()" id="add-msg-btn" class="px-6 py-3 bg-cyan-600 rounded-xl font-bold hover:bg-cyan-500 transition active:scale-95 whitespace-nowrap">
             ОТПРАВИТЬ
           </button>
         </div>
-        <p class="text-[10px] text-gray-500 mt-2">* Максимум 10 сообщений. Самое старое удаляется автоматически.</p>
+        <div class="flex justify-between mt-1">
+          <p class="text-[10px] text-gray-500">Максимум 10 сообщений. Старое удаляется автоматически.</p>
+          <p class="char-counter" id="char-counter">0/100</p>
+        </div>
       </div>
 
-      <hr class="border-gray-700 mb-6">
+      <hr class="border-gray-700/50 mb-6">
 
-      <!-- История сообщений -->
+      <!-- История -->
       <div>
-        <h2 class="text-xl font-bold mb-4 text-cyan-300">ИСТОРИЯ</h2>
+        <div class="flex justify-between items-center mb-4">
+          <h2 class="text-lg font-bold text-cyan-300">ИСТОРИЯ</h2>
+          <button onclick="clearAllMessages()" id="clear-all-btn" class="text-xs font-bold text-red-400 hover:text-red-300 transition px-3 py-1 rounded-lg hover:bg-red-900/20">
+            ОЧИСТИТЬ ВСЁ
+          </button>
+        </div>
         <div id="messages-list" class="space-y-3 max-h-96 overflow-y-auto pr-2">
           <div class="text-center text-gray-500 py-8 italic" id="empty-history">
             Пока нет отправленных сообщений
@@ -145,11 +384,33 @@
     <!-- ВКЛАДКА: СБРОС -->
     <!-- ============================================================ -->
     <div id="tab-reset" class="hidden">
-      <div class="text-center py-8">
-        <div class="text-6xl mb-4">🗑️</div>
-        <p class="text-gray-400 mb-6">Сбросить ВСЮ игру? Все игроки отключатся.</p>
-        <button onclick="clearGame()" class="w-full py-4 bg-red-600/20 border-2 border-red-500/50 text-red-400 rounded-xl font-black text-lg hover:bg-red-600/40 transition active:scale-95">
-          ПОЛНЫЙ СБРОС ИГРЫ
+      <div class="text-center py-6">
+        <div class="text-6xl mb-4">⚠️</div>
+        <h2 class="text-2xl font-black text-red-400 mb-2">ОПАСНАЯ ЗОНА</h2>
+        <p class="text-gray-400 mb-6 text-sm max-w-md mx-auto">
+          Сброс очистит всех игроков, выстрелы, таймер и вернёт игру в лобби. 
+          Реклама и бегущая строка <span class="text-cyan-300 font-bold">не будут затронуты</span>.
+        </p>
+        
+        <div class="bg-red-900/10 border border-red-500/30 rounded-xl p-4 max-w-md mx-auto mb-6 text-left">
+          <label class="admin-label text-red-300/80">Для подтверждения введите:</label>
+          <p class="text-red-400 font-black text-lg mb-2 select-all">СБРОС</p>
+          <input 
+            type="text" 
+            id="reset-confirm" 
+            class="admin-input" 
+            placeholder="Введите слово"
+            oninput="validateResetInput()"
+          >
+        </div>
+
+        <button 
+          onclick="clearGame()" 
+          id="reset-btn"
+          disabled
+          class="w-full py-4 bg-red-600/30 border-2 border-red-500/50 text-red-300 rounded-xl font-black text-lg hover:bg-red-600/50 transition active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed"
+        >
+          🗑️ ПОЛНЫЙ СБРОС ИГРЫ
         </button>
       </div>
     </div>
@@ -158,7 +419,7 @@
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getDatabase, ref, set, onValue, push, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+    import { getDatabase, ref, set, onValue, push, remove, update, get } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
     const firebaseConfig = { apiKey: "AIzaSyCXIR5Tv8lB6ivcGRC3yt1SC66MM6T5b_M", authDomain: "endorphin-battle.firebaseapp.com", databaseURL: "https://endorphin-battle-default-rtdb.europe-west1.firebasedatabase.app", projectId: "endorphin-battle", storageBucket: "endorphin-battle.firebasestorage.app", messagingSenderId: "185259733030", appId: "1:185259733030:web:d72a89a436880973e636e7" };
     const app = initializeApp(firebaseConfig);
@@ -167,7 +428,33 @@
     const adRef = ref(db, 'games/battle_1/ad_settings');
 
     // ============================================================
-    // ТАБЫ
+    // ФЛАГИ
+    // ============================================================
+    let adFieldsDirty = false;
+    let isAdLoading = false;
+    let lastMessagesData = null;
+
+    // ============================================================
+    // TOAST
+    // ============================================================
+    function showToast(message, type = 'info') {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+      
+      const icons = { success: '✅', error: '❌', info: 'ℹ️' };
+      toast.innerHTML = `<span>${icons[type] || ''}</span><span>${escapeHtml(message)}</span>`;
+      
+      container.appendChild(toast);
+      
+      setTimeout(() => {
+        toast.classList.add('out');
+        setTimeout(() => toast.remove(), 300);
+      }, 3000);
+    }
+
+    // ============================================================
+    // ТАБЫ (с сохранением в localStorage)
     // ============================================================
     window.switchTab = (tab) => {
       ['ad', 'ticker', 'reset'].forEach(t => {
@@ -176,117 +463,340 @@
       });
       document.getElementById(`tab-${tab}`).classList.remove('hidden');
       document.getElementById(`tab-btn-${tab}`).classList.add('active');
+      localStorage.setItem('endorphin_admin_tab', tab);
+    };
+
+    // Восстанавливаем вкладку
+    const savedTab = localStorage.getItem('endorphin_admin_tab') || 'ad';
+    switchTab(savedTab);
+
+    // ============================================================
+    // ВАЛИДАЦИЯ URL
+    // ============================================================
+    function isValidUrl(str) {
+      if (!str) return true; // пусто — ок
+      try {
+        const url = new URL(str);
+        return ['http:', 'https:'].includes(url.protocol);
+      } catch {
+        return false;
+      }
+    }
+
+    // ============================================================
+    // ПРЕВЬЮ РЕКЛАМЫ
+    // ============================================================
+    window.updateAdPreview = (type) => {
+      const imgInput = document.getElementById(`${type}-img`);
+      const preview = document.getElementById(`${type}-preview`);
+      const url = imgInput.value.trim();
+
+      adFieldsDirty = true;
+
+      if (!url) {
+        preview.innerHTML = '<span class="placeholder">ПРЕВЬЮ</span>';
+        imgInput.classList.remove('error');
+        return;
+      }
+
+      if (!isValidUrl(url)) {
+        imgInput.classList.add('error');
+        preview.innerHTML = '<span class="placeholder" style="color:#ef4444">❌ НЕВЕРНЫЙ URL</span>';
+        return;
+      }
+
+      imgInput.classList.remove('error');
+      preview.innerHTML = `<img src="${escapeHtml(url)}" alt="preview" onerror="this.parentElement.innerHTML='<span class=\\'placeholder\\' style=\\'color:#ef4444\\'>❌ НЕ ЗАГРУЖАЕТСЯ</span>'">`;
     };
 
     // ============================================================
-    // РЕКЛАМА
+    // СОХРАНЕНИЕ РЕКЛАМЫ
     // ============================================================
-    window.saveAdSettings = () => {
+    window.saveAdSettings = async () => {
+      const btn = document.getElementById('save-ad-btn');
+      
+      // Валидация
+      const preloadImg = document.getElementById('preload-img').value.trim();
+      const preloadLink = document.getElementById('preload-link').value.trim();
+      const lobbyImg = document.getElementById('lobby-img').value.trim();
+      const lobbyLink = document.getElementById('lobby-link').value.trim();
+
+      if (!isValidUrl(preloadImg) || !isValidUrl(lobbyImg)) {
+        showToast('Неверный URL картинки', 'error');
+        return;
+      }
+      if (!isValidUrl(preloadLink) || !isValidUrl(lobbyLink)) {
+        showToast('Неверный URL ссылки', 'error');
+        return;
+      }
+
       const settings = {
         preload: {
-          img: document.getElementById('preload-img').value.trim(),
-          link: document.getElementById('preload-link').value.trim(),
+          img: preloadImg,
+          link: preloadLink,
           text: document.getElementById('preload-text').value.trim()
         },
         lobby: {
-          img: document.getElementById('lobby-img').value.trim(),
-          link: document.getElementById('lobby-link').value.trim(),
+          img: lobbyImg,
+          link: lobbyLink,
           text: document.getElementById('lobby-text').value.trim()
         }
       };
-      set(adRef, settings);
-      alert('✅ Реклама сохранена!');
+
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner"></span> СОХРАНЕНИЕ...';
+
+      try {
+        await set(adRef, settings);
+        adFieldsDirty = false;
+        showToast('Реклама сохранена', 'success');
+      } catch (e) {
+        showToast('Ошибка сохранения: ' + e.message, 'error');
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '💾 СОХРАНИТЬ РЕКЛАМУ';
+      }
     };
 
+    // Загрузка рекламы (НЕ перезаписываем, если пользователь печатает)
     onValue(adRef, (snap) => {
       const data = snap.val();
       if (!data) return;
+
+      // Если пользователь уже что-то менял — не перезаписываем
+      if (adFieldsDirty) return;
+
+      isAdLoading = true;
+
       if (data.preload) {
         document.getElementById('preload-img').value = data.preload.img || '';
         document.getElementById('preload-link').value = data.preload.link || '';
         document.getElementById('preload-text').value = data.preload.text || '';
+        updateAdPreview('preload');
       }
       if (data.lobby) {
         document.getElementById('lobby-img').value = data.lobby.img || '';
         document.getElementById('lobby-link').value = data.lobby.link || '';
         document.getElementById('lobby-text').value = data.lobby.text || '';
+        updateAdPreview('lobby');
       }
+
+      isAdLoading = false;
+    });
+
+    // Отслеживаем изменения вручную (без oninput на каждом поле)
+    ['preload-img', 'preload-link', 'preload-text', 'lobby-img', 'lobby-link', 'lobby-text'].forEach(id => {
+      document.getElementById(id).addEventListener('input', () => {
+        if (!isAdLoading) adFieldsDirty = true;
+      });
     });
 
     // ============================================================
     // БЕГУЩАЯ СТРОКА
     // ============================================================
-    window.addMessage = () => {
+    window.updateCharCounter = () => {
       const input = document.getElementById('ticker-input');
-      const text = input.value.trim();
-      if (!text) return;
-
-      onValue(tickerRef, (snap) => {
-        const messages = snap.val() || {};
-        const keys = Object.keys(messages).sort((a, b) => messages[a].time - messages[b].time);
-        
-        if (keys.length >= 10) {
-          remove(ref(db, `games/battle_1/ticker_messages/${keys[0]}`));
-        }
-
-        const newRef = push(tickerRef);
-        set(newRef, { text, time: Date.now() });
-        input.value = '';
-      }, { onlyOnce: true });
+      const counter = document.getElementById('char-counter');
+      const len = input.value.length;
+      const max = 100;
+      
+      counter.innerText = `${len}/${max}`;
+      counter.className = 'char-counter';
+      if (len > max * 0.9) counter.classList.add('danger');
+      else if (len > max * 0.7) counter.classList.add('warn');
     };
 
-    window.deleteMessage = (key) => {
-      if (confirm('Удалить это сообщение?')) {
-        remove(ref(db, `games/battle_1/ticker_messages/${key}`));
+    window.addMessage = async () => {
+      const input = document.getElementById('ticker-input');
+      const btn = document.getElementById('add-msg-btn');
+      const text = input.value.trim();
+
+      if (!text) {
+        showToast('Введите текст', 'error');
+        return;
+      }
+
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner"></span>';
+
+      try {
+        // Читаем свежие данные
+        const snap = await get(tickerRef);
+        const messages = snap.val() || {};
+        const keys = Object.keys(messages).sort((a, b) => messages[a].time - messages[b].time);
+
+        // Удаляем старые, если >= 10
+        const toDelete = keys.slice(0, Math.max(0, keys.length - 9));
+        await Promise.all(toDelete.map(k => remove(ref(db, `games/battle_1/ticker_messages/${k}`))));
+
+        // Добавляем новое
+        const newRef = push(tickerRef);
+        await set(newRef, { text, time: Date.now() });
+
+        input.value = '';
+        updateCharCounter();
+        showToast('Сообщение добавлено', 'success');
+      } catch (e) {
+        showToast('Ошибка: ' + e.message, 'error');
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = 'ОТПРАВИТЬ';
       }
     };
 
+    window.deleteMessage = async (key) => {
+      try {
+        await remove(ref(db, `games/battle_1/ticker_messages/${key}`));
+        showToast('Сообщение удалено', 'info');
+      } catch (e) {
+        showToast('Ошибка удаления', 'error');
+      }
+    };
+
+    window.clearAllMessages = async () => {
+      if (!confirm('Удалить все сообщения бегущей строки?')) return;
+      
+      try {
+        await remove(tickerRef);
+        showToast('Все сообщения удалены', 'success');
+      } catch (e) {
+        showToast('Ошибка: ' + e.message, 'error');
+      }
+    };
+
+    // Рендер сообщений (только если данные реально изменились)
     onValue(tickerRef, (snap) => {
       const messages = snap.val() || {};
       const keys = Object.keys(messages).sort((a, b) => messages[a].time - messages[b].time);
+      
+      // Хэш для проверки изменений
+      const dataHash = keys.map(k => `${k}:${messages[k].time}`).join('|');
+      if (dataHash === lastMessagesData) return;
+      lastMessagesData = dataHash;
+
       const list = document.getElementById('messages-list');
       const empty = document.getElementById('empty-history');
 
       if (keys.length === 0) {
         list.innerHTML = '';
-        list.appendChild(empty);
-        empty.style.display = 'block';
+        const emptyDiv = document.createElement('div');
+        emptyDiv.className = 'text-center text-gray-500 py-8 italic';
+        emptyDiv.innerText = 'Пока нет отправленных сообщений';
+        list.appendChild(emptyDiv);
+        updateTickerPreview();
         return;
       }
 
-      empty.style.display = 'none';
-
+      // Ограничиваем список последними 10 (по факту их не больше)
       list.innerHTML = keys.map(key => {
         const msg = messages[key];
         return `
           <div class="msg-item flex justify-between items-center bg-gray-900/60 border border-gray-700 rounded-xl p-4">
             <div class="flex-1 min-w-0">
-              <p class="text-sm text-gray-300 truncate">${msg.text}</p>
-              <p class="text-[10px] text-gray-500 mt-1">${new Date(msg.time).toLocaleString()}</p>
+              <p class="text-sm text-gray-200 break-words">${escapeHtml(msg.text)}</p>
+              <p class="text-[10px] text-gray-500 mt-1">${new Date(msg.time).toLocaleString('ru-RU')}</p>
             </div>
-            <button onclick="deleteMessage('${key}')" class="delete-btn ml-4 text-red-400 hover:text-red-300 font-black text-xl px-2">✖</button>
+            <button onclick="deleteMessage('${key}')" class="delete-btn ml-4 text-red-400 hover:text-red-300 font-black text-xl px-2" aria-label="Удалить">✖</button>
           </div>
         `;
       }).join('');
+
+      updateTickerPreview();
+    });
+
+    function updateTickerPreview() {
+      const messages = lastMessagesData 
+        ? lastMessagesData.split('|').filter(Boolean)
+        : [];
+      
+      // Берём данные из lastMessagesData, но нам нужны тексты. Читаем из БД-снапшота заново
+      // Проще: держим глобальную переменную с последними сообщениями
+      const previewEl = document.getElementById('ticker-preview-text');
+      
+      // Если нет сообщений — показываем дефолт
+      const msgs = window.__lastMessages || {};
+      const keys = Object.keys(msgs).sort((a, b) => msgs[a].time - msgs[b].time);
+      
+      if (keys.length === 0) {
+        previewEl.innerText = 'ДОБРО ПОЖАЛОВАТЬ НА ВЕЧЕРИНКУ ENDORPHIN!';
+      } else {
+        previewEl.innerText = keys.map(k => msgs[k].text).join('  •  ');
+      }
+      
+      // Перезапуск анимации
+      previewEl.style.animation = 'none';
+      void previewEl.offsetWidth;
+      previewEl.style.animation = '';
+    }
+
+    // Сохраняем последние сообщения глобально для превью
+    onValue(tickerRef, (snap) => {
+      window.__lastMessages = snap.val() || {};
+      updateTickerPreview();
     });
 
     // ============================================================
     // СБРОС
     // ============================================================
-    window.clearGame = () => {
-      if (confirm('Сбросить ВСЮ игру? Все игроки отключатся.')) {
-        set(ref(db, 'games/battle_1'), {
+    window.validateResetInput = () => {
+      const input = document.getElementById('reset-confirm');
+      const btn = document.getElementById('reset-btn');
+      const isValid = input.value.trim().toUpperCase() === 'СБРОС';
+      btn.disabled = !isValid;
+      input.classList.toggle('error', input.value.length > 0 && !isValid);
+    };
+
+    window.clearGame = async () => {
+      const btn = document.getElementById('reset-btn');
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner"></span> СБРОС...';
+
+      try {
+        // Сбрасываем игровое состояние, НЕ трогая ad_settings и ticker_messages
+        await update(ref(db, 'games/battle_1'), {
           status: 'lobby',
           mode: '1v1',
-          lives: { red: 3, blue: 3 },
           players: { red: {}, blue: {} },
           turn: { team: 'red', name: '...' },
           activePlayerId: null,
-          timer: null
+          timer: null,
+          preloadDone: false,
+          winner: null,
+          last_shot: null
         });
-        alert('Игра сброшена');
+
+        // Удаляем выстрелы
+        try {
+          await remove(ref(db, 'games/battle_1/shots'));
+          await remove(ref(db, 'games/battle_1/last_shot'));
+        } catch {}
+
+        document.getElementById('reset-confirm').value = '';
+        validateResetInput();
+        
+        showToast('Игра сброшена в лобби', 'success');
+      } catch (e) {
+        showToast('Ошибка сброса: ' + e.message, 'error');
+        btn.disabled = false;
+        btn.innerHTML = '🗑️ ПОЛНЫЙ СБРОС ИГРЫ';
       }
     };
+
+    // ============================================================
+    // УТИЛИТЫ
+    // ============================================================
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    // Инициализация счётчика
+    updateCharCounter();
   </script>
 </body>
 </html>
