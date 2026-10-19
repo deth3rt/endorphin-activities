@@ -29,7 +29,6 @@
             user-select: none;
         }
 
-        /* СНЕЖИНКИ */
         .snowflake {
             position: absolute;
             color: rgba(255, 255, 255, 0.6);
@@ -48,7 +47,6 @@
             100% { transform: translateY(110vh) rotate(360deg); opacity: 0; }
         }
 
-        /* СТЕКЛО */
         .glass-panel {
             background: var(--glass-bg);
             backdrop-filter: blur(16px);
@@ -58,7 +56,6 @@
             border-radius: 1.5rem;
         }
 
-        /* SHAKE */
         @keyframes screenShake {
             0%, 100% { transform: translate(0, 0); }
             20% { transform: translate(-5px, 2px); }
@@ -68,7 +65,6 @@
         }
         .screen-shake { animation: screenShake 0.4s cubic-bezier(.36,.07,.19,.97) both; }
 
-        /* CANVAS */
         #game-canvas {
             position: absolute;
             top: 0; left: 0;
@@ -77,7 +73,6 @@
             display: block;
         }
 
-        /* UI СЛОЙ */
         .ui-layer {
             position: absolute;
             inset: 0;
@@ -85,36 +80,184 @@
             pointer-events: none;
         }
 
-        /* ЛОББИ */
-        #lobby-view {
+        .full-screen {
             position: absolute;
             inset: 0;
-            z-index: 30;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             padding: 2rem;
             background: var(--bg-gradient);
+            z-index: 30;
             transition: opacity 0.5s;
         }
+        .full-screen.hidden { display: none; }
 
-        /* ПРЕЛОУДИНГ */
-        #preload-view {
-            position: absolute;
-            inset: 0;
-            z-index: 35;
-            display: none;
-            flex-direction: column;
+        .attract-title {
+            font-size: clamp(3rem, 12vw, 9rem);
+            font-weight: 900;
+            line-height: 1;
+            letter-spacing: -0.03em;
+            background: linear-gradient(180deg, #ffffff 0%, #a8e6ff 50%, #22d3ee 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-align: center;
+            text-shadow: 
+                0 0 40px rgba(34, 211, 238, 0.4),
+                0 0 80px rgba(34, 211, 238, 0.2);
+            animation: titleFloat 4s ease-in-out infinite;
+            margin-bottom: 1rem;
+        }
+        @keyframes titleFloat {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .attract-subtitle {
+            font-size: clamp(1rem, 3vw, 2rem);
+            font-weight: 700;
+            letter-spacing: 0.3em;
+            text-transform: uppercase;
+            color: rgba(168, 230, 255, 0.7);
+            margin-bottom: 3rem;
+            text-align: center;
+        }
+
+        .attract-cta {
+            font-size: clamp(1rem, 2.5vw, 1.8rem);
+            font-weight: 900;
+            color: #22d3ee;
+            text-shadow: 0 0 30px rgba(34, 211, 238, 0.8);
+            text-align: center;
+            animation: ctaPulse 2s ease-in-out infinite;
+            margin-top: 2rem;
+        }
+        @keyframes ctaPulse {
+            0%, 100% { opacity: 0.6; }
+            50% { opacity: 1; }
+        }
+
+        .attract-hint {
+            font-size: clamp(0.7rem, 1.5vw, 1rem);
+            color: rgba(168, 230, 255, 0.4);
+            letter-spacing: 0.2em;
+            margin-top: 1rem;
+            text-align: center;
+        }
+
+        .ad-block {
+            width: 100%;
+            max-width: 700px;
+            height: clamp(100px, 20vh, 180px);
+            background: rgba(10, 37, 64, 0.6);
+            border: 2px dashed rgba(127, 227, 255, 0.4);
+            border-radius: 1.5rem;
+            display: flex;
             align-items: center;
             justify-content: center;
-            background: var(--bg-gradient);
-            transition: opacity 0.5s;
+            overflow: hidden;
+            text-decoration: none;
         }
-        #preload-view.active { display: flex; }
+        .ad-block.hidden { display: none; }
+        .ad-block img { width: 100%; height: 100%; object-fit: contain; }
+        .ad-block span {
+            color: rgba(168, 230, 255, 0.4);
+            font-size: clamp(0.9rem, 2vw, 1.2rem);
+            font-weight: 700;
+            letter-spacing: 0.2em;
+        }
+
+        .qr-container {
+            display: flex;
+            gap: clamp(2rem, 6vw, 6rem);
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .qr-team {
+            position: relative;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: clamp(280px, 25vw, 360px);
+        }
+
+        .qr-team-badge {
+            position: absolute;
+            top: -1.2rem;
+            padding: 0.5rem 1.5rem;
+            border-radius: 999px;
+            font-weight: 900;
+            font-size: clamp(0.9rem, 2vw, 1.2rem);
+            letter-spacing: 0.1em;
+            color: #fff;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+        }
+        .qr-team-badge.red { background: #ef4444; }
+        .qr-team-badge.blue { background: #3b82f6; }
+
+        .qr-box {
+            background: #fff;
+            padding: 12px;
+            border-radius: 16px;
+            margin-top: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .qr-box img { display: block; }
+
+        .qr-players {
+            margin-top: 1rem;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .qr-player {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 12px;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 0.95rem;
+            background: rgba(0,0,0,0.4);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .qr-player.red { border-color: rgba(239, 68, 68, 0.4); }
+        .qr-player.blue { border-color: rgba(59, 130, 246, 0.4); }
+        .qr-player .name { flex: 1; }
+
+        .qr-vs {
+            font-size: clamp(3rem, 6vw, 5rem);
+            font-weight: 900;
+            color: rgba(255,255,255,0.2);
+            font-style: italic;
+        }
+
+        .avatar {
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 900;
+            color: #fff;
+            text-shadow: 0 2px 8px rgba(0,0,0,0.5);
+            flex-shrink: 0;
+            border: 2px solid rgba(255,255,255,0.3);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        }
+        .avatar-xs { width: 24px; height: 24px; font-size: 0.75rem; }
+        .avatar-sm { width: 32px; height: 32px; font-size: 0.9rem; }
 
         .preload-title {
-            font-size: 4rem;
+            font-size: clamp(2rem, 5vw, 4rem);
             font-weight: 900;
             text-align: center;
             line-height: 1.2;
@@ -126,7 +269,7 @@
             50% { transform: scale(1.02); text-shadow: 0 0 60px rgba(34, 211, 238, 0.8); }
         }
         .preload-timer {
-            font-size: 8rem;
+            font-size: clamp(5rem, 12vw, 8rem);
             font-weight: 900;
             color: #fff;
             text-shadow: 0 0 40px rgba(34, 211, 238, 0.6);
@@ -134,30 +277,6 @@
             font-variant-numeric: tabular-nums;
         }
 
-        /* РЕКЛАМА */
-        .ad-block {
-            width: 100%;
-            max-width: 600px;
-            height: 150px;
-            background: rgba(10, 37, 64, 0.6);
-            border: 2px dashed rgba(127, 227, 255, 0.4);
-            border-radius: 1.5rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-            margin-top: 2rem;
-            text-decoration: none;
-        }
-        .ad-block img { width: 100%; height: 100%; object-fit: contain; }
-        .ad-block span {
-            color: rgba(168, 230, 255, 0.4);
-            font-size: 1.2rem;
-            font-weight: 700;
-            letter-spacing: 0.2em;
-        }
-
-        /* МЕГАБРОСОК */
         @keyframes megaZoom {
             0% { transform: translate(-50%, -50%) scale(0.1); opacity: 0; }
             50% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
@@ -167,7 +286,7 @@
             position: absolute;
             top: 50%;
             left: 50%;
-            font-size: 120px;
+            font-size: clamp(3rem, 8vw, 8rem);
             font-weight: 900;
             color: #ffffff;
             text-shadow: 0 0 80px #fbbf24;
@@ -176,9 +295,9 @@
             text-transform: uppercase;
             animation: megaZoom 0.8s forwards;
             pointer-events: none;
+            text-align: center;
         }
 
-        /* СУПЕРБРОСОК */
         @keyframes superZoom {
             0% { transform: translate(-50%, -50%) scale(0.1) rotate(-10deg); opacity: 0; }
             50% { transform: translate(-50%, -50%) scale(1.3) rotate(3deg); opacity: 1; }
@@ -188,7 +307,7 @@
             position: absolute;
             top: 50%;
             left: 50%;
-            font-size: 110px;
+            font-size: clamp(3rem, 7vw, 7rem);
             font-weight: 900;
             color: #ffffff;
             text-shadow: 0 0 80px #fbbf24, 0 0 120px #f59e0b;
@@ -202,11 +321,10 @@
         }
         .super-text .super-emoji {
             display: block;
-            font-size: 140px;
+            font-size: clamp(4rem, 9vw, 9rem);
             margin-bottom: 10px;
         }
 
-        /* БЕГУЩАЯ СТРОКА */
         .ticker-wrap {
             position: fixed;
             bottom: 0;
@@ -235,56 +353,14 @@
             100% { transform: translate3d(-100%, 0, 0); }
         }
 
-        /* СЕРДЕЧКИ */
         .hp-display {
             position: absolute;
-            font-size: 3rem;
+            font-size: clamp(1.5rem, 3vw, 3rem);
             filter: drop-shadow(0 0 10px currentColor);
         }
         .hp-red { top: 20px; left: 20px; color: var(--red-team); }
         .hp-blue { bottom: 80px; right: 20px; color: var(--blue-team); }
 
-        /* ВЫБОР КОМАНДЫ */
-        .team-select {
-            display: flex;
-            gap: 20px;
-            margin-top: 20px;
-            z-index: 50;
-        }
-        .team-btn {
-            padding: 15px 40px;
-            border-radius: 15px;
-            font-weight: 900;
-            font-size: 1.5rem;
-            cursor: default;
-            transition: all 0.3s;
-            border: 3px solid transparent;
-            opacity: 0.5;
-        }
-        .team-btn.red {
-            background: rgba(239, 68, 68, 0.2);
-            color: #ef4444;
-            border-color: rgba(239, 68, 68, 0.3);
-        }
-        .team-btn.red.active {
-            background: rgba(239, 68, 68, 0.5);
-            border-color: #ef4444;
-            box-shadow: 0 0 30px rgba(239, 68, 68, 0.6);
-            opacity: 1;
-        }
-        .team-btn.blue {
-            background: rgba(59, 130, 246, 0.2);
-            color: #3b82f6;
-            border-color: rgba(59, 130, 246, 0.3);
-        }
-        .team-btn.blue.active {
-            background: rgba(59, 130, 246, 0.5);
-            border-color: #3b82f6;
-            box-shadow: 0 0 30px rgba(59, 130, 246, 0.6);
-            opacity: 1;
-        }
-
-        /* ФИНИШ */
         @keyframes winPop {
             0% { transform: scale(0.3); opacity: 0; }
             60% { transform: scale(1.1); opacity: 1; }
@@ -303,7 +379,6 @@
             animation: confettiFall linear forwards;
         }
 
-        /* ТАЙМЕР ХОДА (TV) */
         .tv-turn-timer {
             position: absolute;
             z-index: 25;
@@ -374,25 +449,6 @@
             white-space: nowrap;
             text-shadow: 0 0 10px currentColor;
         }
-
-        /* ФОРМИРОВАНИЕ */
-        @keyframes formingPulse {
-            0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.7; }
-            50% { transform: translate(-50%, -50%) scale(1.4); opacity: 1; }
-        }
-
-        .forming-label {
-            position: absolute;
-            transform: translate(-50%, -50%);
-            font-size: 0.9rem;
-            font-weight: 900;
-            letter-spacing: 0.15em;
-            white-space: nowrap;
-            pointer-events: none;
-            z-index: 15;
-            animation: formingPulse 0.6s ease-in-out infinite;
-            text-shadow: 0 0 20px currentColor;
-        }
     </style>
 </head>
 <body class="h-screen w-screen relative overflow-hidden" id="main-body">
@@ -401,13 +457,12 @@
     <canvas id="game-canvas"></canvas>
 
     <div class="ui-layer">
-        <div class="hp-display hp-red" id="heart-red">❤️❤️❤️</div>
-        <div class="hp-display hp-blue" id="heart-blue">❤️❤️❤️</div>
+        <div class="hp-display hp-red" id="heart-red" style="display: none;">❤️❤️❤️</div>
+        <div class="hp-display hp-blue" id="heart-blue" style="display: none;">❤️❤️❤️</div>
         
         <div class="absolute top-4 left-1/2 -translate-x-1/2 glass-panel px-8 py-2 rounded-full text-2xl font-black" id="turn-indicator" style="display: none;">ХОД: ...</div>
         <div class="absolute top-20 left-1/2 -translate-x-1/2 text-6xl font-black text-white" id="tv-timer" style="display: none;"></div>
 
-        <!-- Таймер хода (рядом с активным игроком) -->
         <div class="tv-turn-timer" id="tv-turn-timer">
             <div class="tv-turn-timer-ring" id="tv-turn-timer-ring">
                 <svg viewBox="0 0 90 90">
@@ -420,55 +475,53 @@
         </div>
     </div>
 
-    <div id="lobby-view">
-        <div class="text-center mb-8">
-            <h1 class="text-8xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 via-blue-400 to-indigo-500 mb-2 tracking-tighter">ENDORPHIN</h1>
-            <h2 class="text-4xl font-bold text-cyan-100 tracking-[0.3em] uppercase opacity-80">Снежный Баттл</h2>
-            <div id="tv-mode" class="mt-4 inline-block bg-cyan-900/50 px-8 py-2 rounded-full border border-cyan-500/50 text-2xl font-black text-cyan-300">РЕЖИМ: ОЖИДАНИЕ</div>
-            <div id="tv-unfair-badge" class="mt-2 hidden inline-block bg-yellow-500/20 px-6 py-1 rounded-full border border-yellow-500/50 text-sm font-black text-yellow-300">⚔️ НЕЧЕСТНЫЙ БОЙ</div>
-        </div>
-
-        <div id="qr-container" class="hidden flex gap-24 mb-8">
-            <div class="glass-panel p-6 rounded-3xl flex flex-col items-center w-80 relative">
-                <div class="absolute -top-6 w-full text-center"><span class="bg-red-500 text-white font-black px-6 py-2 rounded-full">КРАСНЫЕ</span></div>
-                <div class="bg-white p-3 rounded-xl mt-4" id="qr-red"></div>
-                <div id="tv-players-red" class="mt-4 space-y-2 w-full text-center text-sm"></div>
-            </div>
-            <div class="flex flex-col items-center justify-center"><div class="text-6xl font-black text-white/30 italic">VS</div></div>
-            <div class="glass-panel p-6 rounded-3xl flex flex-col items-center w-80 relative">
-                <div class="absolute -top-6 w-full text-center"><span class="bg-blue-500 text-white font-black px-6 py-2 rounded-full">СИНИЕ</span></div>
-                <div class="bg-white p-3 rounded-xl mt-4" id="qr-blue"></div>
-                <div id="tv-players-blue" class="mt-4 space-y-2 w-full text-center text-sm"></div>
-            </div>
-        </div>
+    <div id="attract-view" class="full-screen hidden">
+        <h1 class="attract-title">ENDORPHIN</h1>
+        <p class="attract-subtitle">Снежный Баттл</p>
 
         <a id="lobby-ad" class="ad-block hidden" href="#" target="_blank">
             <img id="lobby-ad-img" src="" alt="Реклама" class="hidden">
             <span id="lobby-ad-text">РЕКЛАМА</span>
         </a>
-        
-        <div class="team-select hidden" id="team-select">
-            <button class="team-btn red" id="btn-red-start" disabled>КРАСНЫЕ НАЧИНАЮТ</button>
-            <button class="team-btn blue" id="btn-blue-start" disabled>СИНИЕ НАЧИНАЮТ</button>
+
+        <div class="attract-cta">ХОЧЕШЬ ПОИГРАТЬ?</div>
+        <div class="attract-hint">ПОДХОДИ К ВЕДУЩЕМУ</div>
+    </div>
+
+    <div id="qr-view" class="full-screen hidden">
+        <h1 class="text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 via-blue-400 to-indigo-500 mb-8 tracking-tighter">ENDORPHIN</h1>
+        <p class="text-2xl font-bold text-cyan-100/70 tracking-[0.2em] mb-8">СКАНИРУЙ И ИГРАЙ</p>
+
+        <div id="qr-container" class="qr-container">
+            <div class="qr-team glass-panel">
+                <div class="qr-team-badge red">🔴 КРАСНЫЕ</div>
+                <div class="qr-box" id="qr-red"></div>
+                <div class="qr-players" id="qr-players-red"></div>
+            </div>
+
+            <div class="qr-vs">VS</div>
+
+            <div class="qr-team glass-panel">
+                <div class="qr-team-badge blue">🔵 СИНИЕ</div>
+                <div class="qr-box" id="qr-blue"></div>
+                <div class="qr-players" id="qr-players-blue"></div>
+            </div>
         </div>
 
-        <div id="tv-status" class="text-4xl font-black text-white tracking-widest hidden">ОЖИДАНИЕ ИГРОКОВ...</div>
+        <div class="mt-8 text-xl font-black text-white/50 tracking-wider" id="qr-status">ОЖИДАНИЕ ИГРОКОВ...</div>
     </div>
 
-    <div id="preload-view">
+    <div id="preload-view" class="full-screen hidden">
         <h1 class="preload-title" id="preload-title">ИГРОК 1 VS ИГРОК 2</h1>
         <div class="preload-timer" id="preload-timer">10</div>
-        
-        <a id="preload-ad" class="ad-block" href="#" target="_blank">
-            <img id="preload-ad-img" src="" alt="Реклама" class="hidden">
-            <span id="preload-ad-text">РЕКЛАМА</span>
-        </a>
+        <p class="text-gray-400 text-sm">ПРИГОТОВЬТЕСЬ</p>
     </div>
 
-    <div id="win-view" class="absolute inset-0 hidden flex-col items-center justify-center bg-black/80 backdrop-blur-2xl z-40">
+    <div id="win-view" class="full-screen hidden">
         <div class="text-8xl mb-6" id="win-emoji">🏆</div>
         <h1 class="text-9xl font-black text-white mb-12" id="win-text">ПОБЕДА!</h1>
         <p class="text-2xl text-cyan-300/70 font-bold tracking-widest" id="win-subtitle"></p>
+        <p class="text-sm text-white/30 mt-8 tracking-wider" id="win-countdown"></p>
     </div>
 
     <div id="confetti-container"></div>
@@ -506,6 +559,7 @@
         // ============================================================
         const TURN_TIME = 15;
         const FORM_TIME = 1500;
+        const WINNER_AUTO_HIDE = 30;
 
         // ============================================================
         // СОСТОЯНИЕ
@@ -519,11 +573,10 @@
         let lastShotTime = 0;
         let lastShotState = null;
 
-        let preloadInterval = null;
         let isPreloading = false;
         let hasGeneratedQR = false;
         let lastTickerText = '';
-        let finishedHandled = false;
+        let lastScreen = 'attract';
         let lastMode = null;
 
         // Таймер хода
@@ -535,11 +588,14 @@
         let formingShots = [];
 
         // Live-прицел
-        let currentAim = null;            // { angle, power, team, name, playerId }
-        let displayedAimAngle = null;     // для интерполяции
+        let currentAim = null;
+        let displayedAimAngle = null;
         let displayedAimPower = null;
 
-        // Отображение суперброска
+        // Winner таймер
+        let winnerCountdownInterval = null;
+
+        // Супер
         let superTextTimeout = null;
 
         function getBaseUrl() {
@@ -548,7 +604,42 @@
         }
 
         // ============================================================
-        // PLAYER
+        // УТИЛИТЫ
+        // ============================================================
+        function escapeHtml(str) {
+            if (!str) return '';
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
+        function getNameGradient(name) {
+            let hash = 0;
+            const s = name || '?';
+            for (let i = 0; i < s.length; i++) {
+                hash = s.charCodeAt(i) + ((hash << 5) - hash);
+                hash |= 0;
+            }
+            const hue1 = Math.abs(hash) % 360;
+            const hue2 = (hue1 + 60 + Math.abs(hash >> 8) % 60) % 360;
+            return `linear-gradient(135deg, hsl(${hue1}, 70%, 55%), hsl(${hue2}, 70%, 45%))`;
+        }
+
+        function getInitial(name) {
+            return (name || '?').trim().charAt(0).toUpperCase() || '?';
+        }
+
+        function applyAvatar(el, name, size = 'sm') {
+            el.style.background = getNameGradient(name);
+            el.innerText = getInitial(name);
+            el.className = `avatar avatar-${size}`;
+        }
+
+        // ============================================================
+        // PLAYER (круглый, с аватаром)
         // ============================================================
         class Player {
             constructor(id, data, team) {
@@ -566,8 +657,7 @@
                     this.y = height * 0.5;
                 }
                 
-                this.width = 60;
-                this.height = 100;
+                this.radius = 40;
             }
 
             update(data) {
@@ -579,15 +669,18 @@
             }
 
             draw(ctx, isActive) {
+                const teamColor = this.team === 'red' ? '#ef4444' : '#3b82f6';
+
                 if (!this.alive) {
-                    ctx.font = '40px Montserrat';
-                    ctx.fillStyle = 'rgba(100, 100, 100, 0.5)';
+                    ctx.save();
+                    ctx.globalAlpha = 0.4;
+                    ctx.font = '48px Montserrat';
                     ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
                     ctx.fillText('💀', this.x, this.y);
+                    ctx.restore();
                     return;
                 }
-
-                const teamColor = this.team === 'red' ? '#ef4444' : '#3b82f6';
 
                 if (isActive) {
                     ctx.save();
@@ -597,36 +690,64 @@
                     ctx.shadowColor = teamColor;
                     ctx.shadowBlur = 30 * pulse;
                     ctx.beginPath();
-                    ctx.arc(this.x, this.y, this.width * 0.9 + pulse * 10, 0, Math.PI * 2);
+                    ctx.arc(this.x, this.y, this.radius + 12 + pulse * 10, 0, Math.PI * 2);
                     ctx.stroke();
                     ctx.restore();
                 }
 
+                // Круг с градиентом
+                ctx.save();
                 ctx.shadowColor = teamColor;
-                ctx.shadowBlur = 30;
+                ctx.shadowBlur = 25;
 
-                ctx.fillStyle = this.team === 'red' ? 'rgba(239, 68, 68, 0.3)' : 'rgba(59, 130, 246, 0.3)';
+                const gradient = ctx.createRadialGradient(this.x - 10, this.y - 10, 5, this.x, this.y, this.radius);
+                let hash = 0;
+                for (let i = 0; i < this.name.length; i++) {
+                    hash = this.name.charCodeAt(i) + ((hash << 5) - hash);
+                    hash |= 0;
+                }
+                const hue1 = Math.abs(hash) % 360;
+                const hue2 = (hue1 + 60) % 360;
+                gradient.addColorStop(0, `hsl(${hue1}, 70%, 60%)`);
+                gradient.addColorStop(1, `hsl(${hue2}, 70%, 40%)`);
+
+                ctx.fillStyle = gradient;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                ctx.fill();
+
                 ctx.strokeStyle = teamColor;
-                ctx.lineWidth = 3;
-                ctx.beginPath();
-                ctx.roundRect(this.x - this.width/2, this.y - this.height/2, this.width, this.height, 15);
-                ctx.fill();
+                ctx.lineWidth = 4;
                 ctx.stroke();
+                ctx.restore();
 
-                ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
-                ctx.beginPath();
-                ctx.roundRect(this.x - this.width/2 + 5, this.y - this.height/2 + 5, this.width - 10, this.height/3, 10);
-                ctx.fill();
-
-                ctx.shadowBlur = 0;
-
-                ctx.font = 'bold 14px Montserrat';
+                // Инициал
+                ctx.save();
+                ctx.font = 'bold 36px Montserrat';
                 ctx.fillStyle = '#ffffff';
                 ctx.textAlign = 'center';
-                ctx.fillText(this.name, this.x, this.y + this.height/2 + 20);
+                ctx.textBaseline = 'middle';
+                ctx.shadowColor = 'rgba(0,0,0,0.6)';
+                ctx.shadowBlur = 6;
+                ctx.fillText(getInitial(this.name), this.x, this.y);
+                ctx.restore();
 
+                // Имя под
+                ctx.save();
+                ctx.font = 'bold 18px Montserrat';
+                ctx.fillStyle = '#ffffff';
+                ctx.textAlign = 'center';
+                ctx.shadowColor = 'rgba(0,0,0,0.9)';
+                ctx.shadowBlur = 8;
+                ctx.fillText(this.name, this.x, this.y + this.radius + 26);
+                ctx.restore();
+
+                // Сердечки над
+                ctx.save();
                 ctx.font = '20px Montserrat';
-                ctx.fillText('❤️'.repeat(Math.max(0, this.lives)), this.x, this.y - this.height/2 - 15);
+                ctx.textAlign = 'center';
+                ctx.fillText('❤️'.repeat(Math.max(0, this.lives)), this.x, this.y - this.radius - 15);
+                ctx.restore();
             }
         }
 
@@ -666,7 +787,6 @@
                 this.isSuper = isSuper;
                 this.damage = damage;
                 this.team = shooter.team;
-                this.dead = false;
                 this.trailCooldown = 0;
             }
 
@@ -694,14 +814,13 @@
 
             draw(ctx) {
                 const radius = this.isSuper ? 18 : 15;
-                const color1 = '#ffffff';
                 const color2 = this.isSuper ? '#fbbf24' : '#7fe3ff';
                 
                 ctx.shadowColor = this.isSuper ? '#fbbf24' : '#7fe3ff';
                 ctx.shadowBlur = this.isSuper ? 40 : 25;
 
                 const gradient = ctx.createRadialGradient(this.x - 5, this.y - 5, 2, this.x, this.y, radius);
-                gradient.addColorStop(0, color1);
+                gradient.addColorStop(0, '#ffffff');
                 gradient.addColorStop(1, color2);
                 
                 ctx.fillStyle = gradient;
@@ -724,14 +843,12 @@
         }
 
         // ============================================================
-        // LIVE-ПРИЦЕЛ
+        // LIVE-ПРИЦЕЛ (короче)
         // ============================================================
         function drawLiveAim(aimer, angle, power) {
-            // Экранный угол: для красных 0 = вправо, для синих 0 = влево
             const direction = aimer.team === 'red' ? 1 : -1;
             const rad = angle * Math.PI / 180;
             
-            // Реальный вектор полёта (как у снежка)
             const speed = power * 0.4;
             const vx = Math.cos(rad) * speed * direction;
             const vy = -Math.sin(rad) * speed;
@@ -739,12 +856,10 @@
 
             const teamColor = aimer.team === 'red' ? '#ef4444' : '#3b82f6';
 
-            // Стартовая точка — от игрока
             let x = aimer.x;
             let y = aimer.y;
 
-            // Пунктирная линия (короткая, направление)
-            const lineLength = 100 + power * 1.2;
+            const lineLength = 60 + power * 0.6;
             const lineEndX = x + Math.cos(rad) * lineLength * direction;
             const lineEndY = y - Math.sin(rad) * lineLength;
 
@@ -762,7 +877,6 @@
             ctx.stroke();
             ctx.restore();
 
-            // Параболическая дуга (симуляция полёта)
             let sx = x;
             let sy = y;
             let svx = vx;
@@ -772,12 +886,12 @@
             ctx.setLineDash([10, 10]);
             ctx.strokeStyle = teamColor;
             ctx.lineWidth = 3;
-            ctx.globalAlpha = 0.45;
+            ctx.globalAlpha = 0.4;
             ctx.shadowColor = teamColor;
             ctx.shadowBlur = 15;
             ctx.beginPath();
             ctx.moveTo(sx, sy);
-            for (let i = 0; i < 60; i++) {
+            for (let i = 0; i < 50; i++) {
                 sx += svx;
                 sy += svy;
                 svy += gravity;
@@ -787,7 +901,6 @@
             ctx.stroke();
             ctx.restore();
 
-            // Наконечник стрелки
             const headAngle = Math.atan2(lineEndY - y, lineEndX - x);
             ctx.save();
             ctx.translate(lineEndX, lineEndY);
@@ -803,7 +916,6 @@
             ctx.fill();
             ctx.restore();
 
-            // Кружок с силой у наконечника
             ctx.save();
             ctx.fillStyle = 'rgba(0,0,0,0.7)';
             ctx.strokeStyle = teamColor;
@@ -811,33 +923,15 @@
             ctx.shadowColor = teamColor;
             ctx.shadowBlur = 20;
             ctx.beginPath();
-            ctx.arc(lineEndX, lineEndY, 28, 0, Math.PI * 2);
+            ctx.arc(lineEndX, lineEndY, 26, 0, Math.PI * 2);
             ctx.fill();
             ctx.stroke();
 
-            ctx.font = 'bold 18px Montserrat';
+            ctx.font = 'bold 16px Montserrat';
             ctx.fillStyle = teamColor;
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
             ctx.fillText(Math.round(power) + '%', lineEndX, lineEndY);
-            ctx.restore();
-
-            // Угол дугой у игрока
-            ctx.save();
-            ctx.strokeStyle = teamColor;
-            ctx.lineWidth = 3;
-            ctx.globalAlpha = 0.7;
-            ctx.beginPath();
-            const baseAngle = aimer.team === 'red' ? 0 : Math.PI;
-            ctx.arc(x, y, 40, baseAngle, baseAngle - rad * direction, direction > 0);
-            ctx.stroke();
-
-            ctx.font = 'bold 14px Montserrat';
-            ctx.fillStyle = teamColor;
-            ctx.textAlign = 'center';
-            const angleLabelX = x + Math.cos(rad * 0.5) * 55 * direction;
-            const angleLabelY = y - Math.sin(rad * 0.5) * 55;
-            ctx.fillText(Math.round(angle) + '°', angleLabelX, angleLabelY);
             ctx.restore();
         }
 
@@ -868,24 +962,6 @@
                 ctx.fill();
                 ctx.restore();
 
-                const particleCount = Math.floor(progress * (fs.isSuper ? 12 : 8));
-                for (let i = 0; i < particleCount; i++) {
-                    const angle = (now / 200 + i * Math.PI * 2 / particleCount) % (Math.PI * 2);
-                    const dist = baseRadius + 10 + Math.sin(now / 100 + i) * 5;
-                    const px = bx + Math.cos(angle) * dist;
-                    const py = by + Math.sin(angle) * dist;
-
-                    ctx.save();
-                    ctx.fillStyle = fs.isSuper ? '#fbbf24' : '#ffffff';
-                    ctx.globalAlpha = 0.6 + 0.4 * Math.sin(now / 100 + i);
-                    ctx.shadowColor = teamColor;
-                    ctx.shadowBlur = 10;
-                    ctx.beginPath();
-                    ctx.arc(px, py, 3, 0, Math.PI * 2);
-                    ctx.fill();
-                    ctx.restore();
-                }
-
                 ctx.save();
                 ctx.strokeStyle = fs.isSuper ? '#fbbf24' : teamColor;
                 ctx.lineWidth = 4;
@@ -900,47 +976,6 @@
         }
 
         // ============================================================
-        // ПРЕДПРОСМОТР ТРАЕКТОРИИ (при формировании)
-        // ============================================================
-        function drawTrajectoryPreview(fs, now) {
-            const elapsed = now - fs.startTime;
-            const progress = Math.min(1, elapsed / FORM_TIME);
-            if (progress < 0.3) return;
-
-            const direction = fs.team === 'red' ? 1 : -1;
-            const rad = fs.angle * Math.PI / 180;
-            const speed = fs.power * 0.4;
-            let vx = Math.cos(rad) * speed * direction;
-            let vy = -Math.sin(rad) * speed;
-            const gravity = 0.3;
-
-            let x = fs.x;
-            let y = fs.y;
-            const teamColor = fs.team === 'red' ? '#ef4444' : '#3b82f6';
-
-            ctx.save();
-            ctx.setLineDash([10, 8]);
-            ctx.strokeStyle = fs.isSuper ? '#fbbf24' : teamColor;
-            ctx.lineWidth = fs.isSuper ? 3 : 2;
-            ctx.globalAlpha = 0.3 + progress * 0.3;
-            ctx.shadowColor = ctx.strokeStyle;
-            ctx.shadowBlur = 10;
-            
-            ctx.beginPath();
-            ctx.moveTo(x, y);
-            
-            for (let i = 0; i < 50; i++) {
-                x += vx;
-                y += vy;
-                vy += gravity;
-                ctx.lineTo(x, y);
-                if (x < -100 || x > width + 100 || y > height + 100) break;
-            }
-            ctx.stroke();
-            ctx.restore();
-        }
-
-        // ============================================================
         // ИГРОВОЙ ЦИКЛ
         // ============================================================
         function gameLoop() {
@@ -948,96 +983,90 @@
 
             ctx.clearRect(0, 0, width, height);
 
-            ctx.fillStyle = 'rgba(10, 37, 64, 0.2)';
-            ctx.fillRect(0, 0, width, height);
-            ctx.fillStyle = 'rgba(239, 68, 68, 0.05)';
-            ctx.fillRect(0, 0, width * 0.25, height);
-            ctx.fillStyle = 'rgba(59, 130, 246, 0.05)';
-            ctx.fillRect(width * 0.75, 0, width * 0.25, height);
+            if (lastScreen === 'game' && currentData?.preloadDone && currentData?.status === 'playing') {
+                ctx.fillStyle = 'rgba(10, 37, 64, 0.2)';
+                ctx.fillRect(0, 0, width, height);
+                ctx.fillStyle = 'rgba(239, 68, 68, 0.05)';
+                ctx.fillRect(0, 0, width * 0.25, height);
+                ctx.fillStyle = 'rgba(59, 130, 246, 0.05)';
+                ctx.fillRect(width * 0.75, 0, width * 0.25, height);
 
-            ctx.strokeStyle = 'rgba(127, 227, 255, 0.05)';
-            ctx.lineWidth = 1;
-            for (let x = 0; x < width; x += 50) {
-                ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, height); ctx.stroke();
-            }
-            for (let y = 0; y < height; y += 50) {
-                ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(width, y); ctx.stroke();
-            }
-
-            const activeId = currentData?.activePlayerId;
-
-            // Игроки
-            players.forEach(p => p.draw(ctx, p.id === activeId));
-
-            // LIVE-ПРИЦЕЛ (если играем и не формируется снежок)
-            if (currentAim && currentData?.status === 'playing' && currentData?.preloadDone && formingShots.length === 0) {
-                const aimer = players.get(currentAim.playerId);
-                if (aimer && aimer.alive) {
-                    // Интерполяция
-                    if (displayedAimAngle === null) {
-                        displayedAimAngle = currentAim.angle;
-                        displayedAimPower = currentAim.power;
-                    } else {
-                        displayedAimAngle += (currentAim.angle - displayedAimAngle) * 0.25;
-                        displayedAimPower += (currentAim.power - displayedAimPower) * 0.25;
-                    }
-                    drawLiveAim(aimer, displayedAimAngle, displayedAimPower);
+                ctx.strokeStyle = 'rgba(127, 227, 255, 0.05)';
+                ctx.lineWidth = 1;
+                for (let x = 0; x < width; x += 50) {
+                    ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, height); ctx.stroke();
                 }
-            } else if (!currentAim) {
-                displayedAimAngle = null;
-                displayedAimPower = null;
-            }
+                for (let y = 0; y < height; y += 50) {
+                    ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(width, y); ctx.stroke();
+                }
 
-            // Формирование
-            if (formingShots.length > 0) {
-                formingShots.forEach(fs => drawTrajectoryPreview(fs, now));
-                drawFormingShots(now);
-            }
+                const activeId = currentData?.activePlayerId;
+                players.forEach(p => p.draw(ctx, p.id === activeId));
 
-            // Летящие снежки
-            for (let i = snowballs.length - 1; i >= 0; i--) {
-                const ball = snowballs[i];
-                ball.update();
-                ball.draw(ctx);
-
-                let hit = false;
-                players.forEach(p => {
-                    if (hit) return;
-                    if (p.team !== ball.team && p.alive) {
-                        const dx = Math.abs(ball.x - p.x);
-                        const dy = Math.abs(ball.y - p.y);
-                        if (dx < p.width/2 && dy < p.height/2) {
-                            hit = true;
-                            handleHit(ball, p);
+                if (currentAim && formingShots.length === 0) {
+                    const aimer = players.get(currentAim.playerId);
+                    if (aimer && aimer.alive) {
+                        if (displayedAimAngle === null) {
+                            displayedAimAngle = currentAim.angle;
+                            displayedAimPower = currentAim.power;
+                        } else {
+                            displayedAimAngle += (currentAim.angle - displayedAimAngle) * 0.25;
+                            displayedAimPower += (currentAim.power - displayedAimPower) * 0.25;
                         }
+                        drawLiveAim(aimer, displayedAimAngle, displayedAimPower);
                     }
-                });
-
-                if (hit || ball.x < -100 || ball.x > width + 100 || ball.y > height + 100 || ball.y < -200) {
-                    snowballs.splice(i, 1);
+                } else if (!currentAim) {
+                    displayedAimAngle = null;
+                    displayedAimPower = null;
                 }
-            }
 
-            // Частицы
-            for (let i = particles.length - 1; i >= 0; i--) {
-                const p = particles[i];
-                p.x += p.vx;
-                p.y += p.vy;
-                p.vy += 0.15;
-                p.life -= 0.02;
-                if (p.life <= 0) {
-                    particles.splice(i, 1);
-                    continue;
+                if (formingShots.length > 0) {
+                    drawFormingShots(now);
                 }
-                ctx.globalAlpha = p.life;
-                ctx.fillStyle = p.color;
-                ctx.beginPath();
-                ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.globalAlpha = 1;
-            }
 
-            updateTurnTimerPosition(now);
+                for (let i = snowballs.length - 1; i >= 0; i--) {
+                    const ball = snowballs[i];
+                    ball.update();
+                    ball.draw(ctx);
+
+                    let hit = false;
+                    players.forEach(p => {
+                        if (hit) return;
+                        if (p.team !== ball.team && p.alive) {
+                            const dx = Math.abs(ball.x - p.x);
+                            const dy = Math.abs(ball.y - p.y);
+                            if (dx < p.radius && dy < p.radius) {
+                                hit = true;
+                                handleHit(ball, p);
+                            }
+                        }
+                    });
+
+                    if (hit || ball.x < -100 || ball.x > width + 100 || ball.y > height + 100 || ball.y < -200) {
+                        snowballs.splice(i, 1);
+                    }
+                }
+
+                for (let i = particles.length - 1; i >= 0; i--) {
+                    const p = particles[i];
+                    p.x += p.vx;
+                    p.y += p.vy;
+                    p.vy += 0.15;
+                    p.life -= 0.02;
+                    if (p.life <= 0) {
+                        particles.splice(i, 1);
+                        continue;
+                    }
+                    ctx.globalAlpha = p.life;
+                    ctx.fillStyle = p.color;
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.globalAlpha = 1;
+                }
+
+                updateTurnTimerPosition(now);
+            }
 
             requestAnimationFrame(gameLoop);
         }
@@ -1060,7 +1089,7 @@
             }
 
             timerEl.style.left = `${player.x}px`;
-            timerEl.style.top = `${player.y - 120}px`;
+            timerEl.style.top = `${player.y - 100}px`;
             timerEl.style.transform = 'translateX(-50%)';
             timerEl.classList.add('active');
 
@@ -1147,11 +1176,11 @@
                 document.getElementById('heart-blue').innerText = blueLives > 0 ? '❤️'.repeat(blueLives) : '💀';
 
                 if (redLives <= 0 && blueLives <= 0) {
-                    await update(gameRef, { status: 'finished', winner: 'none' });
+                    await update(gameRef, { status: 'finished', screen: 'winner', winner: 'none' });
                 } else if (redLives <= 0) {
-                    await update(gameRef, { status: 'finished', winner: 'blue' });
+                    await update(gameRef, { status: 'finished', screen: 'winner', winner: 'blue' });
                 } else if (blueLives <= 0) {
-                    await update(gameRef, { status: 'finished', winner: 'red' });
+                    await update(gameRef, { status: 'finished', screen: 'winner', winner: 'red' });
                 }
             } finally {
                 checkingGameOver = false;
@@ -1162,70 +1191,174 @@
         // QR
         // ============================================================
         function generateQRs() {
-            if (hasGeneratedQR) return;
-            hasGeneratedQR = true;
-
-            document.getElementById('qr-container').classList.remove('hidden');
-            document.getElementById('tv-status').classList.remove('hidden');
-            const redUrl = `${currentBaseUrl}play.html?game=${gameId}&team=red`;
-            const blueUrl = `${currentBaseUrl}play.html?game=${gameId}&team=blue`;
             document.getElementById('qr-red').innerHTML = '';
             document.getElementById('qr-blue').innerHTML = '';
             
+            const redUrl = `${currentBaseUrl}play.html?game=${gameId}&team=red`;
+            const blueUrl = `${currentBaseUrl}play.html?game=${gameId}&team=blue`;
+            
             const qrRed = qrcode(0, 'M'); qrRed.addData(redUrl); qrRed.make();
-            document.getElementById('qr-red').innerHTML = qrRed.createImgTag(4, 8);
+            document.getElementById('qr-red').innerHTML = qrRed.createImgTag(5, 10);
             
             const qrBlue = qrcode(0, 'M'); qrBlue.addData(blueUrl); qrBlue.make();
-            document.getElementById('qr-blue').innerHTML = qrBlue.createImgTag(4, 8);
+            document.getElementById('qr-blue').innerHTML = qrBlue.createImgTag(5, 10);
+            
+            hasGeneratedQR = true;
         }
 
-        function resetQRs() {
-            hasGeneratedQR = false;
-            document.getElementById('qr-container').classList.add('hidden');
-            document.getElementById('tv-status').classList.add('hidden');
-        }
-
-        // ============================================================
-        // ПРЕЛОУДИНГ
-        // ============================================================
-        function startPreload(data) {
-            if (isPreloading) return;
-            isPreloading = true;
-
-            const preloadView = document.getElementById('preload-view');
-            const preloadTitle = document.getElementById('preload-title');
-            const preloadTimer = document.getElementById('preload-timer');
-
-            const redPlayers = Object.values(data.players?.red || {});
-            const bluePlayers = Object.values(data.players?.blue || {});
-
-            if (redPlayers.length === 1 && bluePlayers.length === 1) {
-                preloadTitle.innerText = `${redPlayers[0].name.toUpperCase()} VS ${bluePlayers[0].name.toUpperCase()}`;
+        function updateQRPlayersList(data) {
+            const renderList = (containerId, team) => {
+                const container = document.getElementById(containerId);
+                const players = Object.entries(data.room?.[team] || {})
+                    .sort((a, b) => (a[1].joinedAt || 0) - (b[1].joinedAt || 0));
+                const activePlayers = Object.values(data.players?.[team] || {});
+                
+                const all = [
+                    ...activePlayers.map(p => ({ ...p, _status: 'playing' })),
+                    ...players.map(([id, p]) => ({ ...p, _status: 'waiting' }))
+                ];
+                
+                if (all.length === 0) {
+                    container.innerHTML = `<div class="text-white/30 italic text-center py-2 text-sm">Нет игроков</div>`;
+                    return;
+                }
+                
+                container.innerHTML = all.map(p => `
+                    <div class="qr-player ${team}">
+                        <div class="avatar avatar-sm" data-name="${escapeHtml(p.name)}"></div>
+                        <span class="name">${escapeHtml(p.name)}</span>
+                        ${p._status === 'playing' ? '<span class="text-xs text-cyan-300 font-bold">ИГРАЕТ</span>' : ''}
+                    </div>
+                `).join('');
+                
+                container.querySelectorAll('.avatar[data-name]').forEach(el => {
+                    applyAvatar(el, el.dataset.name);
+                });
+            };
+            
+            renderList('qr-players-red', 'red');
+            renderList('qr-players-blue', 'blue');
+            
+            // Статус
+            const redMax = parseInt((data.mode || '1v1').split('v')[0]) || 1;
+            const blueMax = parseInt((data.mode || '1v1').split('v')[1]) || 1;
+            const redCount = Object.keys(data.room?.red || {}).length + Object.keys(data.players?.red || {}).length;
+            const blueCount = Object.keys(data.room?.blue || {}).length + Object.keys(data.players?.blue || {}).length;
+            
+            const isReady = redCount >= redMax && blueCount >= blueMax;
+            const statusEl = document.getElementById('qr-status');
+            if (isReady) {
+                statusEl.innerText = '✅ ВСЕ ГОТОВЫ!';
+                statusEl.className = 'mt-8 text-xl font-black text-green-400 tracking-wider';
             } else {
-                const redCount = redPlayers.length;
-                const blueCount = bluePlayers.length;
-                const isUnfair = redCount !== blueCount;
-                preloadTitle.innerText = isUnfair 
-                    ? `⚔️ ${redCount} vs ${blueCount}` 
-                    : `${redCount} vs ${blueCount}`;
+                statusEl.innerText = `ОЖИДАНИЕ: ${redCount}/${redMax} vs ${blueCount}/${blueMax}`;
+                statusEl.className = 'mt-8 text-xl font-black text-white/50 tracking-wider';
+            }
+        }
+
+        // ============================================================
+        // ЭКРАНЫ
+        // ============================================================
+        function showAttract() {
+            document.getElementById('attract-view').classList.remove('hidden');
+            document.getElementById('qr-view').classList.add('hidden');
+            document.getElementById('preload-view').classList.add('hidden');
+            document.getElementById('win-view').classList.add('hidden');
+            document.getElementById('turn-indicator').style.display = 'none';
+            document.getElementById('tv-timer').style.display = 'none';
+            document.getElementById('tv-turn-timer').classList.remove('active');
+            document.getElementById('heart-red').style.display = 'none';
+            document.getElementById('heart-blue').style.display = 'none';
+        }
+
+        function showQR(data) {
+            document.getElementById('attract-view').classList.add('hidden');
+            document.getElementById('qr-view').classList.remove('hidden');
+            document.getElementById('preload-view').classList.add('hidden');
+            document.getElementById('win-view').classList.add('hidden');
+            document.getElementById('turn-indicator').style.display = 'none';
+            document.getElementById('tv-timer').style.display = 'none';
+            document.getElementById('tv-turn-timer').classList.remove('active');
+            document.getElementById('heart-red').style.display = 'none';
+            document.getElementById('heart-blue').style.display = 'none';
+            
+            if (!hasGeneratedQR) generateQRs();
+            if (data) updateQRPlayersList(data);
+        }
+
+        function showGame() {
+            document.getElementById('attract-view').classList.add('hidden');
+            document.getElementById('qr-view').classList.add('hidden');
+            document.getElementById('preload-view').classList.add('hidden');
+            document.getElementById('win-view').classList.add('hidden');
+            document.getElementById('heart-red').style.display = 'block';
+            document.getElementById('heart-blue').style.display = 'block';
+        }
+
+        function showWinner(data) {
+            document.getElementById('attract-view').classList.add('hidden');
+            document.getElementById('qr-view').classList.add('hidden');
+            document.getElementById('preload-view').classList.add('hidden');
+            document.getElementById('win-view').classList.remove('hidden');
+            document.getElementById('turn-indicator').style.display = 'none';
+            document.getElementById('tv-timer').style.display = 'none';
+            document.getElementById('tv-turn-timer').classList.remove('active');
+            document.getElementById('heart-red').style.display = 'none';
+            document.getElementById('heart-blue').style.display = 'none';
+
+            const winText = document.getElementById('win-text');
+            const winEmoji = document.getElementById('win-emoji');
+            const winSubtitle = document.getElementById('win-subtitle');
+
+            if (data.winner === 'red') {
+                winText.innerText = 'КРАСНЫЕ ПОБЕДИЛИ!';
+                winText.className = 'text-9xl font-black text-red-500 mb-12';
+                winEmoji.innerText = '🔴';
+                winSubtitle.innerText = 'ТАКТИКА, СИЛА, ПОБЕДА';
+                launchConfetti(['#ef4444', '#f87171', '#fca5a5']);
+            } else if (data.winner === 'blue') {
+                winText.innerText = 'СИНИЕ ПОБЕДИЛИ!';
+                winText.className = 'text-9xl font-black text-blue-500 mb-12';
+                winEmoji.innerText = '🔵';
+                winSubtitle.innerText = 'ЛЁД, СКОРОСТЬ, ТОЧНОСТЬ';
+                launchConfetti(['#3b82f6', '#60a5fa', '#93c5fd']);
+            } else {
+                winText.innerText = 'ИГРА ОКОНЧЕНА';
+                winText.className = 'text-9xl font-black text-white mb-12';
+                winEmoji.innerText = '🏁';
+                winSubtitle.innerText = 'СПАСИБО ЗА ИГРУ';
             }
 
-            preloadView.classList.add('active');
-            preloadTimer.innerText = '10';
+            startWinnerCountdown();
+        }
 
-            let seconds = 10;
-            if (preloadInterval) clearInterval(preloadInterval);
-            preloadInterval = setInterval(() => {
-                seconds--;
-                preloadTimer.innerText = seconds;
-
-                if (seconds <= 0) {
-                    clearInterval(preloadInterval);
-                    preloadView.classList.remove('active');
-                    isPreloading = false;
-                    update(gameRef, { status: 'playing', timer: null, preloadDone: true });
+        function startWinnerCountdown() {
+            clearWinnerTimers();
+            
+            let countdown = WINNER_AUTO_HIDE;
+            const countdownEl = document.getElementById('win-countdown');
+            
+            const tick = () => {
+                countdownEl.innerText = `ЗАСТАВКА ЧЕРЕЗ ${countdown} СЕК`;
+                if (countdown <= 0) {
+                    clearWinnerTimers();
+                    update(gameRef, { screen: 'attract' }).catch(() => {});
+                    return;
                 }
-            }, 1000);
+                countdown--;
+            };
+            
+            tick();
+            winnerCountdownInterval = setInterval(tick, 1000);
+        }
+
+        function clearWinnerTimers() {
+            if (winnerCountdownInterval) {
+                clearInterval(winnerCountdownInterval);
+                winnerCountdownInterval = null;
+            }
+            const countdownEl = document.getElementById('win-countdown');
+            if (countdownEl) countdownEl.innerText = '';
         }
 
         // ============================================================
@@ -1255,22 +1388,6 @@
             const data = snap.val();
             if (!data) return;
 
-            if (data.preload) {
-                const img = document.getElementById('preload-ad-img');
-                const text = document.getElementById('preload-ad-text');
-                const link = document.getElementById('preload-ad');
-                if (data.preload.img) {
-                    img.src = data.preload.img;
-                    img.classList.remove('hidden');
-                    text.classList.add('hidden');
-                } else if (data.preload.text) {
-                    text.innerText = data.preload.text;
-                    img.classList.add('hidden');
-                    text.classList.remove('hidden');
-                }
-                if (data.preload.link) link.href = data.preload.link;
-            }
-
             if (data.lobby) {
                 const container = document.getElementById('lobby-ad');
                 const img = document.getElementById('lobby-ad-img');
@@ -1290,7 +1407,7 @@
         });
 
         // ============================================================
-        // LIVE-ПРИЦЕЛ — СЛУШАТЕЛЬ
+        // LIVE-ПРИЦЕЛ
         // ============================================================
         onValue(ref(db, `games/${gameId}/aim`), (snap) => {
             const aimData = snap.val();
@@ -1300,7 +1417,6 @@
                 return;
             }
 
-            // Берём первый (только один активный)
             const [playerId, data] = Object.entries(aimData)[0];
             
             if (currentData?.activePlayerId === playerId && currentData?.status === 'playing' && currentData?.preloadDone) {
@@ -1343,7 +1459,6 @@
                         startTime: performance.now()
                     }));
 
-                    // Убираем live-прицел
                     currentAim = null;
                     displayedAimAngle = null;
                     displayedAimPower = null;
@@ -1367,19 +1482,11 @@
                         );
                         snowballs.push(ball);
                     });
-                    if (shot.isSuper) {
-                        formingShots.forEach(fs => {
-                            spawnParticles(fs.x, fs.y + 20, '#fbbf24', 15);
-                        });
-                    }
                 }
                 formingShots = [];
             }
         });
 
-        // ============================================================
-        // НАЗВАНИЕ СУПЕРБРОСКА
-        // ============================================================
         function showSuperTitle(type) {
             if (superTextTimeout) clearTimeout(superTextTimeout);
 
@@ -1409,9 +1516,12 @@
         onValue(ref(db, `games/${gameId}/timer`), (snap) => {
             const val = snap.val();
             const tvTimer = document.getElementById('tv-timer');
+            const preloadTimer = document.getElementById('preload-timer');
+            
             if (val !== null && val !== undefined) {
                 tvTimer.innerText = val;
                 tvTimer.style.display = 'block';
+                if (preloadTimer) preloadTimer.innerText = val;
             } else {
                 tvTimer.style.display = 'none';
             }
@@ -1425,49 +1535,114 @@
             if (!data) return;
 
             currentData = data;
+            const screen = data.screen || 'attract';
+            const prevScreen = lastScreen;
 
-            // Режим
-            if (data.mode) {
-                document.getElementById('tv-mode').innerText = `РЕЖИМ: ${data.mode.toUpperCase()}`;
-                
-                // Нечестный?
-                if (typeof data.mode === 'string' && data.mode.includes('v')) {
-                    const parts = data.mode.split('v');
-                    const isUnfair = parseInt(parts[0]) !== parseInt(parts[1]);
-                    document.getElementById('tv-unfair-badge').classList.toggle('hidden', !isUnfair);
-                }
-
-                // Смена режима → пересоздать QR
-                if (lastMode !== data.mode) {
-                    lastMode = data.mode;
-                    resetQRs();
-                }
+            // Смена режима → пересоздать QR
+            if (data.mode && lastMode !== data.mode) {
+                lastMode = data.mode;
+                hasGeneratedQR = false;
             }
 
             syncPlayers(data);
             updateHeartsUI();
 
-            // ЛОББИ
-            if (data.status === 'lobby') {
-                handleLobby(data);
-                return;
+            // Обработка экранов
+            if (screen !== prevScreen) {
+                lastScreen = screen;
+                
+                // Сброс таймеров победителя при смене экрана
+                if (screen !== 'winner') {
+                    clearWinnerTimers();
+                }
             }
 
-            // ПРЕЛОУДИНГ
-            if (data.status === 'playing' && !data.preloadDone && !isPreloading) {
-                startPreload(data);
-            }
+            switch (screen) {
+                case 'attract':
+                    showAttract();
+                    // Сброс игрового состояния
+                    formingShots = [];
+                    snowballs = [];
+                    particles = [];
+                    currentAim = null;
+                    turnTimerActive = false;
+                    break;
+                
+                case 'qr':
+                    showQR(data);
+                    break;
+                
+                case 'game':
+                    if (data.status === 'playing' && !data.preloadDone) {
+                        // Прелоадинг
+                        if (isPreloading) {
+                            // Уже идёт
+                        } else {
+                            startPreload(data);
+                        }
+                    } else {
+                        isPreloading = false;
+                        document.getElementById('preload-view').classList.add('hidden');
+                        showGame();
+                        
+                        // Обновить индикаторы
+                        const turnIndicator = document.getElementById('turn-indicator');
+                        if (data.turn && data.preloadDone) {
+                            turnIndicator.style.display = 'block';
+                            turnIndicator.innerText = `ХОД: ${data.turn.name.toUpperCase()}`;
+                            turnIndicator.style.color = data.turn.team === 'red' ? '#ef4444' : '#3b82f6';
+                        } else {
+                            turnIndicator.style.display = 'none';
+                        }
 
-            // ИГРА
-            if (data.status === 'playing') {
-                handlePlaying(data);
-            }
-
-            // ФИНИШ
-            if (data.status === 'finished') {
-                handleFinished(data);
+                        // Таймер хода
+                        if (data.preloadDone && data.activePlayerId && !data.timer) {
+                            if (turnTimerPlayerId !== data.activePlayerId) {
+                                turnTimerPlayerId = data.activePlayerId;
+                                turnTimerStart = Date.now();
+                                turnTimerActive = true;
+                            }
+                        } else {
+                            turnTimerActive = false;
+                            turnTimerPlayerId = null;
+                        }
+                    }
+                    break;
+                
+                case 'winner':
+                    showWinner(data);
+                    break;
             }
         });
+
+        // ============================================================
+        // ПРЕЛОУДИНГ
+        // ============================================================
+        function startPreload(data) {
+            if (isPreloading) return;
+            isPreloading = true;
+
+            const preloadView = document.getElementById('preload-view');
+            const preloadTitle = document.getElementById('preload-title');
+            const preloadTimer = document.getElementById('preload-timer');
+
+            const redPlayers = Object.values(data.players?.red || {});
+            const bluePlayers = Object.values(data.players?.blue || {});
+
+            if (redPlayers.length === 1 && bluePlayers.length === 1) {
+                preloadTitle.innerText = `${redPlayers[0].name.toUpperCase()} VS ${bluePlayers[0].name.toUpperCase()}`;
+            } else {
+                const redCount = redPlayers.length;
+                const blueCount = bluePlayers.length;
+                const isUnfair = redCount !== blueCount;
+                preloadTitle.innerText = isUnfair 
+                    ? `⚔️ ${redCount} vs ${blueCount}` 
+                    : `${redCount} vs ${blueCount}`;
+            }
+
+            preloadView.classList.remove('hidden');
+            preloadTimer.innerText = data.timer || '10';
+        }
 
         // ============================================================
         // СИНХРОНИЗАЦИЯ ИГРОКОВ
@@ -1510,166 +1685,14 @@
         }
 
         // ============================================================
-        // ЛОББИ
-        // ============================================================
-        function handleLobby(data) {
-            const lobbyView = document.getElementById('lobby-view');
-            lobbyView.style.opacity = '1';
-            lobbyView.style.pointerEvents = 'auto';
-
-            document.getElementById('win-view').classList.add('hidden');
-            document.getElementById('win-view').classList.remove('flex');
-            document.getElementById('preload-view').classList.remove('active');
-            document.getElementById('turn-indicator').style.display = 'none';
-            document.getElementById('tv-timer').style.display = 'none';
-            document.getElementById('tv-turn-timer').classList.remove('active');
-
-            finishedHandled = false;
-            document.getElementById('confetti-container').innerHTML = '';
-            
-            formingShots = [];
-            snowballs = [];
-            turnTimerActive = false;
-            currentAim = null;
-            displayedAimAngle = null;
-            displayedAimPower = null;
-
-            if (data.mode) {
-                generateQRs();
-                
-                let redMax = 1, blueMax = 1;
-                if (typeof data.mode === 'string' && data.mode.includes('v')) {
-                    const parts = data.mode.split('v');
-                    redMax = parseInt(parts[0]) || 1;
-                    blueMax = parseInt(parts[1]) || 1;
-                } else {
-                    redMax = parseInt(data.mode?.charAt(0) || 1);
-                    blueMax = redMax;
-                }
-                
-                const redCount = Object.keys(data.players?.red || {}).length;
-                const blueCount = Object.keys(data.players?.blue || {}).length;
-                const isReady = redCount >= redMax && blueCount >= blueMax;
-
-                document.getElementById('tv-players-red').innerHTML = 
-                    Object.values(data.players?.red || {}).map(p => 
-                        `<div class="text-red-300 font-bold bg-red-900/40 py-1 rounded border border-red-500/50">👤 ${escapeHtml(p.name)}</div>`
-                    ).join('');
-                document.getElementById('tv-players-blue').innerHTML = 
-                    Object.values(data.players?.blue || {}).map(p => 
-                        `<div class="text-blue-300 font-bold bg-blue-900/40 py-1 rounded border border-blue-500/50">👤 ${escapeHtml(p.name)}</div>`
-                    ).join('');
-
-                if (isReady) {
-                    document.getElementById('team-select').classList.remove('hidden');
-                    document.getElementById('tv-status').innerText = "ВСЕ ГОТОВЫ!";
-                    document.getElementById('tv-status').classList.add('text-green-400');
-                } else {
-                    document.getElementById('team-select').classList.add('hidden');
-                    document.getElementById('tv-status').innerText = `ОЖИДАНИЕ: ${redCount}/${redMax} vs ${blueCount}/${blueMax}`;
-                    document.getElementById('tv-status').classList.remove('text-green-400');
-                }
-
-                if (data.firstTeam) {
-                    document.getElementById('btn-red-start').classList.toggle('active', data.firstTeam === 'red');
-                    document.getElementById('btn-blue-start').classList.toggle('active', data.firstTeam === 'blue');
-                }
-            }
-        }
-
-        // ============================================================
-        // ИГРА
-        // ============================================================
-        function handlePlaying(data) {
-            const lobbyView = document.getElementById('lobby-view');
-            lobbyView.style.opacity = '0';
-            lobbyView.style.pointerEvents = 'none';
-            document.getElementById('team-select').classList.add('hidden');
-
-            const tvTimer = document.getElementById('tv-timer');
-            if (data.timer !== null && data.timer !== undefined) {
-                tvTimer.style.display = 'block';
-                tvTimer.innerText = data.timer;
-            } else {
-                tvTimer.style.display = 'none';
-            }
-
-            const turnIndicator = document.getElementById('turn-indicator');
-            if (data.turn && data.preloadDone) {
-                turnIndicator.style.display = 'block';
-                turnIndicator.innerText = `ХОД: ${data.turn.name.toUpperCase()}`;
-                turnIndicator.style.color = data.turn.team === 'red' ? '#ef4444' : '#3b82f6';
-            } else {
-                turnIndicator.style.display = 'none';
-            }
-
-            // Таймер хода
-            if (data.preloadDone && data.activePlayerId && !data.timer) {
-                if (turnTimerPlayerId !== data.activePlayerId) {
-                    turnTimerPlayerId = data.activePlayerId;
-                    turnTimerStart = Date.now();
-                    turnTimerActive = true;
-                }
-            } else {
-                turnTimerActive = false;
-                turnTimerPlayerId = null;
-            }
-        }
-
-        // ============================================================
-        // ФИНИШ
-        // ============================================================
-        function handleFinished(data) {
-            if (finishedHandled) return;
-            finishedHandled = true;
-
-            const lobbyView = document.getElementById('lobby-view');
-            lobbyView.style.opacity = '0';
-            lobbyView.style.pointerEvents = 'none';
-            document.getElementById('preload-view').classList.remove('active');
-            document.getElementById('turn-indicator').style.display = 'none';
-            document.getElementById('tv-timer').style.display = 'none';
-            document.getElementById('tv-turn-timer').classList.remove('active');
-
-            turnTimerActive = false;
-            formingShots = [];
-            currentAim = null;
-
-            const winView = document.getElementById('win-view');
-            winView.classList.remove('hidden');
-            winView.classList.add('flex');
-
-            const winText = document.getElementById('win-text');
-            const winEmoji = document.getElementById('win-emoji');
-            const winSubtitle = document.getElementById('win-subtitle');
-
-            if (data.winner === 'red') {
-                winText.innerText = 'КРАСНЫЕ ПОБЕДИЛИ!';
-                winText.className = 'text-9xl font-black text-red-500 mb-12';
-                winEmoji.innerText = '🔴';
-                winSubtitle.innerText = 'ТАКТИКА, СИЛА, ПОБЕДА';
-                launchConfetti(['#ef4444', '#f87171', '#fca5a5']);
-            } else if (data.winner === 'blue') {
-                winText.innerText = 'СИНИЕ ПОБЕДИЛИ!';
-                winText.className = 'text-9xl font-black text-blue-500 mb-12';
-                winEmoji.innerText = '🔵';
-                winSubtitle.innerText = 'ЛЁД, СКОРОСТЬ, ТОЧНОСТЬ';
-                launchConfetti(['#3b82f6', '#60a5fa', '#93c5fd']);
-            } else {
-                winText.innerText = 'ИГРА ОКОНЧЕНА';
-                winText.className = 'text-9xl font-black text-white mb-12';
-                winEmoji.innerText = '🏁';
-                winSubtitle.innerText = 'СПАСИБО ЗА ИГРУ';
-            }
-        }
-
-        // ============================================================
         // КОНФЕТТИ
         // ============================================================
         function launchConfetti(colors) {
             const container = document.getElementById('confetti-container');
             const defaultColors = ['#fbbf24', '#f59e0b', '#22d3ee', '#3b82f6', '#ef4444', '#a855f7', '#22c55e'];
             const palette = colors || defaultColors;
+
+            container.innerHTML = '';
 
             for (let i = 0; i < 80; i++) {
                 const c = document.createElement('div');
@@ -1687,19 +1710,6 @@
             setTimeout(() => {
                 container.innerHTML = '';
             }, 6000);
-        }
-
-        // ============================================================
-        // ЭКРАНИРОВАНИЕ
-        // ============================================================
-        function escapeHtml(str) {
-            if (!str) return '';
-            return String(str)
-                .replace(/&/g, '&amp;')
-                .replace(/</g, '&lt;')
-                .replace(/>/g, '&gt;')
-                .replace(/"/g, '&quot;')
-                .replace(/'/g, '&#39;');
         }
 
         // ============================================================
