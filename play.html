@@ -42,9 +42,6 @@
       box-shadow: 0 0 40px rgba(31, 143, 214, 0.2), inset 0 0 20px rgba(127, 227, 255, 0.05);
     }
 
-    /* ============================================================
-       АНИМАЦИИ
-       ============================================================ */
     @keyframes slideUp { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
     @keyframes pulseGlow {
       0%, 100% { box-shadow: 0 0 20px rgba(34, 211, 238, 0.3); }
@@ -79,9 +76,6 @@
     }
     .animate-shake { animation: shake 0.4s ease-in-out; }
 
-    /* ============================================================
-       АВАТАР
-       ============================================================ */
     .avatar {
       border-radius: 50%;
       display: inline-flex;
@@ -98,9 +92,6 @@
     .avatar-md { width: 48px; height: 48px; font-size: 1.4rem; }
     .avatar-lg { width: 72px; height: 72px; font-size: 2rem; }
 
-    /* ============================================================
-       ТАЙМЕР ХОДА
-       ============================================================ */
     .turn-timer {
       position: fixed;
       top: calc(var(--safe-top) + 6px);
@@ -158,9 +149,6 @@
       animation: timerPulse 0.5s ease-in-out infinite;
     }
 
-    /* ============================================================
-       ИНФО-ПАНЕЛЬ
-       ============================================================ */
     .player-info {
       position: fixed;
       top: calc(var(--safe-top) + 6px);
@@ -197,9 +185,6 @@
       letter-spacing: 1px;
     }
 
-    /* ============================================================
-       ЭКРАН ИГРЫ
-       ============================================================ */
     .game-screen {
       display: flex;
       flex-direction: column;
@@ -221,9 +206,6 @@
       overflow-y: auto;
     }
 
-    /* ============================================================
-       СЕКЦИИ УГОЛ / СИЛА
-       ============================================================ */
     .control-section {
       width: 100%;
       display: flex;
@@ -328,9 +310,6 @@
       border-radius: 5px;
     }
 
-    /* ============================================================
-       СУПЕРСПОСОБНОСТИ
-       ============================================================ */
     .super-panel {
       width: 100%;
       max-width: 340px;
@@ -403,9 +382,6 @@
       animation: superPulse 2s ease-in-out infinite;
     }
 
-    /* ============================================================
-       КНОПКА БРОСОК
-       ============================================================ */
     .shoot-btn {
       width: 100%;
       max-width: 340px;
@@ -437,9 +413,6 @@
       box-shadow: none;
     }
 
-    /* ============================================================
-       МОДАЛКА СУПЕРБРОСКА
-       ============================================================ */
     .super-modal {
       position: fixed;
       inset: 0;
@@ -454,9 +427,6 @@
     }
     .super-modal.hidden { display: none; }
 
-    /* ============================================================
-       ОВЕРЛЕИ
-       ============================================================ */
     .overlay {
       position: fixed;
       inset: 0;
@@ -529,9 +499,6 @@
       animation: confettiFall linear forwards;
     }
 
-    /* ============================================================
-       ВХОД
-       ============================================================ */
     .join-card {
       animation: slideUp 0.5s ease-out;
     }
@@ -546,9 +513,6 @@
       outline: none;
     }
 
-    /* ============================================================
-       КОМНАТА ОЖИДАНИЯ
-       ============================================================ */
     .room-screen {
       position: fixed;
       inset: 0;
@@ -559,6 +523,7 @@
       justify-content: center;
       padding: 20px;
       background: radial-gradient(circle at 50% 0%, #0a2540 0%, #03080f 100%);
+      overflow-y: auto;
     }
 
     .room-status {
@@ -639,9 +604,6 @@
       border: 1px solid rgba(251, 191, 36, 0.4);
     }
 
-    /* ============================================================
-       АДАПТИВ
-       ============================================================ */
     @media (max-height: 720px) {
       .game-content { gap: 5px; }
       .control-section { gap: 4px; }
@@ -670,9 +632,6 @@
 </head>
 <body class="relative" id="main-body">
 
-  <!-- ============================================================
-       ЭКРАН ВХОДА
-       ============================================================ -->
   <div id="join-screen" class="fixed inset-0 flex flex-col items-center justify-center p-6 z-10">
     <div class="glass-panel join-card p-7 rounded-3xl w-full max-w-sm flex flex-col items-center">
       <div class="text-4xl mb-3">❄️</div>
@@ -702,9 +661,6 @@
     </div>
   </div>
 
-  <!-- ============================================================
-       КОМНАТА ОЖИДАНИЯ
-       ============================================================ -->
   <div id="room-screen" class="room-screen hidden">
     <div class="room-status" id="room-status">⏳ ОЖИДАНИЕ</div>
     <div class="room-title">ВЫ В КОМНАТЕ</div>
@@ -728,9 +684,6 @@
     </button>
   </div>
 
-  <!-- ============================================================
-       ЭКРАН ИГРЫ
-       ============================================================ -->
   <div id="game-screen" class="hidden game-screen">
     
     <div class="turn-timer" id="turn-timer">
@@ -754,7 +707,6 @@
     <div id="game-team-badge" class="self-center mb-1 px-4 py-1 rounded-full font-black text-[10px] tracking-widest"></div>
 
     <div class="game-content">
-
       <div class="control-section">
         <div class="section-label">УГОЛ</div>
         <div class="control-row">
@@ -789,15 +741,11 @@
         </div>
         <div class="super-grid" id="super-grid"></div>
       </div>
-
     </div>
 
     <button id="shoot-btn" class="shoot-btn self-center" disabled>БРОСОК</button>
   </div>
 
-  <!-- ============================================================
-       МОДАЛКА СУПЕРБРОСКА
-       ============================================================ -->
   <div id="super-modal" class="super-modal hidden">
     <div class="glass-panel p-5 rounded-3xl w-full max-w-sm">
       <h2 class="text-lg font-black text-center mb-3 text-yellow-400 tracking-widest">ВЫБЕРИ СУПЕРБРОСОК</h2>
@@ -806,9 +754,6 @@
     </div>
   </div>
 
-  <!-- ============================================================
-       ОВЕРЛЕИ
-       ============================================================ -->
   <div id="wait-overlay" class="overlay wait-overlay hidden">
     <div class="text-5xl mb-4">⏳</div>
     <h1 class="text-2xl font-black text-white mb-2 text-center">ХОД СОПЕРНИКА</h1>
@@ -826,7 +771,6 @@
     <p class="text-gray-400 text-xs mt-3">ИГРА НАЧНЁТСЯ СЕЙЧАС</p>
   </div>
 
-  <!-- ТЫ ВЫБЫЛ -->
   <div id="dead-overlay" class="overlay hidden">
     <div class="text-7xl mb-4">💀</div>
     <h1 class="text-3xl font-black text-white mb-3">ТЫ ВЫБЫЛ</h1>
@@ -877,10 +821,13 @@
 
     document.body.classList.add(isRed ? 'team-red' : 'team-blue');
 
-    // playerId — стабильный на устройство+команду
     const storageKey = `endorphin_playerId_${team}`;
     let playerId = localStorage.getItem(storageKey) || 'p_' + Math.random().toString(36).substr(2, 9);
     localStorage.setItem(storageKey, playerId);
+
+    // Флаг "игрок уже заходил" — восстанавливаем из localStorage
+    const joinedKey = `endorphin_joined_${team}_${playerId}`;
+    let hasJoined = localStorage.getItem(joinedKey) === '1';
 
     const playerRef = ref(db, `games/battle_1/players/${team}/${playerId}`);
     const roomRef = ref(db, `games/battle_1/room/${team}/${playerId}`);
@@ -912,10 +859,8 @@
     let currentAngle = 45;
     let currentPower = 30;
     let isShooting = false;
-    let hasJoined = false;
     let myName = '';
     let gameStatus = 'lobby';
-    let screenMode = 'attract';
     let lastPreloadValue = null;
     let myLives = 3;
     let isUnfairMode = false;
@@ -925,9 +870,13 @@
     let turnTimerInterval = null;
     let turnDeadline = 0;
     let meAlive = true;
-    let meConnected = true;
 
-    // Throttle для live-прицела
+    // Флаг для ensureMyPosition (защита от race condition)
+    let isEnsuringPosition = false;
+
+    // Флаг для throttling super-panel
+    let lastSuperPanelHash = '';
+
     let aimSyncTimeout = null;
     let lastAimSent = null;
 
@@ -950,7 +899,7 @@
     }
 
     // ============================================================
-    // АВАТАР: ГРАДИЕНТ ПО ИМЕНИ
+    // АВАТАР
     // ============================================================
     function getNameGradient(name) {
       let hash = 0;
@@ -959,10 +908,8 @@
         hash = s.charCodeAt(i) + ((hash << 5) - hash);
         hash |= 0;
       }
-      
       const hue1 = Math.abs(hash) % 360;
       const hue2 = (hue1 + 60 + Math.abs(hash >> 8) % 60) % 360;
-      
       return `linear-gradient(135deg, hsl(${hue1}, 70%, 55%), hsl(${hue2}, 70%, 45%))`;
     }
 
@@ -979,29 +926,36 @@
     }
 
     // ============================================================
-    // ГЕНЕРАЦИЯ КООРДИНАТ (для players)
+    // ГЕНЕРАЦИЯ КООРДИНАТ (с защитой от race)
     // ============================================================
     async function ensureMyPosition() {
-      const snap = await get(playerRef);
-      const me = snap.val();
-      if (!me) return;
-      if (me.posX !== undefined && me.posY !== undefined) return;
+      if (isEnsuringPosition) return;
+      isEnsuringPosition = true;
 
-      const teamSnap = await get(ref(db, `games/battle_1/players/${team}`));
-      const teamPlayers = teamSnap.val() || {};
-      const usedY = [];
-      Object.values(teamPlayers).forEach(p => {
-        if (p.posY !== undefined) usedY.push(p.posY);
-      });
+      try {
+        const snap = await get(playerRef);
+        const me = snap.val();
+        if (!me) return;
+        if (me.posX !== undefined && me.posY !== undefined) return;
 
-      let posX, posY, attempts = 0;
-      do {
-        posX = isRed ? (5 + Math.random() * 15) : (80 + Math.random() * 15);
-        posY = 20 + Math.random() * 60;
-        attempts++;
-      } while (usedY.some(y => Math.abs(y - posY) < 10) && attempts < 50);
+        const teamSnap = await get(ref(db, `games/battle_1/players/${team}`));
+        const teamPlayers = teamSnap.val() || {};
+        const usedY = [];
+        Object.values(teamPlayers).forEach(p => {
+          if (p.posY !== undefined) usedY.push(p.posY);
+        });
 
-      await update(playerRef, { posX, posY });
+        let posX, posY, attempts = 0;
+        do {
+          posX = isRed ? (5 + Math.random() * 15) : (80 + Math.random() * 15);
+          posY = 20 + Math.random() * 60;
+          attempts++;
+        } while (usedY.some(y => Math.abs(y - posY) < 10) && attempts < 50);
+
+        await update(playerRef, { posX, posY });
+      } finally {
+        isEnsuringPosition = false;
+      }
     }
 
     // ============================================================
@@ -1023,43 +977,31 @@
 
       myName = name;
 
-      // Проверяем, есть ли уже этот игрок в players (перезаход)
-      const playersSnap = await get(ref(db, `games/battle_1/players/${team}/${playerId}`));
+      const playersSnap = await get(playerRef);
       const existingPlayer = playersSnap.val();
 
       if (existingPlayer) {
-        // Перезаход в игру — восстанавливаем connected
-        await update(playerRef, { 
-          name, 
-          connected: true 
-        });
-        console.log('Перезаход в игру как', playerId);
+        await update(playerRef, { name, connected: true });
       } else {
-        // Новый вход — в комнату
         const roomSnap = await get(roomRef);
         const existingRoom = roomSnap.val();
         
         if (existingRoom) {
           await update(roomRef, { name, joinedAt: existingRoom.joinedAt || Date.now() });
         } else {
-          await set(roomRef, { 
-            name, 
-            joinedAt: Date.now() 
-          });
+          await set(roomRef, { name, joinedAt: Date.now() });
         }
       }
 
-      // onDisconnect
       onDisconnect(playerRef).update({ connected: false });
       onDisconnect(roomRef).remove();
       onDisconnect(aimRef).remove();
 
       hasJoined = true;
+      localStorage.setItem(joinedKey, '1');
       vibrate(50);
 
       document.getElementById('join-screen').classList.add('hidden');
-
-      // Показываем комнату или игру — решит onValue ниже
     }
 
     document.getElementById('join-btn').onclick = joinGame;
@@ -1082,7 +1024,7 @@
     updateTeamBadges();
 
     // ============================================================
-    // УГОЛ
+    // УГОЛ / МОЩНОСТЬ
     // ============================================================
     function angleUp() {
       if (!isMyTurn || isShooting) return;
@@ -1100,9 +1042,6 @@
       vibrate(10);
     }
 
-    // ============================================================
-    // МОЩНОСТЬ
-    // ============================================================
     function powerUp() {
       if (!isMyTurn || isShooting) return;
       currentPower = clamp(currentPower + POWER_STEP, 10, 100);
@@ -1119,9 +1058,6 @@
       vibrate(10);
     }
 
-    // ============================================================
-    // ОТОБРАЖЕНИЕ
-    // ============================================================
     function updateAngleDisplay() {
       document.getElementById('angle-display').innerText = Math.round(currentAngle) + '°';
       
@@ -1148,9 +1084,6 @@
       document.getElementById('power-hint').innerText = hint;
     }
 
-    // ============================================================
-    // LIVE-ПРИЦЕЛ
-    // ============================================================
     function syncAimToFirebase() {
       if (!isMyTurn) return;
       if (aimSyncTimeout) return;
@@ -1178,7 +1111,7 @@
     }
 
     // ============================================================
-    // ТАЙМЕР ХОДА
+    // ТАЙМЕР
     // ============================================================
     function startTurnTimer() {
       stopTurnTimer();
@@ -1262,6 +1195,11 @@
       
       panel.classList.remove('hidden');
       
+      // Хеш состояния — не пересоздаём, если ничего не изменилось
+      const hash = `${myLives}_${isMyTurn}_${isShooting}_${costMultiplier}`;
+      if (hash === lastSuperPanelHash) return;
+      lastSuperPanelHash = hash;
+      
       const costInfo = costMultiplier > 1 
         ? `×${costMultiplier} (вы в большинстве)` 
         : `БОНУС`;
@@ -1319,9 +1257,6 @@
     }
     document.getElementById('super-cancel').onclick = closeSuperModal;
 
-    // ============================================================
-    // ГЕНЕРАЦИЯ СУПЕРБРОСКА
-    // ============================================================
     function generateSuperShots(superItem) {
       const shots = [];
       
@@ -1459,7 +1394,6 @@
       const room = data.room || {};
       const players = data.players || {};
 
-      // Сейчас играют
       const playingList = document.getElementById('room-playing-list');
       const playingAll = [
         ...Object.entries(players.red || {}).map(([id, p]) => ({ ...p, team: 'red', id })),
@@ -1481,7 +1415,6 @@
         });
       }
 
-      // В комнате
       const waitingList = document.getElementById('room-waiting-list');
       const waitingAll = [
         ...Object.entries(room.red || {}).map(([id, p]) => ({ ...p, team: 'red', id })),
@@ -1506,7 +1439,6 @@
         });
       }
 
-      // Статус
       const statusEl = document.getElementById('room-status');
       if (data.screen === 'qr') {
         statusEl.innerText = '📱 СКАНИРУЙ И ЖДИ';
@@ -1518,7 +1450,7 @@
     }
 
     // ============================================================
-    // ПОКАЗ ЭКРАНОВ
+    // ЭКРАНЫ
     // ============================================================
     function showJoinScreen() {
       document.getElementById('join-screen').classList.remove('hidden');
@@ -1560,69 +1492,82 @@
 
       const prevStatus = gameStatus;
       gameStatus = data.status || 'lobby';
-      screenMode = data.screen || 'attract';
 
       if (data.mode) updateModeInfo(data.mode);
 
-      // Проверяем, где я
       const inPlayers = data.players?.[team]?.[playerId];
       const inRoom = data.room?.[team]?.[playerId];
 
-      // Если я вообще не в игре — на экран входа
+      // Восстановление hasJoined при перезагрузке
+      if (!hasJoined && (inPlayers || inRoom)) {
+        hasJoined = true;
+        localStorage.setItem(joinedKey, '1');
+        document.getElementById('join-screen').classList.add('hidden');
+      }
+
+      // Меня нет нигде → экран входа
       if (hasJoined && !inPlayers && !inRoom) {
         showJoinScreen();
         hasJoined = false;
+        localStorage.removeItem(joinedKey);
         return;
       }
 
-      // Приветствие если не зашёл
       if (!hasJoined) return;
 
       // Я в игре
       if (inPlayers) {
         meAlive = inPlayers.alive;
-        meConnected = inPlayers.connected !== false;
         myLives = inPlayers.lives;
         myName = inPlayers.name || myName;
 
-        // Проверяем, нужен ли posX/posY
         if (inPlayers.posX == null || inPlayers.posY == null) {
           ensureMyPosition();
         }
 
-        // Финиш всей игры
         if (gameStatus === 'finished') {
+          // Сбрасываем isMyTurn
+          isMyTurn = false;
           showGameScreen(data);
           handleFinished(data);
           return;
         }
 
-        // Живой — играем
         if (meAlive) {
           showGameScreen(data);
           hideOverlay('dead-overlay');
           handlePlaying(data);
         } else {
-          // Мёртв, но игра идёт
           showGameScreen(data);
+          // Мёртв — показываем dead-overlay
           if (gameStatus === 'playing' && data.preloadDone) {
             const deadOverlay = document.getElementById('dead-overlay');
             if (deadOverlay.classList.contains('hidden')) {
               showOverlay('dead-overlay');
             }
           }
+          // Сбрасываем ход
+          isMyTurn = false;
+          stopTurnTimer();
         }
         return;
       }
 
       // Я в комнате
       if (inRoom) {
-        // Скрываем все игровые оверлеи
+        // Сбрасываем всё игровое
+        isMyTurn = false;
+        isShooting = false;
+        stopTurnTimer();
+        remove(aimRef).catch(() => {});
+        lastAimSent = null;
+        lastSuperPanelHash = '';
+        
         hideOverlay('dead-overlay');
         hideOverlay('wait-overlay');
         hideOverlay('preload-overlay');
         hideOverlay('result-overlay');
-        stopTurnTimer();
+        
         showRoomScreen(data);
         return;
       }
@@ -1677,7 +1622,7 @@
         }
         btn.disabled = true;
         buttons.forEach(b => b.disabled = true);
-        if (hasJoined && !isShooting && meAlive) showOverlay('wait-overlay');
+        if (!isShooting && meAlive) showOverlay('wait-overlay');
       }
 
       const me = data.players?.[team]?.[playerId];
@@ -1800,9 +1745,6 @@
       document.getElementById('confetti-container').innerHTML = '';
     };
 
-    // ============================================================
-    // ТЫ ВЫБЫЛ
-    // ============================================================
     document.getElementById('watch-btn').onclick = () => {
       hideOverlay('dead-overlay');
     };
@@ -1811,22 +1753,25 @@
       hideOverlay('dead-overlay');
     };
 
-    // ============================================================
-    // ВЫЙТИ ИЗ КОМНАТЫ
-    // ============================================================
     document.getElementById('room-leave-btn').onclick = async () => {
       if (!confirm('Выйти из комнаты?')) return;
+      
+      // Очищаем всё
       await remove(roomRef);
-      showJoinScreen();
+      await remove(playerRef).catch(() => {});
+      localStorage.removeItem(joinedKey);
+      
       hasJoined = false;
+      showJoinScreen();
     };
 
     // ============================================================
-    // СЕРДЕЧКИ
+    // СЕРДЕЧКИ (компактный формат)
     // ============================================================
     function renderHearts(lives, alive) {
       if (!alive || lives <= 0) return '💀';
-      return '❤️'.repeat(lives);
+      if (lives <= 5) return '❤️'.repeat(lives);
+      return `❤️×${lives}`;
     }
 
     // ============================================================
@@ -1835,6 +1780,8 @@
     function launchConfetti() {
       const container = document.getElementById('confetti-container');
       const colors = ['#fbbf24', '#f59e0b', '#22d3ee', '#3b82f6', '#ef4444', '#a855f7', '#22c55e'];
+      
+      container.innerHTML = '';
       
       for (let i = 0; i < 60; i++) {
         const c = document.createElement('div');
@@ -1857,6 +1804,11 @@
     // ============================================================
     updateAngleDisplay();
     updatePowerDisplay();
+
+    // Показываем экран входа, если не зашли
+    if (!hasJoined) {
+      document.getElementById('join-screen').classList.remove('hidden');
+    }
   </script>
 </body>
 </html>
