@@ -812,9 +812,6 @@
     const db = getDatabase(app);
     const gameRef = ref(db, 'games/battle_1');
 
-    // ============================================================
-    // КОНТЕКСТ
-    // ============================================================
     const urlParams = new URLSearchParams(window.location.search);
     const team = urlParams.get('team') || 'red';
     const isRed = team === 'red';
@@ -825,7 +822,6 @@
     let playerId = localStorage.getItem(storageKey) || 'p_' + Math.random().toString(36).substr(2, 9);
     localStorage.setItem(storageKey, playerId);
 
-    // Флаг "игрок уже заходил" — восстанавливаем из localStorage
     const joinedKey = `endorphin_joined_${team}_${playerId}`;
     let hasJoined = localStorage.getItem(joinedKey) === '1';
 
@@ -833,18 +829,12 @@
     const roomRef = ref(db, `games/battle_1/room/${team}/${playerId}`);
     const aimRef = ref(db, `games/battle_1/aim/${playerId}`);
 
-    // ============================================================
-    // КОНСТАНТЫ
-    // ============================================================
     const TURN_TIME = 15;
     const FORM_TIME = 1500;
     const ANGLE_STEP = 5;
     const POWER_STEP = 10;
     const NAME_MAX = 16;
 
-    // ============================================================
-    // СУПЕРСПОСОБНОСТИ
-    // ============================================================
     const SUPERS = {
       fan: { id: 'fan', emoji: '🌪', name: 'ВЕЕР', desc: '6 снежков ±30°', cost: 1, count: 6 },
       shotgun: { id: 'shotgun', emoji: '💥', name: 'ДРОБОВИК', desc: '8 снежков ±10°', cost: 1, count: 8 },
@@ -852,9 +842,6 @@
       nuke: { id: 'nuke', emoji: '☄️', name: 'ЯДЕРКА', desc: '1 снежок, 3❤️ урона', cost: 2, count: 1 }
     };
 
-    // ============================================================
-    // СОСТОЯНИЕ
-    // ============================================================
     let isMyTurn = false;
     let currentAngle = 45;
     let currentPower = 30;
@@ -871,18 +858,12 @@
     let turnDeadline = 0;
     let meAlive = true;
 
-    // Флаг для ensureMyPosition (защита от race condition)
     let isEnsuringPosition = false;
-
-    // Флаг для throttling super-panel
     let lastSuperPanelHash = '';
 
     let aimSyncTimeout = null;
     let lastAimSent = null;
 
-    // ============================================================
-    // УТИЛИТЫ
-    // ============================================================
     const vibrate = (p) => { if (navigator.vibrate) navigator.vibrate(p); };
     const showOverlay = (id) => document.getElementById(id).classList.remove('hidden');
     const hideOverlay = (id) => document.getElementById(id).classList.add('hidden');
@@ -898,9 +879,6 @@
         .replace(/'/g, '&#39;');
     }
 
-    // ============================================================
-    // АВАТАР
-    // ============================================================
     function getNameGradient(name) {
       let hash = 0;
       const s = name || '?';
@@ -925,9 +903,6 @@
       }
     }
 
-    // ============================================================
-    // ГЕНЕРАЦИЯ КООРДИНАТ (с защитой от race)
-    // ============================================================
     async function ensureMyPosition() {
       if (isEnsuringPosition) return;
       isEnsuringPosition = true;
@@ -958,9 +933,6 @@
       }
     }
 
-    // ============================================================
-    // ВХОД
-    // ============================================================
     async function joinGame() {
       const nameInput = document.getElementById('input-name');
       let name = nameInput.value.trim() || 'Игрок';
@@ -1023,9 +995,6 @@
     }
     updateTeamBadges();
 
-    // ============================================================
-    // УГОЛ / МОЩНОСТЬ
-    // ============================================================
     function angleUp() {
       if (!isMyTurn || isShooting) return;
       currentAngle = clamp(currentAngle + ANGLE_STEP, 0, 180);
@@ -1110,9 +1079,6 @@
       }, 60);
     }
 
-    // ============================================================
-    // ТАЙМЕР
-    // ============================================================
     function startTurnTimer() {
       stopTurnTimer();
       turnDeadline = Date.now() + TURN_TIME * 1000;
@@ -1178,9 +1144,6 @@
       await executeShot();
     }
 
-    // ============================================================
-    // СУПЕРСПОСОБНОСТИ
-    // ============================================================
     function getSuperCost(baseCost) {
       return baseCost * costMultiplier;
     }
@@ -1195,7 +1158,6 @@
       
       panel.classList.remove('hidden');
       
-      // Хеш состояния — не пересоздаём, если ничего не изменилось
       const hash = `${myLives}_${isMyTurn}_${isShooting}_${costMultiplier}`;
       if (hash === lastSuperPanelHash) return;
       lastSuperPanelHash = hash;
@@ -1292,9 +1254,6 @@
       return shots;
     }
 
-    // ============================================================
-    // БРОСОК
-    // ============================================================
     async function executeShot() {
       if (isShooting) return;
       await doShot([{ angle: currentAngle, power: currentPower }], false, null);
@@ -1387,9 +1346,6 @@
       await executeShot();
     };
 
-    // ============================================================
-    // РЕНДЕР КОМНАТЫ
-    // ============================================================
     function renderRoom(data) {
       const room = data.room || {};
       const players = data.players || {};
@@ -1449,9 +1405,6 @@
       }
     }
 
-    // ============================================================
-    // ЭКРАНЫ
-    // ============================================================
     function showJoinScreen() {
       document.getElementById('join-screen').classList.remove('hidden');
       document.getElementById('room-screen').classList.add('hidden');
@@ -1483,9 +1436,6 @@
       }
     }
 
-    // ============================================================
-    // ОСНОВНОЙ СЛУШАТЕЛЬ
-    // ============================================================
     onValue(gameRef, (snapshot) => {
       const data = snapshot.val();
       if (!data) return;
@@ -1498,14 +1448,12 @@
       const inPlayers = data.players?.[team]?.[playerId];
       const inRoom = data.room?.[team]?.[playerId];
 
-      // Восстановление hasJoined при перезагрузке
       if (!hasJoined && (inPlayers || inRoom)) {
         hasJoined = true;
         localStorage.setItem(joinedKey, '1');
         document.getElementById('join-screen').classList.add('hidden');
       }
 
-      // Меня нет нигде → экран входа
       if (hasJoined && !inPlayers && !inRoom) {
         showJoinScreen();
         hasJoined = false;
@@ -1515,7 +1463,6 @@
 
       if (!hasJoined) return;
 
-      // Я в игре
       if (inPlayers) {
         meAlive = inPlayers.alive;
         myLives = inPlayers.lives;
@@ -1526,10 +1473,13 @@
         }
 
         if (gameStatus === 'finished') {
-          // Сбрасываем isMyTurn
           isMyTurn = false;
-          showGameScreen(data);
-          handleFinished(data);
+          // ✅ ФИКС: показываем финиш только если ещё не показан
+          const resultOverlay = document.getElementById('result-overlay');
+          if (resultOverlay.classList.contains('hidden')) {
+            showGameScreen(data);
+            handleFinished(data);
+          }
           return;
         }
 
@@ -1539,23 +1489,19 @@
           handlePlaying(data);
         } else {
           showGameScreen(data);
-          // Мёртв — показываем dead-overlay
           if (gameStatus === 'playing' && data.preloadDone) {
             const deadOverlay = document.getElementById('dead-overlay');
             if (deadOverlay.classList.contains('hidden')) {
               showOverlay('dead-overlay');
             }
           }
-          // Сбрасываем ход
           isMyTurn = false;
           stopTurnTimer();
         }
         return;
       }
 
-      // Я в комнате
       if (inRoom) {
-        // Сбрасываем всё игровое
         isMyTurn = false;
         isShooting = false;
         stopTurnTimer();
@@ -1573,9 +1519,6 @@
       }
     });
 
-    // ============================================================
-    // ИГРА
-    // ============================================================
     function handlePlaying(data) {
       if (data.timer !== null && data.timer !== undefined) {
         showOverlay('preload-overlay');
@@ -1634,9 +1577,6 @@
       }
     }
 
-    // ============================================================
-    // РЕЖИМ
-    // ============================================================
     function updateModeInfo(mode) {
       if (typeof mode === 'string' && mode.includes('v')) {
         const parts = mode.split('v');
@@ -1662,9 +1602,6 @@
       updateSuperPanel();
     }
 
-    // ============================================================
-    // ДОЛГОЕ НАЖАТИЕ
-    // ============================================================
     function addHoldSupport(btnId, action) {
       const btn = document.getElementById(btnId);
       let holdInterval = null;
@@ -1694,9 +1631,6 @@
     addHoldSupport('power-up', powerUp);
     addHoldSupport('power-down', powerDown);
 
-    // ============================================================
-    // ФИНИШ
-    // ============================================================
     function handleFinished(data) {
       hideOverlay('wait-overlay');
       hideOverlay('preload-overlay');
@@ -1756,7 +1690,6 @@
     document.getElementById('room-leave-btn').onclick = async () => {
       if (!confirm('Выйти из комнаты?')) return;
       
-      // Очищаем всё
       await remove(roomRef);
       await remove(playerRef).catch(() => {});
       localStorage.removeItem(joinedKey);
@@ -1765,18 +1698,12 @@
       showJoinScreen();
     };
 
-    // ============================================================
-    // СЕРДЕЧКИ (компактный формат)
-    // ============================================================
     function renderHearts(lives, alive) {
       if (!alive || lives <= 0) return '💀';
       if (lives <= 5) return '❤️'.repeat(lives);
       return `❤️×${lives}`;
     }
 
-    // ============================================================
-    // КОНФЕТТИ
-    // ============================================================
     function launchConfetti() {
       const container = document.getElementById('confetti-container');
       const colors = ['#fbbf24', '#f59e0b', '#22d3ee', '#3b82f6', '#ef4444', '#a855f7', '#22c55e'];
@@ -1799,13 +1726,9 @@
       setTimeout(() => { container.innerHTML = ''; }, 5000);
     }
 
-    // ============================================================
-    // СТАРТ
-    // ============================================================
     updateAngleDisplay();
     updatePowerDisplay();
 
-    // Показываем экран входа, если не зашли
     if (!hasJoined) {
       document.getElementById('join-screen').classList.remove('hidden');
     }
