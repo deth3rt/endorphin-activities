@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="theme-color" content="#03080f">
-    <title>ENDORPHIN | ТВ ЭКРАН</title>
+    <title>ЭНДОРФИН | ТВ ЭКРАН</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -884,7 +884,7 @@
         <div class="attract-overlay"></div>
 
         <div class="attract-top">
-            <div class="attract-logo-wrap" aria-label="ENDORPHIN">
+            <div class="attract-logo-wrap" aria-label="ЭНДОРФИН">
                 <svg viewBox="0 0 600 120" xmlns="http://www.w3.org/2000/svg" role="img">
                     <defs>
                         <linearGradient id="tvLogoGrad" x1="0" y1="0" x2="0" y2="1">
@@ -907,7 +907,7 @@
                           fill="url(#tvLogoGrad)"
                           stroke="rgba(127,227,255,0.35)"
                           stroke-width="0.7"
-                          filter="url(#tvLogoGlow)">ENDORPHIN</text>
+                          filter="url(#tvLogoGlow)">ЭНДОРФИН</text>
                 </svg>
             </div>
             <p class="attract-subtitle">Снежный Баттл</p>
@@ -928,7 +928,7 @@
 
     <!-- QR -->
     <div id="qr-view" class="full-screen hidden">
-        <h1 class="text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 via-blue-400 to-indigo-500 mb-6 tracking-tighter">ENDORPHIN</h1>
+        <h1 class="text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 via-blue-400 to-indigo-500 mb-6 tracking-tighter">ЭНДОРФИН</h1>
         <p class="text-2xl font-bold text-cyan-100/70 tracking-[0.25em] mb-8">СКАНИРУЙ И ИГРАЙ</p>
 
         <div id="qr-container" class="qr-container">
@@ -984,7 +984,7 @@
     <div id="confetti-container"></div>
 
     <div class="ticker-wrap">
-        <div class="ticker" id="ticker-text">ДОБРО ПОЖАЛОВАТЬ НА ВЕЧЕРИНКУ ENDORPHIN!</div>
+        <div class="ticker" id="ticker-text">ДОБРО ПОЖАЛОВАТЬ НА ВЕЧЕРИНКУ ЭНДОРФИН!</div>
     </div>
 
     <script type="module">
@@ -1329,7 +1329,7 @@ function drawBattleBackground() {
             // 4. Круг-подложка
             c.save();
             c.shadowColor = teamColor;
-            c.shadowBlur = 25 * scale;
+            c.shadowBlur = 0;
             const grad = c.createRadialGradient(x - r * 0.25, y - r * 0.25, r * 0.1, x, y, r);
             grad.addColorStop(0, 'rgba(70, 120, 175, 0.96)');
             grad.addColorStop(0.5, 'rgba(35, 75, 125, 0.96)');
@@ -1430,12 +1430,11 @@ function drawBattleBackground() {
         // ============================================================
         // ПРИЦЕЛ — поддерживает угол 0..360
         // ============================================================
-        function drawAimArc(aimer, angle, power) {
-            const direction = aimer.team === 'red' ? 1 : -1;
+        function drawAimArc(aimer, angle, power) {            
             const teamColor = aimer.team === 'red' ? '#ff3b5c' : '#3d8bff';
             const rad = (angle * Math.PI) / 180;
             const speed = power * 0.4;
-            const vx = Math.cos(rad) * speed * direction;
+            const vx = Math.cos(rad) * speed;
             const vy = -Math.sin(rad) * speed;
             const gravity = 0.3;
 
@@ -1464,7 +1463,7 @@ function drawBattleBackground() {
 
             // Стрелка направления (для любого угла 0..360)
             const lineLength = 25 + power * 0.18;
-            const endX = x + Math.cos(rad) * lineLength * direction;
+            const endX = x + Math.cos(rad) * lineLength;
             const endY = y - Math.sin(rad) * lineLength;
 
             ctx.save();
@@ -1519,13 +1518,12 @@ function drawBattleBackground() {
         }
 
         function demoShoot(shooter, target, isSuper = false, superType = null) {
-            if (!target) return;
+    if (!target) return;
 
-            const direction = shooter.team === 'red' ? 1 : -1;
-            const dx = target.x - shooter.x;
-            const dy = target.y - shooter.y;
-            let baseAngle = Math.atan2(-dy, dx * direction) * 180 / Math.PI;
-            const power = isSuper ? 70 + Math.random() * 30 : shooter.aimPower;
+    const dx = target.x - shooter.x;
+    const dy = target.y - shooter.y;
+    let baseAngle = Math.atan2(-dy, dx) * 180 / Math.PI;
+    const power = isSuper ? 70 + Math.random() * 30 : shooter.aimPower;
 
             if (isSuper) {
                 const shots = [];
@@ -1540,7 +1538,7 @@ function drawBattleBackground() {
                 shots.forEach(s => {
                     demoSnowballs.push({
                         x: shooter.x, y: shooter.y - 20,
-                        vx: Math.cos(s.angle * Math.PI / 180) * (s.power * 0.4) * direction,
+                        vx: Math.cos(s.angle * Math.PI / 180) * (s.power * 0.4),
                         vy: -Math.sin(s.angle * Math.PI / 180) * (s.power * 0.4),
                         gravity: 0.3, team: shooter.team, radius: 12,
                         isSuper: true, damage: s.damage || 1
@@ -1553,7 +1551,7 @@ function drawBattleBackground() {
             } else {
                 demoSnowballs.push({
                     x: shooter.x, y: shooter.y - 20,
-                    vx: Math.cos(baseAngle * Math.PI / 180) * (power * 0.4) * direction,
+                    vx: Math.cos(baseAngle * Math.PI / 180) * (power * 0.4),
                     vy: -Math.sin(baseAngle * Math.PI / 180) * (power * 0.4),
                     gravity: 0.3, team: shooter.team, radius: 11,
                     isSuper: false, damage: 1
@@ -1563,7 +1561,7 @@ function drawBattleBackground() {
             for (let i = 0; i < 14; i++) {
                 demoParticles.push({
                     x: shooter.x, y: shooter.y - 20,
-                    vx: (Math.random() - 0.5) * 10 * direction,
+                    vx: (Math.random() - 0.5) * 10,
                     vy: (Math.random() - 0.5) * 10,
                     life: 0.7,
                     color: isSuper ? '#fbbf24' : (shooter.team === 'red' ? '#ff3b5c' : '#3d8bff'),
@@ -2318,7 +2316,7 @@ function drawBattleBackground() {
             const keys = Object.keys(messages).sort((a, b) => messages[a].time - messages[b].time);
             const text = keys.length > 0
                 ? keys.map(key => messages[key].text).join('  •  ')
-                : 'ДОБРО ПОЖАЛОВАТЬ НА ВЕЧЕРИНКУ ENDORPHIN!';
+                : 'ДОБРО ПОЖАЛОВАТЬ НА ВЕЧЕРИНКУ ЭНДОРФИН!';
 
             if (text !== lastTickerText) {
                 lastTickerText = text;
