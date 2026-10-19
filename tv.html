@@ -123,7 +123,7 @@
         #attract-view {
             background: transparent;
             justify-content: space-between;
-            padding: 2.5rem 2rem 1.5rem;
+            padding: 2.5rem 2rem 5.5rem;
         }
 
         .attract-top {
@@ -201,6 +201,7 @@
             display: flex;
             justify-content: center;
             z-index: 10;
+            margin-bottom: 0.5rem;
         }
 
         .ad-block {
@@ -338,8 +339,9 @@
             color: #fff;
             text-shadow: 0 0 40px rgba(34, 211, 238, 0.6);
             margin: 1rem 0;
-            font-family: 'JetBrains Mono', monospace;
+            font-family: 'Montserrat', sans-serif;
             font-variant-numeric: tabular-nums;
+            letter-spacing: -0.02em;
         }
 
         @keyframes megaZoom {
@@ -444,11 +446,12 @@
         .hp-display.hp-blue { right: 20px; border-color: rgba(61, 139, 255, 0.6); color: var(--blue-team); }
         .hp-display .hp-icon { font-size: clamp(1.4rem, 2.2vw, 2rem); }
         .hp-display .hp-value {
-            font-family: 'JetBrains Mono', monospace;
+            font-family: 'Montserrat', sans-serif;
             font-weight: 900;
-            font-size: clamp(1.6rem, 3vw, 2.6rem);
+            font-size: clamp(1.8rem, 3.4vw, 3rem);
             color: #fff;
             text-shadow: 0 0 20px currentColor;
+            font-variant-numeric: tabular-nums;
         }
         .hp-display .hp-label {
             font-size: clamp(0.7rem, 1.2vw, 0.9rem);
@@ -740,12 +743,12 @@
         const gameId = 'battle_1';
         const gameRef = ref(db, `games/${gameId}`);
 
-    
+
         // ============================================================
         // СОСТОЯНИЕ (объявлено до resizeCanvas — иначе TDZ)
         // ============================================================
         let currentData = null;
-        let currentBaseUrl = '';   // вычислим ниже, после getBaseUrl()
+        let currentBaseUrl = '';
         const players = new Map();
         let snowballs = [];
         let particles = [];
@@ -789,7 +792,6 @@
             canvas.style.height = height + 'px';
             ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
-            // При ресайзе пересчитываем позиции всех игроков (posX/posY — проценты)
             if (currentData) {
                 players.forEach((p, id) => {
                     const raw = currentData.players?.[p.team]?.[id];
@@ -808,8 +810,6 @@
         window.addEventListener('resize', resizeCanvas);
         resizeCanvas();
 
-        // currentBaseUrl считаем после того, как определена getBaseUrl()
-        // (функции hoisted, поэтому можно и здесь)
         currentBaseUrl = getBaseUrl();
 
         // ============================================================
@@ -1779,25 +1779,22 @@
         function updateQRPlayersList(data) {
             const renderList = (containerId, team) => {
                 const container = document.getElementById(containerId);
-                const roomPlayers = Object.entries(data.room?.[team] || {})
+
+                // Показываем ТОЛЬКО тех, кого ведущий уже закинул в бой (players).
+                // Ждущие в room — не видны на QR-экране.
+                const activePlayers = Object.entries(data.players?.[team] || {})
                     .sort((a, b) => (a[1].joinedAt || 0) - (b[1].joinedAt || 0));
-                const activePlayers = Object.values(data.players?.[team] || {});
 
-                const all = [
-                    ...activePlayers.map(p => ({ ...p, _status: 'playing' })),
-                    ...roomPlayers.map(([id, p]) => ({ ...p, _status: 'waiting' }))
-                ];
-
-                if (all.length === 0) {
+                if (activePlayers.length === 0) {
                     container.innerHTML = `<div class="text-white/30 italic text-center py-2 text-sm">Нет игроков</div>`;
                     return;
                 }
 
-                container.innerHTML = all.map(p => `
+                container.innerHTML = activePlayers.map(([id, p]) => `
                     <div class="qr-player ${team}">
                         <div class="avatar avatar-sm" data-name="${escapeHtml(p.name)}"></div>
                         <span class="name">${escapeHtml(p.name)}</span>
-                        ${p._status === 'playing' ? '<span class="text-xs text-cyan-300 font-bold">ИГРАЕТ</span>' : ''}
+                        <span class="text-xs text-cyan-300 font-bold">В БОЮ</span>
                     </div>
                 `).join('');
 
@@ -2156,7 +2153,6 @@
                     break;
             }
 
-            // Если открыт QR — обновляем список игроков на лету
             if (screen === 'qr') {
                 updateQRPlayersList(data);
             }
@@ -2239,7 +2235,6 @@
             setTimeout(() => { container.innerHTML = ''; }, 6000);
         }
 
-        // Снежинки CSS
         const snowContainer = document.getElementById('snow-container');
         for (let i = 0; i < 40; i++) {
             const s = document.createElement('div');
