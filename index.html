@@ -1,35 +1,364 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ENDORPHIN | МЕНЮ</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap');
-    body { background: radial-gradient(circle at 50% 0%, #0a2540 0%, #03080f 100%); font-family: 'Montserrat', sans-serif; color: #fff; overflow: hidden; height: 100vh; display: flex; align-items: center; justify-content: center; }
-    .glass-panel { background: rgba(10, 37, 64, 0.6); backdrop-filter: blur(16px); border: 1px solid rgba(127, 227, 255, 0.3); box-shadow: 0 0 40px rgba(31, 143, 214, 0.2); }
-    .btn-neon { transition: all 0.3s ease; }
-    .btn-neon:hover { transform: scale(1.05); box-shadow: 0 0 40px rgba(34, 211, 238, 0.6); }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>ENDORPHIN | ГЛАВНОЕ МЕНЮ</title>
+    
+    <!-- Внешние библиотеки -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap');
+        
+        :root {
+            --bg-gradient: radial-gradient(circle at 50% 0%, #0a2540 0%, #03080f 100%);
+            --ice-blue: #22d3ee;
+            --ice-dark: #0a2540;
+            --ice-glow: rgba(34, 211, 238, 0.4);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        html, body { width: 100%; height: 100%; overflow: hidden; }
+        
+        body {
+            background: var(--bg-gradient);
+            font-family: 'Montserrat', sans-serif;
+            color: #fff;
+            user-select: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* ============================================================
+           CANVAS ДЛЯ СНЕГА И ЛЬДА
+           ============================================================ */
+        #snow-canvas {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        /* ============================================================
+           ГЛАВНЫЙ КОНТЕЙНЕР
+           ============================================================ */
+        .menu-container {
+            position: relative;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            padding: 2rem;
+        }
+
+        /* ============================================================
+           ЗАГОЛОВОК С ЛЕДЯНЫМ СВЕЧЕНИЕМ
+           ============================================================ */
+        .title {
+            font-size: 6rem;
+            font-weight: 900;
+            line-height: 1;
+            background: linear-gradient(180deg, #ffffff 0%, #a8e6ff 50%, #22d3ee 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 
+                0 0 30px rgba(34, 211, 238, 0.4),
+                0 0 60px rgba(34, 211, 238, 0.2);
+            letter-spacing: -2px;
+            margin-bottom: 1rem;
+            position: relative;
+            animation: titleFloat 4s ease-in-out infinite;
+        }
+
+        @keyframes titleFloat {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .subtitle {
+            font-size: 1.5rem;
+            font-weight: 700;
+            letter-spacing: 0.3em;
+            text-transform: uppercase;
+            color: rgba(168, 230, 255, 0.7);
+            margin-bottom: 4rem;
+        }
+
+        /* ============================================================
+           КАРТОЧКИ АКТИВНОСТЕЙ
+           ============================================================ */
+        .cards-grid {
+            display: flex;
+            gap: 2rem;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-bottom: 3rem;
+        }
+
+        .card-btn {
+            position: relative;
+            width: 280px;
+            padding: 2.5rem 2rem;
+            background: rgba(10, 37, 64, 0.6);
+            backdrop-filter: blur(16px);
+            border: 2px solid rgba(127, 227, 255, 0.3);
+            border-radius: 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            overflow: hidden;
+            text-decoration: none;
+            color: #fff;
+            display: block;
+        }
+
+        .card-btn::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: conic-gradient(from 0deg, transparent, rgba(34, 211, 238, 0.1), transparent 30%);
+            animation: rotate 8s linear infinite;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.4s;
+        }
+
+        @keyframes rotate {
+            to { transform: rotate(360deg); }
+        }
+
+        .card-btn:hover {
+            transform: translateY(-10px) scale(1.03);
+            border-color: rgba(34, 211, 238, 0.8);
+            box-shadow: 
+                0 20px 40px rgba(34, 211, 238, 0.2),
+                0 0 60px rgba(34, 211, 238, 0.3),
+                inset 0 0 30px rgba(34, 211, 238, 0.1);
+        }
+
+        .card-btn:hover::before {
+            opacity: 1;
+        }
+
+        .card-icon {
+            font-size: 4rem;
+            margin-bottom: 1.5rem;
+            display: block;
+            filter: drop-shadow(0 0 20px rgba(34, 211, 238, 0.6));
+            transition: transform 0.4s;
+        }
+
+        .card-btn:hover .card-icon {
+            transform: scale(1.2) rotate(5deg);
+        }
+
+        .card-title {
+            font-size: 1.3rem;
+            font-weight: 900;
+            letter-spacing: 0.1em;
+            margin-bottom: 0.5rem;
+            position: relative;
+            z-index: 2;
+        }
+
+        .card-desc {
+            font-size: 0.85rem;
+            color: rgba(168, 230, 255, 0.6);
+            position: relative;
+            z-index: 2;
+        }
+
+        /* ============================================================
+           АДМИН-ССЫЛКА
+           ============================================================ */
+        .admin-link {
+            font-size: 0.75rem;
+            color: rgba(168, 230, 255, 0.3);
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            transition: color 0.3s;
+            text-decoration: none;
+        }
+
+        .admin-link:hover {
+            color: rgba(34, 211, 238, 0.8);
+        }
+
+        /* ============================================================
+           ЛЕДЯНЫЕ КРИСТАЛЛЫ (ДЕКОРАЦИЯ)
+           ============================================================ */
+        .crystal {
+            position: absolute;
+            background: linear-gradient(135deg, rgba(255,255,255,0.8), rgba(34,211,238,0.3));
+            border-radius: 2px;
+            transform: rotate(45deg);
+            pointer-events: none;
+            z-index: 2;
+            animation: crystalFloat 6s ease-in-out infinite;
+        }
+
+        @keyframes crystalFloat {
+            0%, 100% { transform: rotate(45deg) translateY(0); opacity: 0.6; }
+            50% { transform: rotate(45deg) translateY(-20px); opacity: 1; }
+        }
+
+        /* ============================================================
+           АДАПТАЦИЯ
+           ============================================================ */
+        @media (max-width: 768px) {
+            .title { font-size: 3.5rem; }
+            .subtitle { font-size: 1rem; margin-bottom: 2rem; }
+            .card-btn { width: 100%; max-width: 320px; }
+            .cards-grid { gap: 1rem; }
+        }
+    </style>
 </head>
 <body>
-  <div id="main-menu" class="flex flex-col items-center">
-    <div class="text-center mb-16">
-      <h1 class="text-8xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 via-blue-400 to-indigo-500 mb-2 drop-shadow-[0_0_30px_rgba(59,130,246,0.8)] tracking-tighter">ENDORPHIN</h1>
-      <h2 class="text-3xl font-bold text-cyan-100 tracking-[0.3em] uppercase opacity-80">Снежный Баттл</h2>
+
+    <!-- Canvas для снега -->
+    <canvas id="snow-canvas"></canvas>
+
+    <!-- Главное меню -->
+    <div class="menu-container">
+        
+        <h1 class="title">ENDORPHIN</h1>
+        <p class="subtitle">Снежный Баттл</p>
+
+        <div class="cards-grid">
+            <!-- Пульт ведущего -->
+            <a href="mod.html" class="card-btn">
+                <span class="card-icon">🎮</span>
+                <div class="card-title" style="color: #22d3ee;">ПУЛЬТ ВЕДУЩЕГО</div>
+                <div class="card-desc">Управление игрой</div>
+            </a>
+
+            <!-- Экран ТВ -->
+            <a href="tv.html" class="card-btn">
+                <span class="card-icon">📺</span>
+                <div class="card-title" style="color: #3b82f6;">ЭКРАН ТВ</div>
+                <div class="card-desc">Для проектора</div>
+            </a>
+        </div>
+
+        <a href="admin.html" class="admin-link">ВХОД ДЛЯ АДМИНИСТРАТОРА</a>
+
     </div>
-    <div class="flex gap-8">
-      <a href="mod.html" class="glass-panel btn-neon px-12 py-8 rounded-3xl flex flex-col items-center w-64">
-        <span class="text-5xl mb-4">🎮</span>
-        <span class="text-2xl font-black text-cyan-300">ПУЛЬТ ВЕДУЩЕГО</span>
-      </a>
-      <a href="tv.html" class="glass-panel btn-neon px-12 py-8 rounded-3xl flex flex-col items-center w-64">
-        <span class="text-5xl mb-4">📺</span>
-        <span class="text-2xl font-black text-blue-400">ЭКРАН ТВ</span>
-      </a>
-    </div>
-    <p class="mt-12 text-gray-500 text-sm tracking-widest">ВХОД ДЛЯ АДМИНИСТРАТОРА: <a href="admin.html" class="hover:text-cyan-400 underline transition">admin.html</a></p>
-  </div>
+
+    <script>
+        // ============================================================
+        // CANVAS: СНЕГОПАД И ЛЕДЯНЫЕ ЧАСТИЦЫ
+        // ============================================================
+        const canvas = document.getElementById('snow-canvas');
+        const ctx = canvas.getContext('2d');
+        let width, height;
+
+        function resize() {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resize);
+        resize();
+
+        // Массив снежинок
+        const snowflakes = [];
+        const snowflakeCount = 80;
+
+        for (let i = 0; i < snowflakeCount; i++) {
+            snowflakes.push({
+                x: Math.random() * width,
+                y: Math.random() * height,
+                radius: Math.random() * 3 + 1,
+                speedY: Math.random() * 1 + 0.5,
+                speedX: Math.random() * 0.5 - 0.25,
+                opacity: Math.random() * 0.5 + 0.3,
+                wobble: Math.random() * Math.PI * 2
+            });
+        }
+
+        // Массив ледяных кристаллов (декоративных)
+        const crystals = [];
+        for (let i = 0; i < 15; i++) {
+            crystals.push({
+                x: Math.random() * width,
+                y: Math.random() * height,
+                size: Math.random() * 15 + 5,
+                speedY: Math.random() * 0.3 + 0.1,
+                opacity: Math.random() * 0.3 + 0.1,
+                rotation: Math.random() * Math.PI
+            });
+        }
+
+        function drawSnow() {
+            ctx.clearRect(0, 0, width, height);
+
+            // Рисуем снежинки
+            snowflakes.forEach(flake => {
+                // Обновление позиции
+                flake.y += flake.speedY;
+                flake.x += flake.speedX + Math.sin(flake.wobble) * 0.3;
+                flake.wobble += 0.01;
+
+                // Респавн
+                if (flake.y > height) {
+                    flake.y = -10;
+                    flake.x = Math.random() * width;
+                }
+                if (flake.x > width) flake.x = 0;
+                if (flake.x < 0) flake.x = width;
+
+                // Рисование
+                ctx.beginPath();
+                ctx.arc(flake.x, flake.y, flake.radius, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(255, 255, 255, ${flake.opacity})`;
+                ctx.shadowColor = '#22d3ee';
+                ctx.shadowBlur = 8;
+                ctx.fill();
+                ctx.shadowBlur = 0;
+            });
+
+            // Рисуем ледяные кристаллы
+            crystals.forEach(crystal => {
+                crystal.y += crystal.speedY;
+                if (crystal.y > height + 20) {
+                    crystal.y = -20;
+                    crystal.x = Math.random() * width;
+                }
+
+                ctx.save();
+                ctx.translate(crystal.x, crystal.y);
+                ctx.rotate(crystal.rotation);
+                ctx.fillStyle = `rgba(34, 211, 238, ${crystal.opacity})`;
+                ctx.shadowColor = '#22d3ee';
+                ctx.shadowBlur = 15;
+                ctx.beginPath();
+                ctx.moveTo(0, -crystal.size);
+                ctx.lineTo(crystal.size / 2, 0);
+                ctx.lineTo(0, crystal.size);
+                ctx.lineTo(-crystal.size / 2, 0);
+                ctx.closePath();
+                ctx.fill();
+                ctx.restore();
+            });
+
+            requestAnimationFrame(drawSnow);
+        }
+
+        drawSnow();
+
+        // ============================================================
+        // ИНИЦИАЛИЗАЦИЯ ИКОНОК LUCIDE
+        // ============================================================
+        lucide.createIcons();
+    </script>
+
 </body>
 </html>
