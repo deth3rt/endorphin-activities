@@ -451,6 +451,183 @@
     }
     .modal-btn.danger:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(239,68,68,0.5); }
 
+    /* ============================================================
+       ПАРОЛЬ-ГЕЙТ
+       ============================================================ */
+    .auth-screen {
+      position: fixed;
+      inset: 0;
+      z-index: 2000;
+      background: radial-gradient(circle at 50% 30%, #0a2540 0%, #03080f 75%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+      animation: fadeIn 0.3s ease-out;
+    }
+    .auth-screen.hidden { display: none; }
+
+    .auth-card {
+      background: rgba(10, 37, 64, 0.95);
+      border: 1.5px solid rgba(127, 227, 255, 0.35);
+      border-radius: 1.75rem;
+      padding: 2rem 1.75rem;
+      max-width: 400px;
+      width: 100%;
+      text-align: center;
+      box-shadow:
+        0 25px 70px rgba(0,0,0,0.7),
+        0 0 80px rgba(34, 211, 238, 0.1),
+        inset 0 1px 0 rgba(255,255,255,0.06);
+      animation: modalIn 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .auth-lock {
+      font-size: 3rem;
+      margin-bottom: 0.5rem;
+      filter: drop-shadow(0 0 25px rgba(34, 211, 238, 0.5));
+      animation: lockFloat 3s ease-in-out infinite;
+    }
+    @keyframes lockFloat {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-6px); }
+    }
+
+    .auth-title {
+      font-size: 1.3rem;
+      font-weight: 900;
+      letter-spacing: 0.15em;
+      background: linear-gradient(180deg, #fff 0%, #a8e6ff 55%, #22d3ee 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      margin-bottom: 0.3rem;
+    }
+
+    .auth-subtitle {
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: rgba(168, 230, 255, 0.55);
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      margin-bottom: 1.5rem;
+    }
+
+    .pin-input {
+      width: 100%;
+      background: rgba(0, 0, 0, 0.6);
+      border: 2px solid rgba(127, 227, 255, 0.3);
+      border-radius: 14px;
+      padding: 16px 18px;
+      font-size: 1.8rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 900;
+      color: #fff;
+      text-align: center;
+      letter-spacing: 0.5em;
+      padding-left: calc(0.5em + 18px);
+      outline: none;
+      transition: all 0.2s;
+      margin-bottom: 0.8rem;
+    }
+    .pin-input:focus {
+      border-color: var(--ice-bright);
+      box-shadow: 0 0 25px rgba(34, 211, 238, 0.4);
+    }
+    .pin-input.error {
+      border-color: var(--red-team);
+      box-shadow: 0 0 25px rgba(255, 59, 92, 0.4);
+      animation: pinShake 0.4s ease-in-out;
+    }
+    .pin-input::placeholder {
+      color: rgba(255, 255, 255, 0.15);
+      letter-spacing: 0.2em;
+      font-size: 1.2rem;
+    }
+    @keyframes pinShake {
+      0%, 100% { transform: translateX(0); }
+      20% { transform: translateX(-8px); }
+      40% { transform: translateX(8px); }
+      60% { transform: translateX(-5px); }
+      80% { transform: translateX(5px); }
+    }
+
+    .pin-hint {
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: rgba(251, 191, 36, 0.75);
+      letter-spacing: 0.08em;
+      margin-bottom: 1.2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .auth-btn {
+      width: 100%;
+      padding: 16px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, var(--ice-bright), var(--blue-team));
+      color: #000;
+      font-weight: 900;
+      font-size: 1rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s;
+      box-shadow: 0 0 30px rgba(34, 211, 238, 0.4), inset 0 1px 0 rgba(255,255,255,0.3);
+    }
+    .auth-btn:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 0 50px rgba(34, 211, 238, 0.7), inset 0 1px 0 rgba(255,255,255,0.3);
+    }
+    .auth-btn:active:not(:disabled) { transform: scale(0.98); }
+    .auth-btn:disabled { opacity: 0.4; cursor: not-allowed; box-shadow: none; }
+
+    .auth-error {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: #fca5a5;
+      margin-top: 0.6rem;
+      min-height: 1rem;
+      letter-spacing: 0.05em;
+    }
+
+    .auth-back-link {
+      display: inline-block;
+      margin-top: 1.2rem;
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: rgba(168, 230, 255, 0.4);
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .auth-back-link:hover { color: var(--ice); }
+
+    /* Кнопка «Выйти» в шапке */
+    .logout-btn {
+      padding: 0.5rem 0.9rem;
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      border-radius: 0.7rem;
+      font-weight: 700;
+      font-size: 0.7rem;
+      color: #fca5a5;
+      text-decoration: none;
+      transition: all 0.2s;
+      letter-spacing: 0.08em;
+      cursor: pointer;
+    }
+    .logout-btn:hover {
+      background: rgba(239, 68, 68, 0.25);
+      color: #fff;
+      border-color: rgba(239, 68, 68, 0.6);
+    }
+
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after {
         animation-duration: 0.01ms !important;
@@ -462,250 +639,294 @@
 </head>
 <body class="p-4 flex items-start justify-center">
 
-  <div class="toast-container" id="toast-container"></div>
+  <!-- ============================================================ -->
+  <!-- ЭКРАН ПАРОЛЯ -->
+  <!-- ============================================================ -->
+  <div class="auth-screen" id="auth-screen">
+    <div class="auth-card">
+      <div class="auth-lock">🔒</div>
+      <div class="auth-title">АДМИН-ПАНЕЛЬ</div>
+      <div class="auth-subtitle">Требуется доступ</div>
 
-  <div class="glass max-w-2xl w-full p-6 my-4">
-    <div class="flex justify-between items-center mb-4 flex-wrap gap-3">
-      <h1 class="page-title text-2xl font-black tracking-widest">АДМИН-ПАНЕЛЬ</h1>
-      <a href="index.html" class="back-btn">← НАЗАД</a>
-    </div>
+      <input
+        type="password"
+        inputmode="numeric"
+        pattern="[0-9]*"
+        maxlength="8"
+        id="pin-input"
+        class="pin-input"
+        placeholder="••••"
+        autocomplete="off"
+        oninput="onPinInput(this)"
+        onkeydown="if(event.key === 'Enter') submitPin()"
+      >
 
-    <!-- Живой статус -->
-    <div class="status-bar mb-5" id="status-bar">
-      <div class="sb-item">СТАТУС: <span class="sb-val" id="sb-status">—</span></div>
-      <div class="sb-item">ЭКРАН: <span class="sb-val" id="sb-screen">—</span></div>
-      <div class="sb-item">ИГРОКОВ: <span class="sb-val" id="sb-players">0</span></div>
-      <div class="sb-item">В КОМНАТЕ: <span class="sb-val" id="sb-room">0</span></div>
-      <div class="sb-item">РЕЖИМ: <span class="sb-val" id="sb-mode">—</span></div>
-    </div>
+      <div class="pin-hint">
+        💡 Подсказка: твой основной пин
+      </div>
 
-    <!-- Табы -->
-    <div class="flex gap-2 mb-6 flex-wrap">
-      <button onclick="switchTab('ad')" id="tab-btn-ad" class="tab-btn active flex-1 py-3 rounded-xl font-bold text-sm min-w-[100px]">
-        📢 РЕКЛАМА
+      <button class="auth-btn" id="auth-btn" onclick="submitPin()">
+        ВОЙТИ
       </button>
-      <button onclick="switchTab('ticker')" id="tab-btn-ticker" class="tab-btn flex-1 py-3 rounded-xl font-bold text-sm min-w-[100px]">
-        📜 СТРОКА
-      </button>
-      <button onclick="switchTab('reset')" id="tab-btn-reset" class="tab-btn flex-1 py-3 rounded-xl font-bold text-sm min-w-[100px]">
-        🗑️ СБРОС
-      </button>
-    </div>
 
-    <!-- ============================================================ -->
-    <!-- ВКЛАДКА: РЕКЛАМА -->
-    <!-- ============================================================ -->
-    <div id="tab-ad">
-      <div class="mb-6">
-        <h2 class="text-sm font-black mb-3 text-cyan-300 tracking-wider">🎬 РЕКЛАМА В ПРЕЛОУДИНГЕ</h2>
-        <div class="space-y-3">
-          <div>
-            <label class="admin-label">URL картинки (JPG/PNG/GIF)</label>
-            <input type="url" id="preload-img" class="admin-input" placeholder="https://example.com/banner.jpg" oninput="updateAdPreview('preload')">
-          </div>
-          <div class="ad-preview" id="preload-preview">
-            <span class="placeholder">ПРЕВЬЮ</span>
-          </div>
-          <div>
-            <label class="admin-label">Ссылка (куда ведёт)</label>
-            <input type="url" id="preload-link" class="admin-input" placeholder="https://t.me/yourchannel">
-          </div>
-          <div>
-            <label class="admin-label">Текст-заглушка (если картинки нет)</label>
-            <input type="text" id="preload-text" class="admin-input" maxlength="40" placeholder="РЕКЛАМА">
-          </div>
+      <div class="auth-error" id="auth-error"></div>
+
+      <a href="index.html" class="auth-back-link">← На главную</a>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- ОСНОВНОЙ КОНТЕНТ (скрыт до входа) -->
+  <!-- ============================================================ -->
+  <div id="admin-content" style="display: none; width: 100%;">
+    <div class="toast-container" id="toast-container"></div>
+
+    <div class="glass max-w-2xl w-full p-6 my-4 mx-auto">
+      <div class="flex justify-between items-center mb-4 flex-wrap gap-3">
+        <h1 class="page-title text-2xl font-black tracking-widest">АДМИН-ПАНЕЛЬ</h1>
+        <div class="flex gap-2 flex-wrap">
+          <a href="index.html" class="back-btn">← НАЗАД</a>
+          <button class="logout-btn" onclick="logout()">🚪 ВЫЙТИ</button>
         </div>
       </div>
 
-      <hr class="border-gray-700/50 my-6">
+      <!-- Живой статус -->
+      <div class="status-bar mb-5" id="status-bar">
+        <div class="sb-item">СТАТУС: <span class="sb-val" id="sb-status">—</span></div>
+        <div class="sb-item">ЭКРАН: <span class="sb-val" id="sb-screen">—</span></div>
+        <div class="sb-item">ИГРОКОВ: <span class="sb-val" id="sb-players">0</span></div>
+        <div class="sb-item">В КОМНАТЕ: <span class="sb-val" id="sb-room">0</span></div>
+        <div class="sb-item">РЕЖИМ: <span class="sb-val" id="sb-mode">—</span></div>
+      </div>
 
-      <div class="mb-6">
-        <h2 class="text-sm font-black mb-3 text-cyan-300 tracking-wider">🏠 РЕКЛАМА НА ЗАСТАВКЕ (TV)</h2>
-        <div class="space-y-3">
-          <div>
-            <label class="admin-label">URL картинки</label>
-            <input type="url" id="lobby-img" class="admin-input" placeholder="https://example.com/banner.jpg" oninput="updateAdPreview('lobby')">
+      <!-- Табы -->
+      <div class="flex gap-2 mb-6 flex-wrap">
+        <button onclick="switchTab('ad')" id="tab-btn-ad" class="tab-btn active flex-1 py-3 rounded-xl font-bold text-sm min-w-[100px]">
+          📢 РЕКЛАМА
+        </button>
+        <button onclick="switchTab('ticker')" id="tab-btn-ticker" class="tab-btn flex-1 py-3 rounded-xl font-bold text-sm min-w-[100px]">
+          📜 СТРОКА
+        </button>
+        <button onclick="switchTab('reset')" id="tab-btn-reset" class="tab-btn flex-1 py-3 rounded-xl font-bold text-sm min-w-[100px]">
+          🗑️ СБРОС
+        </button>
+      </div>
+
+      <!-- ============================================================ -->
+      <!-- ВКЛАДКА: РЕКЛАМА -->
+      <!-- ============================================================ -->
+      <div id="tab-ad">
+        <div class="mb-6">
+          <h2 class="text-sm font-black mb-3 text-cyan-300 tracking-wider">🎬 РЕКЛАМА В ПРЕЛОУДИНГЕ</h2>
+          <div class="space-y-3">
+            <div>
+              <label class="admin-label">URL картинки (JPG/PNG/GIF)</label>
+              <input type="url" id="preload-img" class="admin-input" placeholder="https://example.com/banner.jpg" oninput="updateAdPreview('preload')">
+            </div>
+            <div class="ad-preview" id="preload-preview">
+              <span class="placeholder">ПРЕВЬЮ</span>
+            </div>
+            <div>
+              <label class="admin-label">Ссылка (куда ведёт)</label>
+              <input type="url" id="preload-link" class="admin-input" placeholder="https://t.me/yourchannel">
+            </div>
+            <div>
+              <label class="admin-label">Текст-заглушка (если картинки нет)</label>
+              <input type="text" id="preload-text" class="admin-input" maxlength="40" placeholder="РЕКЛАМА">
+            </div>
           </div>
-          <div class="ad-preview" id="lobby-preview">
-            <span class="placeholder">ПРЕВЬЮ</span>
+        </div>
+
+        <hr class="border-gray-700/50 my-6">
+
+        <div class="mb-6">
+          <h2 class="text-sm font-black mb-3 text-cyan-300 tracking-wider">🏠 РЕКЛАМА НА ЗАСТАВКЕ (TV)</h2>
+          <div class="space-y-3">
+            <div>
+              <label class="admin-label">URL картинки</label>
+              <input type="url" id="lobby-img" class="admin-input" placeholder="https://example.com/banner.jpg" oninput="updateAdPreview('lobby')">
+            </div>
+            <div class="ad-preview" id="lobby-preview">
+              <span class="placeholder">ПРЕВЬЮ</span>
+            </div>
+            <div>
+              <label class="admin-label">Ссылка</label>
+              <input type="url" id="lobby-link" class="admin-input" placeholder="https://t.me/yourchannel">
+            </div>
+            <div>
+              <label class="admin-label">Текст-заглушка</label>
+              <input type="text" id="lobby-text" class="admin-input" maxlength="40" placeholder="РЕКЛАМА">
+            </div>
           </div>
-          <div>
-            <label class="admin-label">Ссылка</label>
-            <input type="url" id="lobby-link" class="admin-input" placeholder="https://t.me/yourchannel">
+        </div>
+
+        <button onclick="saveAdSettings()" id="save-ad-btn" class="save-btn w-full py-4 rounded-xl text-base">
+          💾 СОХРАНИТЬ РЕКЛАМУ
+        </button>
+      </div>
+
+      <!-- ============================================================ -->
+      <!-- ВКЛАДКА: БЕГУЩАЯ СТРОКА -->
+      <!-- ============================================================ -->
+      <div id="tab-ticker" class="hidden">
+        <div class="mb-6">
+          <label class="admin-label">Предпросмотр</label>
+          <div class="ticker-preview">
+            <div class="ticker-preview-inner" id="ticker-preview-text">
+              ДОБРО ПОЖАЛОВАТЬ НА ВЕЧЕРИНКУ ENDORPHIN!
+            </div>
           </div>
-          <div>
-            <label class="admin-label">Текст-заглушка</label>
-            <input type="text" id="lobby-text" class="admin-input" maxlength="40" placeholder="РЕКЛАМА">
+        </div>
+
+        <div class="mb-6">
+          <label class="admin-label">Новое сообщение</label>
+          <div class="flex gap-2">
+            <input
+              type="text"
+              id="ticker-input"
+              class="admin-input flex-1"
+              placeholder="Введите текст..."
+              maxlength="100"
+              oninput="updateCharCounter()"
+              onkeydown="if(event.key === 'Enter') addMessage()"
+            >
+            <button onclick="addMessage()" id="add-msg-btn" class="send-btn px-5 py-3 rounded-xl whitespace-nowrap">
+              ОТПРАВИТЬ
+            </button>
           </div>
+          <div class="flex justify-between mt-1 flex-wrap gap-2">
+            <p class="text-[10px] text-gray-500">Максимум 10 сообщений. Старое удаляется автоматически.</p>
+            <p class="char-counter" id="char-counter">0/100</p>
+          </div>
+        </div>
+
+        <hr class="border-gray-700/50 mb-6">
+
+        <div>
+          <div class="flex justify-between items-center mb-4">
+            <h2 class="text-base font-black text-cyan-300 tracking-wider">ИСТОРИЯ</h2>
+            <button onclick="clearAllMessages()" id="clear-all-btn" class="clear-btn text-xs font-bold px-3 py-1.5 rounded-lg">
+              ОЧИСТИТЬ ВСЁ
+            </button>
+          </div>
+          <div id="messages-list" class="space-y-3 max-h-96 overflow-y-auto pr-2"></div>
         </div>
       </div>
 
-      <button onclick="saveAdSettings()" id="save-ad-btn" class="save-btn w-full py-4 rounded-xl text-base">
-        💾 СОХРАНИТЬ РЕКЛАМУ
-      </button>
-    </div>
-
-    <!-- ============================================================ -->
-    <!-- ВКЛАДКА: БЕГУЩАЯ СТРОКА -->
-    <!-- ============================================================ -->
-    <div id="tab-ticker" class="hidden">
-      <div class="mb-6">
-        <label class="admin-label">Предпросмотр</label>
-        <div class="ticker-preview">
-          <div class="ticker-preview-inner" id="ticker-preview-text">
-            ДОБРО ПОЖАЛОВАТЬ НА ВЕЧЕРИНКУ ENDORPHIN!
-          </div>
+      <!-- ============================================================ -->
+      <!-- ВКЛАДКА: СБРОС -->
+      <!-- ============================================================ -->
+      <div id="tab-reset" class="hidden">
+        <div class="text-center py-2 mb-4">
+          <div class="text-5xl mb-3">⚠️</div>
+          <h2 class="text-2xl font-black text-red-400 mb-2 tracking-wider">ОПАСНАЯ ЗОНА</h2>
+          <p class="text-gray-400 text-sm max-w-md mx-auto leading-relaxed">
+            Три уровня сброса. Выбирай по ситуации.
+            Реклама и бегущая строка <span class="text-cyan-300 font-bold">не затрагиваются</span> (кроме хард-ресета).
+          </p>
         </div>
-      </div>
 
-      <div class="mb-6">
-        <label class="admin-label">Новое сообщение</label>
-        <div class="flex gap-2">
-          <input
-            type="text"
-            id="ticker-input"
-            class="admin-input flex-1"
-            placeholder="Введите текст..."
-            maxlength="100"
-            oninput="updateCharCounter()"
-            onkeydown="if(event.key === 'Enter') addMessage()"
-          >
-          <button onclick="addMessage()" id="add-msg-btn" class="send-btn px-5 py-3 rounded-xl whitespace-nowrap">
-            ОТПРАВИТЬ
+        <!-- 1. МЯГКИЙ -->
+        <div class="reset-card soft mb-4">
+          <div class="flex items-start gap-3 mb-3">
+            <div class="text-2xl flex-shrink-0">🧹</div>
+            <div class="flex-1">
+              <h3 class="text-amber-300 font-black text-sm tracking-wider mb-1">МЯГКИЙ СБРОС</h3>
+              <p class="text-[0.72rem] text-white/50 leading-relaxed">
+                Только убирает игроков из игры и очищает выстрелы/прицелы.
+                <span class="text-amber-200/80 font-bold">Комната ожидания не трогается</span> —
+                кто ждёт, остаётся. Используй между раундами.
+              </p>
+            </div>
+          </div>
+          <div class="bg-black/30 rounded-lg p-3 mb-3">
+            <label class="admin-label text-amber-300/80">Введи для подтверждения:</label>
+            <div class="flex items-center gap-3">
+              <p class="text-amber-400 font-black text-base select-all mono">МЯГКО</p>
+              <input type="text" id="confirm-soft" class="admin-input flex-1" placeholder="..." autocomplete="off" oninput="validateConfirm('soft')">
+            </div>
+          </div>
+          <button onclick="doSoftReset()" id="btn-soft" disabled class="reset-btn soft w-full py-3 rounded-xl text-sm">
+            🧹 ОЧИСТИТЬ ИГРУ (комната остаётся)
           </button>
         </div>
-        <div class="flex justify-between mt-1 flex-wrap gap-2">
-          <p class="text-[10px] text-gray-500">Максимум 10 сообщений. Старое удаляется автоматически.</p>
-          <p class="char-counter" id="char-counter">0/100</p>
-        </div>
-      </div>
 
-      <hr class="border-gray-700/50 mb-6">
-
-      <div>
-        <div class="flex justify-between items-center mb-4">
-          <h2 class="text-base font-black text-cyan-300 tracking-wider">ИСТОРИЯ</h2>
-          <button onclick="clearAllMessages()" id="clear-all-btn" class="clear-btn text-xs font-bold px-3 py-1.5 rounded-lg">
-            ОЧИСТИТЬ ВСЁ
+        <!-- 2. ПОЛНЫЙ -->
+        <div class="reset-card full mb-4">
+          <div class="flex items-start gap-3 mb-3">
+            <div class="text-2xl flex-shrink-0">🗑️</div>
+            <div class="flex-1">
+              <h3 class="text-red-300 font-black text-sm tracking-wider mb-1">ПОЛНЫЙ СБРОС</h3>
+              <p class="text-[0.72rem] text-white/50 leading-relaxed">
+                Очищает игроков <span class="text-red-200 font-bold">и комнату</span>, сбрасывает режим и первый ход.
+                Реклама и строка остаются.
+              </p>
+            </div>
+          </div>
+          <div class="bg-black/30 rounded-lg p-3 mb-3">
+            <label class="admin-label text-red-300/80">Введи для подтверждения:</label>
+            <div class="flex items-center gap-3">
+              <p class="text-red-400 font-black text-base select-all mono">СБРОС</p>
+              <input type="text" id="confirm-full" class="admin-input flex-1" placeholder="..." autocomplete="off" oninput="validateConfirm('full')">
+            </div>
+          </div>
+          <button onclick="doFullReset()" id="btn-full" disabled class="reset-btn full w-full py-3 rounded-xl text-sm">
+            🗑️ ПОЛНЫЙ СБРОС (игроки + комната)
           </button>
         </div>
-        <div id="messages-list" class="space-y-3 max-h-96 overflow-y-auto pr-2"></div>
-      </div>
-    </div>
 
-    <!-- ============================================================ -->
-    <!-- ВКЛАДКА: СБРОС -->
-    <!-- ============================================================ -->
-    <div id="tab-reset" class="hidden">
-      <div class="text-center py-2 mb-4">
-        <div class="text-5xl mb-3">⚠️</div>
-        <h2 class="text-2xl font-black text-red-400 mb-2 tracking-wider">ОПАСНАЯ ЗОНА</h2>
-        <p class="text-gray-400 text-sm max-w-md mx-auto leading-relaxed">
-          Три уровня сброса. Выбирай по ситуации.
-          Реклама и бегущая строка <span class="text-cyan-300 font-bold">не затрагиваются</span> (кроме хард-ресета).
+        <!-- 3. ХАРД -->
+        <div class="reset-card hard mb-4">
+          <div class="flex items-start gap-3 mb-3">
+            <div class="text-2xl flex-shrink-0">🔥</div>
+            <div class="flex-1">
+              <h3 class="text-white font-black text-sm tracking-wider mb-1">ХАРД-РЕСЕТ</h3>
+              <p class="text-[0.72rem] text-white/60 leading-relaxed">
+                Всё то же + <span class="text-red-300 font-bold">удаление рекламы и бегущей строки</span>.
+                Полная очистка игровой базы. Используй перед новой вечеринкой.
+              </p>
+            </div>
+          </div>
+          <div class="bg-black/30 rounded-lg p-3 mb-3">
+            <label class="admin-label text-red-300/80">Введи для подтверждения:</label>
+            <div class="flex items-center gap-3">
+              <p class="text-red-400 font-black text-base select-all mono">ВСЁ</p>
+              <input type="text" id="confirm-hard" class="admin-input flex-1" placeholder="..." autocomplete="off" oninput="validateConfirm('hard')">
+            </div>
+          </div>
+          <button onclick="doHardReset()" id="btn-hard" disabled class="reset-btn hard w-full py-3 rounded-xl text-sm">
+            🔥 ХАРД-РЕСЕТ (включая рекламу)
+          </button>
+        </div>
+
+        <!-- Быстрые действия -->
+        <hr class="border-gray-700/50 my-5">
+        <h3 class="text-xs font-black text-cyan-300 tracking-widest mb-3">БЫСТРЫЕ ДЕЙСТВИЯ</h3>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <button onclick="quickShowQR()" id="btn-show-qr" class="w-full py-3 rounded-xl bg-cyan-600/20 border-2 border-cyan-500/50 text-cyan-300 font-black text-sm hover:bg-cyan-600/40 transition">
+            📱 ПОКАЗАТЬ QR НА TV
+          </button>
+          <button onclick="quickAttract()" id="btn-attract" class="w-full py-3 rounded-xl bg-gray-700/30 border-2 border-gray-500/50 text-gray-300 font-black text-sm hover:bg-gray-600/40 transition">
+            🏠 ВЕРНУТЬ НА ЗАСТАВКУ
+          </button>
+        </div>
+        <p class="text-[0.68rem] text-white/30 mt-2 text-center">
+          Полезно, если ведущий отошёл от пульта и нужно срочно переключить экран
         </p>
       </div>
 
-      <!-- 1. МЯГКИЙ -->
-      <div class="reset-card soft mb-4">
-        <div class="flex items-start gap-3 mb-3">
-          <div class="text-2xl flex-shrink-0">🧹</div>
-          <div class="flex-1">
-            <h3 class="text-amber-300 font-black text-sm tracking-wider mb-1">МЯГКИЙ СБРОС</h3>
-            <p class="text-[0.72rem] text-white/50 leading-relaxed">
-              Только убирает игроков из игры и очищает выстрелы/прицелы.
-              <span class="text-amber-200/80 font-bold">Комната ожидания не трогается</span> —
-              кто ждёт, остаётся. Используй между раундами.
-            </p>
-          </div>
-        </div>
-        <div class="bg-black/30 rounded-lg p-3 mb-3">
-          <label class="admin-label text-amber-300/80">Введи для подтверждения:</label>
-          <div class="flex items-center gap-3">
-            <p class="text-amber-400 font-black text-base select-all mono">МЯГКО</p>
-            <input type="text" id="confirm-soft" class="admin-input flex-1" placeholder="..." autocomplete="off" oninput="validateConfirm('soft')">
-          </div>
-        </div>
-        <button onclick="doSoftReset()" id="btn-soft" disabled class="reset-btn soft w-full py-3 rounded-xl text-sm">
-          🧹 ОЧИСТИТЬ ИГРУ (комната остаётся)
-        </button>
-      </div>
-
-      <!-- 2. ПОЛНЫЙ -->
-      <div class="reset-card full mb-4">
-        <div class="flex items-start gap-3 mb-3">
-          <div class="text-2xl flex-shrink-0">🗑️</div>
-          <div class="flex-1">
-            <h3 class="text-red-300 font-black text-sm tracking-wider mb-1">ПОЛНЫЙ СБРОС</h3>
-            <p class="text-[0.72rem] text-white/50 leading-relaxed">
-              Очищает игроков <span class="text-red-200 font-bold">и комнату</span>, сбрасывает режим и первый ход.
-              Реклама и строка остаются.
-            </p>
-          </div>
-        </div>
-        <div class="bg-black/30 rounded-lg p-3 mb-3">
-          <label class="admin-label text-red-300/80">Введи для подтверждения:</label>
-          <div class="flex items-center gap-3">
-            <p class="text-red-400 font-black text-base select-all mono">СБРОС</p>
-            <input type="text" id="confirm-full" class="admin-input flex-1" placeholder="..." autocomplete="off" oninput="validateConfirm('full')">
-          </div>
-        </div>
-        <button onclick="doFullReset()" id="btn-full" disabled class="reset-btn full w-full py-3 rounded-xl text-sm">
-          🗑️ ПОЛНЫЙ СБРОС (игроки + комната)
-        </button>
-      </div>
-
-      <!-- 3. ХАРД -->
-      <div class="reset-card hard mb-4">
-        <div class="flex items-start gap-3 mb-3">
-          <div class="text-2xl flex-shrink-0">🔥</div>
-          <div class="flex-1">
-            <h3 class="text-white font-black text-sm tracking-wider mb-1">ХАРД-РЕСЕТ</h3>
-            <p class="text-[0.72rem] text-white/60 leading-relaxed">
-              Всё то же + <span class="text-red-300 font-bold">удаление рекламы и бегущей строки</span>.
-              Полная очистка игровой базы. Используй перед новой вечеринкой.
-            </p>
-          </div>
-        </div>
-        <div class="bg-black/30 rounded-lg p-3 mb-3">
-          <label class="admin-label text-red-300/80">Введи для подтверждения:</label>
-          <div class="flex items-center gap-3">
-            <p class="text-red-400 font-black text-base select-all mono">ВСЁ</p>
-            <input type="text" id="confirm-hard" class="admin-input flex-1" placeholder="..." autocomplete="off" oninput="validateConfirm('hard')">
-          </div>
-        </div>
-        <button onclick="doHardReset()" id="btn-hard" disabled class="reset-btn hard w-full py-3 rounded-xl text-sm">
-          🔥 ХАРД-РЕСЕТ (включая рекламу)
-        </button>
-      </div>
-
-      <!-- Быстрые действия -->
-      <hr class="border-gray-700/50 my-5">
-      <h3 class="text-xs font-black text-cyan-300 tracking-widest mb-3">БЫСТРЫЕ ДЕЙСТВИЯ</h3>
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        <button onclick="quickShowQR()" id="btn-show-qr" class="w-full py-3 rounded-xl bg-cyan-600/20 border-2 border-cyan-500/50 text-cyan-300 font-black text-sm hover:bg-cyan-600/40 transition">
-          📱 ПОКАЗАТЬ QR НА TV
-        </button>
-        <button onclick="quickAttract()" id="btn-attract" class="w-full py-3 rounded-xl bg-gray-700/30 border-2 border-gray-500/50 text-gray-300 font-black text-sm hover:bg-gray-600/40 transition">
-          🏠 ВЕРНУТЬ НА ЗАСТАВКУ
-        </button>
-      </div>
-      <p class="text-[0.68rem] text-white/30 mt-2 text-center">
-        Полезно, если ведущий отошёл от пульта и нужно срочно переключить экран
-      </p>
     </div>
 
-  </div>
-
-  <!-- МОДАЛКА -->
-  <div class="modal-backdrop hidden" id="modal">
-    <div class="modal-card">
-      <div class="modal-icon" id="modal-icon">⚠️</div>
-      <div class="modal-title" id="modal-title">Подтверждение</div>
-      <div class="modal-text" id="modal-text"></div>
-      <div class="modal-actions">
-        <button class="modal-btn cancel" id="modal-cancel">ОТМЕНА</button>
-        <button class="modal-btn danger" id="modal-confirm">ОК</button>
+    <!-- МОДАЛКА -->
+    <div class="modal-backdrop hidden" id="modal">
+      <div class="modal-card">
+        <div class="modal-icon" id="modal-icon">⚠️</div>
+        <div class="modal-title" id="modal-title">Подтверждение</div>
+        <div class="modal-text" id="modal-text"></div>
+        <div class="modal-actions">
+          <button class="modal-btn cancel" id="modal-cancel">ОТМЕНА</button>
+          <button class="modal-btn danger" id="modal-confirm">ОК</button>
+        </div>
       </div>
     </div>
   </div>
@@ -730,12 +951,108 @@
     const adRef = ref(db, 'games/battle_1/ad_settings');
 
     // ============================================================
-    // СОСТОЯНИЕ
+    // ПАРОЛЬ-ГЕЙТ
     // ============================================================
-    let adFieldsDirty = false;
-    let isAdLoading = false;
-    let lastMessagesHash = '';
-    let currentGameState = null;
+    const ADMIN_PIN = '1620';
+    const SESSION_KEY = 'endorphin_admin_authed';
+
+    function isAuthed() {
+      try { return sessionStorage.getItem(SESSION_KEY) === '1'; }
+      catch { return false; }
+    }
+    function setAuthed() {
+      try { sessionStorage.setItem(SESSION_KEY, '1'); } catch {}
+    }
+    function clearAuthed() {
+      try { sessionStorage.removeItem(SESSION_KEY); } catch {}
+    }
+
+    // Ограничение попыток — защита от перебора
+    let failedAttempts = 0;
+    let lockUntil = 0;
+    const MAX_ATTEMPTS = 5;
+    const LOCK_MS = 30000; // 30 секунд после 5 неудач
+
+    window.onPinInput = (el) => {
+      // Только цифры
+      el.value = el.value.replace(/\D/g, '').slice(0, 8);
+      el.classList.remove('error');
+      document.getElementById('auth-error').innerText = '';
+    };
+
+    window.submitPin = () => {
+      const input = document.getElementById('pin-input');
+      const errorEl = document.getElementById('auth-error');
+      const now = Date.now();
+
+      if (now < lockUntil) {
+        const sec = Math.ceil((lockUntil - now) / 1000);
+        errorEl.innerText = `⏳ Подожди ${sec} сек`;
+        return;
+      }
+
+      const val = input.value.trim();
+      if (!val) {
+        errorEl.innerText = 'Введи пин';
+        input.focus();
+        return;
+      }
+
+      if (val === ADMIN_PIN) {
+        // Успех
+        setAuthed();
+        failedAttempts = 0;
+        showAdmin();
+      } else {
+        failedAttempts++;
+        input.classList.add('error');
+        input.value = '';
+        if (failedAttempts >= MAX_ATTEMPTS) {
+          lockUntil = Date.now() + LOCK_MS;
+          errorEl.innerText = `Слишком много попыток. Жди 30 сек.`;
+          failedAttempts = 0;
+          setTimeout(() => {
+            input.classList.remove('error');
+            document.getElementById('auth-error').innerText = '';
+          }, LOCK_MS);
+        } else {
+          const left = MAX_ATTEMPTS - failedAttempts;
+          errorEl.innerText = `❌ Неверный пин · осталось ${left}`;
+        }
+        setTimeout(() => input.focus(), 50);
+      }
+    };
+
+    function showAdmin() {
+      document.getElementById('auth-screen').classList.add('hidden');
+      document.getElementById('admin-content').style.display = 'block';
+      // Переинициализируем вкладку и счётчик, чтобы всё было свежим
+      const savedTab = localStorage.getItem('endorphin_admin_tab') || 'ad';
+      switchTab(savedTab);
+      updateCharCounter();
+    }
+
+    function showAuth() {
+      document.getElementById('auth-screen').classList.remove('hidden');
+      document.getElementById('admin-content').style.display = 'none';
+      const input = document.getElementById('pin-input');
+      input.value = '';
+      input.classList.remove('error');
+      document.getElementById('auth-error').innerText = '';
+      setTimeout(() => input.focus(), 200);
+    }
+
+    window.logout = () => {
+      clearAuthed();
+      showAuth();
+    };
+
+    // При загрузке: если уже авторизован — показать админку
+    if (isAuthed()) {
+      showAdmin();
+    } else {
+      showAuth();
+    }
 
     // ============================================================
     // ЗВУК
@@ -795,6 +1112,7 @@
     // ============================================================
     function showToast(message, type = 'info') {
       const container = document.getElementById('toast-container');
+      if (!container) return;
       const toast = document.createElement('div');
       toast.className = `toast ${type}`;
       const icons = { success: '✅', error: '❌', info: 'ℹ️' };
@@ -839,20 +1157,22 @@
     window.switchTab = (tab) => {
       playClick();
       ['ad', 'ticker', 'reset'].forEach(t => {
-        document.getElementById(`tab-${t}`).classList.add('hidden');
-        document.getElementById(`tab-btn-${t}`).classList.remove('active');
+        const panel = document.getElementById(`tab-${t}`);
+        const btn = document.getElementById(`tab-btn-${t}`);
+        if (panel) panel.classList.add('hidden');
+        if (btn) btn.classList.remove('active');
       });
-      document.getElementById(`tab-${tab}`).classList.remove('hidden');
-      document.getElementById(`tab-btn-${tab}`).classList.add('active');
+      const panel = document.getElementById(`tab-${tab}`);
+      const btn = document.getElementById(`tab-btn-${tab}`);
+      if (panel) panel.classList.remove('hidden');
+      if (btn) btn.classList.add('active');
       localStorage.setItem('endorphin_admin_tab', tab);
     };
-
-    const savedTab = localStorage.getItem('endorphin_admin_tab') || 'ad';
-    switchTab(savedTab);
 
     // ============================================================
     // ЖИВОЙ СТАТУС
     // ============================================================
+    let currentGameState = null;
     onValue(gameRef, (snap) => {
       const data = snap.val() || {};
       currentGameState = data;
@@ -866,6 +1186,7 @@
       const mode = data.mode || '—';
 
       const statusEl = document.getElementById('sb-status');
+      if (!statusEl) return;
       statusEl.innerText = status.toUpperCase();
       statusEl.className = 'sb-val ' + (
         status === 'playing' ? 'ok' :
@@ -911,6 +1232,13 @@
       preview.innerHTML = '';
       preview.appendChild(img);
     };
+
+    // ============================================================
+    // СОСТОЯНИЕ
+    // ============================================================
+    let adFieldsDirty = false;
+    let isAdLoading = false;
+    let lastMessagesHash = '';
 
     // ============================================================
     // СОХРАНЕНИЕ РЕКЛАМЫ
@@ -1003,6 +1331,7 @@
     window.updateCharCounter = () => {
       const input = document.getElementById('ticker-input');
       const counter = document.getElementById('char-counter');
+      if (!input || !counter) return;
       const len = input.value.length;
       const max = 100;
 
@@ -1089,6 +1418,8 @@
       lastMessagesHash = hash;
 
       const list = document.getElementById('messages-list');
+      if (!list) return;
+
       if (keys.length === 0) {
         list.innerHTML = `
           <div class="empty-state">
@@ -1115,14 +1446,16 @@
       }
 
       const previewEl = document.getElementById('ticker-preview-text');
-      if (keys.length === 0) {
-        previewEl.innerText = 'ДОБРО ПОЖАЛОВАТЬ НА ВЕЧЕРИНКУ ENDORPHIN!';
-      } else {
-        previewEl.innerText = keys.map(k => messages[k].text).join('  •  ');
+      if (previewEl) {
+        if (keys.length === 0) {
+          previewEl.innerText = 'ДОБРО ПОЖАЛОВАТЬ НА ВЕЧЕРИНКУ ENDORPHIN!';
+        } else {
+          previewEl.innerText = keys.map(k => messages[k].text).join('  •  ');
+        }
+        previewEl.style.animation = 'none';
+        void previewEl.offsetWidth;
+        previewEl.style.animation = '';
       }
-      previewEl.style.animation = 'none';
-      void previewEl.offsetWidth;
-      previewEl.style.animation = '';
     });
 
     // ============================================================
@@ -1137,6 +1470,7 @@
     window.validateConfirm = (level) => {
       const input = document.getElementById(`confirm-${level}`);
       const btn = document.getElementById(`btn-${level}`);
+      if (!input || !btn) return;
       const isValid = input.value.trim().toUpperCase() === CONFIRM_WORDS[level];
       btn.disabled = !isValid;
       input.classList.toggle('error', input.value.length > 0 && !isValid);
@@ -1289,8 +1623,7 @@
             • <b class="text-red-300">бегущая строка</b><br>
             • режим, первый ход, жизни<br><br>
             <span class="text-white/60 text-xs">Сейчас в базе:</span><br>
-            ${getStateSummary()}<br>
-            <span class="text-xs text-amber-300 mt-2 block">⚠ Сообщений в строке: ${document.querySelectorAll('#messages-list .msg-item').length}</span>
+            ${getStateSummary()}
           </div>
         `,
         confirmText: 'УДАЛИТЬ ВСЁ'
@@ -1302,7 +1635,6 @@
       btn.innerHTML = '<span class="spinner"></span> УДАЛЕНИЕ...';
 
       try {
-        // Полный сброс игровых данных
         await update(gameRef, {
           status: 'lobby',
           screen: 'attract',
@@ -1320,7 +1652,6 @@
           lives: { red: 3, blue: 3 }
         });
 
-        // Удаление рекламы и строки
         try { await remove(adRef); } catch {}
         try { await remove(tickerRef); } catch {}
         try {
@@ -1329,7 +1660,6 @@
           await remove(ref(db, 'games/battle_1/aim'));
         } catch {}
 
-        // Очистка полей рекламы в UI
         ['preload-img', 'preload-link', 'preload-text', 'lobby-img', 'lobby-link', 'lobby-text'].forEach(id => {
           document.getElementById(id).value = '';
         });
@@ -1379,8 +1709,13 @@
     };
 
     // ============================================================
-    // INIT
+    // FOCUS на PIN при загрузке
     // ============================================================
+    setTimeout(() => {
+      const pin = document.getElementById('pin-input');
+      if (pin && !isAuthed()) pin.focus();
+    }, 300);
+
     updateCharCounter();
   </script>
 </body>
