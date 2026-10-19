@@ -189,6 +189,7 @@
       gap: 12px;
       min-height: 0;
       overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
     }
 
     .control-card {
@@ -212,7 +213,6 @@
 
     /* ============================================================
        УГОЛ — КРУГ-ДЖОЙСТИК 360°
-       Просто: тапни/тяни в любую точку → стрелка туда.
        ============================================================ */
     .angle-control {
       position: relative;
@@ -653,8 +653,16 @@
       font-size: 1.7rem;
       font-weight: 900;
       color: #fff;
-      margin-bottom: 24px;
+      margin-bottom: 8px;
       text-align: center;
+    }
+    .room-mode-info {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: rgba(251, 191, 36, 0.9);
+      margin-bottom: 20px;
+      text-align: center;
+      letter-spacing: 0.05em;
     }
     .room-section { width: 100%; max-width: 340px; margin-bottom: 16px; }
     .room-section-title {
@@ -748,6 +756,16 @@
       .super-btn { padding: 4px 2px; }
       .super-btn .super-cost { font-size: 0.5rem; }
     }
+    @media (max-height: 520px) {
+      .angle-control { height: 140px; max-width: 140px; }
+      .power-drag { height: 46px; }
+      .shoot-btn { height: 46px; font-size: 0.95rem; letter-spacing: 1px; }
+      .game-content { gap: 4px; }
+      .section-label { font-size: 0.55rem; }
+      .player-info { padding: 4px 8px; min-width: 90px; }
+      .player-info .name { font-size: 0.7rem; max-width: 80px; }
+      .player-info .lives { font-size: 0.75rem; }
+    }
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after {
         animation-duration: 0.01ms !important;
@@ -799,6 +817,7 @@
   <div id="room-screen" class="room-screen hidden">
     <div class="room-status" id="room-status">⏳ ОЖИДАНИЕ</div>
     <div class="room-title">ВЫ В КОМНАТЕ</div>
+    <div class="room-mode-info" id="room-mode-info"></div>
 
     <div class="room-section">
       <div class="room-section-title">🎮 СЕЙЧАС ИГРАЮТ</div>
@@ -971,7 +990,7 @@
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getDatabase, ref, set, push, onDisconnect, onValue, update, get, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+    import { getDatabase, ref, set, push, onDisconnect, onValue, update, get, remove, runTransaction } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyCXIR5Tv8lB6ivcGRC3yt1SC66MM6T5b_M",
@@ -997,7 +1016,9 @@
     localStorage.setItem(storageKey, playerId);
 
     const joinedKey = `endorphin_joined_${team}_${playerId}`;
+    // ВАЖНО: восстанавливаем флаг из localStorage, чтобы рефреш не выкидывал на экран имени
     let hasJoined = false;
+    try { hasJoined = localStorage.getItem(joinedKey) === '1'; } catch {}
 
     const nameStorageKey = `endorphin_name_${team}`;
     const emojiStorageKey = `endorphin_emoji_${team}`;
@@ -1009,6 +1030,7 @@
     const TURN_TIME = 15;
     const FORM_TIME = 1500;
     const NAME_MAX = 16;
+    const HEARTBEAT_MS = 10000;
 
     const EMOJIS = [
       '😀','😎','🥳','🤠',
@@ -1046,6 +1068,16 @@
 
     let aimSyncTimeout = null;
     let lastAimSent = null;
+
+    let lastToastKey = '';
+    let lastToastAt = 0;
+
+    // turnOrder — массив ID в порядке хода. Хранится в battle_1/turnOrder.
+    // Создаётся автоматически при первом ходе, если его нет.
+    let turnOrder = null;
+    let turnOrderBuilding = false;
+
+    let heartbeatTimer = null;
 
     // ============================================================
     // ЗВУК
@@ -1100,6 +1132,13 @@
     }
 
     function showToast(message, type = 'info') {
+      const now = Date.now();
+      const key = `${type}:${message}`;
+      // Debounce одинаковых сообщений — чтобы не спамило при сетевых лагах
+      if (key === lastToastKey && now - lastToastAt < 1500) return;
+      lastToastKey = key;
+      lastToastAt = now;
+
       const container = document.getElementById('toast-container');
       const toast = document.createElement('div');
       toast.className = `toast ${type}`;
@@ -1187,6 +1226,26 @@
     }
 
     // ============================================================
+    // HEARTBEAT — чтобы mod.html мог видеть, что игрок жив
+    // ============================================================
+    function startHeartbeat() {
+      stopHeartbeat();
+      const tick = () => {
+        if (!hasJoined) return;
+        const inPlayers = currentData?.players?.[team]?.[playerId];
+        const inRoom = currentData?.room?.[team]?.[playerId];
+        if (!inPlayers && !inRoom) return;
+        const targetRef = inPlayers ? playerRef : roomRef;
+        update(targetRef, { lastSeen: Date.now() }).catch(() => {});
+      };
+      tick();
+      heartbeatTimer = setInterval(tick, HEARTBEAT_MS);
+    }
+    function stopHeartbeat() {
+      if (heartbeatTimer) { clearInterval(heartbeatTimer); heartbeatTimer = null; }
+    }
+
+    // ============================================================
     // JOIN
     // ============================================================
     async function joinGame() {
@@ -1212,14 +1271,25 @@
         const existingPlayer = playersSnap.val();
 
         if (existingPlayer) {
+          // Уже в игре — просто обновляем имя/эмодзи/connected
           await update(playerRef, { name, emoji: myEmoji, connected: true });
+          // Если случайно остался дубль в room — удаляем
+          try { await remove(roomRef); } catch {}
         } else {
           const roomSnap = await get(roomRef);
           const existingRoom = roomSnap.val();
           if (existingRoom) {
-            await update(roomRef, { name, emoji: myEmoji, joinedAt: existingRoom.joinedAt || Date.now() });
+            await update(roomRef, {
+              name, emoji: myEmoji,
+              joinedAt: existingRoom.joinedAt || Date.now(),
+              lastSeen: Date.now()
+            });
           } else {
-            await set(roomRef, { name, emoji: myEmoji, joinedAt: Date.now() });
+            await set(roomRef, {
+              name, emoji: myEmoji,
+              joinedAt: Date.now(),
+              lastSeen: Date.now()
+            });
           }
         }
 
@@ -1232,8 +1302,8 @@
         localStorage.setItem(nameStorageKey, name);
         localStorage.setItem(emojiStorageKey, myEmoji);
         vibrate(50);
+        startHeartbeat();
 
-        // ⚡ СРАЗУ показываем room-screen, чтобы не было тёмного экрана
         document.getElementById('join-screen').classList.add('hidden');
         showRoomScreenPlaceholder();
       } catch (e) {
@@ -1243,7 +1313,6 @@
       }
     }
 
-    // Заглушка комнаты, пока onValue не пришёл
     function showRoomScreenPlaceholder() {
       document.getElementById('join-screen').classList.add('hidden');
       document.getElementById('room-screen').classList.remove('hidden');
@@ -1286,9 +1355,6 @@
 
     // ============================================================
     // УГОЛ — ПРОСТОЙ 360° ДЖОЙСТИК
-    // Формула: angle = atan2(cy - y, x - cx) * 180 / PI
-    // 0° = вправо, 90° = вверх, 180° = влево, 270° = вниз.
-    // Одинаково для обеих команд (TV развернёт направление через direction).
     // ============================================================
     const ANGLE_CX = 120;
     const ANGLE_CY = 120;
@@ -1333,7 +1399,6 @@
       angleArrowLine.setAttribute('x2', endX);
       angleArrowLine.setAttribute('y2', endY);
 
-      // Наконечник — треугольник, повёрнутый по направлению
       const headSize = 14;
       const headBack = 10;
       const backX = ANGLE_CX + Math.cos(rad) * (ARROW_LENGTH - headBack);
@@ -1350,28 +1415,27 @@
       angleValueBadge.innerText = Math.round(a) + '°';
 
       const displayAngle = isRed ? a : (180 - a + 360) % 360;
-let hint;
-if (displayAngle < 22 || displayAngle > 338) hint = 'ВПЕРЁД';
-else if (displayAngle < 67) hint = 'ВВЕРХ-ВПЕРЁД';
-else if (displayAngle < 112) hint = 'ВВЕРХ';
-else if (displayAngle < 157) hint = 'ВВЕРХ-НАЗАД';
-else if (displayAngle < 202) hint = 'НАЗАД';
-else if (displayAngle < 247) hint = 'ВНИЗ-НАЗАД';
-else if (displayAngle < 292) hint = 'ВНИЗ';
-else hint = 'ВНИЗ-ВПЕРЁД';
-angleHint.innerText = hint;
+      let hint;
+      if (displayAngle < 22 || displayAngle > 338) hint = 'ВПЕРЁД';
+      else if (displayAngle < 67) hint = 'ВВЕРХ-ВПЕРЁД';
+      else if (displayAngle < 112) hint = 'ВВЕРХ';
+      else if (displayAngle < 157) hint = 'ВВЕРХ-НАЗАД';
+      else if (displayAngle < 202) hint = 'НАЗАД';
+      else if (displayAngle < 247) hint = 'ВНИЗ-НАЗАД';
+      else if (displayAngle < 292) hint = 'ВНИЗ';
+      else hint = 'ВНИЗ-ВПЕРЁД';
+      angleHint.innerText = hint;
     }
 
     let isDraggingAngle = false;
 
     function pointerToAngle(clientX, clientY) {
       const rect = angleSvg.getBoundingClientRect();
-      // Пропорционально viewBox 240x240
       const x = ((clientX - rect.left) / rect.width) * 240;
       const y = ((clientY - rect.top) / rect.height) * 240;
 
       const dx = x - ANGLE_CX;
-      const dy = ANGLE_CY - y; // минус, т.к. Y вниз
+      const dy = ANGLE_CY - y;
       let deg = Math.atan2(dy, dx) * 180 / Math.PI;
       if (deg < 0) deg += 360;
       return deg;
@@ -1396,6 +1460,7 @@ angleHint.innerText = hint;
       handleAngleMove(e.clientX, e.clientY);
       vibrate(8);
       e.preventDefault();
+      e.stopPropagation();
     });
     angleControl.addEventListener('pointermove', (e) => {
       if (!isDraggingAngle) return;
@@ -1518,7 +1583,10 @@ angleHint.innerText = hint;
 
         if (remaining <= 0) {
           stopTurnTimer();
-          if (isMyTurn && !isShooting) autoShoot();
+          // ВАЖНО: проверяем свежий activePlayerId — вдруг ход уже перешёл
+          if (isMyTurn && !isShooting && currentData?.activePlayerId === playerId) {
+            autoShoot();
+          }
         }
       }, 100);
     }
@@ -1531,6 +1599,7 @@ angleHint.innerText = hint;
 
     async function autoShoot() {
       if (!isMyTurn || isShooting) return;
+      if (currentData?.activePlayerId !== playerId) return;
       vibrate([100, 50, 100]);
       playError();
       const notif = document.createElement('div');
@@ -1654,21 +1723,113 @@ angleHint.innerText = hint;
     async function executeSuperShot(superItem) {
       if (isShooting) return;
       const actualCost = getSuperCost(superItem.cost);
-      if ((myLives - actualCost) < 1) return;
+
+      // Атомарно списываем жизни — защита от двойного клика и гонок
+      let newLives = myLives;
+      try {
+        const result = await runTransaction(ref(db, `games/battle_1/players/${team}/${playerId}/lives`), (current) => {
+          const cur = typeof current === 'number' ? current : myLives;
+          if (cur - actualCost < 1) return cur; // отказ
+          return cur - actualCost;
+        });
+        if (!result.committed) {
+          playError();
+          showToast('Недостаточно жизней', 'error');
+          return;
+        }
+        newLives = result.snapshot.val();
+        if (typeof newLives !== 'number' || (myLives - newLives) !== actualCost) {
+          // транзакция не списала — значит, не хватает
+          if (newLives === myLives) {
+            playError();
+            showToast('Недостаточно жизней', 'error');
+            return;
+          }
+        }
+      } catch (e) {
+        showToast('Ошибка: ' + e.message, 'error');
+        return;
+      }
+
+      myLives = newLives;
       const shots = generateSuperShots(superItem);
       vibrate([60, 30, 60, 30, 100]);
       playSuper();
+      await doShot(shots, true, superItem.id);
+    }
 
+    // ============================================================
+    // TURN ORDER
+    // ============================================================
+    // Строит turnOrder из текущих players, если его нет.
+    // Вызывается только если activePlayerId === playerId и preloadDone.
+    async function buildTurnOrderIfNeeded(data) {
+      if (turnOrder || turnOrderBuilding) return;
+      if (data?.turnOrder) { turnOrder = data.turnOrder; return; }
+      if (data?.status !== 'playing' || !data?.preloadDone) return;
+      if (data?.activePlayerId !== playerId) return;
+
+      turnOrderBuilding = true;
       try {
-        const newLives = myLives - actualCost;
-        await update(playerRef, { lives: newLives });
-        myLives = newLives;
-        await doShot(shots, true, superItem.id);
+        const playersSnap = await get(ref(db, 'games/battle_1/players'));
+        const playersData = playersSnap.val() || {};
+
+        const all = [
+          ...Object.entries(playersData.red || {}).map(([id, p]) => ({ id, team: 'red', joinedAt: p.joinedAt || 0 })),
+          ...Object.entries(playersData.blue || {}).map(([id, p]) => ({ id, team: 'blue', joinedAt: p.joinedAt || 0 }))
+        ].sort((a, b) => a.joinedAt - b.joinedAt);
+
+        const order = all.map(p => p.id);
+        if (order.length === 0) return;
+
+        await set(ref(db, 'games/battle_1/turnOrder'), order);
+        turnOrder = order;
       } catch (e) {
-        showToast('Ошибка: ' + e.message, 'error');
+        // не критично — сработает fallback
+      } finally {
+        turnOrderBuilding = false;
       }
     }
 
+    // Возвращает следующего живого игрока по turnOrder (с переходом на другую команду).
+    // Если turnOrder нет — fallback на старую логику.
+    function findNextPlayer(data) {
+      const players = data?.players || {};
+      const isAlive = (p) => p && p.alive && p.lives > 0;
+
+      if (Array.isArray(turnOrder) && turnOrder.length > 0) {
+        const idx = turnOrder.indexOf(playerId);
+        if (idx !== -1) {
+          for (let step = 1; step <= turnOrder.length; step++) {
+            const nextId = turnOrder[(idx + step) % turnOrder.length];
+            const nextTeam = players.red?.[nextId] ? 'red' : (players.blue?.[nextId] ? 'blue' : null);
+            if (!nextTeam) continue;
+            const nextPlayer = players[nextTeam]?.[nextId];
+            if (isAlive(nextPlayer)) {
+              return { id: nextId, team: nextTeam, name: nextPlayer.name };
+            }
+          }
+        }
+      }
+
+      // Fallback: старая логика
+      const myTeamPlayers = Object.entries(players[team] || {}).filter(([id, p]) => isAlive(p));
+      const myIdx = myTeamPlayers.findIndex(([id]) => id === playerId);
+      if (myIdx !== -1 && myIdx < myTeamPlayers.length - 1) {
+        const [id, p] = myTeamPlayers[myIdx + 1];
+        return { id, team, name: p.name };
+      }
+      const enemyTeam = Object.entries(players[isRed ? 'blue' : 'red'] || {}).filter(([id, p]) => isAlive(p));
+      if (enemyTeam.length > 0) {
+        const [id, p] = enemyTeam[0];
+        return { id, team: isRed ? 'blue' : 'red', name: p.name };
+      }
+      return null;
+    }
+
+    // ============================================================
+    // ВЫСТРЕЛ
+    // ============================================================
     async function doShot(shots, isSuper, superType) {
       isShooting = true;
       stopTurnTimer();
@@ -1686,6 +1847,8 @@ angleHint.innerText = hint;
         time: now,
         state: 'forming',
         formTime: now,
+        formDuration: FORM_TIME,
+        turnDuration: TURN_TIME,
         isSuper: isSuper || false,
         superType: superType || null
       };
@@ -1711,27 +1874,14 @@ angleHint.innerText = hint;
 
       setTimeout(async () => {
         try {
-          const playersSnap = await get(ref(db, 'games/battle_1/players'));
-          const players = playersSnap.val() || {};
-
-          const myTeamPlayers = Object.entries(players[team] || {}).filter(([id, p]) => p.alive && p.lives > 0);
-          const myIdx = myTeamPlayers.findIndex(([id]) => id === playerId);
-
-          let nextPlayer = null;
-          if (myIdx !== -1 && myIdx < myTeamPlayers.length - 1) {
-            nextPlayer = myTeamPlayers[myIdx + 1];
-          } else {
-            const enemyTeam = Object.entries(players[isRed ? 'blue' : 'red'] || {}).filter(([id, p]) => p.alive && p.lives > 0);
-            if (enemyTeam.length > 0) nextPlayer = enemyTeam[0];
-          }
-
-          if (nextPlayer) {
+          // Берём свежие данные для поиска следующего
+          const snap = await get(ref(db, 'games/battle_1'));
+          const fresh = snap.val() || {};
+          const next = findNextPlayer(fresh);
+          if (next) {
             await update(gameRef, {
-              activePlayerId: nextPlayer[0],
-              turn: {
-                team: (players[team]?.[nextPlayer[0]] ? team : (isRed ? 'blue' : 'red')),
-                name: nextPlayer[1].name
-              }
+              activePlayerId: next.id,
+              turn: { team: next.team, name: next.name }
             });
           }
         } catch (e) {
@@ -1766,7 +1916,7 @@ angleHint.innerText = hint;
       } else {
         playingList.innerHTML = playingAll.map(p => `
           <div class="room-player-row">
-            <div class="avatar avatar-md">${p.emoji || '😀'}</div>
+            <div class="avatar avatar-md">${escapeHtml(p.emoji || '😀')}</div>
             <div class="room-player-name">${escapeHtml(p.name)}</div>
             <div class="room-player-badge playing">В ИГРЕ</div>
           </div>
@@ -1786,12 +1936,34 @@ angleHint.innerText = hint;
           const isMe = p.id === playerId;
           return `
             <div class="room-player-row ${isMe ? 'me' : ''}">
-              <div class="avatar avatar-md">${p.emoji || '😀'}</div>
+              <div class="avatar avatar-md">${escapeHtml(p.emoji || '😀')}</div>
               <div class="room-player-name">${escapeHtml(p.name)}${isMe ? ' (ты)' : ''}</div>
               <div class="room-player-badge waiting">ЖДЁТ</div>
             </div>
           `;
         }).join('');
+      }
+
+      // Режим и счётчики
+      const modeInfoEl = document.getElementById('room-mode-info');
+      const mode = data.mode || '1v1';
+      const parts = mode.split('v');
+      const redMax = parseInt(parts[0]) || 1;
+      const blueMax = parseInt(parts[1]) || 1;
+      const redNow = Object.keys(players.red || {}).length + Object.keys(room.red || {}).length;
+      const blueNow = Object.keys(players.blue || {}).length + Object.keys(room.blue || {}).length;
+      const redMissing = Math.max(0, redMax - redNow);
+      const blueMissing = Math.max(0, blueMax - blueNow);
+
+      if (redMissing === 0 && blueMissing === 0) {
+        modeInfoEl.innerText = `✅ ${redMax} vs ${blueMax} — все на месте`;
+        modeInfoEl.style.color = '#22c55e';
+      } else {
+        const missing = [];
+        if (redMissing > 0) missing.push(`🔴 ещё ${redMissing}`);
+        if (blueMissing > 0) missing.push(`🔵 ещё ${blueMissing}`);
+        modeInfoEl.innerText = `Режим ${redMax} vs ${blueMax} · ждём: ${missing.join(', ')}`;
+        modeInfoEl.style.color = 'rgba(251, 191, 36, 0.9)';
       }
 
       const statusEl = document.getElementById('room-status');
@@ -1837,12 +2009,16 @@ angleHint.innerText = hint;
     // ============================================================
     // ГЛАВНЫЙ СЛУШАТЕЛЬ
     // ============================================================
+    let currentData = null;
+
     onValue(gameRef, (snapshot) => {
       const data = snapshot.val();
       if (!data) return;
+      currentData = data;
 
       gameStatus = data.status || 'lobby';
       if (data.mode) updateModeInfo(data.mode);
+      if (data.turnOrder) turnOrder = data.turnOrder;
 
       const inPlayers = data.players?.[team]?.[playerId];
       const inRoom = data.room?.[team]?.[playerId];
@@ -1851,7 +2027,8 @@ angleHint.innerText = hint;
       if (hasJoined && !inPlayers && !inRoom) {
         showJoinScreen();
         hasJoined = false;
-        localStorage.removeItem(joinedKey);
+        try { localStorage.removeItem(joinedKey); } catch {}
+        stopHeartbeat();
         return;
       }
 
@@ -1864,7 +2041,9 @@ angleHint.innerText = hint;
         myName = inPlayers.name || myName;
         if (inPlayers.emoji) myEmoji = inPlayers.emoji;
 
-        if (inPlayers.posX == null || inPlayers.posY == null) ensureMyPosition();
+        if ((inPlayers.posX == null || inPlayers.posY == null) && !isEnsuringPosition) {
+          ensureMyPosition();
+        }
 
         if (gameStatus === 'finished') {
           isMyTurn = false;
@@ -1928,6 +2107,9 @@ angleHint.innerText = hint;
 
       if (!data.preloadDone) return;
 
+      // Если мы первые в turnOrder — построим его
+      buildTurnOrderIfNeeded(data);
+
       const wasMyTurn = isMyTurn;
       isMyTurn = (data.activePlayerId === playerId);
 
@@ -1940,11 +2122,11 @@ angleHint.innerText = hint;
           btn.classList.add('animate-shake');
           setTimeout(() => btn.classList.remove('animate-shake'), 500);
           startTurnTimer();
-currentAngle = isRed ? 0 : 180;
-currentPower = 30;
-updateAngleVisual();
-updatePowerDisplay();
-syncAimToFirebase();
+          currentAngle = isRed ? 0 : 180;
+          currentPower = 30;
+          updateAngleVisual();
+          updatePowerDisplay();
+          syncAimToFirebase();
         }
         btn.disabled = false;
         hideOverlay('wait-overlay');
@@ -1978,7 +2160,8 @@ syncAimToFirebase();
       }
       isUnfairMode = myTeamMax !== enemyTeamMax;
       if (isUnfairMode) {
-        costMultiplier = myTeamMax > enemyTeamMax ? Math.ceil(myTeamMax / enemyTeamMax) : 1;
+        // Cap на 2 — иначе 3v1 убивает супером с одного удара (у большей команды 3 жизни, супер 3)
+        costMultiplier = Math.min(2, Math.ceil(myTeamMax / enemyTeamMax));
       } else {
         costMultiplier = 1;
       }
@@ -2038,6 +2221,9 @@ syncAimToFirebase();
 
     document.getElementById('play-again-btn').onclick = () => {
       playClick();
+      // Очищаем joinedKey — при возврате через end.html и новом сканировании
+      // игрок начнёт с чистого листа (но playerId останется — он в players/room удалён)
+      try { localStorage.removeItem(joinedKey); } catch {}
       window.location.href = 'end.html';
     };
 
@@ -2058,9 +2244,10 @@ syncAimToFirebase();
       });
       if (!ok) return;
       try {
+        stopHeartbeat();
         await remove(roomRef);
         await remove(playerRef).catch(() => {});
-        localStorage.removeItem(joinedKey);
+        try { localStorage.removeItem(joinedKey); } catch {}
         hasJoined = false;
         showJoinScreen();
       } catch (e) {
@@ -2093,10 +2280,50 @@ syncAimToFirebase();
       setTimeout(() => { container.innerHTML = ''; }, 5000);
     }
 
+    // ============================================================
+    // ВОССТАНОВЛЕНИЕ СЕССИИ ПОСЛЕ РЕФРЕША
+    // ============================================================
+    async function tryRestoreSession() {
+      if (!hasJoined) return;
+      try {
+        const [playerSnap, roomSnap] = await Promise.all([get(playerRef), get(roomRef)]);
+        const inPlayers = playerSnap.exists();
+        const inRoom = roomSnap.exists();
+
+        if (!inPlayers && !inRoom) {
+          // Нас нет в базе — сбрасываем
+          hasJoined = false;
+          try { localStorage.removeItem(joinedKey); } catch {}
+          showJoinScreen();
+          return;
+        }
+
+        // Восстанавливаем имя/эмодзи из базы (чтобы не потерять при рефреше)
+        const src = inPlayers ? playerSnap.val() : roomSnap.val();
+        if (src?.name) myName = src.name;
+        if (src?.emoji) myEmoji = src.emoji;
+        if (src?.name) document.getElementById('input-name').value = src.name;
+
+        startHeartbeat();
+        // Дальше onValue сам разрулит, куда показать
+      } catch (e) {
+        // Тихо — onValue всё равно сработает
+      }
+    }
+
+    // ============================================================
+    // INIT
+    // ============================================================
     drawAngleTicks();
     updateAngleVisual();
     updatePowerDisplay();
     document.getElementById('join-screen').classList.remove('hidden');
+
+    // Если рефреш и hasJoined — попробуем восстановить сессию, показывая заглушку
+    if (hasJoined) {
+      showRoomScreenPlaceholder();
+      tryRestoreSession();
+    }
   </script>
 </body>
 </html>
