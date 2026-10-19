@@ -190,54 +190,42 @@
         .hp-blue { bottom: 80px; right: 20px; color: var(--blue-team); }
 
         /* ============================================================
-           КНОПКА БРОСОК (в play.html)
+           ВЫБОР КОМАНДЫ (для модератора)
            ============================================================ */
-        .shoot-btn { 
-            width: 180px; height: 180px; border-radius: 50%; 
-            font-size: 2rem; font-weight: 900; 
-            display: flex; align-items: center; justify-content: center; 
-            background: linear-gradient(135deg, #ef4444, #7f1d1d); 
-            border: 8px solid rgba(255,255,255,0.2); 
-            color: #fff;
-            transition: all 0.2s;
-            text-transform: uppercase;
-            letter-spacing: 2px;
+        .team-select {
+            display: flex;
+            gap: 20px;
+            margin-top: 20px;
+            z-index: 50;
         }
-        .shoot-btn:disabled { filter: grayscale(1); opacity: 0.3; transform: scale(0.9); }
-
-        /* ============================================================
-           ШКАЛА СИЛЫ (в play.html)
-           ============================================================ */
-        .power-track {
-            position: relative; width: 100%; height: 30px;
-            background: linear-gradient(90deg, #22c55e 0%, #fbbf24 50%, #ef4444 100%);
-            border-radius: 15px; 
-            border: 3px solid rgba(255,255,255,0.3); /* Обводка */
-            overflow: hidden; cursor: pointer;
+        .team-btn {
+            padding: 15px 40px;
+            border-radius: 15px;
+            font-weight: 900;
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 3px solid transparent;
         }
-        .power-thumb {
-            position: absolute; top: 50%; left: 10%;
-            width: 40px; height: 40px;
-            background: #ffffff; border-radius: 50%;
-            transform: translate(-50%, -50%);
-            box-shadow: 0 0 20px rgba(255,255,255,0.8);
-            transition: left 0.05s linear; pointer-events: none;
+        .team-btn.red {
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+            border-color: rgba(239, 68, 68, 0.3);
         }
-
-        /* ============================================================
-           СТРЕЛКА УГЛА (в play.html)
-           ============================================================ */
-        .aim-container { position: relative; width: 260px; height: 260px; margin: 0 auto; }
-        .aim-bg { position: absolute; inset: 0; border-radius: 50%; border: 2px dashed rgba(255,255,255,0.2); }
-        .aim-arrow { 
-            position: absolute; top: 50%; left: 50%; width: 4px; height: 110px; 
-            background: linear-gradient(to top, transparent, #22d3ee); 
-            transform-origin: bottom center; transition: transform 0.1s; 
+        .team-btn.red.active {
+            background: rgba(239, 68, 68, 0.5);
+            border-color: #ef4444;
+            box-shadow: 0 0 30px rgba(239, 68, 68, 0.6);
         }
-        .aim-arrow::before { 
-            content: ''; position: absolute; top: -10px; left: -8px; 
-            border-left: 10px solid transparent; border-right: 10px solid transparent; 
-            border-bottom: 20px solid #22d3ee; 
+        .team-btn.blue {
+            background: rgba(59, 130, 246, 0.2);
+            color: #3b82f6;
+            border-color: rgba(59, 130, 246, 0.3);
+        }
+        .team-btn.blue.active {
+            background: rgba(59, 130, 246, 0.5);
+            border-color: #3b82f6;
+            box-shadow: 0 0 30px rgba(59, 130, 246, 0.6);
         }
     </style>
 </head>
@@ -279,6 +267,13 @@
                 <div id="tv-players-blue" class="mt-4 space-y-2 w-full text-center text-sm"></div>
             </div>
         </div>
+        
+        <!-- Выбор первой команды (управляется с модератора) -->
+        <div class="team-select hidden" id="team-select">
+            <button class="team-btn red" onclick="selectFirstTeam('red')" id="btn-red-start">КРАСНЫЕ</button>
+            <button class="team-btn blue" onclick="selectFirstTeam('blue')" id="btn-blue-start">СИНИЕ</button>
+        </div>
+
         <div id="tv-status" class="text-4xl font-black text-white tracking-widest hidden">ОЖИДАНИЕ ИГРОКОВ...</div>
     </div>
 
@@ -297,7 +292,7 @@
          ============================================================ -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getDatabase, ref, onValue, update } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+        import { getDatabase, ref, onValue, update, set } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
         // ============================================================
         // КОНФИГУРАЦИЯ
@@ -329,9 +324,10 @@
         let currentMode = null;
         let currentBaseUrl = getBaseUrl();
         
-        let players = []; // Массив объектов игроков
-        let snowballs = []; // Массив активных снежков
-        let particles = []; // Массив частиц
+        let players = []; 
+        let snowballs = []; 
+        let particles = []; 
+        let iceCrystals = []; // Для визуализации
 
         function getBaseUrl() {
             const url = new URL(window.location.href);
@@ -349,9 +345,19 @@
                 this.alive = data.alive !== undefined ? data.alive : true;
                 this.team = team;
                 
-                // Координаты (если не заданы, генерируем)
-                this.x = data.posX !== undefined ? (data.posX / 100) * width : (team === 'red' ? width * 0.15 : width * 0.85);
-                this.y = data.posY !== undefined ? (data.posY / 100) * height : height * (0.3 + Math.random() * 0.4);
+                // Координаты (если не заданы, генерируем на своей базе)
+                if (data.posX !== undefined) {
+                    this.x = (data.posX / 100) * width;
+                    this.y = (data.posY / 100) * height;
+                } else {
+                    // Генерация на своей базе (красные слева, синие справа)
+                    if (team === 'red') {
+                        this.x = width * (0.05 + Math.random() * 0.15); // 5-20% ширины
+                    } else {
+                        this.x = width * (0.80 + Math.random() * 0.15); // 80-95% ширины
+                    }
+                    this.y = height * (0.2 + Math.random() * 0.6); // 20-80% высоты
+                }
                 
                 this.width = 60;
                 this.height = 100;
@@ -366,12 +372,12 @@
                     return;
                 }
 
-                // Тень/свечение
+                // Свечение (ледяное)
                 ctx.shadowColor = this.team === 'red' ? '#ef4444' : '#3b82f6';
-                ctx.shadowBlur = 20;
+                ctx.shadowBlur = 30;
 
-                // Тело
-                ctx.fillStyle = this.team === 'red' ? 'rgba(239, 68, 68, 0.2)' : 'rgba(59, 130, 246, 0.2)';
+                // Тело (кристалл)
+                ctx.fillStyle = this.team === 'red' ? 'rgba(239, 68, 68, 0.3)' : 'rgba(59, 130, 246, 0.3)';
                 ctx.strokeStyle = this.team === 'red' ? '#ef4444' : '#3b82f6';
                 ctx.lineWidth = 3;
                 ctx.beginPath();
@@ -379,32 +385,37 @@
                 ctx.fill();
                 ctx.stroke();
 
-                // Сброс тени для текста
+                // Блик (эффект льда)
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
+                ctx.beginPath();
+                ctx.roundRect(this.x - this.width/2 + 5, this.y - this.height/2 + 5, this.width - 10, this.height/3, 10);
+                ctx.fill();
+
                 ctx.shadowBlur = 0;
 
                 // Имя
-                ctx.font = 'bold 12px Montserrat';
+                ctx.font = 'bold 14px Montserrat';
                 ctx.fillStyle = '#ffffff';
                 ctx.textAlign = 'center';
-                ctx.fillText(this.name, this.x, this.y + this.height/2 + 15);
+                ctx.fillText(this.name, this.x, this.y + this.height/2 + 20);
 
                 // Сердечки
-                ctx.font = '16px Montserrat';
-                ctx.fillText('❤️'.repeat(this.lives), this.x, this.y - this.height/2 - 10);
+                ctx.font = '20px Montserrat';
+                ctx.fillText('❤️'.repeat(this.lives), this.x, this.y - this.height/2 - 15);
             }
         }
 
         // ============================================================
-        // СИСТЕМА ЧАСТИЦ
+        // СИСТЕМА ЧАСТИЦ (ЛЕДЯНЫЕ ОСКОЛКИ)
         // ============================================================
         function spawnParticles(x, y, color) {
-            for (let i = 0; i < 20; i++) {
+            for (let i = 0; i < 30; i++) {
                 particles.push({
                     x: x, y: y,
-                    vx: (Math.random() - 0.5) * 20,
-                    vy: (Math.random() - 0.5) * 20,
+                    vx: (Math.random() - 0.5) * 25,
+                    vy: (Math.random() - 0.5) * 25,
                     life: 1, color: color || '#ffffff',
-                    size: Math.random() * 5 + 2
+                    size: Math.random() * 8 + 2
                 });
             }
         }
@@ -431,33 +442,32 @@
             }
 
             update() {
-                // ПРЯМАЯ ТРАЕКТОРИЯ (как просил)
                 this.x += this.vx;
                 this.y += this.vy;
             }
 
             draw(ctx) {
                 ctx.shadowColor = '#7fe3ff';
-                ctx.shadowBlur = 20;
+                ctx.shadowBlur = 25;
 
-                const gradient = ctx.createRadialGradient(this.x - 5, this.y - 5, 2, this.x, this.y, 12);
+                const gradient = ctx.createRadialGradient(this.x - 5, this.y - 5, 2, this.x, this.y, 15);
                 gradient.addColorStop(0, '#ffffff');
                 gradient.addColorStop(1, '#7fe3ff');
                 
                 ctx.fillStyle = gradient;
                 ctx.beginPath();
-                ctx.arc(this.x, this.y, 12, 0, Math.PI * 2);
+                ctx.arc(this.x, this.y, 15, 0, Math.PI * 2);
                 ctx.fill();
                 
                 ctx.shadowBlur = 0;
 
                 // Шлейф
-                if (Math.random() > 0.4) {
+                if (Math.random() > 0.3) {
                     particles.push({
                         x: this.x, y: this.y,
-                        vx: 0, vy: 0,
-                        life: 0.6, color: 'rgba(127, 227, 255, 0.4)',
-                        size: 3
+                        vx: (Math.random() - 0.5) * 2, vy: (Math.random() - 0.5) * 2,
+                        life: 0.8, color: 'rgba(127, 227, 255, 0.6)',
+                        size: Math.random() * 4 + 2
                     });
                 }
             }
@@ -469,19 +479,23 @@
         function gameLoop() {
             ctx.clearRect(0, 0, width, height);
 
-            // Зоны команд
+            // Фон (ледяная гладь)
+            ctx.fillStyle = 'rgba(10, 37, 64, 0.2)';
+            ctx.fillRect(0, 0, width, height);
+
+            // Зоны команд (ледяные базы)
             ctx.fillStyle = 'rgba(239, 68, 68, 0.05)';
             ctx.fillRect(0, 0, width * 0.25, height);
             ctx.fillStyle = 'rgba(59, 130, 246, 0.05)';
             ctx.fillRect(width * 0.75, 0, width * 0.25, height);
 
-            // Сетка
-            ctx.strokeStyle = 'rgba(127, 227, 255, 0.1)';
+            // Сетка (ледяные трещины)
+            ctx.strokeStyle = 'rgba(127, 227, 255, 0.05)';
             ctx.lineWidth = 1;
-            for (let x = 0; x < width; x += 40) {
+            for (let x = 0; x < width; x += 50) {
                 ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, height); ctx.stroke();
             }
-            for (let y = 0; y < height; y += 40) {
+            for (let y = 0; y < height; y += 50) {
                 ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(width, y); ctx.stroke();
             }
 
@@ -495,29 +509,24 @@
 
                 let hit = false;
                 for (let p of players) {
-                    // Проверка попадания в живого врага
                     if (p.team !== ball.team && p.alive) {
                         const dx = Math.abs(ball.x - p.x);
                         const dy = Math.abs(ball.y - p.y);
                         if (dx < p.width/2 && dy < p.height/2) {
                             hit = true;
                             
-                            // Урон
                             const newLives = Math.max(0, p.lives - 1);
                             p.lives = newLives;
                             if (newLives <= 0) p.alive = false;
                             
-                            // Firebase
                             update(ref(db, `games/${gameId}/players/${p.team}/${p.id}`), {
                                 lives: p.lives, alive: p.alive
                             });
 
-                            // Эффекты
                             spawnParticles(ball.x, ball.y, p.team === 'red' ? '#ef4444' : '#3b82f6');
                             document.getElementById('main-body').classList.add('screen-shake');
                             setTimeout(() => document.getElementById('main-body').classList.remove('screen-shake'), 400);
 
-                            // Мегабросок (только при попадании)
                             if (ball.isMega) {
                                 const megaDiv = document.createElement('div');
                                 megaDiv.className = 'mega-text'; 
@@ -561,18 +570,27 @@
         }
 
         // ============================================================
+        // ВЫБОР ПЕРВОЙ КОМАНДЫ
+        // ============================================================
+        window.selectFirstTeam = (team) => {
+            update(ref(db, `games/${gameId}`), { firstTeam: team });
+            document.getElementById('btn-red-start').classList.toggle('active', team === 'red');
+            document.getElementById('btn-blue-start').classList.toggle('active', team === 'blue');
+        };
+
+        // ============================================================
         // FIREBASE СЛУШАТЕЛИ
         // ============================================================
         onValue(ref(db, `games/${gameId}/ticker_messages`), (snap) => {
-    const messages = snap.val() || {};
-    const keys = Object.keys(messages).sort((a, b) => messages[a].time - messages[b].time);
-    if (keys.length > 0) {
-        const lastMsg = messages[keys[keys.length - 1]];
-        document.getElementById('ticker-text').innerText = lastMsg.text;
-    } else {
-        document.getElementById('ticker-text').innerText = 'ДОБРО ПОЖАЛОВАТЬ НА ВЕЧЕРИНКУ ENDORPHIN!';
-    }
-});
+            const messages = snap.val() || {};
+            const keys = Object.keys(messages).sort((a, b) => messages[a].time - messages[b].time);
+            if (keys.length > 0) {
+                const lastMsg = messages[keys[keys.length - 1]];
+                document.getElementById('ticker-text').innerText = lastMsg.text;
+            } else {
+                document.getElementById('ticker-text').innerText = 'ДОБРО ПОЖАЛОВАТЬ НА ВЕЧЕРИНКУ ENDORPHIN!';
+            }
+        });
 
         onValue(gameRef, (snapshot) => {
             const data = snapshot.val();
@@ -583,7 +601,7 @@
                 if (data.status === 'lobby') generateQRs();
             }
 
-            // Обновляем игроков без пересоздания
+            // Обновляем игроков
             const redPlayers = Object.entries(data.players?.red || {}).map(([id, p]) => new Player(id, p, 'red'));
             const bluePlayers = Object.entries(data.players?.blue || {}).map(([id, p]) => new Player(id, p, 'blue'));
             
@@ -602,6 +620,10 @@
             document.getElementById('tv-players-red').innerHTML = redPlayers.map(p => `<div class="text-red-300 font-bold bg-red-900/40 py-1 rounded border border-red-500/50">👤 ${p.name}</div>`).join('');
             document.getElementById('tv-players-blue').innerHTML = bluePlayers.map(p => `<div class="text-blue-300 font-bold bg-blue-900/40 py-1 rounded border border-blue-500/50">👤 ${p.name}</div>`).join('');
 
+            // Показываем выбор первой команды, если все подключились
+            const maxP = parseInt(data.mode?.charAt(0) || 1);
+            const isReady = redPlayers.length >= maxP && bluePlayers.length >= maxP;
+
             if (data.status === 'lobby') {
                 document.getElementById('lobby-view').style.opacity = '1';
                 document.getElementById('lobby-view').style.pointerEvents = 'auto';
@@ -610,11 +632,12 @@
                 
                 if (data.mode) {
                     document.getElementById('qr-container').classList.remove('hidden');
-                    const maxP = parseInt(data.mode.charAt(0));
-                    if (redPlayers.length >= maxP && bluePlayers.length >= maxP) {
-                        document.getElementById('tv-status').innerText = "ВСЕ ГОТОВЫ! ЖДЕМ СТАРТА...";
+                    if (isReady) {
+                        document.getElementById('team-select').classList.remove('hidden');
+                        document.getElementById('tv-status').innerText = "ВСЕ ГОТОВЫ! ВЫБЕРИТЕ ПЕРВУЮ КОМАНДУ.";
                         document.getElementById('tv-status').classList.add('text-green-400');
                     } else {
+                        document.getElementById('team-select').classList.add('hidden');
                         document.getElementById('tv-status').innerText = "ОЖИДАНИЕ ИГРОКОВ...";
                         document.getElementById('tv-status').classList.remove('text-green-400');
                     }
@@ -624,6 +647,7 @@
             if (data.status === 'playing') {
                 document.getElementById('lobby-view').style.opacity = '0';
                 document.getElementById('lobby-view').style.pointerEvents = 'none';
+                document.getElementById('team-select').classList.add('hidden');
                 document.getElementById('turn-indicator').style.display = 'block';
                 
                 if (data.turn) {
@@ -645,7 +669,7 @@
             document.getElementById('heart-blue').innerText = '❤️'.repeat(bluePlayers.reduce((a, b) => a + b.lives, 0)) || '💀';
         });
 
-        // Таймер (обратный отсчёт)
+        // Таймер
         onValue(ref(db, `games/${gameId}/timer`), (snap) => {
             const val = snap.val();
             document.getElementById('tv-timer').innerText = (val !== null && val !== undefined) ? val : '';
