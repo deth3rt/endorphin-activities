@@ -300,9 +300,6 @@
       box-shadow: none;
     }
 
-    /* ============================================================
-       МОДАЛКИ (вместо alert/confirm)
-       ============================================================ */
     .modal-backdrop {
       position: fixed;
       inset: 0;
@@ -347,10 +344,7 @@
       line-height: 1.5;
       margin-bottom: 1.25rem;
     }
-    .modal-actions {
-      display: flex;
-      gap: 0.6rem;
-    }
+    .modal-actions { display: flex; gap: 0.6rem; }
     .modal-btn {
       flex: 1;
       padding: 0.85rem 1rem;
@@ -379,9 +373,6 @@
     }
     .modal-btn.danger:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(239,68,68,0.5); }
 
-    /* ============================================================
-       TOAST
-       ============================================================ */
     .toast-container {
       position: fixed;
       top: 16px;
@@ -414,9 +405,6 @@
     .toast.info { background: rgba(34, 211, 238, 0.25); border: 1px solid rgba(34, 211, 238, 0.5); }
     @keyframes toastIn { from { transform: translateY(-20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 
-    /* ============================================================
-       АДАПТИВ
-       ============================================================ */
     @media (max-width: 640px) {
       body { padding: 1rem 0.75rem 2rem; }
       .glass { border-radius: 1.25rem; }
@@ -437,15 +425,11 @@
 
   <div class="container-inner">
 
-    <!-- HEADER -->
     <div class="w-full flex justify-between items-center mb-6">
       <h1 class="page-title">ПУЛЬТ ВЕДУЩЕГО</h1>
       <a href="index.html" class="back-btn">← В МЕНЮ</a>
     </div>
 
-    <!-- ============================================================
-         ЭКРАН ТВ
-         ============================================================ -->
     <div class="glass w-full p-4 mb-4 flex justify-between items-center flex-wrap gap-3">
       <div>
         <div class="text-[0.65rem] font-bold text-cyan-300/60 tracking-widest mb-1">ЭКРАН ТВ</div>
@@ -456,12 +440,8 @@
       </button>
     </div>
 
-    <!-- ============================================================
-         ЛОББИ
-         ============================================================ -->
     <div id="lobby-controls" class="w-full flex flex-col items-center">
 
-      <!-- РЕЖИМ -->
       <div class="glass w-full p-5 mb-4">
         <h2 class="text-sm font-black mb-3 text-cyan-300 tracking-widest">БЫСТРЫЙ ВЫБОР</h2>
         <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
@@ -472,7 +452,6 @@
         </div>
       </div>
 
-      <!-- НЕЧЕСТНЫЙ БОЙ (сворачиваемый) -->
       <details class="glass w-full mb-4 overflow-hidden" id="unfair-details">
         <summary class="p-5 cursor-pointer flex items-center justify-between list-none hover:bg-white/[0.02] transition">
           <div class="flex items-center gap-2 flex-wrap">
@@ -507,7 +486,6 @@
         </div>
       </details>
 
-      <!-- ПЕРВЫЙ ХОД -->
       <div class="glass w-full p-5 mb-4">
         <h2 class="text-sm font-black mb-3 text-cyan-300 tracking-widest text-center">КАКАЯ КОМАНДА НАЧИНАЕТ?</h2>
         <div class="grid grid-cols-2 gap-3 max-w-md mx-auto">
@@ -516,7 +494,6 @@
         </div>
       </div>
 
-      <!-- В ИГРЕ -->
       <div class="glass w-full p-5 mb-4">
         <div class="flex justify-between items-center mb-3 flex-wrap gap-2">
           <h2 class="text-sm font-black text-cyan-300 tracking-widest">🎮 В ИГРЕ</h2>
@@ -540,7 +517,6 @@
         </div>
       </div>
 
-      <!-- КОМНАТА -->
       <div class="glass w-full p-5 mb-4">
         <div class="flex justify-between items-center mb-2 flex-wrap gap-2">
           <h2 class="text-sm font-black text-cyan-300 tracking-widest">⏳ КОМНАТА ОЖИДАНИЯ</h2>
@@ -565,7 +541,6 @@
         </div>
       </div>
 
-      <!-- СТАРТ (sticky на мобиле) -->
       <div class="w-full sticky bottom-3 z-10">
         <button id="btn-start" disabled class="start-btn w-full py-5 rounded-2xl text-xl">
           ОЖИДАНИЕ ИГРОКОВ...
@@ -573,9 +548,6 @@
       </div>
     </div>
 
-    <!-- ============================================================
-         В ИГРЕ
-         ============================================================ -->
     <div id="game-controls" class="hidden w-full flex-col items-center">
       <div class="glass w-full p-6 mb-4 text-center border-green-500/40">
         <h2 class="text-3xl font-black text-green-400 mb-3" id="game-status-title">ИГРА ИДЕТ</h2>
@@ -609,9 +581,6 @@
       </div>
     </div>
 
-    <!-- ============================================================
-         ФИНИШ
-         ============================================================ -->
     <div id="finished-controls" class="hidden w-full flex-col items-center">
       <div class="glass w-full p-10 mb-6 text-center border-yellow-500/40">
         <div class="text-6xl mb-3" id="finish-emoji">🏆</div>
@@ -625,10 +594,8 @@
 
   </div>
 
-  <!-- TOAST -->
   <div class="toast-container" id="toast-container"></div>
 
-  <!-- МОДАЛКА -->
   <div class="modal-backdrop hidden" id="modal">
     <div class="modal-card">
       <div class="modal-icon" id="modal-icon">⚠️</div>
@@ -658,9 +625,6 @@
     const db = getDatabase(app);
     const gameRef = ref(db, 'games/battle_1');
 
-    // ============================================================
-    // СОСТОЯНИЕ
-    // ============================================================
     let currentData = null;
     let firstTeam = 'red';
     let isStarting = false;
@@ -670,7 +634,7 @@
     let lastUIHash = '';
 
     // ============================================================
-    // АУДИО (Web Audio синтез, без файлов)
+    // АУДИО
     // ============================================================
     let audioCtx = null;
     function getAudioCtx() {
@@ -748,9 +712,6 @@
       return { redLives: baseLives, blueLives: baseLives + diff };
     }
 
-    // ============================================================
-    // TOAST
-    // ============================================================
     function showToast(message, type = 'info') {
       const container = document.getElementById('toast-container');
       const toast = document.createElement('div');
@@ -764,9 +725,6 @@
       }, 2800);
     }
 
-    // ============================================================
-    // КАСТОМНАЯ МОДАЛКА (замена confirm/alert)
-    // ============================================================
     let modalResolver = null;
     function showModal({ icon = '⚠️', title = 'Подтверждение', text = '', confirmText = 'ОК', cancelText = 'ОТМЕНА', danger = false, onlyOk = false }) {
       return new Promise(resolve => {
@@ -817,6 +775,9 @@
         firstTeam = existing.firstTeam || 'red';
 
         if (existing.status === 'finished') {
+          // ФИКС #2: сначала присваиваем firstTeam, потом moveAllPlayersToRoom,
+          // чтобы первый ход не сбрасывался на красных
+          firstTeam = existing.firstTeam || 'red';
           await moveAllPlayersToRoom(existing);
         } else if (existing.status === 'playing') {
           const ok = await showModal({
@@ -835,12 +796,17 @@
     }
 
     async function moveAllPlayersToRoom(data) {
+      // ФИКС #3: остановить прелоадинг-каунтер, если он был
+      if (countdownInterval) { clearInterval(countdownInterval); countdownInterval = null; }
+
       const players = data.players || {};
       const roomUpdates = [];
       ['red', 'blue'].forEach(team => {
         Object.entries(players[team] || {}).forEach(([id, p]) => {
           roomUpdates.push(set(ref(db, `games/battle_1/room/${team}/${id}`), {
-            name: p.name, joinedAt: Date.now()
+            name: p.name,
+            // ФИКС #1: сохраняем старый joinedAt, если был
+            joinedAt: p.joinedAt || Date.now()
           }));
         });
       });
@@ -939,7 +905,8 @@
       playClick();
       try {
         await set(ref(db, `games/battle_1/players/${team}/${id}`), {
-          name: roomPlayer.name, lives: 3, alive: true, connected: true
+          name: roomPlayer.name, lives: 3, alive: true, connected: true,
+          joinedAt: roomPlayer.joinedAt || Date.now()
         });
         await remove(ref(db, `games/battle_1/room/${team}/${id}`));
       } catch (e) {
@@ -954,7 +921,8 @@
       playClick();
       try {
         await set(ref(db, `games/battle_1/room/${team}/${id}`), {
-          name: player.name, joinedAt: Date.now()
+          name: player.name,
+          joinedAt: player.joinedAt || Date.now()
         });
         await remove(ref(db, `games/battle_1/players/${team}/${id}`));
       } catch (e) {
@@ -1238,7 +1206,7 @@
     };
 
     // ============================================================
-    // СТАРТ ИГРЫ (с защитой от гонок и «зависших» прелоадингов)
+    // СТАРТ ИГРЫ
     // ============================================================
     document.getElementById('btn-start').onclick = async () => {
       if (isStarting) return;
@@ -1250,7 +1218,6 @@
       btn.disabled = true;
       btn.innerText = '⏳ ЗАПУСК...';
 
-      // Останавливаем предыдущий countdown, если был (защита от двойного клика)
       if (countdownInterval) { clearInterval(countdownInterval); countdownInterval = null; }
 
       try {
@@ -1267,26 +1234,24 @@
         const roomRed = data.room?.red || {};
         const roomBlue = data.room?.blue || {};
 
-        // Обрезка лишних
         const extraRed = Object.keys(playersRed).slice(redMax);
         const extraBlue = Object.keys(playersBlue).slice(blueMax);
         for (const id of extraRed) {
-          await set(ref(db, `games/battle_1/room/red/${id}`), { name: playersRed[id].name, joinedAt: Date.now() });
+          await set(ref(db, `games/battle_1/room/red/${id}`), { name: playersRed[id].name, joinedAt: playersRed[id].joinedAt || Date.now() });
           await remove(ref(db, `games/battle_1/players/red/${id}`));
           delete playersRed[id];
         }
         for (const id of extraBlue) {
-          await set(ref(db, `games/battle_1/room/blue/${id}`), { name: playersBlue[id].name, joinedAt: Date.now() });
+          await set(ref(db, `games/battle_1/room/blue/${id}`), { name: playersBlue[id].name, joinedAt: playersBlue[id].joinedAt || Date.now() });
           await remove(ref(db, `games/battle_1/players/blue/${id}`));
           delete playersBlue[id];
         }
 
-        // Автовыбор
         if (Object.keys(playersRed).length < redMax) {
           const sorted = Object.entries(roomRed).sort((a, b) => (a[1].joinedAt || 0) - (b[1].joinedAt || 0));
           for (const [id, p] of sorted) {
             if (Object.keys(playersRed).length >= redMax) break;
-            playersRed[id] = { name: p.name, lives: redLives, alive: true, connected: true };
+            playersRed[id] = { name: p.name, lives: redLives, alive: true, connected: true, joinedAt: p.joinedAt || Date.now() };
             await set(ref(db, `games/battle_1/players/red/${id}`), playersRed[id]);
             await remove(ref(db, `games/battle_1/room/red/${id}`));
           }
@@ -1295,7 +1260,7 @@
           const sorted = Object.entries(roomBlue).sort((a, b) => (a[1].joinedAt || 0) - (b[1].joinedAt || 0));
           for (const [id, p] of sorted) {
             if (Object.keys(playersBlue).length >= blueMax) break;
-            playersBlue[id] = { name: p.name, lives: blueLives, alive: true, connected: true };
+            playersBlue[id] = { name: p.name, lives: blueLives, alive: true, connected: true, joinedAt: p.joinedAt || Date.now() };
             await set(ref(db, `games/battle_1/players/blue/${id}`), playersBlue[id]);
             await remove(ref(db, `games/battle_1/room/blue/${id}`));
           }
@@ -1310,7 +1275,6 @@
           return;
         }
 
-        // Координаты
         const usedYRed = [], usedYBlue = [];
         const coordUpdates = [];
         Object.entries(playersRed).forEach(([id, p]) => {
@@ -1339,14 +1303,12 @@
         });
         if (coordUpdates.length > 0) await Promise.all(coordUpdates);
 
-        // Жизни
         const livesUpdates = [];
         Object.keys(playersRed).forEach(id => livesUpdates.push(update(ref(db, `games/battle_1/players/red/${id}`), { lives: redLives, alive: true })));
         Object.keys(playersBlue).forEach(id => livesUpdates.push(update(ref(db, `games/battle_1/players/blue/${id}`), { lives: blueLives, alive: true })));
         await Promise.all(livesUpdates);
         await update(gameRef, { lives: { red: redLives, blue: blueLives } });
 
-        // Первый игрок
         const firstTeamPlayers = firstTeam === 'red' ? playersRed : playersBlue;
         const firstEntry = Object.entries(firstTeamPlayers)[0];
         if (!firstEntry) {
@@ -1358,7 +1320,6 @@
           return;
         }
 
-        // Старт
         await update(gameRef, {
           screen: 'game', status: 'playing',
           turn: { team: firstTeam, name: firstEntry[1].name },
@@ -1389,13 +1350,9 @@
       }
     };
 
-    // ============================================================
-    // ВОЗВРАТ ЗВУКА (AudioContext требует жеста)
-    // ============================================================
     document.addEventListener('click', () => { getAudioCtx(); }, { once: true });
     document.addEventListener('touchstart', () => { getAudioCtx(); }, { once: true });
 
-    // Стрелка в details
     const unfairDetails = document.getElementById('unfair-details');
     const unfairArrow = document.getElementById('unfair-arrow');
     unfairDetails.addEventListener('toggle', () => {
