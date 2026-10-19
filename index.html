@@ -57,7 +57,7 @@
         }
 
         /* ============================================================
-           NOISE TEXTURE (тонкая «дорогая» текстура поверх фона)
+           NOISE TEXTURE
            ============================================================ */
         body::before {
             content: '';
@@ -71,7 +71,7 @@
         }
 
         /* ============================================================
-           СНЕГОПАД (canvas)
+           СНЕГОПАД
            ============================================================ */
         #snow-canvas {
             position: fixed;
@@ -93,11 +93,11 @@
             text-align: center;
             padding: 1rem;
             width: 100%;
-            max-width: 960px;
+            max-width: 1100px;
         }
 
         /* ============================================================
-           ЛОГОТИП (SVG с обводкой и глоу — не «плывёт» на Retina)
+           ЛОГОТИП
            ============================================================ */
         .logo-wrap {
             width: clamp(280px, 62vw, 560px);
@@ -120,7 +120,7 @@
             text-transform: uppercase;
             color: var(--text-dim);
             margin-bottom: clamp(1.8rem, 5vh, 3rem);
-            padding-left: 0.42em; /* компенсируем letter-spacing для центрирования */
+            padding-left: 0.42em;
         }
 
         /* ============================================================
@@ -128,7 +128,7 @@
            ============================================================ */
         .cards-grid {
             display: flex;
-            gap: 1.5rem;
+            gap: 1.2rem;
             flex-wrap: wrap;
             justify-content: center;
             margin-bottom: 2rem;
@@ -137,8 +137,8 @@
 
         .card-btn {
             position: relative;
-            width: 270px;
-            padding: 2rem 1.5rem 1.9rem;
+            width: 260px;
+            padding: 1.8rem 1.3rem 1.7rem;
             background: var(--glass-bg);
             border: 1.5px solid var(--glass-border);
             border-radius: 1.5rem;
@@ -189,10 +189,31 @@
             outline-offset: 4px;
         }
 
+        /* Админка — акцент amber */
+        .card-btn.admin::before {
+            background: conic-gradient(from 0deg, transparent, rgba(251, 191, 36, 0.18), transparent 30%);
+        }
+        .card-btn.admin:hover,
+        .card-btn.admin:focus-visible {
+            border-color: rgba(251, 191, 36, 0.85);
+            box-shadow:
+                0 20px 40px rgba(251, 191, 36, 0.15),
+                0 0 60px rgba(251, 191, 36, 0.2),
+                inset 0 1px 0 rgba(255,255,255,0.1);
+        }
+        .card-btn.admin .card-icon-wrap {
+            background: rgba(251, 191, 36, 0.08);
+            border-color: rgba(251, 191, 36, 0.25);
+        }
+        .card-btn.admin:hover .card-icon-wrap,
+        .card-btn.admin:focus-visible .card-icon-wrap {
+            background: rgba(251, 191, 36, 0.18);
+        }
+
         .card-icon-wrap {
-            width: 64px;
-            height: 64px;
-            margin: 0 auto 1rem;
+            width: 60px;
+            height: 60px;
+            margin: 0 auto 0.9rem;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -202,7 +223,7 @@
             transition: transform 0.4s, background 0.3s;
         }
 
-        .card-icon-wrap svg { width: 34px; height: 34px; }
+        .card-icon-wrap svg { width: 32px; height: 32px; }
 
         .card-btn:hover .card-icon-wrap,
         .card-btn:focus-visible .card-icon-wrap {
@@ -211,16 +232,16 @@
         }
 
         .card-title {
-            font-size: 1.1rem;
+            font-size: 1.05rem;
             font-weight: 900;
             letter-spacing: 0.08em;
-            margin-bottom: 0.4rem;
+            margin-bottom: 0.35rem;
             position: relative;
             z-index: 2;
         }
 
         .card-desc {
-            font-size: 0.78rem;
+            font-size: 0.75rem;
             color: var(--text-dimmer);
             position: relative;
             z-index: 2;
@@ -272,17 +293,20 @@
             right: 12px;
             display: flex;
             align-items: center;
-            gap: 7px;
+            gap: 8px;
             font-size: 0.62rem;
             font-family: 'JetBrains Mono', monospace;
             font-weight: 700;
             color: var(--text-dimmer);
-            letter-spacing: 0.12em;
+            letter-spacing: 0.1em;
             z-index: 20;
             padding: 6px 12px;
-            background: rgba(0,0,0,0.45);
+            background: rgba(0,0,0,0.55);
             border-radius: 999px;
             border: 1px solid rgba(127, 227, 255, 0.15);
+            max-width: calc(100vw - 24px);
+            white-space: nowrap;
+            overflow: hidden;
         }
 
         .status-dot {
@@ -292,6 +316,7 @@
             background: var(--ice-bright);
             box-shadow: 0 0 8px var(--ice-bright);
             animation: pulseDot 2s ease-in-out infinite;
+            flex-shrink: 0;
         }
 
         .status-dot.error {
@@ -305,10 +330,16 @@
             50% { opacity: 0.4; }
         }
 
+        .status-meta {
+            color: var(--text-dimmer);
+            font-weight: 900;
+            margin-left: 4px;
+        }
+
         /* ============================================================
            АДАПТАЦИЯ
            ============================================================ */
-        @media (max-width: 640px) {
+        @media (max-width: 720px) {
             .cards-grid {
                 gap: 0.85rem;
                 flex-direction: column;
@@ -317,12 +348,13 @@
             .card-btn {
                 width: 100%;
                 max-width: 340px;
-                padding: 1.4rem 1.2rem;
+                padding: 1.3rem 1.2rem;
             }
-            .card-icon-wrap { width: 52px; height: 52px; margin-bottom: 0.75rem; }
-            .card-icon-wrap svg { width: 28px; height: 28px; }
-            .card-title { font-size: 1rem; }
-            .card-desc { font-size: 0.72rem; }
+            .card-icon-wrap { width: 48px; height: 48px; margin-bottom: 0.7rem; }
+            .card-icon-wrap svg { width: 26px; height: 26px; }
+            .card-title { font-size: 0.98rem; }
+            .card-desc { font-size: 0.7rem; }
+            .status-indicator { font-size: 0.56rem; padding: 5px 10px; }
         }
 
         @media (max-height: 720px) {
@@ -350,7 +382,7 @@
 
     <div class="menu-container">
 
-        <!-- SVG-логотип: обводка + градиент + глоу -->
+        <!-- Логотип -->
         <div class="logo-wrap" aria-label="ENDORPHIN">
             <svg viewBox="0 0 600 120" xmlns="http://www.w3.org/2000/svg" role="img">
                 <defs>
@@ -383,6 +415,7 @@
         <p class="subtitle">Снежный Баттл</p>
 
         <div class="cards-grid">
+            <!-- Пульт ведущего -->
             <a href="mod.html" class="card-btn" aria-label="Открыть пульт ведущего">
                 <div class="card-icon-wrap">
                     <svg viewBox="0 0 24 24" fill="none" stroke="#22d3ee" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
@@ -397,6 +430,7 @@
                 <div class="card-desc">Управление игрой</div>
             </a>
 
+            <!-- Экран ТВ -->
             <a href="tv.html" class="card-btn" aria-label="Открыть экран для проектора">
                 <div class="card-icon-wrap">
                     <svg viewBox="0 0 24 24" fill="none" stroke="#3d8bff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
@@ -407,12 +441,23 @@
                 <div class="card-title" style="color: #3d8bff;">ЭКРАН ТВ</div>
                 <div class="card-desc">Для проектора</div>
             </a>
+
+            <!-- Админ-панель -->
+            <a href="admin.html" class="card-btn admin" aria-label="Открыть админ-панель">
+                <div class="card-icon-wrap">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="3"/>
+                        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+                    </svg>
+                </div>
+                <div class="card-title" style="color: #fbbf24;">АДМИН-ПАНЕЛЬ</div>
+                <div class="card-desc">Реклама · строка · сброс</div>
+            </a>
         </div>
 
         <div class="footer-links">
-            <a href="play.html?team=red" class="footer-link red">🔴 Играть за красных</a>
-            <a href="play.html?team=blue" class="footer-link blue">🔵 Играть за синих</a>
-            <a href="admin.html" class="footer-link">⚙️ Админ-панель</a>
+            <a href="play.html?team=red" class="footer-link red" title="Для теста: войти за красных без QR">🔴 Играть за красных</a>
+            <a href="play.html?team=blue" class="footer-link blue" title="Для теста: войти за синих без QR">🔵 Играть за синих</a>
         </div>
 
     </div>
@@ -420,11 +465,12 @@
     <div class="status-indicator" id="status-indicator" role="status" aria-live="polite">
         <div class="status-dot" id="status-dot"></div>
         <span id="status-text">ONLINE</span>
+        <span class="status-meta" id="status-meta"></span>
     </div>
 
     <script>
         // ============================================================
-        // СНЕГОПАД НА CANVAS (с учётом DPR — не мыльно на Retina)
+        // СНЕГОПАД НА CANVAS
         // ============================================================
         const canvas = document.getElementById('snow-canvas');
         const ctx = canvas.getContext('2d', { alpha: true });
@@ -546,7 +592,6 @@
             ctx.shadowBlur = 0;
         }
 
-        // Пауза при скрытии вкладки — экономим батарею
         document.addEventListener('visibilitychange', () => {
             if (document.hidden) {
                 if (animationId) {
@@ -565,46 +610,56 @@
         }
 
         // ============================================================
-        // ПРОВЕРКА ДОСТУПНОСТИ FIREBASE (с замером задержки)
+        // ПРОВЕРКА ДОСТУПНОСТИ FIREBASE (статус + счётчики)
         // ============================================================
-        const DB_URL = 'https://endorphin-battle-default-rtdb.europe-west1.firebasedatabase.app/games/battle_1/status.json';
+        const DB_STATUS_URL = 'https://endorphin-battle-default-rtdb.europe-west1.firebasedatabase.app/games/battle_1.json';
 
         async function checkFirebaseStatus() {
             const dot = document.getElementById('status-dot');
             const text = document.getElementById('status-text');
+            const meta = document.getElementById('status-meta');
 
             const controller = new AbortController();
             const timeout = setTimeout(() => controller.abort(), 5000);
             const t0 = performance.now();
 
             try {
-                const res = await fetch(DB_URL, { signal: controller.signal, cache: 'no-store' });
+                const res = await fetch(DB_STATUS_URL, { signal: controller.signal, cache: 'no-store' });
                 clearTimeout(timeout);
                 const latency = Math.round(performance.now() - t0);
 
                 if (!res.ok) throw new Error('HTTP ' + res.status);
 
-                const status = await res.json();
+                const data = await res.json() || {};
+                const status = data.status || 'lobby';
+                const screen = data.screen || 'attract';
+
+                const redP = Object.keys(data.players?.red || {}).length;
+                const blueP = Object.keys(data.players?.blue || {}).length;
+                const redR = Object.keys(data.room?.red || {}).length;
+                const blueR = Object.keys(data.room?.blue || {}).length;
+                const totalP = redP + blueP;
+                const totalR = redR + blueR;
+
                 dot.classList.remove('error');
-                text.innerText = status
-                    ? `ONLINE · ${String(status).toUpperCase()} · ${latency}ms`
-                    : `ONLINE · ${latency}ms`;
+                text.innerText = `ONLINE · ${String(status).toUpperCase()} · ${latency}ms`;
+                meta.innerText = `👥 ${totalP} · 🚪 ${totalR}`;
             } catch (e) {
                 clearTimeout(timeout);
                 dot.classList.add('error');
                 text.innerText = 'OFFLINE';
+                meta.innerText = '';
             }
         }
         checkFirebaseStatus();
         setInterval(checkFirebaseStatus, 30000);
 
-        // Обновить статус при возврате на вкладку
         document.addEventListener('visibilitychange', () => {
             if (!document.hidden) checkFirebaseStatus();
         });
 
         // ============================================================
-        // PREFETCH — ускоряем переходы
+        // PREFETCH — ускоряем переходы (без end.html)
         // ============================================================
         ['mod.html', 'tv.html', 'play.html', 'admin.html'].forEach(href => {
             const link = document.createElement('link');
