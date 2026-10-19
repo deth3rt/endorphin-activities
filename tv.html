@@ -345,18 +345,16 @@
                 this.alive = data.alive !== undefined ? data.alive : true;
                 this.team = team;
                 
-                // Координаты (если не заданы, генерируем на своей базе)
                 if (data.posX !== undefined) {
                     this.x = (data.posX / 100) * width;
                     this.y = (data.posY / 100) * height;
                 } else {
-                    // Генерация на своей базе (красные слева, синие справа)
                     if (team === 'red') {
-                        this.x = width * (0.05 + Math.random() * 0.15); // 5-20% ширины
+                        this.x = width * (0.05 + Math.random() * 0.15);
                     } else {
-                        this.x = width * (0.80 + Math.random() * 0.15); // 80-95% ширины
+                        this.x = width * (0.80 + Math.random() * 0.15);
                     }
-                    this.y = height * (0.2 + Math.random() * 0.6); // 20-80% высоты
+                    this.y = height * (0.2 + Math.random() * 0.6);
                 }
                 
                 this.width = 60;
@@ -372,11 +370,9 @@
                     return;
                 }
 
-                // Свечение (ледяное)
                 ctx.shadowColor = this.team === 'red' ? '#ef4444' : '#3b82f6';
                 ctx.shadowBlur = 30;
 
-                // Тело (кристалл)
                 ctx.fillStyle = this.team === 'red' ? 'rgba(239, 68, 68, 0.3)' : 'rgba(59, 130, 246, 0.3)';
                 ctx.strokeStyle = this.team === 'red' ? '#ef4444' : '#3b82f6';
                 ctx.lineWidth = 3;
@@ -385,7 +381,6 @@
                 ctx.fill();
                 ctx.stroke();
 
-                // Блик (эффект льда)
                 ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
                 ctx.beginPath();
                 ctx.roundRect(this.x - this.width/2 + 5, this.y - this.height/2 + 5, this.width - 10, this.height/3, 10);
@@ -393,20 +388,18 @@
 
                 ctx.shadowBlur = 0;
 
-                // Имя
                 ctx.font = 'bold 14px Montserrat';
                 ctx.fillStyle = '#ffffff';
                 ctx.textAlign = 'center';
                 ctx.fillText(this.name, this.x, this.y + this.height/2 + 20);
 
-                // Сердечки
                 ctx.font = '20px Montserrat';
                 ctx.fillText('❤️'.repeat(this.lives), this.x, this.y - this.height/2 - 15);
             }
         }
 
         // ============================================================
-        // СИСТЕМА ЧАСТИЦ (ЛЕДЯНЫЕ ОСКОЛКИ)
+        // СИСТЕМА ЧАСТИЦ
         // ============================================================
         function spawnParticles(x, y, color) {
             for (let i = 0; i < 30; i++) {
@@ -421,21 +414,21 @@
         }
 
         // ============================================================
-        // СНЕЖОК (ФИЗИКА)
+        // СНЕЖОК (ФИЗИКА С ГРАВИТАЦИЕЙ)
         // ============================================================
         class Snowball {
             constructor(shooter, power, angle) {
                 this.x = shooter.x;
                 this.y = shooter.y;
                 
-                // Направление (красные вправо, синие влево)
                 const direction = shooter.team === 'red' ? 1 : -1;
                 const rad = angle * Math.PI / 180;
                 
-                // Скорость
                 const speed = power * 0.4;
                 this.vx = Math.cos(rad) * speed * direction;
                 this.vy = -Math.sin(rad) * speed;
+                
+                this.gravity = 0.3; 
                 
                 this.isMega = (power > 90);
                 this.team = shooter.team;
@@ -444,6 +437,7 @@
             update() {
                 this.x += this.vx;
                 this.y += this.vy;
+                this.vy += this.gravity;
             }
 
             draw(ctx) {
@@ -461,7 +455,6 @@
                 
                 ctx.shadowBlur = 0;
 
-                // Шлейф
                 if (Math.random() > 0.3) {
                     particles.push({
                         x: this.x, y: this.y,
@@ -479,17 +472,14 @@
         function gameLoop() {
             ctx.clearRect(0, 0, width, height);
 
-            // Фон (ледяная гладь)
             ctx.fillStyle = 'rgba(10, 37, 64, 0.2)';
             ctx.fillRect(0, 0, width, height);
 
-            // Зоны команд (ледяные базы)
             ctx.fillStyle = 'rgba(239, 68, 68, 0.05)';
             ctx.fillRect(0, 0, width * 0.25, height);
             ctx.fillStyle = 'rgba(59, 130, 246, 0.05)';
             ctx.fillRect(width * 0.75, 0, width * 0.25, height);
 
-            // Сетка (ледяные трещины)
             ctx.strokeStyle = 'rgba(127, 227, 255, 0.05)';
             ctx.lineWidth = 1;
             for (let x = 0; x < width; x += 50) {
@@ -499,10 +489,8 @@
                 ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(width, y); ctx.stroke();
             }
 
-            // Игроки
             players.forEach(p => p.draw(ctx));
 
-            // Снежки
             snowballs.forEach((ball, index) => {
                 ball.update();
                 ball.draw(ctx);
@@ -534,15 +522,26 @@
                                 document.body.appendChild(megaDiv);
                                 setTimeout(() => megaDiv.remove(), 2000);
                             }
+
+                            const redLives = players.filter(pl => pl.team === 'red').reduce((sum, pl) => sum + pl.lives, 0);
+                            const blueLives = players.filter(pl => pl.team === 'blue').reduce((sum, pl) => sum + pl.lives, 0);
+                            
+                            if (redLives <= 0) {
+                                update(gameRef, { status: 'finished', winner: 'blue' });
+                            } else if (blueLives <= 0) {
+                                update(gameRef, { status: 'finished', winner: 'red' });
+                            }
+
                             break;
                         }
                     }
                 }
 
-                if (hit || ball.x < -50 || ball.x > width + 50) snowballs.splice(index, 1);
+                if (hit || ball.x < -50 || ball.x > width + 50 || ball.y > height + 50) {
+                    snowballs.splice(index, 1);
+                }
             });
 
-            // Частицы
             particles.forEach((p, index) => {
                 p.x += p.vx; p.y += p.vy; p.life -= 0.02;
                 if (p.life <= 0) { particles.splice(index, 1); return; }
@@ -601,7 +600,6 @@
                 if (data.status === 'lobby') generateQRs();
             }
 
-            // Обновляем игроков
             const redPlayers = Object.entries(data.players?.red || {}).map(([id, p]) => new Player(id, p, 'red'));
             const bluePlayers = Object.entries(data.players?.blue || {}).map(([id, p]) => new Player(id, p, 'blue'));
             
@@ -620,7 +618,6 @@
             document.getElementById('tv-players-red').innerHTML = redPlayers.map(p => `<div class="text-red-300 font-bold bg-red-900/40 py-1 rounded border border-red-500/50">👤 ${p.name}</div>`).join('');
             document.getElementById('tv-players-blue').innerHTML = bluePlayers.map(p => `<div class="text-blue-300 font-bold bg-blue-900/40 py-1 rounded border border-blue-500/50">👤 ${p.name}</div>`).join('');
 
-            // Показываем выбор первой команды, если все подключились
             const maxP = parseInt(data.mode?.charAt(0) || 1);
             const isReady = redPlayers.length >= maxP && bluePlayers.length >= maxP;
 
@@ -669,14 +666,12 @@
             document.getElementById('heart-blue').innerText = '❤️'.repeat(bluePlayers.reduce((a, b) => a + b.lives, 0)) || '💀';
         });
 
-        // Таймер
         onValue(ref(db, `games/${gameId}/timer`), (snap) => {
             const val = snap.val();
             document.getElementById('tv-timer').innerText = (val !== null && val !== undefined) ? val : '';
             document.getElementById('tv-timer').style.display = (val !== null) ? 'block' : 'none';
         });
 
-        // Выстрелы
         onValue(ref(db, `games/${gameId}/last_shot`), (snap) => {
             const shot = snap.val();
             if (!shot || shot.animated) return;
@@ -689,12 +684,8 @@
             }
         });
 
-        // ============================================================
-        // ЗАПУСК
-        // ============================================================
         gameLoop();
 
-        // Снежинки
         const snowContainer = document.getElementById('snow-container');
         for (let i = 0; i < 50; i++) {
             const s = document.createElement('div'); s.className = 'snowflake'; s.innerText = '❄';
