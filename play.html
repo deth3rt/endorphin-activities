@@ -73,7 +73,30 @@
       0%, 100% { transform: scale(1); box-shadow: 0 0 20px #fbbf24; }
       50% { transform: scale(1.05); box-shadow: 0 0 50px #fbbf24, 0 0 80px #f59e0b; }
     }
+    @keyframes roomPulse {
+      0%, 100% { opacity: 0.6; }
+      50% { opacity: 1; }
+    }
     .animate-shake { animation: shake 0.4s ease-in-out; }
+
+    /* ============================================================
+       АВАТАР
+       ============================================================ */
+    .avatar {
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 900;
+      color: #fff;
+      text-shadow: 0 2px 8px rgba(0,0,0,0.5);
+      flex-shrink: 0;
+      border: 2px solid rgba(255,255,255,0.3);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+    }
+    .avatar-sm { width: 32px; height: 32px; font-size: 0.9rem; }
+    .avatar-md { width: 48px; height: 48px; font-size: 1.4rem; }
+    .avatar-lg { width: 72px; height: 72px; font-size: 2rem; }
 
     /* ============================================================
        ТАЙМЕР ХОДА
@@ -143,27 +166,35 @@
       top: calc(var(--safe-top) + 6px);
       left: 12px;
       background: rgba(0,0,0,0.65);
-      padding: 6px 14px;
+      padding: 6px 12px;
       border-radius: 14px;
       border: 1px solid rgba(127, 227, 255, 0.35);
       text-align: left;
       z-index: 50;
       backdrop-filter: blur(12px);
       min-width: 110px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .player-info .info-text {
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
     }
     .player-info .name {
-      font-size: 0.85rem;
+      font-size: 0.8rem;
       font-weight: 900;
       color: #fff;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-      max-width: 130px;
+      max-width: 100px;
     }
     .player-info .lives {
-      font-size: 1rem;
+      font-size: 0.85rem;
       margin-top: 1px;
-      letter-spacing: 2px;
+      letter-spacing: 1px;
     }
 
     /* ============================================================
@@ -191,7 +222,7 @@
     }
 
     /* ============================================================
-       СЕКЦИЯ УГОЛ
+       СЕКЦИИ УГОЛ / СИЛА
        ============================================================ */
     .control-section {
       width: 100%;
@@ -250,7 +281,6 @@
     .control-btn.up, .control-btn.down { color: #22d3ee; }
     .control-btn.left, .control-btn.right { color: #fbbf24; }
 
-    /* Центральный дисплей */
     .control-display {
       flex: 1;
       min-height: clamp(54px, 15vw, 72px);
@@ -281,7 +311,6 @@
       margin-top: 1px;
     }
 
-    /* Индикатор мощности */
     .power-bar {
       width: 100%;
       max-width: 340px;
@@ -438,6 +467,8 @@
       flex-direction: column;
       backdrop-filter: blur(12px);
       -webkit-backdrop-filter: blur(12px);
+      padding: 20px;
+      text-align: center;
     }
     .overlay.hidden { display: none; }
 
@@ -516,6 +547,99 @@
     }
 
     /* ============================================================
+       КОМНАТА ОЖИДАНИЯ
+       ============================================================ */
+    .room-screen {
+      position: fixed;
+      inset: 0;
+      z-index: 40;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      background: radial-gradient(circle at 50% 0%, #0a2540 0%, #03080f 100%);
+    }
+
+    .room-status {
+      font-size: 1.4rem;
+      font-weight: 900;
+      letter-spacing: 0.15em;
+      color: rgba(168, 230, 255, 0.7);
+      margin-bottom: 8px;
+      animation: roomPulse 2s ease-in-out infinite;
+    }
+
+    .room-title {
+      font-size: 1.8rem;
+      font-weight: 900;
+      color: #fff;
+      margin-bottom: 24px;
+      text-align: center;
+    }
+
+    .room-section {
+      width: 100%;
+      max-width: 340px;
+      margin-bottom: 16px;
+    }
+
+    .room-section-title {
+      font-size: 0.65rem;
+      font-weight: 900;
+      letter-spacing: 0.2em;
+      color: rgba(168, 230, 255, 0.5);
+      margin-bottom: 8px;
+      text-align: center;
+    }
+
+    .room-player-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 12px;
+      background: rgba(10, 37, 64, 0.6);
+      border: 1px solid rgba(127, 227, 255, 0.2);
+      border-radius: 12px;
+      margin-bottom: 6px;
+    }
+
+    .room-player-row.me {
+      border-color: var(--team-color);
+      box-shadow: 0 0 20px var(--team-color);
+    }
+
+    .room-player-name {
+      font-weight: 700;
+      font-size: 0.95rem;
+      color: #fff;
+      flex: 1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .room-player-badge {
+      font-size: 0.6rem;
+      font-weight: 900;
+      padding: 2px 8px;
+      border-radius: 999px;
+      letter-spacing: 0.1em;
+    }
+
+    .room-player-badge.playing {
+      background: rgba(34, 211, 238, 0.2);
+      color: #22d3ee;
+      border: 1px solid rgba(34, 211, 238, 0.5);
+    }
+
+    .room-player-badge.waiting {
+      background: rgba(251, 191, 36, 0.2);
+      color: #fbbf24;
+      border: 1px solid rgba(251, 191, 36, 0.4);
+    }
+
+    /* ============================================================
        АДАПТИВ
        ============================================================ */
     @media (max-height: 720px) {
@@ -579,11 +703,36 @@
   </div>
 
   <!-- ============================================================
+       КОМНАТА ОЖИДАНИЯ
+       ============================================================ -->
+  <div id="room-screen" class="room-screen hidden">
+    <div class="room-status" id="room-status">⏳ ОЖИДАНИЕ</div>
+    <div class="room-title">ВЫ В КОМНАТЕ</div>
+
+    <div class="room-section">
+      <div class="room-section-title">🎮 СЕЙЧАС ИГРАЮТ</div>
+      <div id="room-playing-list"></div>
+    </div>
+
+    <div class="room-section">
+      <div class="room-section-title">👥 В КОМНАТЕ</div>
+      <div id="room-waiting-list"></div>
+    </div>
+
+    <p class="text-xs text-white/40 text-center mt-4 max-w-xs">
+      Ведущий выберет, кто играет следующим.<br>Жди!
+    </p>
+
+    <button id="room-leave-btn" class="mt-6 px-6 py-3 rounded-xl bg-white/5 border border-white/15 font-bold text-white/60 hover:bg-white/10 transition text-sm">
+      ВЫЙТИ ИЗ КОМНАТЫ
+    </button>
+  </div>
+
+  <!-- ============================================================
        ЭКРАН ИГРЫ
        ============================================================ -->
   <div id="game-screen" class="hidden game-screen">
     
-    <!-- Таймер хода -->
     <div class="turn-timer" id="turn-timer">
       <div class="turn-timer-ring" id="turn-timer-ring">
         <svg viewBox="0 0 70 70">
@@ -595,18 +744,17 @@
     </div>
 
     <div class="player-info hidden" id="player-info">
-      <div class="name" id="info-name">Игрок</div>
-      <div class="lives" id="info-lives">❤️❤️❤️</div>
+      <div class="avatar avatar-sm" id="info-avatar">?</div>
+      <div class="info-text">
+        <div class="name" id="info-name">Игрок</div>
+        <div class="lives" id="info-lives">❤️❤️❤️</div>
+      </div>
     </div>
 
     <div id="game-team-badge" class="self-center mb-1 px-4 py-1 rounded-full font-black text-[10px] tracking-widest"></div>
 
-    <!-- ========================================================
-         КОНТЕНТ
-         ======================================================== -->
     <div class="game-content">
 
-      <!-- СЕКЦИЯ УГОЛ -->
       <div class="control-section">
         <div class="section-label">УГОЛ</div>
         <div class="control-row">
@@ -619,7 +767,6 @@
         </div>
       </div>
 
-      <!-- СЕКЦИЯ СИЛА -->
       <div class="control-section">
         <div class="section-label">СИЛА</div>
         <div class="control-row">
@@ -635,7 +782,6 @@
         </div>
       </div>
 
-      <!-- СУПЕРСПОСОБНОСТИ -->
       <div class="super-panel hidden" id="super-panel">
         <div class="super-header">
           <div class="super-title">⚡ СУПЕР</div>
@@ -646,7 +792,6 @@
 
     </div>
 
-    <!-- КНОПКА БРОСОК -->
     <button id="shoot-btn" class="shoot-btn self-center" disabled>БРОСОК</button>
   </div>
 
@@ -679,6 +824,21 @@
     <p class="text-cyan-300 font-bold tracking-[0.3em] text-xs mb-3">ПРИГОТОВЬСЯ</p>
     <div class="text-7xl font-black text-white" id="preload-count" style="text-shadow: 0 0 40px rgba(34,211,238,0.8); font-variant-numeric: tabular-nums;">10</div>
     <p class="text-gray-400 text-xs mt-3">ИГРА НАЧНЁТСЯ СЕЙЧАС</p>
+  </div>
+
+  <!-- ТЫ ВЫБЫЛ -->
+  <div id="dead-overlay" class="overlay hidden">
+    <div class="text-7xl mb-4">💀</div>
+    <h1 class="text-3xl font-black text-white mb-3">ТЫ ВЫБЫЛ</h1>
+    <p class="text-sm text-gray-400 text-center px-8 mb-6">Твоя команда ещё сражается!</p>
+    <div class="flex flex-col gap-3 w-full max-w-xs">
+      <button id="watch-btn" class="py-3 rounded-xl bg-cyan-600 hover:bg-cyan-500 font-black text-white transition active:scale-95">
+        👀 СМОТРЕТЬ
+      </button>
+      <button id="leave-dead-btn" class="py-3 rounded-xl bg-white/10 border border-white/20 font-bold text-white/70 hover:bg-white/20 transition text-sm">
+        ЗАКРЫТЬ
+      </button>
+    </div>
   </div>
 
   <div id="result-overlay" class="overlay result-overlay hidden">
@@ -717,11 +877,13 @@
 
     document.body.classList.add(isRed ? 'team-red' : 'team-blue');
 
+    // playerId — стабильный на устройство+команду
     const storageKey = `endorphin_playerId_${team}`;
     let playerId = localStorage.getItem(storageKey) || 'p_' + Math.random().toString(36).substr(2, 9);
     localStorage.setItem(storageKey, playerId);
 
     const playerRef = ref(db, `games/battle_1/players/${team}/${playerId}`);
+    const roomRef = ref(db, `games/battle_1/room/${team}/${playerId}`);
     const aimRef = ref(db, `games/battle_1/aim/${playerId}`);
 
     // ============================================================
@@ -731,6 +893,7 @@
     const FORM_TIME = 1500;
     const ANGLE_STEP = 5;
     const POWER_STEP = 10;
+    const NAME_MAX = 16;
 
     // ============================================================
     // СУПЕРСПОСОБНОСТИ
@@ -750,7 +913,9 @@
     let currentPower = 30;
     let isShooting = false;
     let hasJoined = false;
+    let myName = '';
     let gameStatus = 'lobby';
+    let screenMode = 'attract';
     let lastPreloadValue = null;
     let myLives = 3;
     let isUnfairMode = false;
@@ -759,6 +924,8 @@
     let costMultiplier = 1;
     let turnTimerInterval = null;
     let turnDeadline = 0;
+    let meAlive = true;
+    let meConnected = true;
 
     // Throttle для live-прицела
     let aimSyncTimeout = null;
@@ -772,8 +939,47 @@
     const hideOverlay = (id) => document.getElementById(id).classList.add('hidden');
     const clamp = (v, min, max) => Math.max(min, Math.min(max, v));
 
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
     // ============================================================
-    // ГЕНЕРАЦИЯ КООРДИНАТ
+    // АВАТАР: ГРАДИЕНТ ПО ИМЕНИ
+    // ============================================================
+    function getNameGradient(name) {
+      let hash = 0;
+      const s = name || '?';
+      for (let i = 0; i < s.length; i++) {
+        hash = s.charCodeAt(i) + ((hash << 5) - hash);
+        hash |= 0;
+      }
+      
+      const hue1 = Math.abs(hash) % 360;
+      const hue2 = (hue1 + 60 + Math.abs(hash >> 8) % 60) % 360;
+      
+      return `linear-gradient(135deg, hsl(${hue1}, 70%, 55%), hsl(${hue2}, 70%, 45%))`;
+    }
+
+    function getInitial(name) {
+      return (name || '?').trim().charAt(0).toUpperCase() || '?';
+    }
+
+    function applyAvatar(el, name, size) {
+      el.style.background = getNameGradient(name);
+      el.innerText = getInitial(name);
+      if (size) {
+        el.className = `avatar avatar-${size}`;
+      }
+    }
+
+    // ============================================================
+    // ГЕНЕРАЦИЯ КООРДИНАТ (для players)
     // ============================================================
     async function ensureMyPosition() {
       const snap = await get(playerRef);
@@ -785,7 +991,7 @@
       const teamPlayers = teamSnap.val() || {};
       const usedY = [];
       Object.values(teamPlayers).forEach(p => {
-        if (p.posY !== undefined && p.id !== playerId) usedY.push(p.posY);
+        if (p.posY !== undefined) usedY.push(p.posY);
       });
 
       let posX, posY, attempts = 0;
@@ -803,7 +1009,7 @@
     // ============================================================
     async function joinGame() {
       const nameInput = document.getElementById('input-name');
-      const name = nameInput.value.trim() || 'Игрок';
+      let name = nameInput.value.trim() || 'Игрок';
       const errorEl = document.getElementById('join-error');
       
       if (name.length < 2) {
@@ -811,35 +1017,49 @@
         errorEl.classList.remove('hidden');
         return;
       }
-
-      const snapshot = await get(playerRef);
-      const existing = snapshot.val();
-
-      if (existing) {
-        await update(playerRef, { name, connected: true });
-      } else {
-        await set(playerRef, { 
-          name, lives: 3, alive: true, connected: true, joinedAt: Date.now()
-        });
+      if (name.length > NAME_MAX) {
+        name = name.substring(0, NAME_MAX);
       }
 
-      await ensureMyPosition();
+      myName = name;
 
-      onDisconnect(playerRef).remove();
+      // Проверяем, есть ли уже этот игрок в players (перезаход)
+      const playersSnap = await get(ref(db, `games/battle_1/players/${team}/${playerId}`));
+      const existingPlayer = playersSnap.val();
+
+      if (existingPlayer) {
+        // Перезаход в игру — восстанавливаем connected
+        await update(playerRef, { 
+          name, 
+          connected: true 
+        });
+        console.log('Перезаход в игру как', playerId);
+      } else {
+        // Новый вход — в комнату
+        const roomSnap = await get(roomRef);
+        const existingRoom = roomSnap.val();
+        
+        if (existingRoom) {
+          await update(roomRef, { name, joinedAt: existingRoom.joinedAt || Date.now() });
+        } else {
+          await set(roomRef, { 
+            name, 
+            joinedAt: Date.now() 
+          });
+        }
+      }
+
+      // onDisconnect
+      onDisconnect(playerRef).update({ connected: false });
+      onDisconnect(roomRef).remove();
       onDisconnect(aimRef).remove();
 
       hasJoined = true;
       vibrate(50);
 
       document.getElementById('join-screen').classList.add('hidden');
-      document.getElementById('game-screen').classList.remove('hidden');
-      document.getElementById('player-info').classList.remove('hidden');
-      document.getElementById('info-name').innerText = name;
 
-      updateTeamBadges();
-      updateAngleDisplay();
-      updatePowerDisplay();
-      syncAimToFirebase();
+      // Показываем комнату или игру — решит onValue ниже
     }
 
     document.getElementById('join-btn').onclick = joinGame;
@@ -929,11 +1149,10 @@
     }
 
     // ============================================================
-    // СИНХРОНИЗАЦИЯ ПРИЦЕЛА НА TV
+    // LIVE-ПРИЦЕЛ
     // ============================================================
     function syncAimToFirebase() {
       if (!isMyTurn) return;
-      
       if (aimSyncTimeout) return;
       
       aimSyncTimeout = setTimeout(() => {
@@ -943,11 +1162,10 @@
           angle: currentAngle,
           power: currentPower,
           team,
-          name: document.getElementById('info-name').innerText || 'Игрок',
+          name: myName,
           time: Date.now()
         };
         
-        // Не шлём, если не изменилось
         if (lastAimSent && 
             Math.abs(lastAimSent.angle - aimData.angle) < 1 && 
             Math.abs(lastAimSent.power - aimData.power) < 2) {
@@ -960,7 +1178,7 @@
     }
 
     // ============================================================
-    // ТАЙМЕР ХОДА (15 сек)
+    // ТАЙМЕР ХОДА
     // ============================================================
     function startTurnTimer() {
       stopTurnTimer();
@@ -1014,9 +1232,6 @@
       document.getElementById('turn-timer-ring').classList.remove('danger');
     }
 
-    // ============================================================
-    // АВТО-БРОСОК
-    // ============================================================
     async function autoShoot() {
       if (!isMyTurn || isShooting) return;
       vibrate([100, 50, 100]);
@@ -1040,7 +1255,6 @@
     function updateSuperPanel() {
       const panel = document.getElementById('super-panel');
       
-      // В нечестном режиме — всем
       if (!isUnfairMode) {
         panel.classList.add('hidden');
         return;
@@ -1176,7 +1390,6 @@
       const btn = document.getElementById('shoot-btn');
       btn.disabled = true;
 
-      // Убираем прицел с TV
       remove(aimRef).catch(() => {});
 
       const now = Date.now();
@@ -1240,6 +1453,105 @@
     };
 
     // ============================================================
+    // РЕНДЕР КОМНАТЫ
+    // ============================================================
+    function renderRoom(data) {
+      const room = data.room || {};
+      const players = data.players || {};
+
+      // Сейчас играют
+      const playingList = document.getElementById('room-playing-list');
+      const playingAll = [
+        ...Object.entries(players.red || {}).map(([id, p]) => ({ ...p, team: 'red', id })),
+        ...Object.entries(players.blue || {}).map(([id, p]) => ({ ...p, team: 'blue', id }))
+      ];
+
+      if (playingAll.length === 0) {
+        playingList.innerHTML = `<div class="text-center text-white/30 text-sm italic py-2">Ещё никто не играет</div>`;
+      } else {
+        playingList.innerHTML = playingAll.map(p => `
+          <div class="room-player-row">
+            <div class="avatar avatar-md" data-name="${escapeHtml(p.name)}"></div>
+            <div class="room-player-name">${escapeHtml(p.name)}</div>
+            <div class="room-player-badge playing">В ИГРЕ</div>
+          </div>
+        `).join('');
+        playingList.querySelectorAll('.avatar[data-name]').forEach(el => {
+          applyAvatar(el, el.dataset.name, 'md');
+        });
+      }
+
+      // В комнате
+      const waitingList = document.getElementById('room-waiting-list');
+      const waitingAll = [
+        ...Object.entries(room.red || {}).map(([id, p]) => ({ ...p, team: 'red', id })),
+        ...Object.entries(room.blue || {}).map(([id, p]) => ({ ...p, team: 'blue', id }))
+      ].sort((a, b) => (a.joinedAt || 0) - (b.joinedAt || 0));
+
+      if (waitingAll.length === 0) {
+        waitingList.innerHTML = `<div class="text-center text-white/30 text-sm italic py-2">Пусто</div>`;
+      } else {
+        waitingList.innerHTML = waitingAll.map(p => {
+          const isMe = p.id === playerId;
+          return `
+            <div class="room-player-row ${isMe ? 'me' : ''}">
+              <div class="avatar avatar-md" data-name="${escapeHtml(p.name)}"></div>
+              <div class="room-player-name">${escapeHtml(p.name)}${isMe ? ' (ты)' : ''}</div>
+              <div class="room-player-badge waiting">ЖДЁТ</div>
+            </div>
+          `;
+        }).join('');
+        waitingList.querySelectorAll('.avatar[data-name]').forEach(el => {
+          applyAvatar(el, el.dataset.name, 'md');
+        });
+      }
+
+      // Статус
+      const statusEl = document.getElementById('room-status');
+      if (data.screen === 'qr') {
+        statusEl.innerText = '📱 СКАНИРУЙ И ЖДИ';
+      } else if (data.screen === 'game') {
+        statusEl.innerText = '🎮 ИГРА ИДЁТ';
+      } else {
+        statusEl.innerText = '⏳ ОЖИДАНИЕ';
+      }
+    }
+
+    // ============================================================
+    // ПОКАЗ ЭКРАНОВ
+    // ============================================================
+    function showJoinScreen() {
+      document.getElementById('join-screen').classList.remove('hidden');
+      document.getElementById('room-screen').classList.add('hidden');
+      document.getElementById('game-screen').classList.add('hidden');
+      document.getElementById('player-info').classList.add('hidden');
+    }
+
+    function showRoomScreen(data) {
+      document.getElementById('join-screen').classList.add('hidden');
+      document.getElementById('room-screen').classList.remove('hidden');
+      document.getElementById('game-screen').classList.add('hidden');
+      document.getElementById('player-info').classList.add('hidden');
+      renderRoom(data);
+    }
+
+    function showGameScreen(data) {
+      document.getElementById('join-screen').classList.add('hidden');
+      document.getElementById('room-screen').classList.add('hidden');
+      document.getElementById('game-screen').classList.remove('hidden');
+      document.getElementById('player-info').classList.remove('hidden');
+      
+      const me = data.players?.[team]?.[playerId];
+      if (me) {
+        myLives = me.lives;
+        meAlive = me.alive;
+        document.getElementById('info-name').innerText = me.name;
+        document.getElementById('info-lives').innerHTML = renderHearts(me.lives, me.alive);
+        applyAvatar(document.getElementById('info-avatar'), me.name, 'sm');
+      }
+    }
+
+    // ============================================================
     // ОСНОВНОЙ СЛУШАТЕЛЬ
     // ============================================================
     onValue(gameRef, (snapshot) => {
@@ -1248,35 +1560,79 @@
 
       const prevStatus = gameStatus;
       gameStatus = data.status || 'lobby';
+      screenMode = data.screen || 'attract';
 
       if (data.mode) updateModeInfo(data.mode);
 
-      if (gameStatus === 'finished') {
-        handleFinished(data);
+      // Проверяем, где я
+      const inPlayers = data.players?.[team]?.[playerId];
+      const inRoom = data.room?.[team]?.[playerId];
+
+      // Если я вообще не в игре — на экран входа
+      if (hasJoined && !inPlayers && !inRoom) {
+        showJoinScreen();
+        hasJoined = false;
         return;
-      } else if (prevStatus === 'finished' && gameStatus !== 'finished') {
-        hideOverlay('result-overlay');
-        document.getElementById('result-emoji').innerText = '';
       }
 
-      if (gameStatus === 'lobby') {
-        hideOverlay('wait-overlay');
-        hideOverlay('preload-overlay');
-        hideOverlay('result-overlay');
-        stopTurnTimer();
-        remove(aimRef).catch(() => {});
-        lastAimSent = null;
-        
-        const me = data.players?.[team]?.[playerId];
-        if (me) {
-          myLives = me.lives;
-          document.getElementById('info-lives').innerHTML = renderHearts(me.lives, me.alive);
+      // Приветствие если не зашёл
+      if (!hasJoined) return;
+
+      // Я в игре
+      if (inPlayers) {
+        meAlive = inPlayers.alive;
+        meConnected = inPlayers.connected !== false;
+        myLives = inPlayers.lives;
+        myName = inPlayers.name || myName;
+
+        // Проверяем, нужен ли posX/posY
+        if (inPlayers.posX == null || inPlayers.posY == null) {
+          ensureMyPosition();
+        }
+
+        // Финиш всей игры
+        if (gameStatus === 'finished') {
+          showGameScreen(data);
+          handleFinished(data);
+          return;
+        }
+
+        // Живой — играем
+        if (meAlive) {
+          showGameScreen(data);
+          hideOverlay('dead-overlay');
+          handlePlaying(data);
+        } else {
+          // Мёртв, но игра идёт
+          showGameScreen(data);
+          if (gameStatus === 'playing' && data.preloadDone) {
+            const deadOverlay = document.getElementById('dead-overlay');
+            if (deadOverlay.classList.contains('hidden')) {
+              showOverlay('dead-overlay');
+            }
+          }
         }
         return;
       }
 
-      // ПРЕЛОУДИНГ
-      if (gameStatus === 'playing' && data.timer !== null && data.timer !== undefined) {
+      // Я в комнате
+      if (inRoom) {
+        // Скрываем все игровые оверлеи
+        hideOverlay('dead-overlay');
+        hideOverlay('wait-overlay');
+        hideOverlay('preload-overlay');
+        hideOverlay('result-overlay');
+        stopTurnTimer();
+        showRoomScreen(data);
+        return;
+      }
+    });
+
+    // ============================================================
+    // ИГРА
+    // ============================================================
+    function handlePlaying(data) {
+      if (data.timer !== null && data.timer !== undefined) {
         showOverlay('preload-overlay');
         hideOverlay('wait-overlay');
         document.getElementById('preload-count').innerText = data.timer;
@@ -1284,57 +1640,57 @@
           vibrate(20);
           lastPreloadValue = data.timer;
         }
+        return;
       } else {
         hideOverlay('preload-overlay');
       }
 
-      // ИГРА
-      if (gameStatus === 'playing' && !data.timer) {
-        const wasMyTurn = isMyTurn;
-        isMyTurn = (data.activePlayerId === playerId);
+      if (!data.preloadDone) return;
 
-        const btn = document.getElementById('shoot-btn');
-        const buttons = ['angle-up', 'angle-down', 'power-up', 'power-down'].map(id => document.getElementById(id));
-        
-        if (isMyTurn) {
-          if (!wasMyTurn) {
-            vibrate([40, 20, 40]);
-            btn.classList.add('animate-shake');
-            setTimeout(() => btn.classList.remove('animate-shake'), 500);
-            
-            startTurnTimer();
-            currentAngle = 45;
-            currentPower = 30;
-            updateAngleDisplay();
-            updatePowerDisplay();
-            syncAimToFirebase();
-          }
-          btn.disabled = false;
-          buttons.forEach(b => b.disabled = false);
-          hideOverlay('wait-overlay');
-        } else {
-          if (wasMyTurn) {
-            stopTurnTimer();
-            remove(aimRef).catch(() => {});
-            lastAimSent = null;
-          }
-          btn.disabled = true;
-          buttons.forEach(b => b.disabled = true);
-          if (hasJoined && !isShooting) showOverlay('wait-overlay');
-        }
+      const wasMyTurn = isMyTurn;
+      isMyTurn = (data.activePlayerId === playerId);
 
-        const me = data.players?.[team]?.[playerId];
-        if (me) {
-          myLives = me.lives;
-          document.getElementById('info-name').innerText = me.name;
-          document.getElementById('info-lives').innerHTML = renderHearts(me.lives, me.alive);
-          updateSuperPanel();
+      const btn = document.getElementById('shoot-btn');
+      const buttons = ['angle-up', 'angle-down', 'power-up', 'power-down'].map(id => document.getElementById(id));
+      
+      if (isMyTurn) {
+        if (!wasMyTurn) {
+          vibrate([40, 20, 40]);
+          btn.classList.add('animate-shake');
+          setTimeout(() => btn.classList.remove('animate-shake'), 500);
+          
+          startTurnTimer();
+          currentAngle = 45;
+          currentPower = 30;
+          updateAngleDisplay();
+          updatePowerDisplay();
+          syncAimToFirebase();
         }
+        btn.disabled = false;
+        buttons.forEach(b => b.disabled = false);
+        hideOverlay('wait-overlay');
+      } else {
+        if (wasMyTurn) {
+          stopTurnTimer();
+          remove(aimRef).catch(() => {});
+          lastAimSent = null;
+        }
+        btn.disabled = true;
+        buttons.forEach(b => b.disabled = true);
+        if (hasJoined && !isShooting && meAlive) showOverlay('wait-overlay');
       }
-    });
+
+      const me = data.players?.[team]?.[playerId];
+      if (me) {
+        myLives = me.lives;
+        document.getElementById('info-name').innerText = me.name;
+        document.getElementById('info-lives').innerHTML = renderHearts(me.lives, me.alive);
+        updateSuperPanel();
+      }
+    }
 
     // ============================================================
-    // РЕЖИМ + КОЭФФИЦИЕНТ СТОИМОСТИ
+    // РЕЖИМ
     // ============================================================
     function updateModeInfo(mode) {
       if (typeof mode === 'string' && mode.includes('v')) {
@@ -1348,7 +1704,6 @@
       
       isUnfairMode = myTeamMax !== enemyTeamMax;
       
-      // Коэффициент стоимости: если в большинстве — дороже
       if (isUnfairMode) {
         if (myTeamMax > enemyTeamMax) {
           costMultiplier = Math.ceil(myTeamMax / enemyTeamMax);
@@ -1363,7 +1718,7 @@
     }
 
     // ============================================================
-    // КНОПКИ + ДОЛГОЕ НАЖАТИЕ
+    // ДОЛГОЕ НАЖАТИЕ
     // ============================================================
     function addHoldSupport(btnId, action) {
       const btn = document.getElementById(btnId);
@@ -1400,6 +1755,7 @@
     function handleFinished(data) {
       hideOverlay('wait-overlay');
       hideOverlay('preload-overlay');
+      hideOverlay('dead-overlay');
       stopTurnTimer();
       remove(aimRef).catch(() => {});
 
@@ -1442,11 +1798,27 @@
     document.getElementById('result-close-btn').onclick = () => {
       hideOverlay('result-overlay');
       document.getElementById('confetti-container').innerHTML = '';
-      currentPower = 30;
-      currentAngle = 45;
-      updateAngleDisplay();
-      updatePowerDisplay();
-      document.getElementById('shoot-btn').disabled = true;
+    };
+
+    // ============================================================
+    // ТЫ ВЫБЫЛ
+    // ============================================================
+    document.getElementById('watch-btn').onclick = () => {
+      hideOverlay('dead-overlay');
+    };
+
+    document.getElementById('leave-dead-btn').onclick = () => {
+      hideOverlay('dead-overlay');
+    };
+
+    // ============================================================
+    // ВЫЙТИ ИЗ КОМНАТЫ
+    // ============================================================
+    document.getElementById('room-leave-btn').onclick = async () => {
+      if (!confirm('Выйти из комнаты?')) return;
+      await remove(roomRef);
+      showJoinScreen();
+      hasJoined = false;
     };
 
     // ============================================================
