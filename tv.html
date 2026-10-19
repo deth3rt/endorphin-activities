@@ -1151,210 +1151,59 @@
         currentBaseUrl = getBaseUrl();
 
         // ============================================================
-        // ФОН БОЯ — многослойное зимнее поле
-        // ============================================================
-        function drawBattleBackground() {
-            const now = Date.now() / 1000;
-            const groundY = height * 0.66;
+// ФОН БОЯ — простой: зона красных, зона синих, сетка, снег
+// ============================================================
+function drawBattleBackground() {
+  // 1. Небо / общий фон
+  ctx.fillStyle = 'rgba(5, 20, 40, 0.6)';
+  ctx.fillRect(0, 0, width, height);
 
-            // 1. Небо
-            const skyGrad = ctx.createLinearGradient(0, 0, 0, height);
-            skyGrad.addColorStop(0, 'rgba(10, 37, 64, 0.4)');
-            skyGrad.addColorStop(0.45, 'rgba(5, 20, 40, 0.5)');
-            skyGrad.addColorStop(1, 'rgba(2, 8, 18, 0.65)');
-            ctx.fillStyle = skyGrad;
-            ctx.fillRect(0, 0, width, height);
+  // 2. ЗОНА КРАСНЫХ (левая половина)
+  const redGrad = ctx.createLinearGradient(0, 0, width * 0.5, 0);
+  redGrad.addColorStop(0, 'rgba(255, 59, 92, 0.10)');
+  redGrad.addColorStop(1, 'rgba(255, 59, 92, 0.02)');
+  ctx.fillStyle = redGrad;
+  ctx.fillRect(0, 0, width * 0.5, height);
 
-            // 2. Луна
-            const moonX = width * 0.82;
-            const moonY = height * 0.14;
-            const moonR = 64;
-            const moonGrad = ctx.createRadialGradient(moonX, moonY, 0, moonX, moonY, moonR * 2.4);
-            moonGrad.addColorStop(0, 'rgba(255, 255, 235, 0.32)');
-            moonGrad.addColorStop(0.4, 'rgba(255, 255, 235, 0.1)');
-            moonGrad.addColorStop(1, 'rgba(255, 255, 235, 0)');
-            ctx.fillStyle = moonGrad;
-            ctx.beginPath();
-            ctx.arc(moonX, moonY, moonR * 2.4, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.fillStyle = 'rgba(255, 255, 245, 0.42)';
-            ctx.beginPath();
-            ctx.arc(moonX, moonY, moonR * 0.52, 0, Math.PI * 2);
-            ctx.fill();
+  // 3. ЗОНА СИНИХ (правая половина)
+  const blueGrad = ctx.createLinearGradient(width * 0.5, 0, width, 0);
+  blueGrad.addColorStop(0, 'rgba(61, 139, 255, 0.02)');
+  blueGrad.addColorStop(1, 'rgba(61, 139, 255, 0.10)');
+  ctx.fillStyle = blueGrad;
+  ctx.fillRect(width * 0.5, 0, width * 0.5, height);
 
-            // 3. Звёзды
-            bgStars.forEach(s => {
-                const twinkle = 0.4 + 0.6 * Math.sin(now * s.speed + s.phase);
-                ctx.fillStyle = `rgba(255, 255, 255, ${0.15 + twinkle * 0.3})`;
-                ctx.beginPath();
-                ctx.arc(s.x, s.y, s.size, 0, Math.PI * 2);
-                ctx.fill();
-            });
+  // 4. РАЗДЕЛИТЕЛЬНАЯ ЛИНИЯ ПО ЦЕНТРУ
+  ctx.save();
+  ctx.strokeStyle = 'rgba(127, 227, 255, 0.15)';
+  ctx.lineWidth = 2;
+  ctx.setLineDash([12, 12]);
+  ctx.beginPath();
+  ctx.moveTo(width * 0.5, 0);
+  ctx.lineTo(width * 0.5, height);
+  ctx.stroke();
+  ctx.restore();
 
-            // 4. Дальние холмы (силуэты)
-            ctx.fillStyle = 'rgba(20, 45, 80, 0.35)';
-            ctx.beginPath();
-            ctx.moveTo(0, groundY + 30);
-            ctx.bezierCurveTo(width * 0.2, groundY - 60, width * 0.4, groundY + 10, width * 0.55, groundY - 30);
-            ctx.bezierCurveTo(width * 0.7, groundY - 70, width * 0.85, groundY + 20, width, groundY - 10);
-            ctx.lineTo(width, height);
-            ctx.lineTo(0, height);
-            ctx.closePath();
-            ctx.fill();
+  // 5. СЕТКА
+  ctx.strokeStyle = 'rgba(127, 227, 255, 0.04)';
+  ctx.lineWidth = 1;
+  for (let x = 0; x < width; x += 60) {
+    ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, height); ctx.stroke();
+  }
+  for (let y = 0; y < height; y += 60) {
+    ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(width, y); ctx.stroke();
+  }
 
-            // 5. Земля — снежная заливка
-            const groundGrad = ctx.createLinearGradient(0, groundY, 0, height);
-            groundGrad.addColorStop(0, 'rgba(180, 210, 240, 0.05)');
-            groundGrad.addColorStop(0.3, 'rgba(200, 230, 255, 0.09)');
-            groundGrad.addColorStop(1, 'rgba(220, 240, 255, 0.14)');
-            ctx.fillStyle = groundGrad;
-            ctx.beginPath();
-            ctx.moveTo(0, groundY);
-            ctx.bezierCurveTo(width * 0.25, groundY - 24, width * 0.5, groundY + 12, width * 0.75, groundY - 6);
-            ctx.bezierCurveTo(width * 0.85, groundY - 14, width * 0.95, groundY + 6, width, groundY);
-            ctx.lineTo(width, height);
-            ctx.lineTo(0, height);
-            ctx.closePath();
-            ctx.fill();
-
-            // 6. Замёрзшее озеро
-            if (bgLake) {
-                const lake = bgLake;
-                const lakeGrad = ctx.createRadialGradient(lake.cx, lake.cy, 0, lake.cx, lake.cy, Math.max(lake.rx, lake.ry));
-                lakeGrad.addColorStop(0, 'rgba(100, 180, 230, 0.16)');
-                lakeGrad.addColorStop(0.6, 'rgba(70, 150, 210, 0.11)');
-                lakeGrad.addColorStop(1, 'rgba(40, 100, 160, 0.04)');
-                ctx.fillStyle = lakeGrad;
-                ctx.beginPath();
-                ctx.ellipse(lake.cx, lake.cy, lake.rx, lake.ry, 0, 0, Math.PI * 2);
-                ctx.fill();
-
-                // Блик на льду
-                ctx.save();
-                const shineGrad = ctx.createLinearGradient(lake.cx - lake.rx, lake.cy, lake.cx + lake.rx, lake.cy);
-                shineGrad.addColorStop(0, 'rgba(255, 255, 255, 0)');
-                shineGrad.addColorStop(0.5, `rgba(255, 255, 255, ${0.06 + 0.03 * Math.sin(now * 0.8)})`);
-                shineGrad.addColorStop(1, 'rgba(255, 255, 255, 0)');
-                ctx.fillStyle = shineGrad;
-                ctx.beginPath();
-                ctx.ellipse(lake.cx, lake.cy - lake.ry * 0.2, lake.rx * 0.85, lake.ry * 0.35, 0, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.restore();
-
-                // Трещины на озере
-                ctx.save();
-                ctx.strokeStyle = 'rgba(220, 245, 255, 0.18)';
-                ctx.lineWidth = 1.2;
-                ctx.shadowColor = 'rgba(180, 230, 255, 0.3)';
-                ctx.shadowBlur = 4;
-                for (let i = 0; i < 5; i++) {
-                    const a = (i / 5) * Math.PI * 2 + 0.3;
-                    const r1 = Math.random() * lake.rx * 0.3;
-                    const r2 = lake.rx * (0.4 + Math.random() * 0.5);
-                    ctx.beginPath();
-                    ctx.moveTo(lake.cx + Math.cos(a) * r1, lake.cy + Math.sin(a) * r1 * (lake.ry / lake.rx));
-                    ctx.lineTo(lake.cx + Math.cos(a + 0.4) * r2, lake.cy + Math.sin(a + 0.4) * r2 * (lake.ry / lake.rx));
-                    ctx.stroke();
-                }
-                ctx.restore();
-
-                // Обводка озера (берег)
-                ctx.save();
-                ctx.strokeStyle = 'rgba(220, 240, 255, 0.14)';
-                ctx.lineWidth = 2;
-                ctx.beginPath();
-                ctx.ellipse(lake.cx, lake.cy, lake.rx, lake.ry, 0, 0, Math.PI * 2);
-                ctx.stroke();
-                ctx.restore();
-            }
-
-            // 7. Сугробы
-            bgMounds.forEach(m => {
-                ctx.save();
-                const moundGrad = ctx.createRadialGradient(m.x, m.y - m.h * 0.3, 0, m.x, m.y, m.w / 2);
-                moundGrad.addColorStop(0, `rgba(240, 250, 255, ${m.alpha + 0.08})`);
-                moundGrad.addColorStop(0.7, `rgba(200, 230, 255, ${m.alpha})`);
-                moundGrad.addColorStop(1, 'rgba(160, 200, 240, 0)');
-                ctx.fillStyle = moundGrad;
-                ctx.beginPath();
-                ctx.ellipse(m.x, m.y, m.w / 2, m.h / 2, 0, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.restore();
-            });
-
-            // 8. Лёд — трещины на земле
-            bgIce.forEach(ice => {
-                ctx.save();
-                ctx.strokeStyle = `rgba(127, 227, 255, ${ice.alpha})`;
-                ctx.lineWidth = 1.5;
-                ctx.shadowColor = 'rgba(127, 227, 255, 0.3)';
-                ctx.shadowBlur = 6;
-                ctx.beginPath();
-                ice.path.forEach((p, i) => {
-                    if (i === 0) ctx.moveTo(p.x, p.y);
-                    else ctx.lineTo(p.x, p.y);
-                });
-                ctx.stroke();
-                ctx.restore();
-            });
-
-            // 9. Утоптанная дорожка между командами
-            ctx.save();
-            const pathGrad = ctx.createLinearGradient(width * 0.2, groundY, width * 0.8, groundY);
-            pathGrad.addColorStop(0, 'rgba(200, 230, 255, 0.03)');
-            pathGrad.addColorStop(0.5, 'rgba(220, 240, 255, 0.09)');
-            pathGrad.addColorStop(1, 'rgba(200, 230, 255, 0.03)');
-            ctx.fillStyle = pathGrad;
-            ctx.beginPath();
-            ctx.ellipse(width * 0.5, height * 0.72, width * 0.32, height * 0.06, 0, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.restore();
-
-            // 10. Ёлки (по слоям, сзади вперёд)
-            bgTrees.forEach(t => {
-                const sway = Math.sin(now * 0.8 + t.swayOffset) * (2 + t.layer);
-                const baseY = t.y;
-                const topY = baseY - t.size * 2.4;
-                const halfW = t.size * 0.55;
-
-                ctx.save();
-                ctx.fillStyle = `rgba(15, 45, 75, ${t.alpha})`;
-                ctx.shadowColor = 'rgba(34, 211, 238, 0.12)';
-                ctx.shadowBlur = 6;
-
-                for (let layer = 0; layer < 3; layer++) {
-                    const layerY = topY + t.size * 0.75 * layer;
-                    const layerW = halfW * (0.55 + layer * 0.25);
-                    ctx.beginPath();
-                    ctx.moveTo(t.x + sway, layerY);
-                    ctx.lineTo(t.x - layerW, layerY + t.size * 0.95);
-                    ctx.lineTo(t.x + layerW, layerY + t.size * 0.95);
-                    ctx.closePath();
-                    ctx.fill();
-                }
-
-                // Снег на ёлке
-                ctx.fillStyle = `rgba(240, 250, 255, ${t.alpha * 0.6})`;
-                for (let layer = 0; layer < 3; layer++) {
-                    const layerY = topY + t.size * 0.75 * layer;
-                    const layerW = halfW * (0.55 + layer * 0.25);
-                    ctx.beginPath();
-                    ctx.ellipse(t.x + sway, layerY + t.size * 0.95, layerW * 0.7, t.size * 0.18, 0, 0, Math.PI * 2);
-                    ctx.fill();
-                }
-                ctx.restore();
-            });
-
-            // 11. Снег на земле — точки
-            for (let i = 0; i < 120; i++) {
-                const sx = (i * 73.7) % width;
-                const sy = groundY + ((i * 41.3) % (height - groundY));
-                ctx.fillStyle = `rgba(255, 255, 255, ${0.12 + Math.random() * 0.18})`;
-                ctx.beginPath();
-                ctx.arc(sx, sy, Math.random() * 1.6 + 0.4, 0, Math.PI * 2);
-                ctx.fill();
-            }
-        }
+  // 6. СНЕГ НА ЗЕМЛЕ — точки внизу
+  const groundY = height * 0.75;
+  for (let i = 0; i < 80; i++) {
+    const sx = (i * 73.7) % width;
+    const sy = groundY + ((i * 41.3) % (height - groundY));
+    ctx.fillStyle = `rgba(255, 255, 255, ${0.08 + Math.random() * 0.08})`;
+    ctx.beginPath();
+    ctx.arc(sx, sy, Math.random() * 1.4 + 0.4, 0, Math.PI * 2);
+    ctx.fill();
+  }
+}
 
         // ============================================================
         // ATTRACT DEMO
