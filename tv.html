@@ -5,14 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>ENDORPHIN | ТВ ЭКРАН</title>
     
-    <!-- Внешние библиотеки -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/qrcode-generator@1.4.4/qrcode.js"></script>
     
     <style>
-        /* ============================================================
-           ГЛОБАЛЬНЫЕ СТИЛИ И ШРИФТЫ
-           ============================================================ */
         @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap');
         
         :root {
@@ -45,6 +41,7 @@
             z-index: 5;
             filter: drop-shadow(0 0 8px #fff);
             top: -10vh;
+            will-change: transform;
         }
         @keyframes fall {
             0% { transform: translateY(-10vh) rotate(0deg); opacity: 0; }
@@ -66,7 +63,7 @@
         }
 
         /* ============================================================
-           ЭФФЕКТЫ
+           SHAKE
            ============================================================ */
         @keyframes screenShake {
             0%, 100% { transform: translate(0, 0); }
@@ -114,16 +111,6 @@
             transition: opacity 0.5s;
         }
 
-        .qr-slot {
-            background: #ffffff;
-            padding: 6px;
-            border-radius: 12px;
-            border: 4px solid var(--cyan-glow);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
         /* ============================================================
            ПРЕЛОУДИНГ
            ============================================================ */
@@ -138,10 +125,7 @@
             background: var(--bg-gradient);
             transition: opacity 0.5s;
         }
-
-        #preload-view.active {
-            display: flex;
-        }
+        #preload-view.active { display: flex; }
 
         .preload-title {
             font-size: 4rem;
@@ -151,12 +135,10 @@
             margin-bottom: 2rem;
             animation: preloadPulse 2s ease-in-out infinite;
         }
-
         @keyframes preloadPulse {
             0%, 100% { transform: scale(1); text-shadow: 0 0 30px rgba(34, 211, 238, 0.4); }
             50% { transform: scale(1.02); text-shadow: 0 0 60px rgba(34, 211, 238, 0.8); }
         }
-
         .preload-timer {
             font-size: 8rem;
             font-weight: 900;
@@ -183,13 +165,7 @@
             margin-top: 2rem;
             text-decoration: none;
         }
-
-        .ad-block img {
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-        }
-
+        .ad-block img { width: 100%; height: 100%; object-fit: contain; }
         .ad-block span {
             color: rgba(168, 230, 255, 0.4);
             font-size: 1.2rem;
@@ -198,7 +174,7 @@
         }
 
         /* ============================================================
-           ТЕКСТ МЕГАБРОСОК
+           МЕГАБРОСОК
            ============================================================ */
         @keyframes megaZoom {
             0% { transform: translate(-50%, -50%) scale(0.1); opacity: 0; }
@@ -300,12 +276,32 @@
             border-color: #3b82f6;
             box-shadow: 0 0 30px rgba(59, 130, 246, 0.6);
         }
+
+        /* ============================================================
+           ФИНИШ
+           ============================================================ */
+        @keyframes winPop {
+            0% { transform: scale(0.3); opacity: 0; }
+            60% { transform: scale(1.1); opacity: 1; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        @keyframes confettiFall {
+            0% { transform: translateY(-100vh) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+        }
+        .confetti {
+            position: fixed;
+            top: 0;
+            width: 10px; height: 10px;
+            z-index: 150;
+            pointer-events: none;
+            animation: confettiFall linear forwards;
+        }
     </style>
 </head>
 <body class="h-screen w-screen relative overflow-hidden" id="main-body">
 
     <div id="snow-container" class="fixed inset-0 pointer-events-none z-0"></div>
-
     <canvas id="game-canvas"></canvas>
 
     <div class="ui-layer">
@@ -337,7 +333,6 @@
             </div>
         </div>
 
-        <!-- Реклама в лобби -->
         <a id="lobby-ad" class="ad-block hidden" href="#" target="_blank">
             <img id="lobby-ad-img" src="" alt="Реклама" class="hidden">
             <span id="lobby-ad-text">РЕКЛАМА</span>
@@ -351,12 +346,10 @@
         <div id="tv-status" class="text-4xl font-black text-white tracking-widest hidden">ОЖИДАНИЕ ИГРОКОВ...</div>
     </div>
 
-    <!-- Экран Прелоудинга -->
     <div id="preload-view">
         <h1 class="preload-title" id="preload-title">ИГРОК 1 VS ИГРОК 2</h1>
         <div class="preload-timer" id="preload-timer">10</div>
         
-        <!-- Реклама в прелоудинге -->
         <a id="preload-ad" class="ad-block" href="#" target="_blank">
             <img id="preload-ad-img" src="" alt="Реклама" class="hidden">
             <span id="preload-ad-text">РЕКЛАМА</span>
@@ -364,8 +357,12 @@
     </div>
 
     <div id="win-view" class="absolute inset-0 hidden flex-col items-center justify-center bg-black/80 backdrop-blur-2xl z-40">
+        <div class="text-8xl mb-6" id="win-emoji">🏆</div>
         <h1 class="text-9xl font-black text-white mb-12" id="win-text">ПОБЕДА!</h1>
+        <p class="text-2xl text-cyan-300/70 font-bold tracking-widest" id="win-subtitle"></p>
     </div>
+
+    <div id="confetti-container"></div>
 
     <div class="ticker-wrap">
         <div class="ticker" id="ticker-text">ДОБРО ПОЖАЛОВАТЬ НА ВЕЧЕРИНКУ ENDORPHIN!</div>
@@ -373,7 +370,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getDatabase, ref, onValue, update, set } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+        import { getDatabase, ref, onValue, update, set, get } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
         const firebaseConfig = { apiKey: "AIzaSyCXIR5Tv8lB6ivcGRC3yt1SC66MM6T5b_M", authDomain: "endorphin-battle.firebaseapp.com", databaseURL: "https://endorphin-battle-default-rtdb.europe-west1.firebasedatabase.app", projectId: "endorphin-battle", storageBucket: "endorphin-battle.firebasestorage.app", messagingSenderId: "185259733030", appId: "1:185259733030:web:d72a89a436880973e636e7" };
         const app = initializeApp(firebaseConfig);
@@ -381,6 +378,9 @@
         const gameId = 'battle_1';
         const gameRef = ref(db, `games/${gameId}`);
 
+        // ============================================================
+        // CANVAS
+        // ============================================================
         const canvas = document.getElementById('game-canvas');
         const ctx = canvas.getContext('2d');
         let width, height;
@@ -392,28 +392,38 @@
         window.addEventListener('resize', resizeCanvas);
         resizeCanvas();
 
+        // ============================================================
+        // СОСТОЯНИЕ
+        // ============================================================
         let currentData = null;
-        let currentMode = null;
         let currentBaseUrl = getBaseUrl();
         
-        let players = []; 
+        // Игроки — объект по ID, чтобы не терять при смене состава
+        const players = new Map(); // id -> Player
         let snowballs = []; 
-        let particles = []; 
+        let particles = [];
+        let lastShotTime = 0;
 
         let preloadInterval = null;
         let isPreloading = false;
+        let hasGeneratedQR = false;
+        let lastTickerText = '';
+        let finishedHandled = false;
 
         function getBaseUrl() {
             const url = new URL(window.location.href);
             return url.origin + url.pathname.substring(0, url.pathname.lastIndexOf('/') + 1);
         }
 
+        // ============================================================
+        // PLAYER
+        // ============================================================
         class Player {
             constructor(id, data, team) {
                 this.id = id;
                 this.name = data.name || 'Игрок';
-                this.lives = data.lives !== undefined ? data.lives : 3;
-                this.alive = data.alive !== undefined ? data.alive : true;
+                this.lives = data.lives ?? 3;
+                this.alive = data.alive ?? true;
                 this.team = team;
                 
                 if (data.posX !== undefined && data.posY !== undefined) {
@@ -426,6 +436,14 @@
                 
                 this.width = 60;
                 this.height = 100;
+            }
+
+            update(data) {
+                this.name = data.name || this.name;
+                this.lives = data.lives ?? this.lives;
+                this.alive = data.alive ?? this.alive;
+                if (data.posX !== undefined) this.x = (data.posX / 100) * width;
+                if (data.posY !== undefined) this.y = (data.posY / 100) * height;
             }
 
             draw(ctx) {
@@ -461,22 +479,29 @@
                 ctx.fillText(this.name, this.x, this.y + this.height/2 + 20);
 
                 ctx.font = '20px Montserrat';
-                ctx.fillText('❤️'.repeat(this.lives), this.x, this.y - this.height/2 - 15);
+                ctx.fillText('❤️'.repeat(Math.max(0, this.lives)), this.x, this.y - this.height/2 - 15);
             }
         }
 
+        // ============================================================
+        // ЧАСТИЦЫ
+        // ============================================================
         function spawnParticles(x, y, color) {
             for (let i = 0; i < 30; i++) {
                 particles.push({
-                    x: x, y: y,
+                    x, y,
                     vx: (Math.random() - 0.5) * 25,
                     vy: (Math.random() - 0.5) * 25,
-                    life: 1, color: color || '#ffffff',
+                    life: 1,
+                    color: color || '#ffffff',
                     size: Math.random() * 8 + 2
                 });
             }
         }
 
+        // ============================================================
+        // СНЕЖОК
+        // ============================================================
         class Snowball {
             constructor(shooter, power, angle) {
                 this.x = shooter.x;
@@ -489,16 +514,31 @@
                 this.vx = Math.cos(rad) * speed * direction;
                 this.vy = -Math.sin(rad) * speed;
                 
-                this.gravity = 0.3; 
-                
+                this.gravity = 0.3;
                 this.isMega = (power > 90);
                 this.team = shooter.team;
+                this.dead = false;
+                this.trailCooldown = 0;
             }
 
             update() {
                 this.x += this.vx;
                 this.y += this.vy;
                 this.vy += this.gravity;
+
+                // Трейл
+                this.trailCooldown--;
+                if (this.trailCooldown <= 0 && Math.random() > 0.3) {
+                    particles.push({
+                        x: this.x, y: this.y,
+                        vx: (Math.random() - 0.5) * 2,
+                        vy: (Math.random() - 0.5) * 2,
+                        life: 0.8,
+                        color: 'rgba(127, 227, 255, 0.6)',
+                        size: Math.random() * 4 + 2
+                    });
+                    this.trailCooldown = 2;
+                }
             }
 
             draw(ctx) {
@@ -515,26 +555,27 @@
                 ctx.fill();
                 
                 ctx.shadowBlur = 0;
-
-                if (Math.random() > 0.3) {
-                    particles.push({
-                        x: this.x, y: this.y,
-                        vx: (Math.random() - 0.5) * 2, vy: (Math.random() - 0.5) * 2,
-                        life: 0.8, color: 'rgba(127, 227, 255, 0.6)',
-                        size: Math.random() * 4 + 2
-                    });
-                }
             }
         }
 
-        function ensurePlayerPositions(data) {
+        // ============================================================
+        // РАССТАНОВКА ИГРОКОВ (только когда нужно)
+        // ============================================================
+        async function ensurePlayerPositions(data, force = false) {
             const redPlayers = data.players?.red || {};
             const bluePlayers = data.players?.blue || {};
             
-            const redNeedsPositions = Object.values(redPlayers).some(p => p.posX === undefined || p.posY === undefined);
-            const blueNeedsPositions = Object.values(bluePlayers).some(p => p.posX === undefined || p.posY === undefined);
-            
-            if (redNeedsPositions) {
+            const needsPositions = (teamPlayers) => {
+                const entries = Object.entries(teamPlayers);
+                if (entries.length === 0) return false;
+                return entries.some(([id, p]) => 
+                    force || p.posX === undefined || p.posY === undefined
+                );
+            };
+
+            const updates = [];
+
+            if (needsPositions(redPlayers)) {
                 const keys = Object.keys(redPlayers);
                 const usedY = [];
                 keys.forEach((id) => {
@@ -545,11 +586,11 @@
                         attempts++;
                     } while (usedY.some(y => Math.abs(y - posY) < 10) && attempts < 50);
                     usedY.push(posY);
-                    update(ref(db, `games/${gameId}/players/red/${id}`), { posX, posY });
+                    updates.push(update(ref(db, `games/${gameId}/players/red/${id}`), { posX, posY }));
                 });
             }
             
-            if (blueNeedsPositions) {
+            if (needsPositions(bluePlayers)) {
                 const keys = Object.keys(bluePlayers);
                 const usedY = [];
                 keys.forEach((id) => {
@@ -560,22 +601,28 @@
                         attempts++;
                     } while (usedY.some(y => Math.abs(y - posY) < 10) && attempts < 50);
                     usedY.push(posY);
-                    update(ref(db, `games/${gameId}/players/blue/${id}`), { posX, posY });
+                    updates.push(update(ref(db, `games/${gameId}/players/blue/${id}`), { posX, posY }));
                 });
             }
+
+            if (updates.length > 0) await Promise.all(updates);
         }
 
+        // ============================================================
+        // ИГРОВОЙ ЦИКЛ
+        // ============================================================
         function gameLoop() {
             ctx.clearRect(0, 0, width, height);
 
+            // Фон
             ctx.fillStyle = 'rgba(10, 37, 64, 0.2)';
             ctx.fillRect(0, 0, width, height);
-
             ctx.fillStyle = 'rgba(239, 68, 68, 0.05)';
             ctx.fillRect(0, 0, width * 0.25, height);
             ctx.fillStyle = 'rgba(59, 130, 246, 0.05)';
             ctx.fillRect(width * 0.75, 0, width * 0.25, height);
 
+            // Сетка
             ctx.strokeStyle = 'rgba(127, 227, 255, 0.05)';
             ctx.lineWidth = 1;
             for (let x = 0; x < width; x += 50) {
@@ -585,88 +632,163 @@
                 ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(width, y); ctx.stroke();
             }
 
+            // Игроки
             players.forEach(p => p.draw(ctx));
 
-            snowballs.forEach((ball, index) => {
+            // Снежки — обратный цикл, чтобы безопасно удалять
+            for (let i = snowballs.length - 1; i >= 0; i--) {
+                const ball = snowballs[i];
                 ball.update();
                 ball.draw(ctx);
 
                 let hit = false;
-                for (let p of players) {
+                players.forEach(p => {
+                    if (hit) return;
                     if (p.team !== ball.team && p.alive) {
                         const dx = Math.abs(ball.x - p.x);
                         const dy = Math.abs(ball.y - p.y);
                         if (dx < p.width/2 && dy < p.height/2) {
                             hit = true;
-                            
-                            const newLives = Math.max(0, p.lives - 1);
-                            p.lives = newLives;
-                            if (newLives <= 0) p.alive = false;
-                            
-                            update(ref(db, `games/${gameId}/players/${p.team}/${p.id}`), {
-                                lives: p.lives, alive: p.alive
-                            });
-
-                            spawnParticles(ball.x, ball.y, p.team === 'red' ? '#ef4444' : '#3b82f6');
-                            document.getElementById('main-body').classList.add('screen-shake');
-                            setTimeout(() => document.getElementById('main-body').classList.remove('screen-shake'), 400);
-
-                            if (ball.isMega) {
-                                const megaDiv = document.createElement('div');
-                                megaDiv.className = 'mega-text'; 
-                                megaDiv.innerText = 'МЕГАБРОСОК!';
-                                document.body.appendChild(megaDiv);
-                                setTimeout(() => megaDiv.remove(), 2000);
-                            }
-
-                            const redLives = players.filter(pl => pl.team === 'red').reduce((sum, pl) => sum + pl.lives, 0);
-                            const blueLives = players.filter(pl => pl.team === 'blue').reduce((sum, pl) => sum + pl.lives, 0);
-                            
-                            if (redLives <= 0) {
-                                update(gameRef, { status: 'finished', winner: 'blue' });
-                            } else if (blueLives <= 0) {
-                                update(gameRef, { status: 'finished', winner: 'red' });
-                            }
-
-                            break;
+                            handleHit(ball, p);
                         }
                     }
-                }
+                });
 
-                if (hit || ball.x < -50 || ball.x > width + 50 || ball.y > height + 50) {
-                    snowballs.splice(index, 1);
+                if (hit || ball.x < -100 || ball.x > width + 100 || ball.y > height + 100 || ball.y < -200) {
+                    snowballs.splice(i, 1);
                 }
-            });
+            }
 
-            particles.forEach((p, index) => {
-                p.x += p.vx; p.y += p.vy; p.life -= 0.02;
-                if (p.life <= 0) { particles.splice(index, 1); return; }
-                ctx.globalAlpha = p.life; ctx.fillStyle = p.color;
-                ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2); ctx.fill(); ctx.globalAlpha = 1;
-            });
+            // Частицы
+            for (let i = particles.length - 1; i >= 0; i--) {
+                const p = particles[i];
+                p.x += p.vx;
+                p.y += p.vy;
+                p.vy += 0.15;
+                p.life -= 0.02;
+                if (p.life <= 0) {
+                    particles.splice(i, 1);
+                    continue;
+                }
+                ctx.globalAlpha = p.life;
+                ctx.fillStyle = p.color;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.globalAlpha = 1;
+            }
 
             requestAnimationFrame(gameLoop);
         }
 
+        // ============================================================
+        // ПОПАДАНИЕ
+        // ============================================================
+        async function handleHit(ball, p) {
+            const newLives = Math.max(0, p.lives - 1);
+            const newAlive = newLives > 0;
+
+            // Локально сразу обновляем
+            p.lives = newLives;
+            p.alive = newAlive;
+
+            // Отправляем в Firebase
+            await update(ref(db, `games/${gameId}/players/${p.team}/${p.id}`), {
+                lives: newLives,
+                alive: newAlive
+            });
+
+            // Эффекты
+            spawnParticles(ball.x, ball.y, p.team === 'red' ? '#ef4444' : '#3b82f6');
+            document.getElementById('main-body').classList.add('screen-shake');
+            setTimeout(() => document.getElementById('main-body').classList.remove('screen-shake'), 400);
+
+            if (ball.isMega) {
+                const megaDiv = document.createElement('div');
+                megaDiv.className = 'mega-text';
+                megaDiv.innerText = 'МЕГАБРОСОК!';
+                document.body.appendChild(megaDiv);
+                setTimeout(() => megaDiv.remove(), 2000);
+            }
+
+            // Проверка победы
+            await checkGameOver();
+        }
+
+        let checkingGameOver = false;
+        async function checkGameOver() {
+            if (checkingGameOver) return;
+            checkingGameOver = true;
+
+            try {
+                const snap = await get(ref(db, `games/${gameId}/players`));
+                const playersData = snap.val() || {};
+                
+                const teamLives = (team) => {
+                    const teamPlayers = playersData[team] || {};
+                    return Object.values(teamPlayers).reduce((sum, p) => 
+                        sum + (p.alive && p.lives > 0 ? p.lives : 0), 0
+                    );
+                };
+
+                const redLives = teamLives('red');
+                const blueLives = teamLives('blue');
+
+                // Обновляем верхние сердечки
+                document.getElementById('heart-red').innerText = redLives > 0 ? '❤️'.repeat(redLives) : '💀';
+                document.getElementById('heart-blue').innerText = blueLives > 0 ? '❤️'.repeat(blueLives) : '💀';
+
+                if (redLives <= 0 && blueLives <= 0) {
+                    await update(gameRef, { status: 'finished', winner: 'none' });
+                } else if (redLives <= 0) {
+                    await update(gameRef, { status: 'finished', winner: 'blue' });
+                } else if (blueLives <= 0) {
+                    await update(gameRef, { status: 'finished', winner: 'red' });
+                }
+            } finally {
+                checkingGameOver = false;
+            }
+        }
+
+        // ============================================================
+        // QR
+        // ============================================================
         function generateQRs() {
+            if (hasGeneratedQR) return;
+            hasGeneratedQR = true;
+
             document.getElementById('qr-container').classList.remove('hidden');
             document.getElementById('tv-status').classList.remove('hidden');
             const redUrl = `${currentBaseUrl}play.html?game=${gameId}&team=red`;
             const blueUrl = `${currentBaseUrl}play.html?game=${gameId}&team=blue`;
             document.getElementById('qr-red').innerHTML = '';
             document.getElementById('qr-blue').innerHTML = '';
+            
             const qrRed = qrcode(0, 'M'); qrRed.addData(redUrl); qrRed.make();
             document.getElementById('qr-red').innerHTML = qrRed.createImgTag(4, 8);
+            
             const qrBlue = qrcode(0, 'M'); qrBlue.addData(blueUrl); qrBlue.make();
             document.getElementById('qr-blue').innerHTML = qrBlue.createImgTag(4, 8);
         }
 
+        function resetQRs() {
+            hasGeneratedQR = false;
+            document.getElementById('qr-container').classList.add('hidden');
+            document.getElementById('tv-status').classList.add('hidden');
+        }
+
+        // ============================================================
+        // ВЫБОР ПЕРВОЙ КОМАНДЫ
+        // ============================================================
         window.selectFirstTeam = (team) => {
             update(ref(db, `games/${gameId}`), { firstTeam: team });
             document.getElementById('btn-red-start').classList.toggle('active', team === 'red');
             document.getElementById('btn-blue-start').classList.toggle('active', team === 'blue');
         };
 
+        // ============================================================
+        // ПРЕЛОУДИНГ
+        // ============================================================
         function startPreload(data) {
             if (isPreloading) return;
             isPreloading = true;
@@ -697,23 +819,35 @@
                     clearInterval(preloadInterval);
                     preloadView.classList.remove('active');
                     isPreloading = false;
-                    update(gameRef, { status: 'playing', timer: null });
+                    update(gameRef, { status: 'playing', timer: null, preloadDone: true });
                 }
             }, 1000);
         }
 
+        // ============================================================
+        // БЕГУЩАЯ СТРОКА
+        // ============================================================
         onValue(ref(db, `games/${gameId}/ticker_messages`), (snap) => {
             const messages = snap.val() || {};
             const keys = Object.keys(messages).sort((a, b) => messages[a].time - messages[b].time);
-            if (keys.length > 0) {
-                const allTexts = keys.map(key => messages[key].text).join('  •  ');
-                document.getElementById('ticker-text').innerText = allTexts;
-            } else {
-                document.getElementById('ticker-text').innerText = 'ДОБРО ПОЖАЛОВАТЬ НА ВЕЧЕРИНКУ ENDORPHIN!';
+            const text = keys.length > 0 
+                ? keys.map(key => messages[key].text).join('  •  ') 
+                : 'ДОБРО ПОЖАЛОВАТЬ НА ВЕЧЕРИНКУ ENDORPHIN!';
+            
+            if (text !== lastTickerText) {
+                lastTickerText = text;
+                const ticker = document.getElementById('ticker-text');
+                ticker.innerText = text;
+                // Перезапуск анимации
+                ticker.style.animation = 'none';
+                void ticker.offsetWidth;
+                ticker.style.animation = '';
             }
         });
 
+        // ============================================================
         // РЕКЛАМА
+        // ============================================================
         onValue(ref(db, `games/${gameId}/ad_settings`), (snap) => {
             const data = snap.val();
             if (!data) return;
@@ -754,123 +888,313 @@
             }
         });
 
+        // ============================================================
+        // ОСНОВНОЙ СЛУШАТЕЛЬ
+        // ============================================================
         onValue(gameRef, (snapshot) => {
             const data = snapshot.val();
             if (!data) return;
 
+            currentData = data;
+
+            // Режим
             if (data.mode) {
                 document.getElementById('tv-mode').innerText = `РЕЖИМ: ${data.mode.toUpperCase()}`;
-                if (data.status === 'lobby') generateQRs();
             }
 
+            // Синхронизация игроков
+            syncPlayers(data);
+
+            // Сердечки на экране
+            updateHeartsUI();
+
+            // ---------- ЛОББИ ----------
+            if (data.status === 'lobby') {
+                handleLobby(data);
+                return;
+            }
+
+            // ---------- ПРЕЛОУДИНГ ----------
+            if (data.status === 'playing' && !data.preloadDone && !isPreloading) {
+                startPreload(data);
+            }
+
+            // ---------- ИГРА ----------
             if (data.status === 'playing') {
+                handlePlaying(data);
+            }
+
+            // ---------- ФИНИШ ----------
+            if (data.status === 'finished') {
+                handleFinished(data);
+            }
+        });
+
+        // ============================================================
+        // СИНХРОНИЗАЦИЯ ИГРОКОВ
+        // ============================================================
+        function syncPlayers(data) {
+            const redPlayers = data.players?.red || {};
+            const bluePlayers = data.players?.blue || {};
+
+            // Удаляем тех, кого нет в БД
+            const allIds = new Set([
+                ...Object.keys(redPlayers),
+                ...Object.keys(bluePlayers)
+            ]);
+            for (const [id] of players) {
+                if (!allIds.has(id)) players.delete(id);
+            }
+
+            // Обновляем/создаём
+            Object.entries(redPlayers).forEach(([id, p]) => {
+                if (players.has(id)) players.get(id).update(p);
+                else players.set(id, new Player(id, p, 'red'));
+            });
+            Object.entries(bluePlayers).forEach(([id, p]) => {
+                if (players.has(id)) players.get(id).update(p);
+                else players.set(id, new Player(id, p, 'blue'));
+            });
+        }
+
+        // ============================================================
+        // СЕРДЕЧКИ (UI)
+        // ============================================================
+        function updateHeartsUI() {
+            let red = 0, blue = 0;
+            players.forEach(p => {
+                if (p.alive && p.lives > 0) {
+                    if (p.team === 'red') red += p.lives;
+                    else blue += p.lives;
+                }
+            });
+            document.getElementById('heart-red').innerText = red > 0 ? '❤️'.repeat(red) : '💀';
+            document.getElementById('heart-blue').innerText = blue > 0 ? '❤️'.repeat(blue) : '💀';
+        }
+
+        // ============================================================
+        // ЛОББИ
+        // ============================================================
+        function handleLobby(data) {
+            // Показываем лобби
+            const lobbyView = document.getElementById('lobby-view');
+            lobbyView.style.opacity = '1';
+            lobbyView.style.pointerEvents = 'auto';
+
+            // Скрываем остальное
+            document.getElementById('win-view').classList.add('hidden');
+            document.getElementById('win-view').classList.remove('flex');
+            document.getElementById('preload-view').classList.remove('active');
+            document.getElementById('turn-indicator').style.display = 'none';
+            document.getElementById('tv-timer').style.display = 'none';
+
+            // Сброс финишного состояния
+            finishedHandled = false;
+            document.getElementById('confetti-container').innerHTML = '';
+
+            // QR
+            if (data.mode) {
+                generateQRs();
+                
+                const maxP = parseInt(data.mode?.charAt(0) || 1);
+                const redCount = Object.keys(data.players?.red || {}).length;
+                const blueCount = Object.keys(data.players?.blue || {}).length;
+                const isReady = redCount >= maxP && blueCount >= maxP;
+
+                document.getElementById('tv-players-red').innerHTML = 
+                    Object.values(data.players?.red || {}).map(p => 
+                        `<div class="text-red-300 font-bold bg-red-900/40 py-1 rounded border border-red-500/50">👤 ${escapeHtml(p.name)}</div>`
+                    ).join('');
+                document.getElementById('tv-players-blue').innerHTML = 
+                    Object.values(data.players?.blue || {}).map(p => 
+                        `<div class="text-blue-300 font-bold bg-blue-900/40 py-1 rounded border border-blue-500/50">👤 ${escapeHtml(p.name)}</div>`
+                    ).join('');
+
+                if (isReady) {
+                    document.getElementById('team-select').classList.remove('hidden');
+                    document.getElementById('tv-status').innerText = "ВСЕ ГОТОВЫ! ВЫБЕРИТЕ ПЕРВУЮ КОМАНДУ.";
+                    document.getElementById('tv-status').classList.add('text-green-400');
+                } else {
+                    document.getElementById('team-select').classList.add('hidden');
+                    document.getElementById('tv-status').innerText = "ОЖИДАНИЕ ИГРОКОВ...";
+                    document.getElementById('tv-status').classList.remove('text-green-400');
+                }
+
+                // Активная команда
+                if (data.firstTeam) {
+                    document.getElementById('btn-red-start').classList.toggle('active', data.firstTeam === 'red');
+                    document.getElementById('btn-blue-start').classList.toggle('active', data.firstTeam === 'blue');
+                }
+            }
+        }
+
+        // ============================================================
+        // ИГРА
+        // ============================================================
+        function handlePlaying(data) {
+            const lobbyView = document.getElementById('lobby-view');
+            lobbyView.style.opacity = '0';
+            lobbyView.style.pointerEvents = 'none';
+            document.getElementById('team-select').classList.add('hidden');
+
+            // Таймер
+            const tvTimer = document.getElementById('tv-timer');
+            if (data.timer !== null && data.timer !== undefined) {
+                tvTimer.style.display = 'block';
+                tvTimer.innerText = data.timer;
+            } else {
+                tvTimer.style.display = 'none';
+            }
+
+            // Ход
+            const turnIndicator = document.getElementById('turn-indicator');
+            if (data.turn && data.preloadDone) {
+                turnIndicator.style.display = 'block';
+                turnIndicator.innerText = `ХОД: ${data.turn.name.toUpperCase()}`;
+                turnIndicator.style.color = data.turn.team === 'red' ? '#ef4444' : '#3b82f6';
+            } else {
+                turnIndicator.style.display = 'none';
+            }
+
+            // Координаты — только если есть, и только если preloadDone
+            if (data.preloadDone && data.players) {
                 ensurePlayerPositions(data);
             }
+        }
 
-            const redPlayers = Object.entries(data.players?.red || {}).map(([id, p]) => new Player(id, p, 'red'));
-            const bluePlayers = Object.entries(data.players?.blue || {}).map(([id, p]) => new Player(id, p, 'blue'));
-            
-            if (players.length === 0) {
-                players = [...redPlayers, ...bluePlayers];
+        // ============================================================
+        // ФИНИШ
+        // ============================================================
+        function handleFinished(data) {
+            if (finishedHandled) return;
+            finishedHandled = true;
+
+            // Скрываем лобби
+            const lobbyView = document.getElementById('lobby-view');
+            lobbyView.style.opacity = '0';
+            lobbyView.style.pointerEvents = 'none';
+            document.getElementById('preload-view').classList.remove('active');
+            document.getElementById('turn-indicator').style.display = 'none';
+            document.getElementById('tv-timer').style.display = 'none';
+
+            // Показываем финиш
+            const winView = document.getElementById('win-view');
+            winView.classList.remove('hidden');
+            winView.classList.add('flex');
+
+            const winText = document.getElementById('win-text');
+            const winEmoji = document.getElementById('win-emoji');
+            const winSubtitle = document.getElementById('win-subtitle');
+
+            if (data.winner === 'red') {
+                winText.innerText = 'КРАСНЫЕ ПОБЕДИЛИ!';
+                winText.className = 'text-9xl font-black text-red-500 mb-12';
+                winEmoji.innerText = '🔴';
+                winSubtitle.innerText = 'ТАКТИКА, СИЛА, ПОБЕДА';
+                launchConfetti(['#ef4444', '#f87171', '#fca5a5']);
+            } else if (data.winner === 'blue') {
+                winText.innerText = 'СИНИЕ ПОБЕДИЛИ!';
+                winText.className = 'text-9xl font-black text-blue-500 mb-12';
+                winEmoji.innerText = '🔵';
+                winSubtitle.innerText = 'ЛЁД, СКОРОСТЬ, ТОЧНОСТЬ';
+                launchConfetti(['#3b82f6', '#60a5fa', '#93c5fd']);
             } else {
-                players.forEach(p => {
-                    const updated = [...redPlayers, ...bluePlayers].find(up => up.id === p.id);
-                    if (updated) {
-                        p.lives = updated.lives;
-                        p.alive = updated.alive;
-                        if (updated.x && updated.y) {
-                            p.x = updated.x;
-                            p.y = updated.y;
-                        }
-                    }
-                });
+                winText.innerText = 'ИГРА ОКОНЧЕНА';
+                winText.className = 'text-9xl font-black text-white mb-12';
+                winEmoji.innerText = '🏁';
+                winSubtitle.innerText = 'СПАСИБО ЗА ИГРУ';
+            }
+        }
+
+        // ============================================================
+        // КОНФЕТТИ
+        // ============================================================
+        function launchConfetti(colors) {
+            const container = document.getElementById('confetti-container');
+            const defaultColors = ['#fbbf24', '#f59e0b', '#22d3ee', '#3b82f6', '#ef4444', '#a855f7', '#22c55e'];
+            const palette = colors || defaultColors;
+
+            for (let i = 0; i < 80; i++) {
+                const c = document.createElement('div');
+                c.className = 'confetti';
+                c.style.left = Math.random() * 100 + 'vw';
+                c.style.background = palette[Math.floor(Math.random() * palette.length)];
+                c.style.width = (Math.random() * 8 + 6) + 'px';
+                c.style.height = (Math.random() * 8 + 6) + 'px';
+                c.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+                c.style.animationDuration = (Math.random() * 2 + 2) + 's';
+                c.style.animationDelay = (Math.random() * 0.5) + 's';
+                container.appendChild(c);
             }
 
-            document.getElementById('tv-players-red').innerHTML = redPlayers.map(p => `<div class="text-red-300 font-bold bg-red-900/40 py-1 rounded border border-red-500/50">👤 ${p.name}</div>`).join('');
-            document.getElementById('tv-players-blue').innerHTML = bluePlayers.map(p => `<div class="text-blue-300 font-bold bg-blue-900/40 py-1 rounded border border-blue-500/50">👤 ${p.name}</div>`).join('');
+            setTimeout(() => {
+                container.innerHTML = '';
+            }, 6000);
+        }
 
-            const maxP = parseInt(data.mode?.charAt(0) || 1);
-            const isReady = redPlayers.length >= maxP && bluePlayers.length >= maxP;
-
-            if (data.status === 'playing' && !isPreloading && !data.preloadDone) {
-                startPreload(data);
-                update(gameRef, { preloadDone: true });
-            }
-
-            if (data.status === 'lobby') {
-                document.getElementById('lobby-view').style.opacity = '1';
-                document.getElementById('lobby-view').style.pointerEvents = 'auto';
-                document.getElementById('win-view').classList.add('hidden');
-                document.getElementById('win-view').classList.remove('flex');
-                document.getElementById('preload-view').classList.remove('active');
-                
-                if (data.mode) {
-                    document.getElementById('qr-container').classList.remove('hidden');
-                    if (isReady) {
-                        document.getElementById('team-select').classList.remove('hidden');
-                        document.getElementById('tv-status').innerText = "ВСЕ ГОТОВЫ! ВЫБЕРИТЕ ПЕРВУЮ КОМАНДУ.";
-                        document.getElementById('tv-status').classList.add('text-green-400');
-                    } else {
-                        document.getElementById('team-select').classList.add('hidden');
-                        document.getElementById('tv-status').innerText = "ОЖИДАНИЕ ИГРОКОВ...";
-                        document.getElementById('tv-status').classList.remove('text-green-400');
-                    }
-                }
-            }
-
-            if (data.status === 'playing') {
-                document.getElementById('lobby-view').style.opacity = '0';
-                document.getElementById('lobby-view').style.pointerEvents = 'none';
-                document.getElementById('team-select').classList.add('hidden');
-                document.getElementById('turn-indicator').style.display = 'block';
-                
-                if (data.turn) {
-                    document.getElementById('turn-indicator').innerText = `ХОД: ${data.turn.name.toUpperCase()}`;
-                    document.getElementById('turn-indicator').style.color = data.turn.team === 'red' ? '#ef4444' : '#3b82f6';
-                }
-            }
-
-            if (data.status === 'finished') {
-                const winView = document.getElementById('win-view');
-                winView.classList.remove('hidden');
-                winView.classList.add('flex');
-                const winText = document.getElementById('win-text');
-                if (data.winner === 'red') { winText.innerText = 'КРАСНЫЕ ПОБЕДИЛИ!'; winText.className = 'text-9xl font-black text-red-500 mb-12'; }
-                else if (data.winner === 'blue') { winText.innerText = 'СИНИЕ ПОБЕДИЛИ!'; winText.className = 'text-9xl font-black text-blue-500 mb-12'; }
-            }
-
-            document.getElementById('heart-red').innerText = '❤️'.repeat(redPlayers.reduce((a, b) => a + b.lives, 0)) || '💀';
-            document.getElementById('heart-blue').innerText = '❤️'.repeat(bluePlayers.reduce((a, b) => a + b.lives, 0)) || '💀';
-        });
-
-        onValue(ref(db, `games/${gameId}/timer`), (snap) => {
-            const val = snap.val();
-            document.getElementById('tv-timer').innerText = (val !== null && val !== undefined) ? val : '';
-            document.getElementById('tv-timer').style.display = (val !== null) ? 'block' : 'none';
-        });
-
+        // ============================================================
+        // ВЫСТРЕЛ
+        // ============================================================
         onValue(ref(db, `games/${gameId}/last_shot`), (snap) => {
             const shot = snap.val();
-            if (!shot || shot.animated) return;
-            shot.animated = true;
+            if (!shot || !shot.time) return;
+            if (shot.time === lastShotTime) return;
+            lastShotTime = shot.time;
 
-            const shooter = players.find(p => p.id === shot.shooterId);
-            if (shooter) {
+            const shooter = players.get(shot.shooterId);
+            if (shooter && shooter.alive) {
                 const ball = new Snowball(shooter, shot.power, shot.angle);
                 snowballs.push(ball);
             }
         });
 
-        gameLoop();
+        // ============================================================
+        // ТАЙМЕР (глобальный)
+        // ============================================================
+        onValue(ref(db, `games/${gameId}/timer`), (snap) => {
+            const val = snap.val();
+            const tvTimer = document.getElementById('tv-timer');
+            if (val !== null && val !== undefined) {
+                tvTimer.innerText = val;
+                tvTimer.style.display = 'block';
+            } else {
+                tvTimer.style.display = 'none';
+            }
+        });
 
+        // ============================================================
+        // ЭКРАНИРОВАНИЕ HTML
+        // ============================================================
+        function escapeHtml(str) {
+            if (!str) return '';
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
+        // ============================================================
+        // СНЕЖИНКИ
+        // ============================================================
         const snowContainer = document.getElementById('snow-container');
-        for (let i = 0; i < 50; i++) {
-            const s = document.createElement('div'); s.className = 'snowflake'; s.innerText = '❄';
-            s.style.left = Math.random() * 100 + '%'; s.style.fontSize = (10 + Math.random() * 20) + 'px';
-            s.style.animationDuration = (4 + Math.random() * 8) + 's'; s.style.animationDelay = (-Math.random() * 10) + 's';
+        for (let i = 0; i < 40; i++) {
+            const s = document.createElement('div');
+            s.className = 'snowflake';
+            s.innerText = '❄';
+            s.style.left = Math.random() * 100 + '%';
+            s.style.fontSize = (10 + Math.random() * 20) + 'px';
+            s.style.animationDuration = (4 + Math.random() * 8) + 's';
+            s.style.animationDelay = (-Math.random() * 10) + 's';
             s.style.opacity = Math.random() * 0.7 + 0.3;
             snowContainer.appendChild(s);
         }
+
+        // ============================================================
+        // СТАРТ
+        // ============================================================
+        gameLoop();
     </script>
 </body>
 </html>
