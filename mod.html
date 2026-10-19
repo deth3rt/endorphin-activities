@@ -68,6 +68,14 @@
     }
     .pulse-status { animation: pulseStatus 1.5s ease-in-out infinite; }
 
+    @keyframes shake {
+      0%, 100% { transform: translate(0,0); }
+      25% { transform: translate(-4px, 2px); }
+      50% { transform: translate(4px, -2px); }
+      75% { transform: translate(-2px, 1px); }
+    }
+    .animate-shake { animation: shake 0.4s ease-in-out; }
+
     /* Селектор чисел */
     .num-selector {
       display: flex;
@@ -151,13 +159,12 @@
 
     <!-- Нечестный режим -->
     <div class="glass w-full max-w-4xl p-6 mb-8 flex flex-col items-center">
-      <div class="flex items-center gap-3 mb-4">
+      <div class="flex items-center gap-3 mb-4 flex-wrap justify-center">
         <h2 class="text-lg font-bold text-cyan-100">НЕЧЕСТНЫЙ БОЙ</h2>
         <span class="unfair-badge" id="unfair-badge" style="display: none;">⚔️ МЕНЬШАЯ КОМАНДА ПОЛУЧИТ БОНУС</span>
       </div>
       
       <div class="grid grid-cols-2 gap-8 w-full max-w-lg">
-        <!-- Красные -->
         <div class="text-center">
           <div class="text-red-400 font-bold mb-2 text-sm">🔴 КРАСНЫЕ</div>
           <div class="num-selector">
@@ -167,12 +174,10 @@
           </div>
         </div>
         
-        <!-- VS -->
         <div class="text-center flex items-center justify-center">
           <div class="text-3xl font-black text-white/30 italic">VS</div>
         </div>
         
-        <!-- Синие -->
         <div class="text-center">
           <div class="text-blue-400 font-bold mb-2 text-sm">🔵 СИНИЕ</div>
           <div class="num-selector">
@@ -182,11 +187,10 @@
           </div>
         </div>
         
-        <!-- VS (пусто) -->
         <div></div>
       </div>
       
-      <button onclick="applyUnfair()" class="mt-4 px-8 py-3 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-xl font-black text-black hover:shadow-lg transition">
+      <button onclick="applyUnfair(event)" id="unfair-apply-btn" class="mt-4 px-8 py-3 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-xl font-black text-black hover:shadow-lg transition">
         ⚔️ ПРИМЕНИТЬ НЕЧЕСТНЫЙ РЕЖИМ
       </button>
       
@@ -311,24 +315,24 @@
     let unfairBlue = 1;
 
     // ============================================================
-    // ПАРСИНГ РЕЖИМА
+    // ПАРСИНГ РЕЖИМА (с защитой от кривых данных)
     // ============================================================
     function parseMode(mode) {
       if (!mode || typeof mode !== 'string') return { redMax: 1, blueMax: 1, isUnfair: false };
       
       if (mode.includes('v')) {
-        const parts = mode.split('v');
-        const redMax = parseInt(parts[0]) || 1;
-        const blueMax = parseInt(parts[1]) || 1;
+        const parts = mode.split('v').slice(0, 2);
+        const redMax = Math.max(1, Math.min(4, parseInt(parts[0]) || 1));
+        const blueMax = Math.max(1, Math.min(4, parseInt(parts[1]) || 1));
         return { redMax, blueMax, isUnfair: redMax !== blueMax };
       }
       
-      const n = parseInt(mode.charAt(0)) || 1;
+      const n = Math.max(1, Math.min(4, parseInt(mode.charAt(0)) || 1));
       return { redMax: n, blueMax: n, isUnfair: false };
     }
 
     // ============================================================
-    // РАСЧЁТ ЖИЗНЕЙ (с компенсацией)
+    // РАСЧЁТ ЖИЗНЕЙ
     // ============================================================
     function calculateLives(mode) {
       const { redMax, blueMax, isUnfair } = parseMode(mode);
@@ -337,22 +341,13 @@
         return { redLives: 3, blueLives: 3 };
       }
       
-      // Компенсация: меньшая команда получает больше жизней
       const diff = Math.abs(redMax - blueMax);
       const baseLives = 3;
       
       if (redMax < blueMax) {
-        // Красные в меньшинстве
-        return { 
-          redLives: baseLives + diff,   // 1v4 → 3 + 3 = 6
-          blueLives: baseLives          // 4v1 → 3 у каждого
-        };
+        return { redLives: baseLives + diff, blueLives: baseLives };
       } else {
-        // Синие в меньшинстве
-        return { 
-          redLives: baseLives,          // 4 у каждого
-          blueLives: baseLives + diff   // 1v4 → 6
-        };
+        return { redLives: baseLives, blueLives: baseLives + diff };
       }
     }
 
@@ -375,6 +370,21 @@
           timer: null,
           preloadDone: false
         });
+      } else if (existing.status === 'playing') {
+        if (confirm('Игра уже идёт. Сбросить её и вернуться в лобби?')) {
+          await update(gameRef, {
+            status: 'lobby',
+            players: { red: {}, blue: {} },
+            turn: { team: existing.firstTeam || 'red', name: '...' },
+            activePlayerId: null,
+            timer: null,
+            preloadDone: false,
+            winner: null,
+            last_shot: null,
+            shots: null
+          });
+          try { await remove(ref(db, 'games/battle_1/aim')); } catch {}
+        }
       } else {
         await update(gameRef, {
           status: 'lobby',
@@ -392,11 +402,18 @@
     initGame();
 
     // ============================================================
-    // РЕЖИМ
+    // РЕЖИМ (со сбросом нечестного селектора)
     // ============================================================
     window.setMode = (mode) => { 
       if (currentData?.status === 'playing') return;
       if (currentData?.status === 'finished') return;
+      
+      const parts = mode.split('v');
+      const n = Math.max(1, Math.min(4, parseInt(parts[0]) || 1));
+      unfairRed = n;
+      unfairBlue = n;
+      updateUnfairSelectorUI();
+      
       update(gameRef, { mode });
     };
 
@@ -411,7 +428,7 @@
     };
 
     // ============================================================
-    // НЕЧЕСТНЫЙ РЕЖИМ — СЕЛЕКТОРЫ
+    // НЕЧЕСТНЫЙ РЕЖИМ
     // ============================================================
     window.changeUnfair = (team, delta) => {
       if (currentData?.status === 'playing') return;
@@ -419,27 +436,41 @@
       
       if (team === 'red') {
         unfairRed = Math.max(1, Math.min(4, unfairRed + delta));
-        document.getElementById('unfair-red').innerText = unfairRed;
-        document.getElementById('unfair-red-minus').disabled = unfairRed <= 1;
-        document.getElementById('unfair-red-plus').disabled = unfairRed >= 4;
       } else {
         unfairBlue = Math.max(1, Math.min(4, unfairBlue + delta));
-        document.getElementById('unfair-blue').innerText = unfairBlue;
-        document.getElementById('unfair-blue-minus').disabled = unfairBlue <= 1;
-        document.getElementById('unfair-blue-plus').disabled = unfairBlue >= 4;
       }
       
-      // Обновляем бейдж
-      const isUnfair = unfairRed !== unfairBlue;
-      document.getElementById('unfair-badge').style.display = isUnfair ? 'inline-block' : 'none';
+      updateUnfairSelectorUI();
     };
 
-    window.applyUnfair = () => {
+    function updateUnfairSelectorUI() {
+      document.getElementById('unfair-red').innerText = unfairRed;
+      document.getElementById('unfair-blue').innerText = unfairBlue;
+      document.getElementById('unfair-red-minus').disabled = unfairRed <= 1;
+      document.getElementById('unfair-red-plus').disabled = unfairRed >= 4;
+      document.getElementById('unfair-blue-minus').disabled = unfairBlue <= 1;
+      document.getElementById('unfair-blue-plus').disabled = unfairBlue >= 4;
+      
+      const isUnfair = unfairRed !== unfairBlue;
+      document.getElementById('unfair-badge').style.display = isUnfair ? 'inline-block' : 'none';
+    }
+
+    window.applyUnfair = (event) => {
       if (currentData?.status === 'playing') return;
       if (currentData?.status === 'finished') return;
       
       if (unfairRed === unfairBlue) {
-        alert('Выбери разное количество игроков для нечестного режима');
+        const btn = event?.target || document.getElementById('unfair-apply-btn');
+        btn.classList.add('animate-shake');
+        const originalText = btn.innerText;
+        const originalBg = btn.style.background;
+        btn.style.background = 'linear-gradient(90deg, #ef4444, #dc2626)';
+        btn.innerText = '⚠️ НУЖНЫ РАЗНЫЕ КОМАНДЫ';
+        setTimeout(() => {
+          btn.classList.remove('animate-shake');
+          btn.style.background = originalBg;
+          btn.innerText = originalText;
+        }, 1500);
         return;
       }
       
@@ -458,7 +489,6 @@
       const mode = data.mode || '1v1';
       const { redMax, blueMax, isUnfair } = parseMode(mode);
 
-      // ВИДИМОСТЬ ПАНЕЛЕЙ
       document.getElementById('lobby-controls').classList.toggle('hidden', status !== 'lobby');
       document.getElementById('game-controls').classList.toggle('hidden', status !== 'playing');
       document.getElementById('finished-controls').classList.toggle('hidden', status !== 'finished');
@@ -466,63 +496,49 @@
       document.getElementById('game-controls').classList.toggle('flex', status === 'playing');
       document.getElementById('finished-controls').classList.toggle('flex', status === 'finished');
 
-      // ПЕРВАЯ КОМАНДА
       if (data.firstTeam) {
         firstTeam = data.firstTeam;
         document.getElementById('btn-first-red').classList.toggle('active-red', firstTeam === 'red');
         document.getElementById('btn-first-blue').classList.toggle('active-blue', firstTeam === 'blue');
       }
 
-      // РЕЖИМ
       if (data.mode) {
         document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
         document.getElementById(`btn-${data.mode}`)?.classList.add('active');
         
-        // Синхронизация нечестного селектора
         if (isUnfair) {
           unfairRed = redMax;
           unfairBlue = blueMax;
-          document.getElementById('unfair-red').innerText = unfairRed;
-          document.getElementById('unfair-blue').innerText = unfairBlue;
-          document.getElementById('unfair-badge').style.display = 'inline-block';
+          updateUnfairSelectorUI();
         } else {
           document.getElementById('unfair-badge').style.display = 'none';
         }
         
-        // Отображение режима
         document.getElementById('mode-display').innerText = `РЕЖИМ: ${redMax} vs ${blueMax}${isUnfair ? ' ⚔️' : ''}`;
         document.getElementById('mode-display').style.color = isUnfair ? '#fbbf24' : '#22d3ee';
       }
 
-      // БЛОКИРОВКА
       const inGame = status === 'playing' || status === 'finished';
-      document.querySelectorAll('.mode-btn, .team-btn, .num-btn, #unfair-red-plus, #unfair-red-minus, #unfair-blue-plus, #unfair-blue-minus').forEach(b => {
+      document.querySelectorAll('.mode-btn, .team-btn, .num-btn, #unfair-apply-btn').forEach(b => {
         b.disabled = inGame;
       });
 
-      // СПИСКИ
       renderLobbyLists(data, redMax, blueMax);
       renderGameLists(data);
-
-      // Инфо о жизнях
       updateLivesInfo(data, mode);
-
-      // КНОПКА СТАРТ
       updateStartButton(data, redMax, blueMax);
 
-      // ИГРА
       if (status === 'playing') {
         updateGameView(data, mode);
       }
 
-      // ФИНИШ
       if (status === 'finished') {
         updateFinishedView(data);
       }
     });
 
     // ============================================================
-    // РЕНДЕР СПИСКОВ ЛОББИ
+    // РЕНДЕР СПИСКОВ
     // ============================================================
     function renderLobbyLists(data, redMax, blueMax) {
       const render = (team, listId, countId, max) => {
@@ -546,9 +562,6 @@
       render('blue', 'list-blue', 'count-blue', blueMax);
     }
 
-    // ============================================================
-    // РЕНДЕР ИГРОВЫХ СПИСКОВ
-    // ============================================================
     function renderGameLists(data) {
       const render = (team, listId) => {
         const players = Object.entries(data.players?.[team] || {});
@@ -575,7 +588,7 @@
     }
 
     // ============================================================
-    // ИНФО О ЖИЗНЯХ (с компенсацией)
+    // ИНФО О ЖИЗНЯХ
     // ============================================================
     function updateLivesInfo(data, mode) {
       const { redLives, blueLives } = calculateLives(mode);
@@ -627,7 +640,6 @@
       const { redMax, blueMax, isUnfair } = parseMode(mode);
       const { redLives, blueLives } = calculateLives(mode);
 
-      // Заголовок
       const title = document.getElementById('game-status-title');
       if (isPreloading) {
         title.innerText = 'ПРЕЛОУДИНГ...';
@@ -639,7 +651,6 @@
           : 'text-4xl font-black text-green-400 mb-4';
       }
 
-      // Ход
       const turnInfo = document.getElementById('mod-turn-info');
       if (data.turn && data.preloadDone) {
         turnInfo.innerText = `ХОД: ${data.turn.name.toUpperCase()}`;
@@ -649,11 +660,9 @@
         turnInfo.style.color = '#fbbf24';
       }
 
-      // HP
       const redTotal = Object.values(data.players?.red || {}).reduce((sum, p) => sum + (p.alive ? p.lives : 0), 0);
       const blueTotal = Object.values(data.players?.blue || {}).reduce((sum, p) => sum + (p.alive ? p.lives : 0), 0);
       
-      // Max = стартовые жизни × количество
       const maxRed = redLives * Math.max(1, Object.keys(data.players?.red || {}).length);
       const maxBlue = blueLives * Math.max(1, Object.keys(data.players?.blue || {}).length);
 
@@ -662,7 +671,6 @@
       document.getElementById('hp-fill-red').style.width = maxRed > 0 ? `${(redTotal / maxRed) * 100}%` : '0%';
       document.getElementById('hp-fill-blue').style.width = maxBlue > 0 ? `${(blueTotal / maxBlue) * 100}%` : '0%';
 
-      // Таймер
       const timerInfo = document.getElementById('mod-timer-info');
       if (data.timer !== null && data.timer !== undefined) {
         timerInfo.innerText = `⏱️ Прелоадинг: ${data.timer} сек`;
@@ -698,30 +706,29 @@
     }
 
     // ============================================================
-    // КИК ИГРОКА
+    // КИК
     // ============================================================
     window.kickPlayer = (team, id) => { 
-      if (currentData?.status !== 'lobby') {
-        alert('Нельзя кикнуть во время игры');
-        return;
-      }
+      if (currentData?.status !== 'lobby') return;
       if (!confirm('Кикнуть игрока?')) return;
       remove(ref(db, `games/battle_1/players/${team}/${id}`)); 
     };
 
     // ============================================================
-    // ЗАВЕРШЕНИЕ ИГРЫ
+    // ЗАВЕРШЕНИЕ
     // ============================================================
-    window.endGame = () => {
+    window.endGame = async () => {
       if (currentData?.status !== 'playing') return;
       if (!confirm('Завершить бой? Игра будет окончена.')) return;
       
-      update(gameRef, { 
+      await update(gameRef, { 
         status: 'finished', 
         winner: 'none',
         activePlayerId: null,
         timer: null
       });
+      
+      try { await remove(ref(db, 'games/battle_1/aim')); } catch {}
     };
 
     // ============================================================
@@ -745,8 +752,9 @@
       try {
         await remove(ref(db, 'games/battle_1/shots'));
         await remove(ref(db, 'games/battle_1/last_shot'));
+        await remove(ref(db, 'games/battle_1/aim'));
       } catch (e) {
-        console.warn('Не удалось очистить выстрелы', e);
+        console.warn('Не удалось очистить игровые данные', e);
       }
     };
 
@@ -774,75 +782,66 @@
           return;
         }
 
-        // ---------- ПРОВЕРКА КООРДИНАТ ----------
-        // play.html уже генерирует их при входе. Ждём, если кто-то не успел.
-        const missingCoords = [
-          ...Object.entries(playersRed).filter(([id, p]) => p.posX === undefined || p.posY === undefined),
-          ...Object.entries(playersBlue).filter(([id, p]) => p.posX === undefined || p.posY === undefined)
-        ];
+        // ---------- FALLBACK КООРДИНАТ ----------
+        // play.html генерирует при входе, но могут не успеть (async)
+        const usedYRed = [];
+        const usedYBlue = [];
+        const coordUpdates = [];
 
-        if (missingCoords.length > 0) {
-          alert(`Ждём загрузки координат для ${missingCoords.length} игроков. Попробуй через секунду.`);
-          isStarting = false;
-          return;
+        Object.entries(playersRed).forEach(([id, p]) => {
+          if (p.posX == null || p.posY == null) {
+            let posX, posY, attempts = 0;
+            do {
+              posX = 5 + Math.random() * 15;
+              posY = 20 + Math.random() * 60;
+              attempts++;
+            } while (usedYRed.some(y => Math.abs(y - posY) < 8) && attempts < 100);
+            usedYRed.push(posY);
+            coordUpdates.push(update(ref(db, `games/battle_1/players/red/${id}`), { posX, posY }));
+          } else {
+            usedYRed.push(p.posY);
+          }
+        });
+
+        Object.entries(playersBlue).forEach(([id, p]) => {
+          if (p.posX == null || p.posY == null) {
+            let posX, posY, attempts = 0;
+            do {
+              posX = 80 + Math.random() * 15;
+              posY = 20 + Math.random() * 60;
+              attempts++;
+            } while (usedYBlue.some(y => Math.abs(y - posY) < 8) && attempts < 100);
+            usedYBlue.push(posY);
+            coordUpdates.push(update(ref(db, `games/battle_1/players/blue/${id}`), { posX, posY }));
+          } else {
+            usedYBlue.push(p.posY);
+          }
+        });
+
+        if (coordUpdates.length > 0) {
+          await Promise.all(coordUpdates);
         }
 
         // ---------- ОБНОВЛЕНИЕ ЖИЗНЕЙ ----------
-        // Применяем компенсацию для меньшей команды
+        // calculateLives уже возвращает правильные значения
         const livesUpdates = [];
         
-        if (isUnfair) {
-          // Красные
-          if (redMax < blueMax) {
-            // Красные в меньшинстве — даём им больше жизней
-            Object.keys(playersRed).forEach(id => {
-              livesUpdates.push(update(ref(db, `games/battle_1/players/red/${id}`), { 
-                lives: redLives, 
-                alive: true 
-              }));
-            });
-            // Синие — стандартные
-            Object.keys(playersBlue).forEach(id => {
-              livesUpdates.push(update(ref(db, `games/battle_1/players/blue/${id}`), { 
-                lives: blueLives, 
-                alive: true 
-              }));
-            });
-          } else {
-            // Синие в меньшинстве
-            Object.keys(playersRed).forEach(id => {
-              livesUpdates.push(update(ref(db, `games/battle_1/players/red/${id}`), { 
-                lives: redLives, 
-                alive: true 
-              }));
-            });
-            Object.keys(playersBlue).forEach(id => {
-              livesUpdates.push(update(ref(db, `games/battle_1/players/blue/${id}`), { 
-                lives: blueLives, 
-                alive: true 
-              }));
-            });
-          }
-        } else {
-          // Честный режим — стандартные 3
-          Object.keys(playersRed).forEach(id => {
-            livesUpdates.push(update(ref(db, `games/battle_1/players/red/${id}`), { 
-              lives: 3, 
-              alive: true 
-            }));
-          });
-          Object.keys(playersBlue).forEach(id => {
-            livesUpdates.push(update(ref(db, `games/battle_1/players/blue/${id}`), { 
-              lives: 3, 
-              alive: true 
-            }));
-          });
-        }
+        Object.keys(playersRed).forEach(id => {
+          livesUpdates.push(update(ref(db, `games/battle_1/players/red/${id}`), { 
+            lives: redLives, 
+            alive: true 
+          }));
+        });
+        Object.keys(playersBlue).forEach(id => {
+          livesUpdates.push(update(ref(db, `games/battle_1/players/blue/${id}`), { 
+            lives: blueLives, 
+            alive: true 
+          }));
+        });
         
         await Promise.all(livesUpdates);
 
         // ---------- СОХРАНЯЕМ LIVES В GAME ----------
-        // Чтобы TV знал стартовые значения
         await update(gameRef, {
           lives: { red: redLives, blue: blueLives }
         });
@@ -896,9 +895,8 @@
         .replace(/'/g, '&#39;');
     }
 
-    // Инициализация нечестного селектора
-    document.getElementById('unfair-red-minus').disabled = true;
-    document.getElementById('unfair-blue-minus').disabled = true;
+    // Инициализация селектора
+    updateUnfairSelectorUI();
   </script>
 </body>
 </html>
