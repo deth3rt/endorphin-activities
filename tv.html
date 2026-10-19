@@ -635,9 +635,9 @@
         }
 
         @keyframes damageFloat {
-            0% { transform: translate(-50%, 0); opacity: 0; }
-            20% { opacity: 1; }
-            100% { transform: translate(-50%, -80px); opacity: 0; }
+            0% { transform: translate(-50%, 0) scale(0.5); opacity: 0; }
+            20% { opacity: 1; transform: translate(-50%, -10px) scale(1.1); }
+            100% { transform: translate(-50%, -90px) scale(1); opacity: 0; }
         }
         .damage-float {
             position: fixed;
@@ -837,9 +837,71 @@
 
         #win-text {
             font-size: clamp(3rem, 7vw, 8rem);
+            animation: winPop 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
         #win-emoji {
             font-size: clamp(4rem, 8vw, 9rem);
+            animation: winPop 0.8s 0.1s both cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        /* Состав победившей команды — плашка */
+        .winner-roster {
+            margin-top: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+            max-width: 90vw;
+            animation: winPop 0.8s 0.3s both cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .winner-roster-title {
+            font-size: clamp(0.7rem, 1.2vw, 1rem);
+            font-weight: 900;
+            letter-spacing: 0.3em;
+            color: rgba(255,255,255,0.5);
+            text-transform: uppercase;
+            margin-bottom: 0.4rem;
+        }
+        .winner-roster-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.6rem 0.8rem;
+            justify-content: center;
+            padding: 1rem 1.4rem;
+            border-radius: 1.2rem;
+            background: rgba(0,0,0,0.5);
+            border: 2px solid;
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+        .winner-roster-list.red {
+            border-color: rgba(255, 59, 92, 0.6);
+            box-shadow: 0 0 30px rgba(255, 59, 92, 0.3);
+        }
+        .winner-roster-list.blue {
+            border-color: rgba(61, 139, 255, 0.6);
+            box-shadow: 0 0 30px rgba(61, 139, 255, 0.3);
+        }
+        .winner-roster-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.4rem 0.9rem;
+            border-radius: 999px;
+            background: rgba(255,255,255,0.08);
+            font-size: clamp(0.9rem, 1.6vw, 1.4rem);
+            font-weight: 800;
+            color: #fff;
+            white-space: nowrap;
+        }
+        .winner-roster-item .wr-emoji {
+            font-size: clamp(1.1rem, 2vw, 1.8rem);
+            line-height: 1;
+        }
+        .winner-roster-item .wr-lives {
+            font-size: clamp(0.7rem, 1.2vw, 1rem);
+            opacity: 0.8;
+            margin-left: 0.2rem;
         }
 
         @media (prefers-reduced-motion: reduce) {
@@ -983,8 +1045,14 @@
     <!-- WINNER -->
     <div id="win-view" class="full-screen hidden">
         <div id="win-emoji">🏆</div>
-        <h1 id="win-text" class="font-black text-white mb-10">ПОБЕДА!</h1>
+        <h1 id="win-text" class="font-black text-white mb-6">ПОБЕДА!</h1>
         <p class="text-cyan-300/70 font-bold tracking-widest" id="win-subtitle" style="font-size: clamp(1rem, 2vw, 2rem);"></p>
+
+        <div class="winner-roster hidden" id="winner-roster">
+            <div class="winner-roster-title">СОСТАВ КОМАНДЫ</div>
+            <div class="winner-roster-list" id="winner-roster-list"></div>
+        </div>
+
         <p class="text-white/30 mt-8 tracking-wider" id="win-countdown" style="font-size: clamp(0.8rem, 1.2vw, 1.1rem);"></p>
     </div>
 
@@ -1059,18 +1127,16 @@
         // База под 1080p. На 4K масштабируется пропорционально.
         const BASE_CHAR_RADIUS = 52;
         let CHAR_RADIUS = BASE_CHAR_RADIUS;
-        let EMOJI_FONT = 72; // эмодзи крупнее радиуса — «выпирает» из круга
+        let EMOJI_FONT = 72;
 
         const TURN_TIME = 15;
         const FORM_TIME = 1500;
         const WINNER_AUTO_HIDE = 30;
-        const MAX_BALLS_ALIVE = 200; // защита от утечки
+        const MAX_BALLS_ALIVE = 200;
 
         function recomputeSizes() {
             const minDim = Math.min(width, height);
-            // 1080 → 52, 2160 → 104
             CHAR_RADIUS = Math.max(32, Math.round(BASE_CHAR_RADIUS * (minDim / 1080)));
-            // Эмодзи ~1.38× радиуса — крупный, читаемый
             EMOJI_FONT = Math.round(CHAR_RADIUS * 1.38);
         }
 
@@ -1113,25 +1179,21 @@
         // Фон боя
         // ============================================================
         function drawBattleBackground() {
-            // Небо / общий фон
             ctx.fillStyle = 'rgba(5, 20, 40, 0.6)';
             ctx.fillRect(0, 0, width, height);
 
-            // Зона красных
             const redGrad = ctx.createLinearGradient(0, 0, width * 0.5, 0);
             redGrad.addColorStop(0, 'rgba(255, 59, 92, 0.10)');
             redGrad.addColorStop(1, 'rgba(255, 59, 92, 0.02)');
             ctx.fillStyle = redGrad;
             ctx.fillRect(0, 0, width * 0.5, height);
 
-            // Зона синих
             const blueGrad = ctx.createLinearGradient(width * 0.5, 0, width, 0);
             blueGrad.addColorStop(0, 'rgba(61, 139, 255, 0.02)');
             blueGrad.addColorStop(1, 'rgba(61, 139, 255, 0.10)');
             ctx.fillStyle = blueGrad;
             ctx.fillRect(width * 0.5, 0, width * 0.5, height);
 
-            // Разделитель
             ctx.save();
             ctx.strokeStyle = 'rgba(127, 227, 255, 0.15)';
             ctx.lineWidth = 2;
@@ -1142,7 +1204,6 @@
             ctx.stroke();
             ctx.restore();
 
-            // Сетка (одна path — дешевле, чем 576 отдельных stroke)
             ctx.strokeStyle = 'rgba(127, 227, 255, 0.04)';
             ctx.lineWidth = 1;
             ctx.beginPath();
@@ -1156,7 +1217,6 @@
             }
             ctx.stroke();
 
-            // Снег на земле — детерминированно (без Math.random() в кадре)
             const groundY = height * 0.75;
             ctx.fillStyle = 'rgba(255, 255, 255, 0.10)';
             for (let i = 0; i < 80; i++) {
@@ -1231,13 +1291,13 @@
                     x: width * (baseX + (Math.random() - 0.5) * 0.03),
                     y: height * (0.42 + yOffset + (Math.random() - 0.5) * 0.05),
                     lives: 3, alive: true,
-                    // ФИКС: красные (слева) целятся вправо-вверх (0–90°),
-                    // синие (справа) — влево-вверх (90–180°).
                     aimAngle: p.team === 'red'
                         ? (20 + Math.random() * 60)
                         : (100 + Math.random() * 60),
                     aimPower: 60 + Math.random() * 30,
-                    spawnTime: Date.now()
+                    spawnTime: Date.now(),
+                    hitFlash: 0,
+                    deathFlash: 0
                 };
             });
 
@@ -1253,29 +1313,28 @@
         }
 
         // ============================================================
-        // ПЕРСОНАЖ — крупный эмодзи + свечение команды + HP-бейдж
+        // ПЕРСОНАЖ — HP-бейдж СВЕРХУ, имя СНИЗУ, эмодзи чистый
         // ============================================================
         function drawEmojiCharacter(c, data) {
-            const { x, y, name, emoji, team, lives, alive, isActive, scale = 1, spawnTime = 0 } = data;
+            const { x, y, name, emoji, team, lives, alive, isActive, scale = 1, spawnTime = 0, hitFlash = 0 } = data;
             const teamColor = team === 'red' ? '#ff3b5c' : '#3d8bff';
             const teamGlow = team === 'red' ? 'rgba(255, 59, 92, 0.85)' : 'rgba(61, 139, 255, 0.85)';
             const time = Date.now();
             const r = CHAR_RADIUS * scale;
 
-            // Анимация появления — первые 0.7 сек
             let spawnScale = 1;
             if (spawnTime > 0) {
                 const elapsed = (time - spawnTime) / 1000;
                 if (elapsed < 0.7) {
                     const t = elapsed / 0.7;
-                    spawnScale = 0.3 + 0.7 * (1 - Math.pow(1 - t, 3)); // ease-out cubic
+                    spawnScale = 0.3 + 0.7 * (1 - Math.pow(1 - t, 3));
                 }
             }
 
             const finalR = r * spawnScale;
             const finalEmojiFont = EMOJI_FONT * scale * spawnScale;
 
-            // 1. Ореол активного — большой пульсирующий
+            // 1. Ореол активного
             if (isActive && alive) {
                 const pulse = 0.5 + 0.5 * Math.sin(time / 200);
                 c.save();
@@ -1288,7 +1347,6 @@
                 c.arc(x, y, finalR + 12 * scale + pulse * 10 * scale, 0, Math.PI * 2);
                 c.stroke();
 
-                // Второй, более широкий и прозрачный
                 c.globalAlpha = 0.3;
                 c.lineWidth = 2 * scale;
                 c.beginPath();
@@ -1301,6 +1359,11 @@
             if (!alive) {
                 c.save();
                 c.globalAlpha = 0.4 * spawnScale;
+                c.shadowColor = 'transparent';
+                c.shadowBlur = 0;
+                c.shadowOffsetX = 0;
+                c.shadowOffsetY = 0;
+                c.fillStyle = '#ffffff';
                 c.font = `${Math.round(finalEmojiFont)}px "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif`;
                 c.textAlign = 'center';
                 c.textBaseline = 'middle';
@@ -1313,25 +1376,27 @@
                 c.fillStyle = 'rgba(255,255,255,0.35)';
                 c.textAlign = 'center';
                 c.textBaseline = 'top';
-                c.fillText(name, x, y + finalR + 18 * scale);
+                c.shadowColor = 'transparent';
+                c.shadowBlur = 0;
+                c.fillText(name, x, y + finalR + 16 * scale);
                 c.restore();
                 return;
             }
 
-            // 3. Тень под персонажем
+            // 3. Тень под персонажем (ниже круга)
             c.save();
-            c.fillStyle = 'rgba(0,0,0,0.6)';
+            c.fillStyle = 'rgba(0,0,0,0.5)';
             c.beginPath();
-            c.ellipse(x, y + finalR + 6 * scale, finalR * 0.8, 12 * scale, 0, 0, Math.PI * 2);
+            c.ellipse(x, y + finalR + 18 * scale, finalR * 0.7, 10 * scale, 0, 0, Math.PI * 2);
             c.fill();
             c.restore();
 
-            // 4. Цветной круг-подложка (свечение команды)
+            // 4. Светлая цветная подложка (teamGlow)
             c.save();
-            const grad = c.createRadialGradient(x, y, finalR * 0.2, x, y, finalR * 1.15);
-            grad.addColorStop(0, 'rgba(20, 40, 70, 0.98)');
-            grad.addColorStop(0.6, teamGlow.replace('0.85', '0.35'));
-            grad.addColorStop(1, teamGlow.replace('0.85', '0.05'));
+            const grad = c.createRadialGradient(x, y, finalR * 0.3, x, y, finalR * 1.15);
+            grad.addColorStop(0, teamGlow.replace('0.85', '0.18'));
+            grad.addColorStop(0.6, teamGlow.replace('0.85', '0.08'));
+            grad.addColorStop(1, 'rgba(0,0,0,0)');
             c.fillStyle = grad;
             c.beginPath();
             c.arc(x, y, finalR * 1.15, 0, Math.PI * 2);
@@ -1349,7 +1414,7 @@
             c.stroke();
             c.restore();
 
-            // 6. Внутреннее кольцо (тонкое, для объёма)
+            // 6. Внутреннее кольцо
             c.save();
             c.strokeStyle = 'rgba(255,255,255,0.25)';
             c.lineWidth = 1.5 * scale;
@@ -1358,61 +1423,103 @@
             c.stroke();
             c.restore();
 
-            // 7. Крупный эмодзи
+            // 7. Крупный эмодзи — БЕЗ тени, чистый
             c.save();
+            c.shadowColor = 'transparent';
             c.shadowBlur = 0;
+            c.shadowOffsetX = 0;
+            c.shadowOffsetY = 0;
+            c.fillStyle = '#ffffff';
             c.font = `${Math.round(finalEmojiFont)}px "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif`;
             c.textAlign = 'center';
             c.textBaseline = 'middle';
-            c.fillText(emoji || '😀', x, y + finalEmojiFont * 0.05);
+            c.fillText(emoji || '😀', x, y);
             c.restore();
+
+            // 7.5. Hit-flash — белое кольцо
+            if (hitFlash > 0) {
+                const elapsedHit = (time - hitFlash) / 1000;
+                if (elapsedHit < 0.3) {
+                    const flashAlpha = 0.5 + 0.5 * Math.sin(elapsedHit * 40);
+                    c.save();
+                    c.globalAlpha = flashAlpha * 0.9;
+                    c.strokeStyle = '#ffffff';
+                    c.lineWidth = 5 * scale;
+                    c.shadowColor = '#ffffff';
+                    c.shadowBlur = 25;
+                    c.beginPath();
+                    c.arc(x, y, finalR + 8, 0, Math.PI * 2);
+                    c.stroke();
+                    c.restore();
+                }
+            }
 
             // 8. Имя под персонажем
             c.save();
+            c.shadowColor = 'transparent';
+            c.shadowBlur = 0;
             c.font = `bold ${Math.round(20 * scale * spawnScale)}px Montserrat, sans-serif`;
             c.fillStyle = '#ffffff';
             c.textAlign = 'center';
             c.textBaseline = 'top';
-            c.shadowColor = 'rgba(0,0,0,0.95)';
-            c.shadowBlur = 10;
-            c.fillText(name, x, y + finalR + 18 * scale);
+            c.fillText(name, x, y + finalR + 16 * scale);
             c.restore();
 
-            // 9. HP-бейдж — «капсула» ПОД именем, с рамкой команды
+            // 9. HP-БЕЙДЖ НАД ПЕРСОНАЖЕМ
+            const hearts = lives <= 5 ? '❤️'.repeat(Math.max(0, lives)) : `❤️×${lives}`;
+            const heartFontSize = Math.round(20 * scale * spawnScale);
+
             c.save();
-            const heartFont = `${Math.round(20 * scale * spawnScale)}px "Apple Color Emoji", "Segoe UI Emoji", sans-serif`;
-            c.font = heartFont;
+            c.shadowColor = 'transparent';
+            c.shadowBlur = 0;
+            c.font = `${heartFontSize}px "Apple Color Emoji", "Segoe UI Emoji", sans-serif`;
             c.textAlign = 'center';
             c.textBaseline = 'middle';
-            const hearts = lives <= 5 ? '❤️'.repeat(Math.max(0, lives)) : `❤️×${lives}`;
-            const badgeY = y + finalR + 18 * scale + 26 * scale; // под именем
+
             const textWidth = c.measureText(hearts).width;
             const padX = 12 * scale;
             const bW = textWidth + padX * 2;
             const bH = 28 * scale;
+
+            // Бейдж над кругом. Если активный — сдвигаем выше, чтобы не пересекаться с ореолом
+            const activeRingExtra = isActive ? 24 * scale : 0;
+            const badgeTopY = y - finalR - 16 * scale - activeRingExtra - bH;
+            const badgeCenterY = badgeTopY + bH / 2;
             const bX = x - bW / 2;
-            const bY = badgeY - bH / 2;
 
             // Чёрная подложка
-            c.fillStyle = 'rgba(0,0,0,0.75)';
+            c.fillStyle = 'rgba(0,0,0,0.78)';
             c.beginPath();
             if (c.roundRect) {
-                c.roundRect(bX, bY, bW, bH, 10 * scale);
+                c.roundRect(bX, badgeTopY, bW, bH, 10 * scale);
             } else {
-                c.rect(bX, bY, bW, bH);
+                c.rect(bX, badgeTopY, bW, bH);
             }
             c.fill();
 
-            // Цветная рамка команды
+            // Цветная рамка
             c.strokeStyle = teamColor;
             c.lineWidth = 2 * scale;
             c.shadowColor = teamColor;
-            c.shadowBlur = 10;
+            c.shadowBlur = 12;
+            c.beginPath();
+            if (c.roundRect) {
+                c.roundRect(bX, badgeTopY, bW, bH, 10 * scale);
+            } else {
+                c.rect(bX, badgeTopY, bW, bH);
+            }
             c.stroke();
+            c.restore();
 
+            // Сердечки — отдельный save/restore, чтобы тень от рамки не легла на текст
+            c.save();
+            c.shadowColor = 'transparent';
             c.shadowBlur = 0;
+            c.font = `${heartFontSize}px "Apple Color Emoji", "Segoe UI Emoji", sans-serif`;
+            c.textAlign = 'center';
+            c.textBaseline = 'middle';
             c.fillStyle = '#fff';
-            c.fillText(hearts, x, badgeY);
+            c.fillText(hearts, x, badgeCenterY);
             c.restore();
         }
 
@@ -1420,7 +1527,8 @@
             drawEmojiCharacter(ctx, {
                 x: p.x, y: p.y, name: p.name, emoji: p.emoji, team: p.team,
                 lives: p.lives, alive: p.alive, isActive, scale: 0.75,
-                spawnTime: p.spawnTime || 0
+                spawnTime: p.spawnTime || 0,
+                hitFlash: p.hitFlash || 0
             });
         }
 
@@ -1488,7 +1596,6 @@
             ctx.fill();
             ctx.restore();
 
-            // Бейдж %
             ctx.save();
             ctx.fillStyle = 'rgba(0,0,0,0.75)';
             ctx.strokeStyle = teamColor;
@@ -1535,7 +1642,8 @@
                         vx: Math.cos(s.angle * Math.PI / 180) * (s.power * 0.4),
                         vy: -Math.sin(s.angle * Math.PI / 180) * (s.power * 0.4),
                         gravity: 0.3, team: shooter.team, radius: 12,
-                        isSuper: true, damage: s.damage || 1
+                        isSuper: true, damage: s.damage || 1,
+                        targetId: target.id
                     });
                 });
 
@@ -1548,7 +1656,8 @@
                     vx: Math.cos(baseAngle * Math.PI / 180) * (power * 0.4),
                     vy: -Math.sin(baseAngle * Math.PI / 180) * (power * 0.4),
                     gravity: 0.3, team: shooter.team, radius: 11,
-                    isSuper: false, damage: 1
+                    isSuper: false, damage: 1,
+                    targetId: target.id
                 });
             }
 
@@ -1562,6 +1671,84 @@
                     size: Math.random() * 5 + 2
                 });
             }
+        }
+
+        // ============================================================
+        // ЭФФЕКТ ПОПАДАНИЯ В ДЕМО (снежок → игрок)
+        // ============================================================
+        function demoHandleHit(ball, targetPlayer) {
+            const damage = ball.damage || 1;
+            const teamColor = targetPlayer.team === 'red' ? '#ff3b5c' : '#3d8bff';
+
+            // Вспышка на персонаже
+            targetPlayer.hitFlash = Date.now();
+
+            // Шоквейв (DOM-элемент, как в реальной игре)
+            spawnShockwave(ball.x, ball.y, teamColor);
+
+            // Частицы
+            for (let i = 0; i < 24 + damage * 10; i++) {
+                demoParticles.push({
+                    x: ball.x, y: ball.y,
+                    vx: (Math.random() - 0.5) * 20,
+                    vy: (Math.random() - 0.5) * 20,
+                    life: 0.9,
+                    color: i % 3 === 0 ? '#ffffff' : teamColor,
+                    size: Math.random() * 6 + 2
+                });
+            }
+
+            // Всплывающий урон
+            spawnDamageFloat(targetPlayer.x, targetPlayer.y - CHAR_RADIUS, `-${damage}❤️`, teamColor);
+
+            // Лёгкий screen-shake
+            document.getElementById('main-body').classList.add('screen-shake');
+            setTimeout(() => document.getElementById('main-body').classList.remove('screen-shake'), 400);
+
+            // Снимаем жизни
+            targetPlayer.lives = Math.max(0, targetPlayer.lives - damage);
+
+            // Смерть
+            if (targetPlayer.lives <= 0 && targetPlayer.alive) {
+                demoHandleDeath(targetPlayer);
+            }
+        }
+
+        // ============================================================
+        // ЭФФЕКТ СМЕРТИ В ДЕМО
+        // ============================================================
+        function demoHandleDeath(p) {
+            p.alive = false;
+            const teamColor = p.team === 'red' ? '#ff3b5c' : '#3d8bff';
+
+            // Облако частиц — «взрыв» персонажа
+            for (let i = 0; i < 40; i++) {
+                const angle = Math.random() * Math.PI * 2;
+                const speed = 3 + Math.random() * 8;
+                demoParticles.push({
+                    x: p.x, y: p.y,
+                    vx: Math.cos(angle) * speed,
+                    vy: Math.sin(angle) * speed - 2,
+                    life: 1.2,
+                    color: i % 4 === 0 ? '#ffffff' : teamColor,
+                    size: Math.random() * 8 + 3
+                });
+            }
+
+            // Шоквейв
+            spawnShockwave(p.x, p.y, teamColor);
+
+            // Текст «ВЫБЫЛ!»
+            spawnDamageFloat(p.x, p.y - CHAR_RADIUS, '💀 ВЫБЫЛ', teamColor);
+
+            // Через 2.5 сек — респавн (для демо)
+            setTimeout(() => {
+                if (lastScreen === 'attract') {
+                    p.lives = 3;
+                    p.alive = true;
+                    p.spawnTime = Date.now();
+                }
+            }, 2500);
         }
 
         function updateDemo() {
@@ -1579,7 +1766,11 @@
 
             let alivePlayers = demoPlayers.filter(p => p.alive);
             if (alivePlayers.length === 0) {
-                demoPlayers.forEach(p => { p.lives = 3; p.alive = true; });
+                demoPlayers.forEach(p => {
+                    p.lives = 3;
+                    p.alive = true;
+                    p.spawnTime = Date.now();
+                });
                 alivePlayers = demoPlayers.filter(p => p.alive);
             }
 
@@ -1594,7 +1785,6 @@
 
             if (demoState === 'aiming') {
                 currentActive.aimAngle += (Math.random() - 0.5) * 5;
-                // Клэмп по команде: красные 5–85° (вправо), синие 95–175° (влево)
                 currentActive.aimAngle = currentActive.team === 'red'
                     ? Math.max(5, Math.min(85, currentActive.aimAngle))
                     : Math.max(95, Math.min(175, currentActive.aimAngle));
@@ -1620,37 +1810,43 @@
                 demoState = 'aiming';
                 demoNextActionAt = now + 1000;
 
-                demoPlayers.forEach(p => {
-                    if (!p.alive) return;
-                    if (p.id !== demoActiveId && Math.random() < 0.3) {
-                        p.lives--;
-                        if (p.lives <= 0) {
-                            p.alive = false;
-                            setTimeout(() => {
-                                if (lastScreen === 'attract') {
-                                    p.lives = 3;
-                                    p.alive = true;
-                                    p.spawnTime = Date.now();
-                                }
-                            }, 2500);
-                        }
-                    }
-                });
-
                 const aliveList = demoPlayers.filter(p => p.alive);
                 if (aliveList.length > 0) demoActiveId = aliveList[Math.floor(Math.random() * aliveList.length)].id;
             }
 
+            // Двигаем снежки
             for (let i = demoSnowballs.length - 1; i >= 0; i--) {
                 const b = demoSnowballs[i];
                 b.x += b.vx; b.y += b.vy; b.vy += b.gravity;
-                if (b.x < -80 || b.x > width + 80 || b.y > height + 80) demoSnowballs.splice(i, 1);
+
+                // Проверяем попадание в игрока
+                let hit = false;
+                if (!b.hitApplied) {
+                    for (const p of demoPlayers) {
+                        if (!p.alive || p.team === b.team) continue;
+                        const dx = b.x - p.x;
+                        const dy = b.y - p.y;
+                        const dist = Math.sqrt(dx * dx + dy * dy);
+                        if (dist < CHAR_RADIUS * 0.75) {
+                            b.hitApplied = true;
+                            hit = true;
+                            demoHandleHit(b, p);
+                            break;
+                        }
+                    }
+                }
+
+                if (hit || b.x < -80 || b.x > width + 80 || b.y > height + 80) demoSnowballs.splice(i, 1);
             }
+
+            // Частицы
             for (let i = demoParticles.length - 1; i >= 0; i--) {
                 const p = demoParticles[i];
                 p.x += p.vx; p.y += p.vy; p.vy += 0.15; p.life -= 0.02;
                 if (p.life <= 0) demoParticles.splice(i, 1);
             }
+
+            // Супер-титры
             for (let i = demoSuperTexts.length - 1; i >= 0; i--) {
                 const t = demoSuperTexts[i];
                 t.y -= 0.8; t.life -= 0.015;
@@ -1696,7 +1892,7 @@
             });
 
             demoParticles.forEach(p => {
-                ctx.globalAlpha = p.life;
+                ctx.globalAlpha = Math.max(0, p.life);
                 ctx.fillStyle = p.color;
                 ctx.beginPath();
                 ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
@@ -1706,7 +1902,7 @@
 
             demoSuperTexts.forEach(t => {
                 ctx.save();
-                ctx.globalAlpha = t.life;
+                ctx.globalAlpha = Math.max(0, t.life);
                 ctx.font = 'bold 28px Montserrat';
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
@@ -1766,26 +1962,11 @@
                 if (this.lives < prevLives) this.hitFlash = Date.now();
             }
             draw(ctx, isActive) {
-                const elapsedHit = (Date.now() - this.hitFlash) / 1000;
-                const flash = elapsedHit < 0.3 ? 0.5 + 0.5 * Math.sin(elapsedHit * 40) : 0;
-
-                if (flash > 0) {
-                    ctx.save();
-                    ctx.globalAlpha = flash * 0.9;
-                    ctx.strokeStyle = '#ffffff';
-                    ctx.lineWidth = 5;
-                    ctx.shadowColor = '#ffffff';
-                    ctx.shadowBlur = 25;
-                    ctx.beginPath();
-                    ctx.arc(this.x, this.y, CHAR_RADIUS + 8, 0, Math.PI * 2);
-                    ctx.stroke();
-                    ctx.restore();
-                }
-
                 drawEmojiCharacter(ctx, {
                     x: this.x, y: this.y, name: this.name, emoji: this.emoji, team: this.team,
                     lives: this.lives, alive: this.alive, isActive, scale: 1,
-                    spawnTime: this.spawnTime
+                    spawnTime: this.spawnTime,
+                    hitFlash: this.hitFlash
                 });
             }
         }
@@ -1961,7 +2142,6 @@
 
                 updateTurnTimerPosition(now);
 
-                // Защита от утечки шаров
                 if (snowballs.length > MAX_BALLS_ALIVE) {
                     snowballs = snowballs.slice(-MAX_BALLS_ALIVE);
                 }
@@ -2016,8 +2196,9 @@
                 timerEl.classList.remove('active');
                 return;
             }
+            // Сдвигаем таймер ВЫШЕ HP-бейджа (бейдж над персонажем на ~y - r - 44..-72)
             timerEl.style.left = `${player.x}px`;
-            timerEl.style.top = `${player.y - CHAR_RADIUS - 110}px`;
+            timerEl.style.top = `${player.y - CHAR_RADIUS - 130}px`;
             timerEl.style.transform = 'translateX(-50%)';
             timerEl.classList.add('active');
 
@@ -2041,20 +2222,18 @@
         }
 
         // ============================================================
-        // HIT + GAME OVER (атомарно через runTransaction)
+        // HIT + GAME OVER
         // ============================================================
         async function handleHit(ball, p) {
             const damage = ball.damage || 1;
             pendingHits++;
 
-            // Оптимистично обновляем локальную копию для мгновенной визуальной реакции
             const prevLives = p.lives;
             p.lives = Math.max(0, p.lives - damage);
             p.alive = p.lives > 0;
             p.hitFlash = Date.now();
 
             try {
-                // Атомарно: если два снежка попали одновременно — оба учтутся
                 const livesRef = ref(db, `games/${gameId}/players/${p.team}/${p.id}/lives`);
                 const result = await runTransaction(livesRef, (current) => {
                     const cur = typeof current === 'number' ? current : prevLives;
@@ -2064,7 +2243,6 @@
                 p.lives = typeof finalLives === 'number' ? finalLives : p.lives;
                 p.alive = p.lives > 0;
 
-                // alive пишем отдельно — тоже через транзакцию на весь узел
                 const playerRef = ref(db, `games/${gameId}/players/${p.team}/${p.id}`);
                 await runTransaction(playerRef, (current) => {
                     if (!current) return current;
@@ -2105,7 +2283,7 @@
             if (checkGameOverScheduled) clearTimeout(checkGameOverScheduled);
             checkGameOverScheduled = setTimeout(async () => {
                 checkGameOverScheduled = null;
-                if (pendingHits > 0) return; // ещё снежки в полёте
+                if (pendingHits > 0) return;
                 await checkGameOver();
             }, 120);
         }
@@ -2259,7 +2437,6 @@
             if (data) updateQRPlayersList(data);
         }
 
-        // Идемпотентный — можно звать каждый onValue, если уже в игре — ничего не делает
         function showGame() {
             const attractHidden = document.getElementById('attract-view').classList.contains('hidden');
             const qrHidden = document.getElementById('qr-view').classList.contains('hidden');
@@ -2268,7 +2445,7 @@
             const heartsVisible = document.getElementById('heart-red').style.display === 'flex';
 
             if (attractHidden && qrHidden && preloadHidden && winHidden && heartsVisible) {
-                return; // уже в игре
+                return;
             }
 
             demoPlayers = [];
@@ -2281,7 +2458,6 @@
             document.getElementById('heart-red').style.display = 'flex';
             document.getElementById('heart-blue').style.display = 'flex';
 
-            // Запоминаем старт игры — для анимации появления персонажей
             gameStartTime = Date.now();
             players.forEach(p => { p.spawnTime = gameStartTime; });
         }
@@ -2303,24 +2479,59 @@
             const winText = document.getElementById('win-text');
             const winEmoji = document.getElementById('win-emoji');
             const winSubtitle = document.getElementById('win-subtitle');
+            const rosterEl = document.getElementById('winner-roster');
+            const rosterList = document.getElementById('winner-roster-list');
 
+            let winnerTeam = null;
             if (data.winner === 'red') {
                 winText.innerText = 'КРАСНЫЕ ПОБЕДИЛИ!';
-                winText.className = 'font-black text-red-500 mb-10';
+                winText.className = 'font-black text-red-500 mb-6';
                 winEmoji.innerText = '🔴';
                 winSubtitle.innerText = 'ТАКТИКА, СИЛА, ПОБЕДА';
                 launchConfetti(['#ff3b5c', '#f87171', '#fca5a5']);
+                winnerTeam = 'red';
             } else if (data.winner === 'blue') {
                 winText.innerText = 'СИНИЕ ПОБЕДИЛИ!';
-                winText.className = 'font-black text-blue-500 mb-10';
+                winText.className = 'font-black text-blue-500 mb-6';
                 winEmoji.innerText = '🔵';
                 winSubtitle.innerText = 'ЛЁД, СКОРОСТЬ, ТОЧНОСТЬ';
                 launchConfetti(['#3d8bff', '#60a5fa', '#93c5fd']);
+                winnerTeam = 'blue';
             } else {
                 winText.innerText = 'ИГРА ОКОНЧЕНА';
-                winText.className = 'font-black text-white mb-10';
+                winText.className = 'font-black text-white mb-6';
                 winEmoji.innerText = '🏁';
                 winSubtitle.innerText = 'СПАСИБО ЗА ИГРУ';
+                winnerTeam = null;
+            }
+
+            // Состав победившей команды — плашкой
+            if (winnerTeam) {
+                const teamPlayers = Object.entries(data.players?.[winnerTeam] || {})
+                    .sort((a, b) => (a[1].joinedAt || 0) - (b[1].joinedAt || 0));
+
+                if (teamPlayers.length > 0) {
+                    rosterEl.classList.remove('hidden');
+                    rosterList.className = `winner-roster-list ${winnerTeam}`;
+
+                    rosterList.innerHTML = teamPlayers.map(([id, p]) => {
+                        const livesLeft = p.alive ? (p.lives ?? 0) : 0;
+                        const hearts = livesLeft > 0
+                            ? (livesLeft <= 5 ? '❤️'.repeat(livesLeft) : `❤️×${livesLeft}`)
+                            : '💀';
+                        return `
+                            <div class="winner-roster-item">
+                                <span class="wr-emoji">${escapeHtml(p.emoji || '😀')}</span>
+                                <span>${escapeHtml(p.name)}</span>
+                                <span class="wr-lives">${hearts}</span>
+                            </div>
+                        `;
+                    }).join('');
+                } else {
+                    rosterEl.classList.add('hidden');
+                }
+            } else {
+                rosterEl.classList.add('hidden');
             }
 
             startWinnerCountdown();
@@ -2453,7 +2664,6 @@
 
                     if (shot.isSuper && shot.superType) showSuperTitle(shot.superType);
 
-                    // Страховка: если state 'flying' не придёт — очистим forming
                     if (formingShotsTimeout) clearTimeout(formingShotsTimeout);
                     formingShotsTimeout = setTimeout(() => {
                         formingShots = [];
@@ -2559,8 +2769,6 @@
 
                 case 'game':
                     if (data.status === 'playing' && !data.preloadDone) {
-                        // Preload-фаза: показываем preload-view, но СРАЗУ прячем
-                        // qr-view/attract-view/win-view, чтобы они не остались висеть.
                         if (!isPreloading) {
                             hideAllScreens();
                             hideGameUI();
@@ -2569,7 +2777,6 @@
                     } else {
                         isPreloading = false;
                         document.getElementById('preload-view').classList.add('hidden');
-                        // ВСЕГДА showGame (он идемпотентен) — фикс бага «после preload снова QR».
                         showGame();
 
                         const turnIndicator = document.getElementById('turn-indicator');
@@ -2710,7 +2917,7 @@
         }
 
         // ============================================================
-        // Снежинки (с учётом reduced-motion)
+        // Снежинки
         // ============================================================
         const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
         if (!prefersReducedMotion) {
