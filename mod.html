@@ -7,13 +7,42 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap');
-    body { background: radial-gradient(circle at 50% 0%, #0a2540 0%, #03080f 100%); color: #fff; font-family: 'Montserrat', sans-serif; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 2rem; }
-    .glass { background: rgba(10, 37, 64, 0.8); border: 1px solid rgba(127, 227, 255, 0.3); border-radius: 1.5rem; backdrop-filter: blur(16px); }
+    body { 
+      background: radial-gradient(circle at 50% 0%, #0a2540 0%, #03080f 100%); 
+      color: #fff; 
+      font-family: 'Montserrat', sans-serif; 
+      min-height: 100vh; 
+      display: flex; 
+      flex-direction: column; 
+      align-items: center; 
+      padding: 2rem; 
+    }
+    .glass { 
+      background: rgba(10, 37, 64, 0.8); 
+      border: 1px solid rgba(127, 227, 255, 0.3); 
+      border-radius: 1.5rem; 
+      backdrop-filter: blur(16px); 
+    }
     .mode-btn { transition: all 0.3s ease; }
-    .mode-btn.active { border-color: #22d3ee; background: rgba(34, 211, 238, 0.2); color: #22d3ee; box-shadow: 0 0 20px rgba(34, 211, 238, 0.5); }
+    .mode-btn.active { 
+      border-color: #22d3ee; 
+      background: rgba(34, 211, 238, 0.2); 
+      color: #22d3ee; 
+      box-shadow: 0 0 20px rgba(34, 211, 238, 0.5); 
+    }
     .team-btn { transition: all 0.3s ease; }
-    .team-btn.active-red { border-color: #ef4444; background: rgba(239, 68, 68, 0.2); color: #ef4444; box-shadow: 0 0 20px rgba(239, 68, 68, 0.5); }
-    .team-btn.active-blue { border-color: #3b82f6; background: rgba(59, 130, 246, 0.2); color: #3b82f6; box-shadow: 0 0 20px rgba(59, 130, 246, 0.5); }
+    .team-btn.active-red { 
+      border-color: #ef4444; 
+      background: rgba(239, 68, 68, 0.2); 
+      color: #ef4444; 
+      box-shadow: 0 0 20px rgba(239, 68, 68, 0.5); 
+    }
+    .team-btn.active-blue { 
+      border-color: #3b82f6; 
+      background: rgba(59, 130, 246, 0.2); 
+      color: #3b82f6; 
+      box-shadow: 0 0 20px rgba(59, 130, 246, 0.5); 
+    }
   </style>
 </head>
 <body>
@@ -47,7 +76,6 @@
       </div>
     </div>
 
-    <!-- ВЫБОР ПЕРВОЙ КОМАНДЫ -->
     <div class="glass w-full max-w-4xl p-8 mb-8">
       <h2 class="text-xl font-bold mb-4 text-cyan-100 text-center">КАКАЯ КОМАНДА НАЧИНАЕТ?</h2>
       <div class="flex justify-center gap-6">
@@ -76,20 +104,38 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getDatabase, ref, set, onValue, update, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
-    const firebaseConfig = { apiKey: "AIzaSyCXIR5Tv8lB6ivcGRC3yt1SC66MM6T5b_M", authDomain: "endorphin-battle.firebaseapp.com", databaseURL: "https://endorphin-battle-default-rtdb.europe-west1.firebasedatabase.app", projectId: "endorphin-battle", storageBucket: "endorphin-battle.firebasestorage.app", messagingSenderId: "185259733030", appId: "1:185259733030:web:d72a89a436880973e636e7" };
+    
+    const firebaseConfig = { 
+      apiKey: "AIzaSyCXIR5Tv8lB6ivcGRC3yt1SC66MM6T5b_M", 
+      authDomain: "endorphin-battle.firebaseapp.com", 
+      databaseURL: "https://endorphin-battle-default-rtdb.europe-west1.firebasedatabase.app", 
+      projectId: "endorphin-battle", 
+      storageBucket: "endorphin-battle.firebasestorage.app", 
+      messagingSenderId: "185259733030", 
+      appId: "1:185259733030:web:d72a89a436880973e636e7" 
+    };
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
     const gameRef = ref(db, 'games/battle_1');
 
     let currentData = null;
     let timerInterval = null;
-    let firstTeam = 'red'; // По умолчанию красные
+    let firstTeam = 'red';
 
-    set(gameRef, { status: 'lobby', mode: null, lives: { red: 3, blue: 3 }, players: { red: {}, blue: {} }, firstTeam: 'red' }).then(() => { setMode('1v1'); });
+    // Инициализация
+    set(gameRef, { 
+      status: 'lobby', 
+      mode: null, 
+      lives: { red: 3, blue: 3 }, 
+      players: { red: {}, blue: {} }, 
+      firstTeam: 'red' 
+    }).then(() => { setMode('1v1'); });
 
-    window.setMode = (mode) => { if(currentData?.status === 'playing') return; update(gameRef, { mode }); };
+    window.setMode = (mode) => { 
+      if (currentData?.status === 'playing') return; 
+      update(gameRef, { mode }); 
+    };
 
-    // Выбор первой команды
     window.setFirstTeam = (team) => {
       firstTeam = team;
       update(gameRef, { firstTeam: team });
@@ -135,19 +181,30 @@
           </li>
         `).join('');
       };
-      renderList('red', 'list-red'); renderList('blue', 'list-blue');
+      renderList('red', 'list-red'); 
+      renderList('blue', 'list-blue');
 
       const maxP = parseInt(data.mode?.charAt(0) || 1);
       const redCount = Object.keys(data.players.red || {}).length;
       const blueCount = Object.keys(data.players.blue || {}).length;
 
       const btn = document.getElementById('btn-start');
-      if (redCount >= maxP && blueCount >= maxP && data.status === 'lobby') { btn.disabled = false; btn.innerText = 'НАЧАТЬ БОЙ'; } 
-      else if (data.status === 'lobby') { btn.disabled = true; btn.innerText = `ОЖИДАНИЕ (${redCount}/${maxP} vs ${blueCount}/${maxP})`; }
+      if (redCount >= maxP && blueCount >= maxP && data.status === 'lobby') { 
+        btn.disabled = false; 
+        btn.innerText = 'НАЧАТЬ БОЙ'; 
+      } else if (data.status === 'lobby') { 
+        btn.disabled = true; 
+        btn.innerText = `ОЖИДАНИЕ (${redCount}/${maxP} vs ${blueCount}/${maxP})`; 
+      }
     });
 
-    window.kickPlayer = (team, id) => { if(confirm('Кикнуть игрока?')) remove(ref(db, `games/battle_1/players/${team}/${id}`)); };
-    window.endGame = () => { update(gameRef, { status: 'finished', winner: 'none' }); };
+    window.kickPlayer = (team, id) => { 
+      if (confirm('Кикнуть игрока?')) remove(ref(db, `games/battle_1/players/${team}/${id}`)); 
+    };
+
+    window.endGame = () => { 
+      update(gameRef, { status: 'finished', winner: 'none' }); 
+    };
 
     // ============================================================
     // СТАРТ ИГРЫ (с генерацией координат)
@@ -155,23 +212,41 @@
     document.getElementById('btn-start').onclick = () => {
       if (!currentData) return;
       
-      // Генерируем координаты для каждого игрока на его базе
       const playersRed = currentData.players.red || {};
       const playersBlue = currentData.players.blue || {};
       
-      // Красные (слева): X от 5% до 20%, Y от 20% до 80%
+      // Функция генерации уникальных координат (без пересечений по Y)
+      function generateUniquePositions(keys, minX, maxX) {
+        const positions = [];
+        const usedY = [];
+        
+        keys.forEach((id) => {
+          let posX, posY, attempts = 0;
+          
+          do {
+            posX = minX + Math.random() * (maxX - minX);
+            posY = 20 + Math.random() * 60; // 20-80%
+            attempts++;
+          } while (usedY.some(y => Math.abs(y - posY) < 10) && attempts < 50);
+          
+          usedY.push(posY);
+          positions.push({ id, posX, posY });
+        });
+        
+        return positions;
+      }
+      
+      // Красные (слева): X 5-20%
       const redKeys = Object.keys(playersRed);
-      redKeys.forEach((id, index) => {
-        const posX = 5 + Math.random() * 15; // 5-20%
-        const posY = 20 + (index * 60 / Math.max(1, redKeys.length)) + Math.random() * 10; // Распределяем по Y
+      const redPositions = generateUniquePositions(redKeys, 5, 20);
+      redPositions.forEach(({ id, posX, posY }) => {
         update(ref(db, `games/battle_1/players/red/${id}`), { posX, posY });
       });
-
-      // Синие (справа): X от 80% до 95%, Y от 20% до 80%
+      
+      // Синие (справа): X 80-95%
       const blueKeys = Object.keys(playersBlue);
-      blueKeys.forEach((id, index) => {
-        const posX = 80 + Math.random() * 15; // 80-95%
-        const posY = 20 + (index * 60 / Math.max(1, blueKeys.length)) + Math.random() * 10;
+      const bluePositions = generateUniquePositions(blueKeys, 80, 95);
+      bluePositions.forEach(({ id, posX, posY }) => {
         update(ref(db, `games/battle_1/players/blue/${id}`), { posX, posY });
       });
 
@@ -180,7 +255,7 @@
       const firstPlayerEntry = Object.entries(firstTeamPlayers)[0];
       if (!firstPlayerEntry) return alert('Нет игроков в выбранной команде!');
 
-      // Обновляем статус игры
+      // Старт игры
       update(gameRef, { 
         status: 'playing', 
         turn: { team: firstTeam, name: firstPlayerEntry[1].name }, 
@@ -196,7 +271,7 @@
         update(gameRef, { timer: countdown });
         if (countdown <= 0) { 
           clearInterval(timerInterval); 
-          update(gameRef, { timer: null }); // Убираем цифру
+          update(gameRef, { timer: null }); 
         }
       }, 1000);
     };
