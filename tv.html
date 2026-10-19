@@ -125,7 +125,7 @@
         }
 
         /* ============================================================
-           ПРЕЛОУДИНГ (НОВЫЙ ЭКРАН)
+           ПРЕЛОУДИНГ
            ============================================================ */
         #preload-view {
             position: absolute;
@@ -157,19 +157,6 @@
             50% { transform: scale(1.02); text-shadow: 0 0 60px rgba(34, 211, 238, 0.8); }
         }
 
-        .preload-vs {
-            font-size: 2rem;
-            font-weight: 900;
-            color: var(--cyan-glow);
-            margin: 0.5rem 0;
-            animation: vsGlow 1.5s ease-in-out infinite;
-        }
-
-        @keyframes vsGlow {
-            0%, 100% { opacity: 0.6; text-shadow: 0 0 20px rgba(34, 211, 238, 0.3); }
-            50% { opacity: 1; text-shadow: 0 0 40px rgba(34, 211, 238, 0.9); }
-        }
-
         .preload-timer {
             font-size: 8rem;
             font-weight: 900;
@@ -179,17 +166,31 @@
             font-variant-numeric: tabular-nums;
         }
 
-        .preload-ad {
+        /* ============================================================
+           РЕКЛАМНЫЙ БЛОК
+           ============================================================ */
+        .ad-block {
             width: 100%;
             max-width: 600px;
-            height: 120px;
+            height: 150px;
             background: rgba(10, 37, 64, 0.6);
             border: 2px dashed rgba(127, 227, 255, 0.4);
             border-radius: 1.5rem;
             display: flex;
             align-items: center;
             justify-content: center;
+            overflow: hidden;
             margin-top: 2rem;
+            text-decoration: none;
+        }
+
+        .ad-block img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .ad-block span {
             color: rgba(168, 230, 255, 0.4);
             font-size: 1.2rem;
             font-weight: 700;
@@ -303,13 +304,10 @@
 </head>
 <body class="h-screen w-screen relative overflow-hidden" id="main-body">
 
-    <!-- Фон (снежинки) -->
     <div id="snow-container" class="fixed inset-0 pointer-events-none z-0"></div>
 
-    <!-- Игровое поле (Canvas) -->
     <canvas id="game-canvas"></canvas>
 
-    <!-- UI поверх Canvas -->
     <div class="ui-layer">
         <div class="hp-display hp-red" id="heart-red">❤️❤️❤️</div>
         <div class="hp-display hp-blue" id="heart-blue">❤️❤️❤️</div>
@@ -318,7 +316,6 @@
         <div class="absolute top-20 left-1/2 -translate-x-1/2 text-6xl font-black text-white" id="tv-timer" style="display: none;"></div>
     </div>
 
-    <!-- Экран Лобби -->
     <div id="lobby-view">
         <div class="text-center mb-8">
             <h1 class="text-8xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 via-blue-400 to-indigo-500 mb-2 tracking-tighter">ENDORPHIN</h1>
@@ -339,6 +336,12 @@
                 <div id="tv-players-blue" class="mt-4 space-y-2 w-full text-center text-sm"></div>
             </div>
         </div>
+
+        <!-- Реклама в лобби -->
+        <a id="lobby-ad" class="ad-block hidden" href="#" target="_blank">
+            <img id="lobby-ad-img" src="" alt="Реклама" class="hidden">
+            <span id="lobby-ad-text">РЕКЛАМА</span>
+        </a>
         
         <div class="team-select hidden" id="team-select">
             <button class="team-btn red" onclick="selectFirstTeam('red')" id="btn-red-start">КРАСНЫЕ</button>
@@ -352,41 +355,32 @@
     <div id="preload-view">
         <h1 class="preload-title" id="preload-title">ИГРОК 1 VS ИГРОК 2</h1>
         <div class="preload-timer" id="preload-timer">10</div>
-        <div class="preload-ad" id="preload-ad">
-            <!-- Место под рекламу -->
-            РЕКЛАМА
-        </div>
+        
+        <!-- Реклама в прелоудинге -->
+        <a id="preload-ad" class="ad-block" href="#" target="_blank">
+            <img id="preload-ad-img" src="" alt="Реклама" class="hidden">
+            <span id="preload-ad-text">РЕКЛАМА</span>
+        </a>
     </div>
 
-    <!-- Экран Победы -->
     <div id="win-view" class="absolute inset-0 hidden flex-col items-center justify-center bg-black/80 backdrop-blur-2xl z-40">
         <h1 class="text-9xl font-black text-white mb-12" id="win-text">ПОБЕДА!</h1>
     </div>
 
-    <!-- Бегущая строка -->
     <div class="ticker-wrap">
         <div class="ticker" id="ticker-text">ДОБРО ПОЖАЛОВАТЬ НА ВЕЧЕРИНКУ ENDORPHIN!</div>
     </div>
 
-    <!-- ============================================================
-         СКРИПТ (Canvas Engine & Firebase)
-         ============================================================ -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getDatabase, ref, onValue, update, set } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-        // ============================================================
-        // КОНФИГУРАЦИЯ
-        // ============================================================
         const firebaseConfig = { apiKey: "AIzaSyCXIR5Tv8lB6ivcGRC3yt1SC66MM6T5b_M", authDomain: "endorphin-battle.firebaseapp.com", databaseURL: "https://endorphin-battle-default-rtdb.europe-west1.firebasedatabase.app", projectId: "endorphin-battle", storageBucket: "endorphin-battle.firebasestorage.app", messagingSenderId: "185259733030", appId: "1:185259733030:web:d72a89a436880973e636e7" };
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
         const gameId = 'battle_1';
         const gameRef = ref(db, `games/${gameId}`);
 
-        // ============================================================
-        // CANVAS SETUP
-        // ============================================================
         const canvas = document.getElementById('game-canvas');
         const ctx = canvas.getContext('2d');
         let width, height;
@@ -398,9 +392,6 @@
         window.addEventListener('resize', resizeCanvas);
         resizeCanvas();
 
-        // ============================================================
-        // ИГРОВЫЕ ПЕРЕМЕННЫЕ
-        // ============================================================
         let currentData = null;
         let currentMode = null;
         let currentBaseUrl = getBaseUrl();
@@ -417,9 +408,6 @@
             return url.origin + url.pathname.substring(0, url.pathname.lastIndexOf('/') + 1);
         }
 
-        // ============================================================
-        // КЛАСС ИГРОКА
-        // ============================================================
         class Player {
             constructor(id, data, team) {
                 this.id = id;
@@ -432,7 +420,6 @@
                     this.x = (data.posX / 100) * width;
                     this.y = (data.posY / 100) * height;
                 } else {
-                    // Временное положение (будет перезаписано после генерации)
                     this.x = team === 'red' ? width * 0.1 : width * 0.9;
                     this.y = height * 0.5;
                 }
@@ -478,9 +465,6 @@
             }
         }
 
-        // ============================================================
-        // СИСТЕМА ЧАСТИЦ
-        // ============================================================
         function spawnParticles(x, y, color) {
             for (let i = 0; i < 30; i++) {
                 particles.push({
@@ -493,9 +477,6 @@
             }
         }
 
-        // ============================================================
-        // СНЕЖОК
-        // ============================================================
         class Snowball {
             constructor(shooter, power, angle) {
                 this.x = shooter.x;
@@ -546,9 +527,6 @@
             }
         }
 
-        // ============================================================
-        // ГЕНЕРАЦИЯ КООРДИНАТ (ЕСЛИ ИХ НЕТ В БАЗЕ)
-        // ============================================================
         function ensurePlayerPositions(data) {
             const redPlayers = data.players?.red || {};
             const bluePlayers = data.players?.blue || {};
@@ -562,8 +540,8 @@
                 keys.forEach((id) => {
                     let posX, posY, attempts = 0;
                     do {
-                        posX = 5 + Math.random() * 15; // 5-20%
-                        posY = 20 + Math.random() * 60; // 20-80%
+                        posX = 5 + Math.random() * 15;
+                        posY = 20 + Math.random() * 60;
                         attempts++;
                     } while (usedY.some(y => Math.abs(y - posY) < 10) && attempts < 50);
                     usedY.push(posY);
@@ -577,7 +555,7 @@
                 keys.forEach((id) => {
                     let posX, posY, attempts = 0;
                     do {
-                        posX = 80 + Math.random() * 15; // 80-95%
+                        posX = 80 + Math.random() * 15;
                         posY = 20 + Math.random() * 60;
                         attempts++;
                     } while (usedY.some(y => Math.abs(y - posY) < 10) && attempts < 50);
@@ -587,9 +565,6 @@
             }
         }
 
-        // ============================================================
-        // ИГРОВОЙ ЦИКЛ
-        // ============================================================
         function gameLoop() {
             ctx.clearRect(0, 0, width, height);
 
@@ -673,9 +648,6 @@
             requestAnimationFrame(gameLoop);
         }
 
-        // ============================================================
-        // QR ГЕНЕРАЦИЯ
-        // ============================================================
         function generateQRs() {
             document.getElementById('qr-container').classList.remove('hidden');
             document.getElementById('tv-status').classList.remove('hidden');
@@ -689,18 +661,12 @@
             document.getElementById('qr-blue').innerHTML = qrBlue.createImgTag(4, 8);
         }
 
-        // ============================================================
-        // ВЫБОР ПЕРВОЙ КОМАНДЫ
-        // ============================================================
         window.selectFirstTeam = (team) => {
             update(ref(db, `games/${gameId}`), { firstTeam: team });
             document.getElementById('btn-red-start').classList.toggle('active', team === 'red');
             document.getElementById('btn-blue-start').classList.toggle('active', team === 'blue');
         };
 
-        // ============================================================
-        // ПРЕЛОУДИНГ
-        // ============================================================
         function startPreload(data) {
             if (isPreloading) return;
             isPreloading = true;
@@ -709,7 +675,6 @@
             const preloadTitle = document.getElementById('preload-title');
             const preloadTimer = document.getElementById('preload-timer');
 
-            // Определяем название
             const redPlayers = Object.values(data.players?.red || {});
             const bluePlayers = Object.values(data.players?.blue || {});
             
@@ -732,15 +697,11 @@
                     clearInterval(preloadInterval);
                     preloadView.classList.remove('active');
                     isPreloading = false;
-                    // После прелоудинга начинаем игру
                     update(gameRef, { status: 'playing', timer: null });
                 }
             }, 1000);
         }
 
-        // ============================================================
-        // FIREBASE СЛУШАТЕЛИ
-        // ============================================================
         onValue(ref(db, `games/${gameId}/ticker_messages`), (snap) => {
             const messages = snap.val() || {};
             const keys = Object.keys(messages).sort((a, b) => messages[a].time - messages[b].time);
@@ -749,6 +710,47 @@
                 document.getElementById('ticker-text').innerText = allTexts;
             } else {
                 document.getElementById('ticker-text').innerText = 'ДОБРО ПОЖАЛОВАТЬ НА ВЕЧЕРИНКУ ENDORPHIN!';
+            }
+        });
+
+        // РЕКЛАМА
+        onValue(ref(db, `games/${gameId}/ad_settings`), (snap) => {
+            const data = snap.val();
+            if (!data) return;
+
+            // Прелоудинг
+            if (data.preload) {
+                const img = document.getElementById('preload-ad-img');
+                const text = document.getElementById('preload-ad-text');
+                const link = document.getElementById('preload-ad');
+                if (data.preload.img) {
+                    img.src = data.preload.img;
+                    img.classList.remove('hidden');
+                    text.classList.add('hidden');
+                } else if (data.preload.text) {
+                    text.innerText = data.preload.text;
+                    img.classList.add('hidden');
+                    text.classList.remove('hidden');
+                }
+                if (data.preload.link) link.href = data.preload.link;
+            }
+
+            // Лобби
+            if (data.lobby) {
+                const container = document.getElementById('lobby-ad');
+                const img = document.getElementById('lobby-ad-img');
+                const text = document.getElementById('lobby-ad-text');
+                container.classList.remove('hidden');
+                if (data.lobby.img) {
+                    img.src = data.lobby.img;
+                    img.classList.remove('hidden');
+                    text.classList.add('hidden');
+                } else if (data.lobby.text) {
+                    text.innerText = data.lobby.text;
+                    img.classList.add('hidden');
+                    text.classList.remove('hidden');
+                }
+                if (data.lobby.link) container.href = data.lobby.link;
             }
         });
 
@@ -761,7 +763,6 @@
                 if (data.status === 'lobby') generateQRs();
             }
 
-            // Генерируем координаты, если игра началась, а их нет
             if (data.status === 'playing') {
                 ensurePlayerPositions(data);
             }
@@ -791,7 +792,6 @@
             const maxP = parseInt(data.mode?.charAt(0) || 1);
             const isReady = redPlayers.length >= maxP && bluePlayers.length >= maxP;
 
-            // ПРЕЛОУДИНГ: если статус playing и ещё не было прелоудинга
             if (data.status === 'playing' && !isPreloading && !data.preloadDone) {
                 startPreload(data);
                 update(gameRef, { preloadDone: true });
